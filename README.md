@@ -2,17 +2,16 @@
 The project was created by running
 ```
 mvn archetype:generate \
-    -DgroupId=com.is.proj.group8 \
-    -DartifactId=IS24-AM08 \
-    -DarchetypeArtifactId=maven-archetype-quickstart \
-    -DarchetypeVersion=1.4 \
-    -DinteractiveMode=false
-
+  -DgroupId=it.polimi.ingsw \
+  -DartifactId=AM08 \
+  -DarchetypeArtifactId=maven-archetype-quickstart \
+  -DarchetypeVersion=1.4 \
+  -DinteractiveMode=false
 ```
 
 Flags:
-- `DgroupId`: unique base name of the company who created the project (`com.is.proj.group8`)
-- `DartifactId`: unique name of the project (`IS24-AM08`)
+- `DgroupId`: unique base name of the company who created the project
+- `DartifactId`: unique name of the project
 - `DarchetypeArtifactId`: base struct of project
 
 
