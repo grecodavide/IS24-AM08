@@ -26,3 +26,5 @@ replay_pid*
 # Ignore target dir: it's where builds are
 target/
 .settings/
+
+.project
