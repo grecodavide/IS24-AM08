@@ -1,15 +1,35 @@
+---
+title: Stati
+---
 classDiagram
+    Match --> Move
+    Match --> GameDeck
+    Match --> MatchState
+    MatchState <|-- WaitState
+    MatchState <|-- SetupState
+    MatchState <|-- ChoosePlayerState
+    MatchState <|-- ChooseSecretObjectiveState
+
     Card <|-- InitialCard
     Card <|-- PlayableCard
-
+    GameDeck --> Card
     PlayableCard <|-- ResourceCard
     PlayableCard <|-- GoldCard
-    
+
     Requirement <|-- QuantityRequirement
     Requirement <|-- PositionRequirement
+    Requirement <-- Objective
+    QuantityRequirement <-- GoldCard
 
+    Board --> PlacedCard
+    Player --> Board
+    Player --> Objective
     CardFace <-- Card
     Symbol <-- CardFace
+    Player --> Color
+
+
+
 
     class Symbol {
         <<Enumeration>>
@@ -26,21 +46,21 @@ classDiagram
     }
 
     class CardFace {
-        - topLeft : Symbol
-        - topRight : Symbol
-        - bottomLeft : Symbol
-        - bottomRight : Symbol
-        - center : Set~Symbol~
+        - topLeft: Symbol
+        - topRight: Symbol
+        - bottomLeft: Symbol
+        - bottomRight: Symbol
+        - center: Set~Symbol~
     }
 
-    class Card { 
+    class Card {
         <<Abstract>>
-        - front : CardFace
-        - back : CardFace
+        - front: CardFace
+        - back: CardFace
     }
 
     class PlayableCard {
-        - punti : int
+        - points: int
     }
 
     class InitialCard {
@@ -50,22 +70,107 @@ classDiagram
     }
 
     class GoldCard {
-        - multiplier : Symbol
-        + totPoints(Board) : int
+        - multiplier: Symbol
+        - req: QuantityRequirement
+        + totPoints(Board): int
     }
-    
+
     class Requirement {
         <<Abstract>>
     }
-    
+
     class QuantityRequirement {
         - reqs : Map~Integer, Symbol~
     }
-    
+
     class PositionRequirement {
     }
-    
-    
-    
-    
-    
+    class Objective {
+        - points: int
+        - req: Requirement
+    }
+    class Move {
+        - card: Card
+        - position: Pair~Integer, Integer~
+        - face: Face
+    }
+    class Player {
+        - nickname: String
+        - points: Int
+        - board: Board
+        - resources: Map<Symbol, Integer>
+        - color: Color
+        - objective: Objective
+    }
+    class Color{
+        <<Enumeration>>
+        RED
+        BLUE
+        GREEN
+        YELLOW
+    }
+    class Board {
+        - currentHand: List~PlayableCard~
+        - placed: Map&ltPair&ltInteger,Integer&gt, PlacedCard&gt
+    }
+    class PlacedCard {
+        - card: Card
+        - turn: int
+    }
+
+    class Match {
+        - players: list~Players~
+        - maxPlayers: Int
+        - currState: MatchState
+        - currentPlayer: Player
+        - resourcesDeck: ResourcesDeck
+        - goldsDeck: GoldsDeck
+
+        + Match() void
+        + setState() void
+        + isFull() bool
+        + getAvailableMoves() List~Move~
+        + addPlayer(Player player) void
+        + removePlayer(Player player) void
+        + getCurrentPlayer() Player
+        + choseSecretObjective(Objective obj)
+        + getSecretObjectives() Pair<Objective, Objective>
+        - setupMatch() void
+
+    }
+
+    class MatchState {
+        + match: Match
+        + transition(): void
+        + join(): void
+        + quit(): void
+    }
+
+    class WaitState{
+        + transition(): void
+        + join(): void
+        + quit(): void
+    }
+    class SetupState{
+        + SetupState() void
+        + transition(): void
+
+    }
+    class ChoosePlayerState {
+        + transition(): void
+    }
+
+    class ChooseSecretObjectiveState {
+        + transition(): void
+    }
+
+
+    class GameDeck {
+        - int size
+        - cardList: List~U~
+        + GameDeck(int size)
+        + add(U card) void
+        + pop() U
+        + shuffle() void
+        + isEmpty() void
+    }
