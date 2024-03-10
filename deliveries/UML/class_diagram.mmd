@@ -1,0 +1,71 @@
+classDiagram
+    Card <|-- InitialCard
+    Card <|-- PlayableCard
+
+    PlayableCard <|-- ResourceCard
+    PlayableCard <|-- GoldCard
+    
+    Requirement <|-- QuantityRequirement
+    Requirement <|-- PositionRequirement
+
+    CardFace <-- Card
+    Symbol <-- CardFace
+
+    class Symbol {
+        <<Enumeration>>
+        ANIMAL
+        PLANT
+        INSECT
+        FUNGUS
+        FEATHER
+        INKWELL
+        PARCHMENT
+        EMPTY_CORNER
+        FULL_CORNER
+        CORNER_OBJ
+    }
+
+    class CardFace {
+        - topLeft : Symbol
+        - topRight : Symbol
+        - bottomLeft : Symbol
+        - bottomRight : Symbol
+        - center : Set~Symbol~
+    }
+
+    class Card { 
+        <<Abstract>>
+        - front : CardFace
+        - back : CardFace
+    }
+
+    class PlayableCard {
+        - punti : int
+    }
+
+    class InitialCard {
+    }
+
+    class ResourceCard {
+    }
+
+    class GoldCard {
+        - multiplier : Symbol
+        + totPoints(Board) : int
+    }
+    
+    class Requirement {
+        <<Abstract>>
+    }
+    
+    class QuantityRequirement {
+        - reqs : Map~Integer, Symbol~
+    }
+    
+    class PositionRequirement {
+    }
+    
+    
+    
+    
+    
