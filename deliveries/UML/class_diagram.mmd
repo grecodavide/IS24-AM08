@@ -60,6 +60,7 @@ classDiagram
         - bottomLeft: Symbol
         - bottomRight: Symbol
         - center: Set~Symbol~
+        + CardFace(Symbol topLeft, Symbol topRight, Symbol bottomLeft, Symbol bottomRight, Set~Symbol~ center)
     }
 
     class Card {
@@ -69,23 +70,28 @@ classDiagram
     }
 
     class PlayableCard {
+        <<Abstract>>
         - points: int
     }
 
     class InitialCard {
+        + InitialCard(CardFace front, CardFace back)
     }
 
     class ResourceCard {
+        + ResourceCard(CardFace front, CardFace back, int points)
     }
 
     class GoldCard {
         - multiplier: Symbol
         - req: QuantityRequirement
+        + GoldCard(CardFace front, CardFace back, int points, Symbol multiplier, QuantityRequirement req)
         + totPoints(Board) int
     }
 
     class Requirement {
         <<Abstract>>
+        + isSatisfied(Board bord) bool
     }
 
     class QuantityRequirement {
@@ -100,6 +106,7 @@ classDiagram
     class Objective {
         - points: int
         - req: Requirement
+        + Objective(int points, Requirement req)
     }
     class Player {
         - nickname: String
@@ -110,6 +117,7 @@ classDiagram
         - color: Color
         - objective: Objective
 
+        + Player(String nickname, Match match)
         + playCard(Pair<Integer, Integer> coord, PlayableCard card, Side side)
         + drawCard(DrawSource draw)
         + chooseObjective(Objective objective)
@@ -131,12 +139,17 @@ classDiagram
         - currentHand: List~PlayableCard~
         - placed: Map&ltPair&ltInteger,Integer&gt, PlacedCard&gt
 
+        + Board()
+        + getCurrentHand() List~PlayableCard~
+        + addCardHand(PlayableCard card) void
+        + removeCardHand(PlayableCard card) void
         + checkRequirement(Requirement req)
         + placeCard(Pair<Integer, Integer>, Card card, Side side) Map~Symbols, Integer~
     }
     class PlacedCard {
         - card: Card
         - turn: int
+        + PlacedCard(Card card, int turn)
     }
 
     class Match {
@@ -150,7 +163,7 @@ classDiagram
         - visibleResources: Pair<ResourceCard>
         - visibleObjectives: Pair<Objective, Objective>
 
-        + Match() void
+        + Match(int maxPlayers) void
         + setState() void
         + isFull() bool
         + addPlayer(Player player) void
@@ -174,6 +187,7 @@ classDiagram
     }
 
     class MatchState {
+        <<Abstract>>
         + match: Match
         + transition() void
         + join() void
@@ -226,3 +240,4 @@ classDiagram
         + shuffle() void
         + isEmpty() void
     }
+
