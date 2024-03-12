@@ -118,9 +118,9 @@ classDiagram
         - objective: Objective
 
         + Player(String nickname, Match match)
-        + playCard(Pair<Integer, Integer> coord, PlayableCard card, Side side)
-        + drawCard(DrawSource draw)
-        + chooseObjective(Objective objective)
+        + playCard(Pair<Integer, Integer> coord, PlayableCard card, Side side) void
+        + drawCard(DrawSource draw) void
+        + chooseObjective(Objective objective) void
         + getBoard() Board
     }
     class Color{
@@ -143,7 +143,7 @@ classDiagram
         + getCurrentHand() List~PlayableCard~
         + addCardHand(PlayableCard card) void
         + removeCardHand(PlayableCard card) void
-        + checkRequirement(Requirement req)
+        + checkRequirement(Requirement req) bool
         + placeCard(Pair<Integer, Integer>, Card card, Side side) Map~Symbols, Integer~
     }
     class PlacedCard {
@@ -154,11 +154,12 @@ classDiagram
 
     class Match {
         - players: list~Players~
-        - maxPlayers: Int
+        - maxPlayers: int
         - currState: MatchState
         - currentPlayer: Player
-        - resourcesDeck: ResourcesDeck
-        - goldsDeck: GoldsDeck
+        - resourcesDeck: GameDeck~ResourceCard~
+        - goldsDeck: GameDeck~GoldCard~
+        - objectivesDeck: GameDeck~Objective~
         - visibleGolds: Pair<GoldCard, GoldCard>
         - visibleResources: Pair<ResourceCard>
         - visibleObjectives: Pair<Objective, Objective>
