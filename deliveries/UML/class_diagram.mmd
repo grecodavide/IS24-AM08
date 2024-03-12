@@ -169,9 +169,9 @@ classDiagram
         + addPlayer(Player player) void
         + removePlayer(Player player) void
         + getCurrentPlayer() Player
-        + choseSecretObjective(Objective obj)
-        + getSecretObjectives() Pair<Objective, Objective>
-        + makeMove(Player player, Pair<Integer, Integer> coords, PlayableCard card, Side side) void
+        + chooseSecretObjective(Objective obj) void
+        + getSecretObjectives() Pair~Objective, Objective~
+        + makeMove(Player player, Pair~Integer, Integer~ coords, PlayableCard card, Side side) void
         + drawCard(Player player, DrawSource draw) PlayableCard
         - setupMatch() void
 
@@ -232,6 +232,7 @@ classDiagram
 
 
     class GameDeck {
+        <<Generics>>
         - int size
         - cardList: List~U~
         + GameDeck(int size)
