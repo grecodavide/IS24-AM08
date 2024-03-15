@@ -122,6 +122,7 @@ classDiagram
         + drawCard(DrawSource draw) void
         + chooseObjective(Objective objective) void
         + getBoard() Board
+        # setColor() void
     }
     class Color{
         <<Enumeration>>
@@ -141,7 +142,8 @@ classDiagram
 
         + Board()
         + getCurrentHand() List~PlayableCard~
-        + addCardHand(PlayableCard card) void
+        + addHandCard(PlayableCard card) void
+        + setInitialSide(Side side) void
         + removeCardHand(PlayableCard card) void
         + checkRequirement(Requirement req) bool
         + placeCard(Pair<Integer, Integer>, Card card, Side side) Map~Symbols, Integer~
@@ -157,25 +159,31 @@ classDiagram
         - maxPlayers: int
         - currState: MatchState
         - currentPlayer: Player
+        - initialsDeck: GameDeck~InitialCard~
         - resourcesDeck: GameDeck~ResourceCard~
         - goldsDeck: GameDeck~GoldCard~
         - objectivesDeck: GameDeck~Objective~
-        - visibleGolds: Pair<GoldCard, GoldCard>
-        - visibleResources: Pair<ResourceCard>
-        - visibleObjectives: Pair<Objective, Objective>
+        - visibleGolds: Pair~GoldCard, GoldCard~
+        - visibleResources: Pair~ResourceCard, ResourceCard~
+        - visibleObjectives: Pair~Objective, Objective~
+        - currentProposedObjectives: Pair~Objective, Objective~
+        - finished: bool
 
-        + Match(int maxPlayers) void
-        + setState() void
+        + Match(int maxPlayers, resourceDeck ) void
         + isFull() bool
         + isFinished() bool
         + addPlayer(Player player) void
         + removePlayer(Player player) void
         + getCurrentPlayer() Player
-        + chooseSecretObjective(Objective obj) void
-        + getSecretObjectives() Pair~Objective, Objective~
-        + makeMove(Player player, Pair~Integer, Integer~ coords, PlayableCard card, Side side) void
-        + drawCard(Player player, DrawSource draw) PlayableCard
-        - setupMatch() void
+        # chooseSecretObjective(Objective obj) void
+        # proposeSecretObjectives() Pair~Objective, Objective~
+        # makeMove(Pair~Integer, Integer~ coords, PlayableCard card, Side side) void
+        # drawCard(Player player, DrawSource draw) PlayableCard
+        # doFinish() void
+        # setState() void
+        # setupDecks() void
+        # setupPlayers() void
+        # setupBoards() void
 
     }
     class DrawSource {
