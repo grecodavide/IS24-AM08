@@ -17,5 +17,7 @@ public class Player {
     public void playCard(Pair<Integer, Integer> coord, PlayableCard card, Side side) {
     }
 
-
+    public Board getBoard() {
+        return board;
+    }
 }
