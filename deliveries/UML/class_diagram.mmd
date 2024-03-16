@@ -8,7 +8,7 @@ classDiagram
     Match -- Player
     MatchState <|-- WaitState
     MatchState <|-- SetupState
-    MatchState <|-- ChoosePlayerState
+    MatchState <|-- NextTurnState
     MatchState <|-- ChooseSecretObjectiveState
     MatchState <|-- UpdatePlayerStatusState
     MatchState <|-- DrawPhaseState
@@ -147,7 +147,8 @@ classDiagram
         + setInitialSide(Side side) void
         + removeCardHand(PlayableCard card) void
         + checkRequirement(Requirement req) bool
-        + placeCard(Pair<Integer, Integer>, Card card, Side side) Map~Symbols, Integer~
+        + placeCard(Pair~Integer, Integer~, Card card, Side side) Map~Symbols, Integer~
+        + verifyCardPlacement(Pair~Integer, Integer~, Card card, Side side) bool
     }
     class PlacedCard {
         <<Record>>
@@ -173,19 +174,23 @@ classDiagram
 
         + Match(int maxPlayers, resourceDeck ) void
         + isFull() bool
+        + isStarted() bool
         + isFinished() bool
         + addPlayer(Player player) void
         + removePlayer(Player player) void
         + getCurrentPlayer() Player
+        + getPlayers() List~Player~
         # chooseSecretObjective(Objective obj) void
         # proposeSecretObjectives() Pair~Objective, Objective~
         # makeMove(Pair~Integer, Integer~ coords, PlayableCard card, Side side) void
         # drawCard(Player player, DrawSource draw) PlayableCard
+        # doStart() void
         # doFinish() void
         # setState() void
         # setupDecks() void
         # setupPlayers() void
         # setupBoards() void
+        # nextPlayer() void
 
     }
     class DrawSource {
@@ -201,34 +206,44 @@ classDiagram
     class MatchState {
         <<Abstract>>
         + match: Match
+        + MatchState(Match match)
         + transition() void
-        + join() void
-        + quit() void
+        + addPlayer() void
+        + removePlayer() void
+	+ proposeSecretObjectives() void
+	+ chooseSecretObjective() void
+	+ makeMove() void
+	+ drawCard() void
+	
     }
 
     class WaitState{
-        + WaitState() void
+        + WaitState(Match match) void
         + transition() void
-        + join() void
-        + quit() void
+        + addPlayer() void
+        + removePlayer() void
     }
     class SetupState{
-        + SetupState() void
+        + SetupState(Match match) void
         + transition() void
 
     }
-    class ChoosePlayerState {
-        + ChoosePlayerState() void
+    class NextTurnState {
+        + NextTurnState(Match match) void
+        + proposeSecretObjectives() void
+        + makeMove() void
         + transition() void
     }
 
     class ChooseSecretObjectiveState {
         + ChooseSecretObjectiveState() void
+        + chooseSecretObjective() void
         + transition() void
     }
 
     class UpdatePlayerStatusState {
         + UpdatePlayerStatusState() void
+        + drawCard() void
         + transition() void
     }
 
