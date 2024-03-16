@@ -9,27 +9,25 @@ public class NextTurnState extends MatchState {
 
     @Override
     public void proposeSecretObjectives() throws WrongStateException {
-        if (match.isStarted()) {
+        if (match.isStarted())
             throw new WrongStateException("proposeSecretObjectives called after the match was started");
-        } else {
-            transition();
-        }
+        else
+            this.transition();
     }
 
     @Override
     public void makeMove() throws WrongStateException {
-        if (match.isStarted()) {
-            transition();
-        } else {
+        if (match.isStarted())
+            this.transition();
+        else
             throw new WrongStateException("makeMove called when match was not started yet");
-        }
     }
 
     @Override
     public void transition() {
         MatchState nextState;
         if (match.isStarted())
-            nextState = new UpdatePlayerStatusState(match);
+            nextState = new AfterMoveState(match);
         else
             nextState = new ChooseSecretObjectiveState(match);
         match.setState(nextState);

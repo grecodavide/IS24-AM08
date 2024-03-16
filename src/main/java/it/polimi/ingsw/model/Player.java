@@ -1,5 +1,7 @@
 package it.polimi.ingsw.model;
 
+import com.sun.tools.javac.util.Pair;
+
 import java.util.Map;
 
 public class Player {

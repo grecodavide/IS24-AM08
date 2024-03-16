@@ -4,10 +4,12 @@ public class SetupState extends MatchState{
 
     SetupState(Match match) {
         super(match);
+
         match.setupDecks();
         match.setupPlayers();
         match.setupBoards();
-        transition();
+
+        this.transition();
 
     }
 

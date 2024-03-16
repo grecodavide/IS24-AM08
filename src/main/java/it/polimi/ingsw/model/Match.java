@@ -5,23 +5,32 @@ import com.sun.tools.javac.util.Pair;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class Match {
     private List<Player> players;
     private int maxPlayers;
-    private MatchState currentState;
     private Player currentPlayer;
+
+    private MatchState currentState;
+
+    // All cards decks
     private GameDeck<InitialCard> initialsDeck;
     private GameDeck<ResourceCard> resourcesDeck;
     private GameDeck<GoldCard> goldsDeck;
     private GameDeck<Objective> objectivesDeck;
+
+    // All the visible cards on the common table
     private Pair<ResourceCard, ResourceCard> visibleResources;
     private Pair<GoldCard, GoldCard> visibleGolds;
     private Pair<Objective, Objective> visibleObjectives;
-    private Pair<Objective, Objective> currentProposedObjectives;
-    private boolean started = false;
-    private boolean finished = false;
 
+    private Pair<Objective, Objective> currentProposedObjectives;
+
+    // Denotes if the match has been started or has finished
+    private boolean started = false;
+    private boolean lastTurn = false;
+    private boolean finished = false;
 
 
     /**
@@ -44,15 +53,17 @@ public class Match {
 
     // Called by the controller
     /**
-     * Method that adds a new player to the match; if the player is already in, throws an IllegalArgument exception.
+     * Method that adds a new player to the match; if the player is already in, throws an exception.
      * @param player player to be added to the match
      * @throws IllegalArgumentException thrown if player already in the match
      */
-    public void addPlayer(Player player) throws IllegalArgumentException {
-        if(!players.contains(player))
+    public void addPlayer(Player player) throws IllegalArgumentException, WrongStateException {
+        if(!players.contains(player)) {
+            currentState.addPlayer();
             players.add(player);
-        else
+        } else {
             throw new IllegalArgumentException("Duplicated Player in a Match");
+        }
     }
 
     // Called by the controller
@@ -110,10 +121,10 @@ public class Match {
     protected void doStart() {
         started = true;
     }
+
     public boolean isStarted() {
         return started;
     }
-
 
     // Called by the controller
     /**
@@ -221,6 +232,41 @@ public class Match {
             InitialCard initial = initialsDeck.pop();
             player.getBoard().placeCard(initialCoords, initial, Side.FRONT);
 
+        }
+    }
+
+    // #makeMove(Pair<Integer, Integer> coords, PlayableCard card, Sideside) : void
+    // #drawCard(Player player, DrawSource draw) : PlayableCard
+
+    protected void makeMove(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws WrongStateException, WrongCardPlacementException {
+        Board currentPlayerBoard = currentPlayer.getBoard();
+
+        // If placing the card in the current player's board is allowed rules
+        if (currentPlayerBoard.verifyPlacement(coords, card, side)) {
+
+            // Trigger current state behavior
+            currentState.makeMove();
+
+            // Place the card in the current player's board
+            // and save the points possibly gained because of the move
+            int gainedPoints = currentPlayerBoard.placeCard(coord, card, side);
+
+            // Update the current player's points
+            currentPlayer.addPoints(gainedPoints);
+
+            // If the current player reaches 20 points or more
+            // the last turn of the match starts
+            if (currentPlayer.getPoints() >= 20)
+                lastTurn = true;
+
+            // If the current player is the last one in the match turns rotation
+            // i.e. the last one in the players List
+            // and the current turn is the last one
+            // the match is now finished
+            if (currentPlayer.equals(players.getLast()) && lastTurn)
+                finished = true;
+        } else {
+            throw new WrongCardPlacementException("Card placement not valid!");
         }
     }
 }
