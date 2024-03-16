@@ -55,6 +55,7 @@ classDiagram
     }
 
     class CardFace {
+        <<Record>>
         - topLeft: Symbol
         - topRight: Symbol
         - bottomLeft: Symbol
@@ -149,6 +150,7 @@ classDiagram
         + placeCard(Pair<Integer, Integer>, Card card, Side side) Map~Symbols, Integer~
     }
     class PlacedCard {
+        <<Record>>
         - card: Card
         - turn: int
         + PlacedCard(Card card, int turn)
