@@ -18,8 +18,11 @@ public class Match {
     private Pair<ResourceCard, ResourceCard> visibleResources;
     private Pair<GoldCard, GoldCard> visibleGolds;
     private Pair<Objective, Objective> visibleObjectives;
-    private boolean finished = false;
     private Pair<Objective, Objective> currentProposedObjectives;
+    private boolean started = false;
+    private boolean finished = false;
+
+
 
     /**
      * Constructor to be used to initialize main Match attributes and allocate the attribute players List.
@@ -70,6 +73,23 @@ public class Match {
         return players.size() == maxPlayers;
     }
 
+    /**
+     * Method that changes the currentPlayer based on the next turn
+     * If it is the first turn, currentPlayer gets initialized as the
+     * first one in the players List.The turn order follows the list order.
+     * Called by ChoosePlayerState every time a new turn starts
+     */
+    protected void nextPlayer() {
+        // If player has never been initialized OR the current player is the last one
+        if (currentPlayer == null || currentPlayer.equals(players.getLast())) {
+            // Set currentPlayer as the first one
+            currentPlayer = players.getFirst();
+        } else {
+            // Get the index of the current player and choose the next one
+            int currentPlayerIndex = players.indexOf(currentPlayer);
+            currentPlayer = players.get(currentPlayerIndex + 1);
+        }
+    }
     // Called by the state
     /**
      *
@@ -87,6 +107,14 @@ public class Match {
         return finished;
     }
 
+    protected void doStart() {
+        started = true;
+    }
+    public boolean isStarted() {
+        return started;
+    }
+
+
     // Called by the controller
     /**
      *
@@ -96,6 +124,9 @@ public class Match {
         return currentPlayer;
     }
 
+    public List<Player> getPlayers() {
+        return players;
+    }
     // Called by the state
 
     /**
@@ -133,9 +164,6 @@ public class Match {
     protected void setupPlayers() {
         // Randomize players' turns
         Collections.shuffle(players);
-        
-        // Initialize currentPlayer
-        currentPlayer = players.getFirst();
 
         // Set colors to players
         for (int i = 0; i < maxPlayers; i++) {
