@@ -1,5 +1,5 @@
 ---
-title: Stati
+title: Model diagram
 ---
 classDiagram
     Match --> GameDeck
@@ -114,7 +114,6 @@ classDiagram
         - match: Match
         - points: Int
         - board: Board
-        - resources: Map<Symbol, Integer>
         - color: Color
         - objective: Objective
 
@@ -140,6 +139,7 @@ classDiagram
     class Board {
         - currentHand: List~PlayableCard~
         - placed: Map&ltPair&ltInteger,Integer&gt, PlacedCard&gt
+        - availableResources: Map~Symbol, Integer~
 
         + Board()
         + getCurrentHand() List~PlayableCard~
@@ -147,7 +147,7 @@ classDiagram
         + setInitialSide(Side side) void
         + removeCardHand(PlayableCard card) void
         + checkRequirement(Requirement req) bool
-        + placeCard(Pair~Integer, Integer~, Card card, Side side) Map~Symbols, Integer~
+        + placeCard(Pair~Integer, Integer~, Card card, Side side) int
         + verifyCardPlacement(Pair~Integer, Integer~, Card card, Side side) bool
     }
     class PlacedCard {
@@ -170,6 +170,8 @@ classDiagram
         - visibleResources: Pair~ResourceCard, ResourceCard~
         - visibleObjectives: Pair~Objective, Objective~
         - currentProposedObjectives: Pair~Objective, Objective~
+        - started: bool
+        - lastTurn: bool
         - finished: bool
 
         + Match(int maxPlayers, resourceDeck ) void
@@ -180,6 +182,8 @@ classDiagram
         + removePlayer(Player player) void
         + getCurrentPlayer() Player
         + getPlayers() List~Player~
+        # getPoints() int
+        # addPoints() void
         # chooseSecretObjective(Objective obj) void
         # proposeSecretObjectives() Pair~Objective, Objective~
         # makeMove(Pair~Integer, Integer~ coords, PlayableCard card, Side side) void
@@ -210,11 +214,11 @@ classDiagram
         + transition() void
         + addPlayer() void
         + removePlayer() void
-	+ proposeSecretObjectives() void
-	+ chooseSecretObjective() void
-	+ makeMove() void
-	+ drawCard() void
-	
+	    + proposeSecretObjectives() void
+	    + chooseSecretObjective() void
+	    + makeMove() void
+	    + drawCard() void
+
     }
 
     class WaitState{
@@ -241,19 +245,19 @@ classDiagram
         + transition() void
     }
 
-    class UpdatePlayerStatusState {
-        + UpdatePlayerStatusState() void
+    class AfterMoveState {
+        + AfterMoveState() void
         + drawCard() void
         + transition() void
     }
 
-    class DrawPhaseState {
-        + DrawPhaseState() void
+    class AfterDrawState {
+        + AfterDrawState() void
         + transition() void
     }
 
-    class RankingsState{
-        + RankingsState() void
+    class FinalState{
+        + FinalState() void
         + transition() void
     }
 
