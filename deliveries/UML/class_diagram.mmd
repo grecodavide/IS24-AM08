@@ -10,9 +10,9 @@ classDiagram
     MatchState <|-- SetupState
     MatchState <|-- NextTurnState
     MatchState <|-- ChooseSecretObjectiveState
-    MatchState <|-- UpdatePlayerStatusState
-    MatchState <|-- DrawPhaseState
-    MatchState <|-- RankingsState
+    MatchState <|-- AfterMoveState
+    MatchState <|-- AfterDrawState
+    MatchState <|-- FinalState
 
     Card <|-- InitialCard
     Card <|-- PlayableCard
@@ -122,6 +122,9 @@ classDiagram
         + drawCard(DrawSource draw) void
         + chooseObjective(Objective objective) void
         + getBoard() Board
+        + getPoints() int
+        + getSecretObjective() Objective
+        + getColor() Color
         # setColor() void
     }
     class Color{
