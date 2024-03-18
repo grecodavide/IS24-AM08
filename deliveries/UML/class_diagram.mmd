@@ -66,13 +66,13 @@ classDiagram
 
     class Card {
         <<Abstract>>
-        - front: CardFace
-        - back: CardFace
+        # front: CardFace
+        # back: CardFace
     }
 
     class PlayableCard {
         <<Abstract>>
-        - points: int
+        # points: int
     }
 
     class InitialCard {
@@ -87,12 +87,12 @@ classDiagram
         - multiplier: Symbol
         - req: QuantityRequirement
         + GoldCard(CardFace front, CardFace back, int points, Symbol multiplier, QuantityRequirement req)
-        + totPoints(Board) int
+        + totPoints(Board board) int
     }
 
     class Requirement {
         <<Abstract>>
-        + isSatisfied(Board bord) bool
+        + isSatisfied(Board board) bool
     }
 
     class QuantityRequirement {
@@ -151,7 +151,7 @@ classDiagram
         + removeCardHand(PlayableCard card) void
         + checkRequirement(Requirement req) bool
         + placeCard(Pair~Integer, Integer~, Card card, Side side) int
-        + verifyCardPlacement(Pair~Integer, Integer~, Card card, Side side) bool
+        + verifyCardPlacement(Pair~Integer, Integer~, Card card) bool
     }
     class PlacedCard {
         <<Record>>
