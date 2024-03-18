@@ -32,8 +32,10 @@ public class Board {
     }
 
     /**
-    * TODO: questo metodo può essere chiamato solo in seguito a una pop del mazzo: ci piace che sia pubblicamente disponibile??
+    * Adds a card to the player's hand (which is public)
+    * @param card the card to put in the hand
     */
+    // WARN: questo metodo può essere chiamato solo in seguito a una pop del mazzo: ci piace che sia pubblicamente disponibile??
     public void addHandCard(PlayableCard card) {
         currentHand.addLast(card);
     }
@@ -43,21 +45,40 @@ public class Board {
 
     }
 
+    /**
+    *
+    */
     public void removeCardHand(PlayableCard card) {
         currentHand.remove(card);
     }
 
+    /**
+    * Used to know if it is possible to place a golden card and if an objective is accomplished
+    * @param req the requirement to check
+    * @return whether the given requirement is met or not.
+    */
     public boolean checkRequirement(Requirement req) {
         return req.isSatisfied(this);
     }
 
-    // will also update resources: check the 4 adjacent valid positions and see if there is a card. If there is it'll remove those corner's resouces.
-    // Then it will add the card's resources
+    /**
+    * This method will add to the board the given card (if requirements are met and the position is valid), and it will update the player's resources
+    * @param coord the x and y coordinates in which the card must be placed
+    * @param card the card to be placed
+    * @param side the side of the card to be placed
+    * @return the points gained from the card
+    */
+    // WARN: viene chiamato da match, quindi perché è pubblico?
     public int placeCard(Pair<Integer, Integer> coord, Card card, Side side) {
         return 0; // points ??????
     }
 
-    public boolean verifyCardPlacement(Pair<Integer, Integer> coord, Card card) {
+    /**
+    * Checks whether the given position is valid (ie there are no adjacent cards with an empty angle and there is at least one adjacent card)
+    * @param coord the x and y coordinates to check
+    * @return whether the given coordinates are valid or not
+    */
+    public boolean verifyCardPlacement(Pair<Integer, Integer> coord) {
         return true;
     }
 
