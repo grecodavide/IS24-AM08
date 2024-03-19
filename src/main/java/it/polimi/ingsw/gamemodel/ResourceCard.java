@@ -13,4 +13,11 @@ public class ResourceCard extends PlayableCard{
         this.front = front; this.back = back; this.points = points;
     }
 
+    /**
+    * Getter for the ResourceCard class
+    * @return the quantity requirement for the gold card to be played.
+    */
+    public int getPoints(){
+        return this.points;
+    }
 }

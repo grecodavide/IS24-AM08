@@ -16,5 +16,21 @@ public class Objective {
     public Objective(int points, Requirement req) {
         this.points = points; this.req = req;
     }
+
+    /**
+    * Getter for the Objective class
+    * @return the points held by the objective card.
+    */
+    public int getPoints() {
+        return this.points;
+    }
+
+    /**
+    * Getter for the Objective class
+    * @return the requirement for the objective card to be placed.
+    */
+    public Requirement getReq() {
+        return this.req;
+    }
 }
 

@@ -1,5 +1,7 @@
 package it.polimi.ingsw.gamemodel;
 
+import java.util.concurrent.SynchronousQueue;
+
 /**
 * The front side of these cards always gives points, but needs a certain requirement to be met in order to be played
 * @see CardFace
@@ -23,6 +25,22 @@ public class GoldCard extends PlayableCard{
         this.points = points;
         this.multiplier = multiplier;
         this.req = req;
+    }
+
+    /**
+    * Getter for the GoldCard class
+    * @return the multiplier.
+    */
+    public Symbol getMultiplier(){
+        return this.multiplier;
+    }
+
+    /**
+    * Getter for the GoldCard class
+    * @return the quantity requirement for the gold card to be played.
+    */
+    public QuantityRequirement getRequirement(){
+        return this.req;
     }
 
     /**

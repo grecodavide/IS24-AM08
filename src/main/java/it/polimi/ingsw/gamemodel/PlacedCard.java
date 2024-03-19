@@ -16,4 +16,20 @@ public class PlacedCard {
     public PlacedCard(Card card, int turn) {
         this.card = card; this.turn = turn;
     }
+
+    /**
+    * Getter for the PlacedCard class
+    * @return the card just placed.
+    */
+    public Card getCard() {
+        return this.card;
+    }
+
+    /**
+    * Getter for the PlacedCard class
+    * @return turn in which the card was just placed.
+    */
+    public int getTurn() {
+        return this.turn;
+    }
 }
