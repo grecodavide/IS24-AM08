@@ -52,7 +52,7 @@ public class Board {
     * Removes a card from the hand of the player
     * @param card the card that must be removed from the player's hand
     */
-    protected void removeCardHand(PlayableCard card) {
+    protected void removeHandCard(PlayableCard card) {
         currentHand.remove(card);
     }
 
@@ -64,7 +64,6 @@ public class Board {
     * @return the points gained from playing card
     */
     protected int placeCard(Pair<Integer, Integer> coord, Card card, Side side) {
-
         return 0;
     }
 
@@ -74,7 +73,7 @@ public class Board {
     * @param coord the x and y coordinates to check
     * @return whether the given coordinates are valid or not
     */
-    public boolean verifyCardPlacement(Pair<Integer, Integer> coord) {
+    public boolean verifyCardPlacement(Pair<Integer, Integer> coord, Card card, Side side) {
         return true;
     }
 
