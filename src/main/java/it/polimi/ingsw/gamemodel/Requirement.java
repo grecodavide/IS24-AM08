@@ -5,6 +5,11 @@ package it.polimi.ingsw.gamemodel;
 */
 public abstract class Requirement {
 
+    /**
+    * Will be implemented on the concrete classes, as they have different kind of conditions
+    * @param board the board that will be used to check if the requirement is met
+    * @return whether the requirement is met or not
+    */
 	public abstract boolean isSatisfied(Board board);
 
 }

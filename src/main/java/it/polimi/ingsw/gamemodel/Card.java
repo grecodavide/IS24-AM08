@@ -6,4 +6,22 @@ package it.polimi.ingsw.gamemodel;
 public abstract class Card {
     protected CardFace front;
     protected CardFace back;
+
+    /**
+    * @param side the desired side
+    * @return the structure of the specified side
+    * @see CardFace
+    */
+    public CardFace getSide(Side side) {
+        switch (side) {
+            case FRONT:
+                return this.front;
+
+            case BACK:
+                return this.back;
+
+            default:
+                return null;
+        }
+    }
 }

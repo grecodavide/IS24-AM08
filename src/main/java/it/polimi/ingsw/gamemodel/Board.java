@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.sun.tools.javac.util.Pair;
+import it.polimi.ingsw.utils.Pair;
 
 /**
  * Board is the class that contains all the informations relative to a {@link Player}'s status
@@ -54,15 +54,6 @@ public class Board {
     */
     protected void removeCardHand(PlayableCard card) {
         currentHand.remove(card);
-    }
-
-    /**
-    * Used to know if it is possible to place a golden card and if an objective is accomplished
-    * @param req the requirement to check
-    * @return whether the given requirement is met or not.
-    */
-    public boolean checkRequirement(Requirement req) {
-        return req.isSatisfied(this);
     }
 
     /**

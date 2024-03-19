@@ -1,6 +1,6 @@
 package it.polimi.ingsw.gamemodel;
 
-import com.sun.tools.javac.util.Pair;
+import it.polimi.ingsw.utils.Pair;
 
 import java.util.List;
 

@@ -1,7 +1,7 @@
 package it.polimi.ingsw.gamemodel;
 
 import java.util.Map;
-import com.sun.tools.javac.util.Pair;
+import it.polimi.ingsw.utils.Pair;
 
 public class Player {
     private String nickname;
