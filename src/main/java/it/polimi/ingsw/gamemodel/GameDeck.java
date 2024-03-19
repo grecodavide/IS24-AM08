@@ -1,19 +1,21 @@
 package it.polimi.ingsw.gamemodel;
 
-public class GameDeck<C> {
+import java.util.ArrayList;
+import java.util.List;
 
-    public void add(C card) {
+/*
+* Generic used to create the decks for all the types of cards
+*/
+public class GameDeck<T> {
+    private int size;
+    private List<T> cardsList;
 
-    }
-    public C pop() {
-
-    }
-
-    public void shuffle() {
-
-    }
-
-    public boolean isEmpty() {
-
+    /**
+    * Constructor of the class, which will initialize the deck empty
+    * @param size initial size of the deck
+    */
+    public GameDeck(int size) {
+        this.size = size;
+        cardsList = new ArrayList<>();
     }
 }

@@ -1,5 +1,8 @@
 package it.polimi.ingsw.gamemodel;
 
+/**
+* All the sources a player can draw from: the decks and the four visible cards
+*/
 public enum DrawSource {
     GOLDS_DECK,
     RESOURCES_DECK,
