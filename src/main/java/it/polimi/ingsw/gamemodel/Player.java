@@ -1,4 +1,4 @@
-package it.polimi.ingsw.model;
+package it.polimi.ingsw.gamemodel;
 
 /**
 * Player represents each in-game user. The class also manages the board's logic
