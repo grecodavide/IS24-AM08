@@ -35,6 +35,7 @@ classDiagram
     %%Side <-- Player
     %%Side <-- Match
     Side <-- PlacedCard
+    Corner <-- CardFace
     %%Symbol <-- GoldCard
     %% DrawSource <-- Player
 
@@ -54,6 +55,14 @@ classDiagram
         CORNER_OBJ
     }
 
+    class Corner {
+      <<Enumeation>>
+      TOP_LEFT
+      TOP_RIGHT
+      BOTTOM_LEFT
+      BOTTOM_RIGHT
+    }
+
     class CardFace {
         <<Record>>
         - topLeft: Symbol
@@ -62,10 +71,7 @@ classDiagram
         - bottomRight: Symbol
         - center: Set~Symbol~
         + CardFace(Symbol topLeft, Symbol topRight, Symbol bottomLeft, Symbol bottomRight, Set~Symbol~ center)
-        + getTopLeft() Symbol
-        + getTopRight() Symbol
-        + getBottomLeft() Symbol
-        + getBottomRight() Symbol
+        + getCorner(Corner corner) Symbol
         + getCenter() Set~Symbol~
     }
 
@@ -73,7 +79,6 @@ classDiagram
         <<Abstract>>
         # sides : Map~Side, CardFace~
         + getSide(Side side) CardFace
-        %%+ getSides() Map~Side, CardFace~
     }
 
     class PlayableCard {
@@ -162,9 +167,8 @@ classDiagram
         + getAvailableResources() Map~Symbol, Integer~
         # getPlacedMap() Map&ltPair&ltInteger,Integer&gt, PlacedCard&gt
         # addHandCard(PlayableCard card) void
+        # removeHandCard(PlayableCard card) void
         # setInitialSide(Side side) void
-        # removeCardHand(PlayableCard card) void
-        %% + checkRequirement(Requirement req) bool
         # placeCard(Pair~Integer, Integer~, Card card, Side side) int
         + verifyCardPlacement(Pair~Integer, Integer~ coords, Card card, Side side) bool
     }
