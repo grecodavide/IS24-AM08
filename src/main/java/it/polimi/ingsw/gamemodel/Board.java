@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+
 import it.polimi.ingsw.utils.Pair;
 
 /**
@@ -35,7 +37,10 @@ public class Board {
     * Adds a card to the player's hand (which is visible to every player)
     * @param card the card to put in the hand
     */
-    protected void addHandCard(PlayableCard card) {
+    protected void addHandCard(PlayableCard card) throws HandException {
+        if (currentHand.size() > 2) { // la mano ha 3 carte max
+            throw new HandException("Tried to draw a card with a full hand!");
+        }
         currentHand.addLast(card);
     }
 
@@ -45,26 +50,38 @@ public class Board {
     * @param side the desired side for the initial card
     */
     public void setInitialSide(Side side) {
-
+        
     }
 
     /**
     * Removes a card from the hand of the player
     * @param card the card that must be removed from the player's hand
     */
-    protected void removeHandCard(PlayableCard card) {
+    protected void removeHandCard(PlayableCard card) throws HandException {
+        if (currentHand.size() <= 0) {
+            throw new HandException("Tried to remove a card from an empty hand!");
+        }
         currentHand.remove(card);
     }
 
     /**
-    * This method will add to the board the given card (if requirements are met and the position is valid), and update the player's resources
+    * This method will add to the board the given card (assuming the positioning is valid), and update the player's resources
     * @param coord the x and y coordinates in which the card must be placed
     * @param card the card to be placed
     * @param side the side of the card to be placed
+    * @param turn the turn of the game in which the card is played
     * @return the points gained from playing card
     */
-    protected int placeCard(Pair<Integer, Integer> coord, Card card, Side side) {
-        return 0;
+    protected int placeCard(Pair<Integer, Integer> coord, PlayableCard card, Side side, int turn) throws CardException {
+        PlacedCard last = new PlacedCard(card, turn);
+        placed.put(coord, last);
+        if (card instanceof GoldCard) {
+            return ((GoldCard)card).totPoints(this);
+        } else if (card instanceof ResourceCard) {
+            return ((ResourceCard)card).getPoints();
+        } else {
+            throw new CardException("Unknow card type!");
+        }
     }
 
     /**
@@ -74,6 +91,9 @@ public class Board {
     * @return whether the given coordinates are valid or not
     */
     public boolean verifyCardPlacement(Pair<Integer, Integer> coord, Card card, Side side) {
+        // if (placed) {
+        //     
+        // }
         return true;
     }
 
