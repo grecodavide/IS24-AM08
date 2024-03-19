@@ -169,7 +169,8 @@ classDiagram
         # addHandCard(PlayableCard card) void
         # removeHandCard(PlayableCard card) void
         # setInitialSide(Side side) void
-        # placeCard(Pair~Integer, Integer~, Card card, Side side) int
+        # placeCard(Pair~Integer, Integer~, PlayableCard card, Side side) int
+        # setInitialCard(InitialCard card) void
         + verifyCardPlacement(Pair~Integer, Integer~ coords, Card card, Side side) bool
     }
     class PlacedCard {
