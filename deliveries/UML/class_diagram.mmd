@@ -62,12 +62,18 @@ classDiagram
         - bottomRight: Symbol
         - center: Set~Symbol~
         + CardFace(Symbol topLeft, Symbol topRight, Symbol bottomLeft, Symbol bottomRight, Set~Symbol~ center)
+        + getTopLeft() Symbol
+        + getTopRight() Symbol
+        + getBottomLeft() Symbol
+        + getBottomRight() Symbol
+        + getCenter() Set~Symbol~
     }
 
     class Card {
         <<Abstract>>
-        # front: CardFace
-        # back: CardFace
+        # sides : Map~Side, CardFace~
+        + getSide(Side side) CardFace
+        %%+ getSides() Map~Side, CardFace~
     }
 
     class PlayableCard {
@@ -87,6 +93,8 @@ classDiagram
         - multiplier: Symbol
         - req: QuantityRequirement
         + GoldCard(CardFace front, CardFace back, int points, Symbol multiplier, QuantityRequirement req)
+        + getMultiplier() Symbol
+        + getRequirement() QuantityRequirement
         + totPoints(Board board) int
     }
 
@@ -98,16 +106,20 @@ classDiagram
     class QuantityRequirement {
         - reqs : Map~Integer, Symbol~
         + QuantityRequirement(Symbol simbol, Integer quantity)
+        + isSatisfied(Board board) bool
     }
 
     class PositionRequirement {
         - reqs: Map&ltPair&ltInteger, Integer&gt, Color&gt
         + PositionRequirement(Map&ltPair&ltInteger, Integer&gt, Color&gt)
+        + isSatisfied(Board board) bool
     }
     class Objective {
         - points: int
         - req: Requirement
         + Objective(int points, Requirement req)
+        + getPoints() int
+        + getRequirement() Requirement
     }
     class Player {
         - nickname: String
@@ -125,6 +137,7 @@ classDiagram
         + getPoints() int
         + getSecretObjective() Objective
         + getColor() Color
+        + getNickname() String
         # setColor() void
     }
     class Color{
@@ -146,11 +159,13 @@ classDiagram
 
         + Board()
         + getCurrentHand() List~PlayableCard~
-        + addHandCard(PlayableCard card) void
-        + setInitialSide(Side side) void
-        + removeCardHand(PlayableCard card) void
-        + checkRequirement(Requirement req) bool
-        + placeCard(Pair~Integer, Integer~, Card card, Side side) int
+        + getAvailableResources() Map~Symbol, Integer~
+        # getPlacedMap() Map&ltPair&ltInteger,Integer&gt, PlacedCard&gt
+        # addHandCard(PlayableCard card) void
+        # setInitialSide(Side side) void
+        # removeCardHand(PlayableCard card) void
+        %% + checkRequirement(Requirement req) bool
+        # placeCard(Pair~Integer, Integer~, Card card, Side side) int
         + verifyCardPlacement(Pair~Integer, Integer~ coords, Card card, Side side) bool
     }
     class PlacedCard {
@@ -158,6 +173,8 @@ classDiagram
         - card: Card
         - turn: int
         + PlacedCard(Card card, int turn)
+        + getCard() Card
+        + getTurn() int
     }
 
     class Match {
