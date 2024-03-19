@@ -255,6 +255,10 @@ public class Match {
             // and save the points possibly gained because of the move
             int gainedPoints = currentPlayerBoard.placeCard(coord, card, side);
 
+            // Remove the card from the player's hand
+            // since it has been placed on the board
+            currentPlayerBoard.removeHandCard(card);
+
             // Update the current player's points
             currentPlayer.addPoints(gainedPoints);
 

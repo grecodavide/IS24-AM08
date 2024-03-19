@@ -8,8 +8,8 @@ public class Player {
     private Match match;
     private int points;
     private Board board;
-    private Color color;
-    private Objective objective;
+    private Color pawnColor;
+    private Objective secretObjective;
 
     public Player(String nickname, Match match) {
         this.nickname = nickname;
@@ -61,18 +61,17 @@ public class Player {
         return points;
     }
     /**
-     * Getter for the player's color
+     * Getter for the player's pawn color
      */
-    public Color getColor() {
-        return color;
+    public Color getPawnColor() {
+        return pawnColor;
     }
     
     /**
      * Setter for the player's color
-     */ 
-    
+     */
     protected void setColor(Color color) {
-        this.color = color;
+        this.pawnColor = color;
     }
 
    /**
@@ -80,7 +79,7 @@ public class Player {
     * @see #chooseSecretObjective(Objective)
     */
     protected Objective getSecretObjective() {
-        return objective;
+        return secretObjective;
     }
 
     /**
