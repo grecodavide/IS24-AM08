@@ -1,4 +1,5 @@
 package it.polimi.ingsw.gamemodel;
+import it.polimi.ingsw.utils.Pair;
 
 /**
 * Player represents each in-game user. The class also manages the board's logic
@@ -33,7 +34,7 @@ public class Player {
 
     /**
      * Adds a card to the player's hand, popping it from the required source
-     * @param draw represents the source of the draw, which can be either one of the two decks or one of the four cards on the table
+     * @param source represents the source of the draw, which can be either one of the two decks or one of the four cards on the table
      */
     public void drawcard(DrawSource source) {
         // TODO

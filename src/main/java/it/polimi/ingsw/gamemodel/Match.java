@@ -245,14 +245,14 @@ public class Match {
         Board currentPlayerBoard = currentPlayer.getBoard();
 
         // If placing the card in the current player's board is allowed by rules
-        if (currentPlayerBoard.verifyPlacement(coords, card, side)) {
+        if (currentPlayerBoard.verifyCardPlacement(coords, card, side)) {
 
             // Trigger current state behavior
             currentState.makeMove();
 
             // Place the card in the current player's board
             // and save the points possibly gained because of the move
-            int gainedPoints = currentPlayerBoard.placeCard(coord, card, side);
+            int gainedPoints = currentPlayerBoard.placeCard(coords, card, side);
 
             // Remove the card from the player's hand
             // since it has been placed on the board
