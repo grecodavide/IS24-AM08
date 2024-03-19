@@ -9,10 +9,12 @@ public class AfterDrawState extends MatchState {
     @Override
     public void transition() {
         MatchState nextState;
+
         if(match.isFinished())
             nextState = new FinalState(match);
         else
             nextState = new NextTurnState(match);
+
         match.setState(nextState);
     }
 }

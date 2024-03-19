@@ -4,6 +4,7 @@ public class NextTurnState extends MatchState {
 
     public NextTurnState(Match match) {
         super(match);
+
         match.nextPlayer();
     }
 
@@ -26,10 +27,12 @@ public class NextTurnState extends MatchState {
     @Override
     public void transition() {
         MatchState nextState;
+
         if (match.isStarted())
             nextState = new AfterMoveState(match);
         else
             nextState = new ChooseSecretObjectiveState(match);
+
         match.setState(nextState);
     }
 }

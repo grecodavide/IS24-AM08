@@ -1,9 +1,5 @@
 package it.polimi.ingsw.model;
 
-import com.sun.tools.javac.util.Pair;
-
-import java.util.Map;
-
 /**
 * Player represents each in-game user. The class also manages the board's logic
 */

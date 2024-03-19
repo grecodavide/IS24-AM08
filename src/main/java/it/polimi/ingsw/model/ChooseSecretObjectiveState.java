@@ -1,6 +1,7 @@
 package it.polimi.ingsw.model;
 
 public class ChooseSecretObjectiveState extends MatchState {
+
     public ChooseSecretObjectiveState(Match match) {
         super(match);
     }
@@ -8,11 +9,11 @@ public class ChooseSecretObjectiveState extends MatchState {
     @Override
     public void chooseSecretObjectives() {
         Player lastPlayer = match.getPlayers().getLast();
-        if (match.getCurrentPlayer().equals(lastPlayer)) {
-            match.doStart();
-        }
 
-        transition();
+        if (match.getCurrentPlayer().equals(lastPlayer))
+            match.doStart();
+
+        this.transition();
     }
 
     @Override

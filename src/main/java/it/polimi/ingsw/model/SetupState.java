@@ -10,7 +10,6 @@ public class SetupState extends MatchState{
         match.setupBoards();
 
         this.transition();
-
     }
 
     @Override

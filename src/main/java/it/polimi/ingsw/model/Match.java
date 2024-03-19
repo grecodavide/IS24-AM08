@@ -5,20 +5,19 @@ import com.sun.tools.javac.util.Pair;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 public class Match {
-    private List<Player> players;
-    private int maxPlayers;
+    private final List<Player> players;
+    private final int maxPlayers;
     private Player currentPlayer;
 
     private MatchState currentState;
 
     // All cards decks
-    private GameDeck<InitialCard> initialsDeck;
-    private GameDeck<ResourceCard> resourcesDeck;
-    private GameDeck<GoldCard> goldsDeck;
-    private GameDeck<Objective> objectivesDeck;
+    private final GameDeck<InitialCard> initialsDeck;
+    private final GameDeck<ResourceCard> resourcesDeck;
+    private final GameDeck<GoldCard> goldsDeck;
+    private final GameDeck<Objective> objectivesDeck;
 
     // All the visible cards on the common table
     private Pair<ResourceCard, ResourceCard> visibleResources;
@@ -173,10 +172,10 @@ public class Match {
      *
      */
     protected void setupPlayers() {
-        // Randomize players' turns
+        // Shuffle players List
         Collections.shuffle(players);
 
-        // Set colors to players
+        // Set players' colors
         for (int i = 0; i < maxPlayers; i++) {
             players.get(i).setColor(Color.values()[i]);
         }
@@ -235,13 +234,18 @@ public class Match {
         }
     }
 
-    // #makeMove(Pair<Integer, Integer> coords, PlayableCard card, Sideside) : void
-    // #drawCard(Player player, DrawSource draw) : PlayableCard
-
+    /**
+     *
+     * @param coords
+     * @param card
+     * @param side
+     * @throws WrongStateException
+     * @throws WrongCardPlacementException
+     */
     protected void makeMove(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws WrongStateException, WrongCardPlacementException {
         Board currentPlayerBoard = currentPlayer.getBoard();
 
-        // If placing the card in the current player's board is allowed rules
+        // If placing the card in the current player's board is allowed by rules
         if (currentPlayerBoard.verifyPlacement(coords, card, side)) {
 
             // Trigger current state behavior
@@ -261,7 +265,7 @@ public class Match {
 
             // If the current player is the last one in the match turns rotation
             // i.e. the last one in the players List
-            // and the current turn is the last one
+            // AND the current turn is the last one
             // the match is now finished
             if (currentPlayer.equals(players.getLast()) && lastTurn)
                 finished = true;
