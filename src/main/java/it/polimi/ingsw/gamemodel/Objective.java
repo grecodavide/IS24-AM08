@@ -10,7 +10,7 @@ public class Objective {
     private Requirement req;
 
     /**
-    * @param the number of points the objective will give (which is always an absolute number, it never depends on any resource)
+    * @param points the number of points the objective will give (which is always an absolute number, it never depends on any resource)
     * @param req the requirement to satisfy in order to receive the points
     */
     public Objective(int points, Requirement req) {
