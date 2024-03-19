@@ -1,9 +1,6 @@
 package it.polimi.ingsw.gamemodel;
 
-<<<<<<< HEAD
-public class SetupState {
-=======
-public class SetupState extends MatchState{
+public class SetupState extends MatchState {
 
     SetupState(Match match) {
         super(match);
@@ -20,5 +17,4 @@ public class SetupState extends MatchState{
         MatchState nextState = new NextTurnState(match);
         match.setState(nextState);
     }
->>>>>>> 1-match-states-player-first-implementation
 }

@@ -1,8 +1,5 @@
 package it.polimi.ingsw.gamemodel;
 
-<<<<<<< HEAD
-public class ChooseSecretObjectiveState {
-=======
 public class ChooseSecretObjectiveState extends MatchState {
 
     public ChooseSecretObjectiveState(Match match) {
@@ -24,5 +21,4 @@ public class ChooseSecretObjectiveState extends MatchState {
         MatchState nextState = new NextTurnState(match);
         match.setState(nextState);
     }
->>>>>>> 1-match-states-player-first-implementation
 }

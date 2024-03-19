@@ -1,20 +1,6 @@
 package it.polimi.ingsw.gamemodel;
 
-import com.sun.tools.javac.util.Pair;
-
-<<<<<<< HEAD
-import java.util.List;
-
-public class Match {
-    private List<Players> players;
-    private int maxPlayers;
-    private MatchState currentState;
-    private GameDeck<ResourceCard> resourcesDeck;
-    private GameDeck<GoldCard> goldsDeck;
-    private GameDeck<Objective> objectivesDeck;
-    private Pair<ResourceCard, ResourceCard> visibleResources;
-    private Pair<GoldCard, GoldCard> visibleGolds;
-=======
+import it.polimi.ingsw.utils.Pair;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -290,5 +276,4 @@ public class Match {
             throw new WrongCardPlacementException("Card placement not valid!");
         }
     }
->>>>>>> 1-match-states-player-first-implementation
 }

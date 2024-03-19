@@ -1,31 +1,13 @@
 package it.polimi.ingsw.gamemodel;
 
-<<<<<<< HEAD
-import java.util.Map;
-
-=======
 /**
 * Player represents each in-game user. The class also manages the board's logic
 */
->>>>>>> 1-match-states-player-first-implementation
 public class Player {
     private String nickname;
     private Match match;
     private int points;
     private Board board;
-<<<<<<< HEAD
-    private Map<Symbol, Integer> resources;
-    private Color color;
-    private Objective objective;
-
-    public Player(String nickname, Match match) {
-    }
-
-    public void playCard(Pair<Integer, Integer> coord, PlayableCard card, Side side) {
-    }
-
-
-=======
     private Color pawnColor;
     private Objective secretObjective;
 
@@ -114,5 +96,4 @@ public class Player {
     public String getNickname() {
         return nickname;
     }
->>>>>>> 1-match-states-player-first-implementation
 }

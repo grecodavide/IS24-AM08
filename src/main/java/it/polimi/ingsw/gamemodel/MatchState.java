@@ -1,8 +1,6 @@
 package it.polimi.ingsw.gamemodel;
 
 public abstract class MatchState {
-<<<<<<< HEAD
-=======
     Match match;
 
     public MatchState (Match match) {
@@ -34,5 +32,4 @@ public abstract class MatchState {
     public void chooseSecretObjectives() throws WrongStateException {
         throw new WrongStateException("chooseSecretObjective not allowed from the current match state!");
     }
->>>>>>> 1-match-states-player-first-implementation
 }
