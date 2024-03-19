@@ -3,8 +3,8 @@ package it.polimi.ingsw.gamemodel;
 import java.util.Set;
 
 /*
- * Topological definition of a card's face
- * */
+* Topological definition of a card's side
+*/
 public class CardFace {
     private Symbol topLeft;
     private Symbol topRight;
