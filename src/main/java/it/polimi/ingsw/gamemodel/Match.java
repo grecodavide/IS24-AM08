@@ -30,6 +30,9 @@ public class Match {
     private boolean lastTurn = false;
     private boolean finished = false;
 
+    // Current match turn as an integer (incremental)
+    private int turn;
+
 
     /**
      * Constructor to be used to initialize main Match attributes and allocate the attribute players List.
@@ -225,10 +228,8 @@ public class Match {
             player.getBoard().addHandCard(resourceCard2);
 
             // Place the initial card to the player's board
-            // By default, the initial card is placed on front side
-            Pair<Integer, Integer> initialCoords = new Pair<>(0,0);
-            InitialCard initial = initialsDeck.pop();
-            player.getBoard().placeCard(initialCoords, initial, Side.FRONT);
+            InitialCard initialCard = initialsDeck.pop();
+            player.getBoard().setInitialCard(initialCard);
 
         }
     }
