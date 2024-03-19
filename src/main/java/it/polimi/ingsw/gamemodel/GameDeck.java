@@ -18,4 +18,20 @@ public class GameDeck<T> {
         this.size = size;
         cardsList = new ArrayList<>();
     }
+
+    public void add(T card) {
+
+    }
+
+    public T pop() {
+        return null;
+    }
+
+    public void shuffle() {
+
+    }
+
+    public void isEmpty() {
+
+    }
 }
