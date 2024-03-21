@@ -2,8 +2,10 @@ package it.polimi.ingsw.gamemodel;
 
 import it.polimi.ingsw.utils.Pair;
 import java.util.ArrayList;
+import it.polimi.ingsw.utils.MutablePair;
 import java.util.Collections;
 import java.util.List;
+import it.polimi.ingsw.exceptions.*;
 
 public class Match {
     private final List<Player> players;
@@ -19,14 +21,15 @@ public class Match {
     private final GameDeck<Objective> objectivesDeck;
 
     // All the visible cards on the common table
-    private Pair<ResourceCard, ResourceCard> visibleResources;
-    private Pair<GoldCard, GoldCard> visibleGolds;
+    private MutablePair<ResourceCard, ResourceCard> visibleResources;
+    private MutablePair<GoldCard, GoldCard> visibleGolds;
     private Pair<Objective, Objective> visibleObjectives;
 
     private Pair<Objective, Objective> currentProposedObjectives;
 
     // Denotes if the match has been started or has finished
     private boolean started = false;
+    private boolean initialTurnFinished = false;
     private boolean lastTurn = false;
     private boolean finished = false;
 
@@ -115,11 +118,28 @@ public class Match {
 
     /**
      * Verify if the match is finished.
-     * Note: It's called by the Controller.
+     * Note: It's called by the Controller and NextTurnState.
      * @return true if the match is finished, false otherwise
      */
     public boolean isFinished() {
         return finished;
+    }
+
+    /**
+     * Mark the initial turn as finished, assuming the initial turn hasn't finished yet.
+     * Note: It's called by ChooseInitialCardState once the initial turn is finished.
+     */
+    protected void doInitialTurnFinish() {
+        initialTurnFinished = true;
+    }
+
+    /**
+     * Verify if the initial turn is finished.
+     * Note: It's called by NextTurnState.
+     * @return true if the initial turn is finished, false otherwise
+     */
+    public boolean isInitialTurnFinished() {
+        return initialTurnFinished;
     }
 
     /**
@@ -180,12 +200,23 @@ public class Match {
     /**
      * Check that the given objective is one of the proposed ones to the current player
      * and put the discarded objective back in the objectives deck.
-     * Note: Called by Player
+     * Note: It's called by Player
      * @param objective the accepted objective by the player
      */
-    protected void chooseSecretObjective(Objective objective) {
-        // Put back the player's refused secret objective
-        objectivesDeck.add(objective);
+    protected void chooseSecretObjective(Objective objective) throws WrongThreadException {
+        // Get proposed objectives
+        Objective firstProposedObjective = currentProposedObjectives.first();
+        Objective secondProposedObjective = currentProposedObjectives.second();
+        // Check if the chosen objective is one of the proposed ones and put it back in the deck
+        if (objective.equals(firstProposedObjective)) {
+            objectivesDeck.add(secondProposedObjective);
+        } else if (objective.equals(secondProposedObjective)) {
+            objectivesDeck.add(firstProposedObjective);
+        } else {
+            // If the objective is not one of the proposed ones
+            // throw an exception
+            throw new WrongThreadException("The chosen objective is not one of the proposed ones"); 
+        }
     }
 
     /**
@@ -226,8 +257,8 @@ public class Match {
         Objective objective2 = objectivesDeck.pop();
 
         // Set popped cards in Match attributes
-        visibleGolds = new Pair<>(goldCard1, goldCard2);
-        visibleResources = new Pair<>(resourceCard1, resourceCard2);
+        visibleGolds = new MutablePair<GoldCard, GoldCard>(goldCard1, goldCard2);
+        visibleResources = new MutablePair<ResourceCard, ResourceCard>(resourceCard1, resourceCard2);
         visibleObjectives = new Pair<>(objective1, objective2);
     }
 
@@ -265,9 +296,9 @@ public class Match {
      * @throws WrongStateException if called during a state that does not allow making moves
      * @throws WrongCardPlacementException if the placement is not valid
      */
-    protected void makeMove(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws WrongStateException, WrongCardPlacementException {
+    protected void makeMove(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws WrongStateException {
         Board currentPlayerBoard = currentPlayer.getBoard();
-
+        // TODO: Fix implementation with new verifyCardPlacement method
         // If placing the card in the current player's board is allowed by rules
         if (currentPlayerBoard.verifyCardPlacement(coords, card, side)) {
 
@@ -276,7 +307,7 @@ public class Match {
 
             // Place the card in the current player's board
             // and save the points possibly gained because of the move
-            int gainedPoints = currentPlayerBoard.placeCard(coords, card, side);
+            int gainedPoints = currentPlayerBoard.placeCard(coords, card, side, turn);
 
             // Remove the card from the player's hand
             // since it has been placed on the board
@@ -299,5 +330,67 @@ public class Match {
         } else {
             throw new WrongCardPlacementException("Card placement not valid!");
         }
+    }
+
+    /**
+     * Draw a card from the requested source, and pick a new card from the deck if a visible card is chosen.
+     * Note: It's called by Player
+     * @param source represents the source of the draw
+     * @throws WrongStateException if called during a state that does not allow making moves
+     * @throws WrongChoiceException if the source does not have cards
+     * @return the card drawn
+     */
+    protected PlayableCard drawCard(DrawSource source) throws WrongStateException, WrongChoiceException {
+        currentState.drawCard();
+        PlayableCard card;
+        switch (source) {
+            case GOLDS_DECK:
+                if (goldsDeck.isEmpty())
+                    throw new WrongChoiceException("Golds deck is empty!");
+                card = goldsDeck.pop();
+                break;
+            case RESOURCES_DECK:
+                if (resourcesDeck.isEmpty()) {
+                    throw new WrongChoiceException("Resources deck is empty!");
+                }
+                card = resourcesDeck.pop();
+                break;
+            case FIRST_VISIBLE_GOLDS:
+                card = visibleGolds.getFirst();
+                if (card == null)
+                    throw new WrongChoiceException("There is no visible gold in position one!");
+                visibleGolds.setFirst(goldsDeck.poll());
+                break; 
+            case SECOND_VISIBLE_GOLDS:
+                card = visibleGolds.getSecond();
+                if (card == null)
+                    throw new WrongChoiceException("There is no visible gold in position two!");
+                visibleGolds.setSecond(goldsDeck.poll());
+                break;
+            case FIRST_VISIBLE_RESOURCES:
+                card = visibleResources.getFirst();
+                if (card == null)
+                    throw new WrongChoiceException("There is no visible resource in position one!");
+                visibleResources.setFirst(resourcesDeck.poll());
+                break;
+            case SECOND_VISIBLE_RESOURCES:
+                card = visibleResources.getSecond();
+                if (card == null)
+                    throw new WrongChoiceException("There is no visible resource in position two!");
+                visibleResources.setSecond(resourcesDeck.poll());
+                break;
+            default:
+                throw new WrongChoiceException("Unexpected value: " + source);
+        }
+
+        if (goldsDeck.isEmpty() && resourcesDeck.isEmpty())
+            lastTurn = true;
+        return card;
+    }
+
+    protected void chooseInitialSide(Side side) throws WrongStateException {
+        // TODO
+        currentState.chooseInitialSide();
+        currentPlayer.getBoard().setInitialSide(side);
     }
 }
