@@ -6,15 +6,15 @@ package it.polimi.ingsw.gamemodel;
 public class PlacedCard {
     private Card card;
     private int turn;
-
+    private Side playedSide;
 
     /**
     * @param card the {@link Card} played
     * @param turn the turn said card is played. Needed to know which card covers which, since a card played in a certain turn will
     * always cover one played before
     */
-    public PlacedCard(Card card, int turn) {
-        this.card = card; this.turn = turn;
+    public PlacedCard(Card card, Side playedSide, int turn) {
+        this.card = card; this.turn = turn; this.playedSide = playedSide;
     }
 
     /**
@@ -31,5 +31,17 @@ public class PlacedCard {
     */
     public int getTurn() {
         return this.turn;
+    }
+
+    /**
+    * Getter for the PlacedCard class
+    * @return side the card was played
+    */
+    public Side getPlayedSide() {
+        return this.playedSide;
+    }
+
+    public CardFace getPlayedCardFace() {
+        return this.card.getSide(this.playedSide);
     }
 }

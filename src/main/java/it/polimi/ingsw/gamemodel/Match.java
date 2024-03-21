@@ -152,7 +152,7 @@ public class Match {
      *
      * @return
      */
-    protected Pair<Objective, Objective> proposeSecretObjectives() {
+    protected Pair<Objective, Objective> proposeSecretObjectives() throws Exception {
         Objective obj1 = objectivesDeck.pop();
         Objective obj2 = objectivesDeck.pop();
         currentProposedObjectives = new Pair<>(obj1, obj2);
@@ -185,7 +185,7 @@ public class Match {
     /**
      *
      */
-    protected void setupDecks() {
+    protected void setupDecks() throws Exception {
         // Shuffle each deck
         initialsDeck.shuffle();
         resourcesDeck.shuffle();
@@ -213,7 +213,7 @@ public class Match {
     /**
      *
      */
-    protected void setupBoards() {
+    protected void setupBoards() throws Exception {
         // Give starting cards to players
         for (Player player : players) {
             // Pop a card from the resources deck and one from the golds deck
@@ -242,11 +242,11 @@ public class Match {
      * @throws WrongStateException
      * @throws WrongCardPlacementException
      */
-    protected void makeMove(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws WrongStateException, WrongCardPlacementException {
+    protected void makeMove(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws WrongStateException {
         Board currentPlayerBoard = currentPlayer.getBoard();
 
         // If placing the card in the current player's board is allowed by rules
-        if (currentPlayerBoard.verifyCardPlacement(coords, card, side)) {
+        /* if (currentPlayerBoard.verifyCardPlacement(coords, card, side)) {
 
             // Trigger current state behavior
             currentState.makeMove();
@@ -283,8 +283,8 @@ public class Match {
             // the match is now finished
             if (currentPlayer.equals(players.getLast()) && lastTurn)
                 finished = true;
-        } else {
+        }  else {
             throw new WrongCardPlacementException("Card placement not valid!");
-        }
+        }*/
     }
 }

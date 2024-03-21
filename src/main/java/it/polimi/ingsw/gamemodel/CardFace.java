@@ -26,7 +26,18 @@ public class CardFace {
     * @return the symbol the specified corner contains
     */
     public Symbol getCorner(Corner corner) {
-        return topLeft;
+        switch (corner) {
+            case TOP_LEFT:
+                return this.topLeft;
+            case TOP_RIGHT:
+                return this.topRight;
+            case BOTTOM_LEFT:
+                return this.bottomLeft;
+            case BOTTOM_RIGHT:
+                return this.bottomRight;
+            default:
+                return null;
+        }
     }
 
     /**

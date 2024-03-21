@@ -6,12 +6,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 import it.polimi.ingsw.utils.Pair;
 
+
+/*
+- implement resource elaboration on placed cards
+- Update Javadoc
+- More elegant way for diagonl controls (they are very similar to resource update controls)
+*/
+
 /**
- * Board is the class that contains all the informations relative to a {@link Player}'s status
- */
+* Board is the class that contains all the informations relative to a {@link Player}'s status
+*/
 public class Board {
     private List<PlayableCard> currentHand;
     private Map<Pair<Integer, Integer>, PlacedCard> placed;
@@ -60,8 +66,19 @@ public class Board {
     * During the first turn of the player, he will be asked if he wants to switch side with this method
     * @param side the desired side for the initial card
     */
-    public void setInitialSide(Side side) {
-        
+    protected void setInitialCard(InitialCard card) throws CardException {
+        if (placed.get(new Pair<>(0,0)) != null) {
+            throw new CardException("Tried to add initial card, but one already exists!");
+        }
+        placed.put(new Pair<>(0, 0), new PlacedCard(card, Side.FRONT, 0));
+    }
+    /**
+    * The initial card will be added by {@link Match} at the start of the game, and it will be set on the front side by default.
+    * During the first turn of the player, he will be asked if he wants to switch side with this method
+    * @param side the desired side for the initial card
+    */
+    protected void setInitialSide(Side side) {
+        placed.get(new Pair<>(0, 0));
     }
 
     /**
@@ -84,15 +101,36 @@ public class Board {
     * @return the points gained from playing card
     */
     protected int placeCard(Pair<Integer, Integer> coord, PlayableCard card, Side side, int turn) throws CardException {
-        PlacedCard last = new PlacedCard(card, turn);
-        placed.put(coord, last);
+        PlacedCard last = new PlacedCard(card, side, turn);
+        this.placed.put(coord, last);
+        int points = 0;
+
         if (card instanceof GoldCard) {
-            return ((GoldCard)card).calculatePoints(this);
+            points = ((GoldCard)card).calculatePoints(this);
         } else if (card instanceof ResourceCard) {
-            return ((ResourceCard)card).getPoints();
+            points = ((ResourceCard)card).getPoints();
         } else {
             throw new CardException("Unknow card type: " + card.getClass().toString() + "!");
         }
+
+
+
+        return points;
+    }
+
+    private boolean hasDiagonalAdjacent(Pair<Integer, Integer> coord) {
+        Integer[] offsets = {-1, +1};
+        Pair<Integer, Integer> cmp;
+
+        for (Integer xOffset : offsets) {
+            for (Integer yOffset : offsets) {
+                cmp = new Pair<>(coord.first() + xOffset, coord.second() + yOffset);
+                if (placed.keySet().contains(cmp)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -102,16 +140,77 @@ public class Board {
     * @return whether the given coordinates are valid or not
     */
     public PlacementOutcome verifyCardPlacement(Pair<Integer, Integer> coord, Card card, Side side) throws CardException {
+        if (coord.equals(new Pair<>(0, 0))) {
+            return PlacementOutcome.INVALID_COORDS;
+        }
+
         if (!currentHand.contains(card)) {
             throw new CardException("The card " + card.getClass().toString() + " is not in the player's hand!");
         }
         if (placed.keySet().contains(coord)) {
             return PlacementOutcome.INVALID_COORDS;
         }
-        Pair<Integer, Integer> cmp = new Pair(coord.first()-1, coord.second());
-        
+        if (card instanceof GoldCard && !((GoldCard)card).getRequirement().isSatisfied(this)) {
+            return PlacementOutcome.INVALID_ENOUGH_RESOURCES;
+        }
 
-        return true;
+
+        Integer[] offsets = {-1, +1};
+
+        Pair<Integer, Integer> cmp;
+
+        // cross check: none exists
+        for (Integer offset : offsets) {
+            cmp = new Pair<>(coord.first()+offset, coord.second());
+            if (placed.keySet().contains(cmp)) {
+                return PlacementOutcome.INVALID_COORDS;
+            }
+
+            cmp = new Pair<>(coord.first(), coord.second()+offset);
+            if (placed.keySet().contains(cmp)) {
+                return PlacementOutcome.INVALID_COORDS;
+            }
+        }
+
+        // diagonal check: at least one exists and none has an empty corner
+        if (!hasDiagonalAdjacent(coord)) {
+            return PlacementOutcome.INVALID_COORDS;
+        }
+
+        Symbol adjacentCornerSymbol;
+        cmp = new Pair<Integer, Integer>(coord.first()-1, coord.second()+1);
+        if (placed.get(cmp) != null ) {
+            adjacentCornerSymbol = placed.get(cmp).getPlayedCardFace().getCorner(Corner.BOTTOM_RIGHT);
+            if (adjacentCornerSymbol == Symbol.EMPTY_CORNER) {
+                return PlacementOutcome.INVALID_COORDS;
+            }
+        }
+
+        cmp = new Pair<Integer, Integer>(coord.first()+1, coord.second()+1);
+        if (placed.get(cmp) != null ) {
+            adjacentCornerSymbol = placed.get(cmp).getPlayedCardFace().getCorner(Corner.BOTTOM_LEFT);
+            if (adjacentCornerSymbol == Symbol.EMPTY_CORNER) {
+                return PlacementOutcome.INVALID_COORDS;
+            }
+        }
+
+        cmp = new Pair<Integer, Integer>(coord.first()-1, coord.second()-1);
+        if (placed.get(cmp) != null ) {
+            adjacentCornerSymbol = placed.get(cmp).getPlayedCardFace().getCorner(Corner.TOP_RIGHT);
+            if (adjacentCornerSymbol == Symbol.EMPTY_CORNER) {
+                return PlacementOutcome.INVALID_COORDS;
+            }
+        }
+
+        cmp = new Pair<Integer, Integer>(coord.first()-1, coord.second()+1);
+        if (placed.get(cmp) != null ) {
+            adjacentCornerSymbol = placed.get(cmp).getPlayedCardFace().getCorner(Corner.BOTTOM_RIGHT);
+            if (adjacentCornerSymbol == Symbol.EMPTY_CORNER) {
+                return PlacementOutcome.INVALID_COORDS;
+            }
+        }
+
+        return PlacementOutcome.VALID;
     }
 
 }
