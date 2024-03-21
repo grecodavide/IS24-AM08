@@ -204,12 +204,14 @@ classDiagram
         - visibleObjectives: Pair~Objective, Objective~
         - currentProposedObjectives: Pair~Objective, Objective~
         - started: bool
+        - initialTurn: bool
         - lastTurn: bool
         - finished: bool
 
         + Match(int maxPlayers, resourceDeck ) void
         + isFull() bool
         + isStarted() bool
+        + isInitialTurnFinished() bool
         + isFinished() bool
         + addPlayer(Player player) void
         + removePlayer(Player player) void
@@ -223,6 +225,7 @@ classDiagram
         # drawCard(DrawSource draw) PlayableCard
         # chooseInitialSide(Side side) void
         # doStart() void
+        # doInitialTurnFinish() void
         # doFinish() void
         # setState() void
         # setupDecks() void
@@ -309,10 +312,11 @@ classDiagram
     class GameDeck {
         <<Generics>>
         - int size
-        - cardsList: List~U~
+        - cardsList: List~C~
         + GameDeck(int size)
-        + add(U card) void
-        + pop() U
+        + add(C card) void
+        + pop() C
+        + poll() C
         + shuffle() void
         + isEmpty() void
     }
