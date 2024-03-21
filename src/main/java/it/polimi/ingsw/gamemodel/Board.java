@@ -91,7 +91,7 @@ public class Board {
         } else if (card instanceof ResourceCard) {
             return ((ResourceCard)card).getPoints();
         } else {
-            throw new CardException("Unknow card type!");
+            throw new CardException("Unknow card type: " + card.getClass().toString() + "!");
         }
     }
 
@@ -101,9 +101,12 @@ public class Board {
     * @param coord the x and y coordinates to check
     * @return whether the given coordinates are valid or not
     */
-    public boolean verifyCardPlacement(Pair<Integer, Integer> coord, Card card, Side side) {
+    public PlacementOutcome verifyCardPlacement(Pair<Integer, Integer> coord, Card card, Side side) throws CardException {
+        if (!currentHand.contains(card)) {
+            throw new CardException("The card " + card.getClass().toString() + " is not in the player's hand!");
+        }
         if (placed.keySet().contains(coord)) {
-            return false;
+            return PlacementOutcome.INVALID_COORDS;
         }
         Pair<Integer, Integer> cmp = new Pair(coord.first()-1, coord.second());
         

@@ -23,15 +23,23 @@ public class GameDeck<T> {
 
     }
 
-    public T pop() {
-        return null;
+    public T pop() throws Exception {
+        if (this.isEmpty())
+            throw new Exception("Tried to draw from an empty deck!");
+        return cardsList.removeLast();
+    }
+
+    public T poll() {
+        if (this.isEmpty())
+            return null;
+        return cardsList.removeLast();
     }
 
     public void shuffle() {
 
     }
 
-    public void isEmpty() {
-
+    public boolean isEmpty() {
+        return false;
     }
 }
