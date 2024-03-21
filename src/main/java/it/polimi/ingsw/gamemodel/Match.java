@@ -35,8 +35,8 @@ public class Match {
 
 
     /**
-     * Constructor to be used to initialize main Match attributes and allocate the attribute players List.
-     * @param maxPlayers maximum number of players to be added to the match, chosen by the first player to join
+     * Initialize main Match attributes and allocate the attribute players List, assuming no parameter is null.
+     * @param maxPlayers maximum number of players to be added to the match, chosen by the first player joining the match
      * @param initialsDeck deck of initial cards
      * @param resourcesDeck deck of resource cards
      * @param goldsDeck deck of gold cards
@@ -54,9 +54,10 @@ public class Match {
 
     // Called by the controller
     /**
-     * Method that adds a new player to the match; if the player is already in, throws an exception.
+     * Add a new player to the match, assuming it's not null.
+     * Note: It's called by the Controller when a player joins the match.
      * @param player player to be added to the match
-     * @throws IllegalArgumentException thrown if player already in the match
+     * @throws IllegalArgumentException if the player is already in the match
      */
     public void addPlayer(Player player) throws IllegalArgumentException, WrongStateException {
         if(!players.contains(player)) {
@@ -67,29 +68,30 @@ public class Match {
         }
     }
 
-    // Called by the controller
     /**
-     *
-     * @param player
+     * Remove a player from the match, assuming the player is in the match.
+     * Note: It's called by the Controller when a player quits the match.
+     * @param player player to be removed from the match
      */
     public void removePlayer(Player player) {
         players.remove(player);
     }
 
-    // Called by the controller
     /**
-     *
-     * @return
+     * Verify if the match is full, thus no more players can join.
+     * Note: It's used by the Controller
+     * @return true if the match is full, false otherwise
      */
     public boolean isFull() {
         return players.size() == maxPlayers;
     }
 
     /**
-     * Method that changes the currentPlayer based on the next turn
-     * If it is the first turn, currentPlayer gets initialized as the
-     * first one in the players List.The turn order follows the list order.
-     * Called by ChoosePlayerState every time a new turn starts
+     * Modify the current player according to the next turn:
+     * If it's the first turn, the current player gets initialized as the
+     * first one in the players List; the turn order then follows the players List order, in a circular way.
+     * Ex. 1 -> 2 -> 3 -> 1 -> etc.
+     * Note It's called by NextTurnState every time a new turn starts.
      */
     protected void nextPlayer() {
         // If player has never been initialized OR the current player is the last one
@@ -102,56 +104,71 @@ public class Match {
             currentPlayer = players.get(currentPlayerIndex + 1);
         }
     }
-    // Called by the state
+
     /**
-     *
+     * Mark the match as finished, assuming the match hasn't finished yet.
+     * Note: It's called by FinalState once the match is ready to finish.
      */
     protected void doFinish() {
         finished = true;
     }
 
-    // Called by the controller
     /**
-     *
-     * @return
+     * Verify if the match is finished.
+     * Note: It's called by the Controller.
+     * @return true if the match is finished, false otherwise
      */
     public boolean isFinished() {
         return finished;
     }
 
+    /**
+     * Mark the match as started, assuming the match hasn't started yet.
+     * Note: It's called by ChooseSecretObjectiveState once the match is ready to start.
+     */
     protected void doStart() {
         started = true;
     }
 
+    /**
+     * Verify if the match is started.
+     * Note: It's called by NextTurnState to check when to effectively start the match.
+     * @return true if the match is started, false otherwise
+     */
     public boolean isStarted() {
         return started;
     }
 
-    // Called by the controller
     /**
-     *
-     * @return
+     * Get the player who's playing (or choosing the secret objective) at the moment.
+     * Note: It's used by the Controller.
+     * @return the player playing at the moment, null if the match has never reached NextTurnState
      */
     public Player getCurrentPlayer() {
         return currentPlayer;
     }
 
+    /**
+     * Get the match players.
+     * @return the match players in a List, dynamically defined as an ArrayList
+     */
     public List<Player> getPlayers() {
         return players;
     }
-    // Called by the state
 
     /**
-     *
-     * @param state
+     * Set the current match state, assuming it's not null.
+     * Note: It's called by each state to let the match enter to the next state.
+     * @param state the state in which the match has to be
      */
     protected void setState(MatchState state) {
         this.currentState = state;
     }
 
     /**
-     *
-     * @return
+     * Extract two cards from the deck of objectives and return them.
+     * Note: It's called by the controller.
+     * @return the two cards extracted
      */
     protected Pair<Objective, Objective> proposeSecretObjectives() {
         Objective obj1 = objectivesDeck.pop();
@@ -160,10 +177,11 @@ public class Match {
         return currentProposedObjectives;
     }
 
-    // Called by the controller
     /**
-     *
-     * @param objective
+     * Check that the given objective is one of the proposed ones to the current player
+     * and put the discarded objective back in the objectives deck.
+     * Note: Called by Player
+     * @param objective the accepted objective by the player
      */
     protected void chooseSecretObjective(Objective objective) {
         // Put back the player's refused secret objective
@@ -171,7 +189,8 @@ public class Match {
     }
 
     /**
-     *
+     * Shuffle the players turn order and give them their pawn color
+     * Note: It's called by SetupState
      */
     protected void setupPlayers() {
         // Shuffle players List
@@ -184,7 +203,8 @@ public class Match {
     }
 
     /**
-     *
+     * Shuffle cards decks and place the visible cards on the board
+     * Note: It's called by SetupState
      */
     protected void setupDecks() {
         // Shuffle each deck
@@ -212,7 +232,9 @@ public class Match {
     }
 
     /**
-     *
+     * Give one gold card and two resource cards to each player hand
+     * and set the initial card
+     * Note: It's called by WaitState
      */
     protected void setupBoards() {
         // Give starting cards to players
@@ -235,12 +257,13 @@ public class Match {
     }
 
     /**
-     *
-     * @param coords
-     * @param card
-     * @param side
-     * @throws WrongStateException
-     * @throws WrongCardPlacementException
+     * Check if the placement is valid, then place the card on the board and add points to the player
+     * Note: It's called by Player
+     * @param coords coordinates in which to place the card
+     * @param card card to place
+     * @param side side of the card to be placed
+     * @throws WrongStateException if called during a state that does not allow making moves
+     * @throws WrongCardPlacementException if the placement is not valid
      */
     protected void makeMove(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws WrongStateException, WrongCardPlacementException {
         Board currentPlayerBoard = currentPlayer.getBoard();
