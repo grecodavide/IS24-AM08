@@ -26,6 +26,7 @@ classDiagram
     QuantityRequirement <-- GoldCard
 
     Board --> PlacedCard
+    Board -- PlacementOutcome
     Player --> Board
     Player --> Objective
     CardFace <-- Card
@@ -101,7 +102,7 @@ classDiagram
         + GoldCard(CardFace front, CardFace back, int points, Symbol multiplier, QuantityRequirement req)
         + getMultiplier() Symbol
         + getRequirement() QuantityRequirement
-        + totPoints(Board board) int
+        + calculatePoints(Board board) int
     }
 
     class Requirement {
@@ -170,9 +171,9 @@ classDiagram
         # addHandCard(PlayableCard card) void
         # removeHandCard(PlayableCard card) void
         # setInitialSide(Side side) void
-        # placeCard(Pair~Integer, Integer~, PlayableCard card, Side side) int
+        # placeCard(Pair~Integer, Integer~, PlayableCard card, Side side, int turn) int
         # setInitialCard(InitialCard card) void
-        + verifyCardPlacement(Pair~Integer, Integer~ coords, Card card, Side side) bool
+        + verifyCardPlacement(Pair~Integer, Integer~ coords, Card card, Side side) PlacementOutcome
     }
     class PlacedCard {
         <<Record>>
@@ -287,7 +288,12 @@ classDiagram
         + transition() void
     }
 
-
+    class PlacementOutcome {
+        <<Enumeration>>
+        VALID,
+        INVALID_COORDS,
+        INVALID_ENOUGH_RESOURCES,
+    } 
     class GameDeck {
         <<Generics>>
         - int size
