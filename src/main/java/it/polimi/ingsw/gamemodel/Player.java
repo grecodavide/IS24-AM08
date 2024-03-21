@@ -1,5 +1,6 @@
 package it.polimi.ingsw.gamemodel;
 import it.polimi.ingsw.utils.Pair;
+import it.polimi.ingsw.exceptions.*;
 
 /**
 * Player represents each in-game user. The class also manages the board's logic
@@ -28,26 +29,40 @@ public class Player {
     * @param card the card to be placed
     * @param side whether the card should be placed on the front or on the back
     */
-    public void playCard(Pair<Integer, Integer> coord, PlayableCard card, Side side) {
-        //TODO
+    public void playCard(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws WrongTurnException, WrongStateException {
+        if (match.getCurrentPlayer().equals(this)) {
+            match.makeMove(coords, card, side);
+        } else {
+            throw new WrongTurnException("Only the current player can play cards");
+        }
     }
 
     /**
      * Adds a card to the player's hand, popping it from the required source
      * @param source represents the source of the draw, which can be either one of the two decks or one of the four cards on the table
      */
-    public void drawcard(DrawSource source) {
-        // TODO
+    public void drawcard(DrawSource source) throws WrongTurnException {
+        if (match.getCurrentPlayer().equals(this)) {
+            PlayableCard card = match.drawCard(source);
+            board.addHandCard(card);
+        } else {
+            throw new WrongTurnException("Only the current player can draw cards");
+        }
     }
 
     /**
     * Sets the player private objective (only at the start of the game)
     * @param objective the chosen objective between the two proposed
     */
-    public void chooseSecretObjective(Objective objective) {
-        // TODO
+    public void chooseSecretObjective(Objective objective) throws WrongTurnException {
+        if (match.getCurrentPlayer().equals(this)) {
+            match.chooseSecretObjective(objective);
+            secretObjective = objective;
+        } else {
+            throw new WrongTurnException("Only the current player can choose an objective");
+        }
     }
-
+    
     /**
     * Getter for the player's board
     */
