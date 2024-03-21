@@ -9,6 +9,7 @@ classDiagram
     MatchState <|-- WaitState
     MatchState <|-- SetupState
     MatchState <|-- NextTurnState
+    MatchState <|-- ChooseInitialSideState
     MatchState <|-- ChooseSecretObjectiveState
     MatchState <|-- AfterMoveState
     MatchState <|-- AfterDrawState
@@ -84,7 +85,9 @@ classDiagram
 
     class PlayableCard {
         <<Abstract>>
+        # reign: Symbol
         # points: int
+        + getReign() Symbol
     }
 
     class InitialCard {
@@ -140,6 +143,7 @@ classDiagram
         + playCard(Pair<Integer, Integer> coord, PlayableCard card, Side side) void
         + drawCard(DrawSource draw) void
         + chooseObjective(Objective objective) void
+        + chooseInitialSide(Side side) void
         + getBoard() Board
         + getPoints() int
         + getSecretObjective() Objective
@@ -215,6 +219,7 @@ classDiagram
         # proposeSecretObjectives() Pair~Objective, Objective~
         # makeMove(Pair~Integer, Integer~ coords, PlayableCard card, Side side) void
         # drawCard(DrawSource draw) PlayableCard
+        # chooseInitialSide(Side side) void
         # doStart() void
         # doFinish() void
         # setState() void
@@ -243,6 +248,7 @@ classDiagram
         + removePlayer() void
 	    + proposeSecretObjectives() void
 	    + chooseSecretObjective() void
+        + chooseInitialSide(Side side) void
 	    + makeMove() void
 	    + drawCard() void
 
@@ -265,7 +271,11 @@ classDiagram
         + makeMove() void
         + transition() void
     }
-
+    class ChooseInitialSideState{ 
+        + ChooseInitialSideState(Match match) void
+        + chooseInitialSide(Side side) void
+        + transition() void
+    }
     class ChooseSecretObjectiveState {
         + ChooseSecretObjectiveState() void
         + chooseSecretObjective() void
