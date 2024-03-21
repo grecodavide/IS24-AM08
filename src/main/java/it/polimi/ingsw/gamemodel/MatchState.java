@@ -1,4 +1,5 @@
 package it.polimi.ingsw.gamemodel;
+import it.polimi.ingsw.exceptions.WrongStateException;
 
 public abstract class MatchState {
     Match match;
@@ -15,6 +16,10 @@ public abstract class MatchState {
 
     public void removePlayer() throws WrongStateException{
         throw new WrongStateException("removePlayer not allowed from the current match state!");
+    }
+    
+    public void chooseInitialSide() throws WrongStateException{
+        throw new WrongStateException("chooseInitialSide not allowed from the current match state!");
     }
 
     public void makeMove() throws WrongStateException{

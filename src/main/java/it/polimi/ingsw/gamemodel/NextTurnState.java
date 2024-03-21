@@ -1,4 +1,5 @@
 package it.polimi.ingsw.gamemodel;
+import it.polimi.ingsw.exceptions.WrongStateException;
 
 public class NextTurnState extends MatchState {
 
@@ -30,6 +31,8 @@ public class NextTurnState extends MatchState {
 
         if (match.isStarted())
             nextState = new AfterMoveState(match);
+        else if (!match.isInitialTurnFinished())
+            nextState = new ChooseInitialSideState(match);
         else
             nextState = new ChooseSecretObjectiveState(match);
 
