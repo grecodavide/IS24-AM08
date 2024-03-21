@@ -63,8 +63,16 @@ public class Board {
     * @param side the side of the card to be placed
     * @return the points gained from playing card
     */
-    protected int placeCard(Pair<Integer, Integer> coord, Card card, Side side) {
-        return 0;
+    protected int placeCard(Pair<Integer, Integer> coord, PlayableCard card, Side side, int turn) throws CardException {
+        PlacedCard last = new PlacedCard(card, turn);
+        placed.put(coord, last);
+        if (card instanceof GoldCard) {
+            return ((GoldCard)card).calculatePoints(this);
+        } else if (card instanceof ResourceCard) {
+            return ((ResourceCard)card).getPoints();
+        } else {
+            throw new CardException("Unknow card type: " + card.getClass().toString() + "!");
+        }
     }
 
     /**
@@ -73,8 +81,15 @@ public class Board {
     * @param coord the x and y coordinates to check
     * @return whether the given coordinates are valid or not
     */
-    public boolean verifyCardPlacement(Pair<Integer, Integer> coord, Card card, Side side) {
-        return true;
+    public PlacementOutcome verifyCardPlacement(Pair<Integer, Integer> coord, Card card, Side side) throws CardException {
+        if (!currentHand.contains(card)) {
+            throw new CardException("The card " + card.getClass().toString() + " is not in the player's hand!");
+        }
+        if (placed.keySet().contains(coord)) {
+            return PlacementOutcome.INVALID_COORDS;
+        }
+        Pair<Integer, Integer> cmp = new Pair(coord.first()-1, coord.second()); 
+        return PlacementOutcome.VALID;
     }
 
 }
