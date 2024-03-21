@@ -87,6 +87,7 @@ classDiagram
         <<Abstract>>
         # reign: Symbol
         # points: int
+        + PlayableCard(Symbol reign)
         + getReign() Symbol
     }
 
@@ -95,14 +96,14 @@ classDiagram
     }
 
     class ResourceCard {
-        + ResourceCard(CardFace front, CardFace back, int points)
-        + getPoints() : int
+        + ResourceCard(CardFace front, Symbol reign, int points)
+        + getPoints() int
     }
 
     class GoldCard {
         - multiplier: Symbol
         - req: QuantityRequirement
-        + GoldCard(CardFace front, CardFace back, int points, Symbol multiplier, QuantityRequirement req)
+        + GoldCard(CardFace front, Symbol reign, int points, Symbol multiplier, QuantityRequirement req)
         + getMultiplier() Symbol
         + getRequirement() QuantityRequirement
         + calculatePoints(Board board) int
@@ -111,10 +112,11 @@ classDiagram
     class Requirement {
         <<Abstract>>
         + isSatisfied(Board board) bool
+        - Requirement()
     }
 
     class QuantityRequirement {
-        - reqs : Map~Integer, Symbol~
+        - reqs : Map~Symbol, Integer~
         + QuantityRequirement(Symbol simbol, Integer quantity)
         + isSatisfied(Board board) bool
     }
