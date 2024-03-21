@@ -1,4 +1,5 @@
 package it.polimi.ingsw.gamemodel;
+import it.polimi.ingsw.exceptions.*;
 
 public abstract class MatchState {
     Match match;

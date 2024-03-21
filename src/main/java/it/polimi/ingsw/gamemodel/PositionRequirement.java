@@ -1,7 +1,9 @@
 package it.polimi.ingsw.gamemodel;
 
+import java.util.EnumSet;
 import java.util.Map;
 
+import it.polimi.ingsw.exceptions.InvalidResourceException;
 import it.polimi.ingsw.utils.Pair;
 
 /**
@@ -15,7 +17,14 @@ public class PositionRequirement extends Requirement{
     * Note that, since this requirement only cares about relative positioning, there must always be
     * an element whose key is (0, 0)
     */
-    public PositionRequirement(Map<Pair<Integer, Integer>, Symbol> reqs) {
+    public PositionRequirement(Map<Pair<Integer, Integer>, Symbol> reqs) throws InvalidResourceException {
+        EnumSet<Symbol> validResources = Symbol.getReigns();
+        for (Symbol s : reqs.values()) {
+            if ( !validResources.contains(s) ) {
+                throw new InvalidResourceException("Resource " + s.toString() + " is not valid for a " + this.getClass().toString());
+            }
+        }
+
         this.reqs = reqs;
     }
 
@@ -26,6 +35,7 @@ public class PositionRequirement extends Requirement{
     */
 	@Override
 	public boolean isSatisfied(Board board) {
+
         return true;
 	}
 

@@ -1,6 +1,7 @@
 package it.polimi.ingsw.gamemodel;
 
 import it.polimi.ingsw.utils.Pair;
+import it.polimi.ingsw.exceptions.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -9,6 +10,7 @@ public class Match {
     private final List<Player> players;
     private final int maxPlayers;
     private Player currentPlayer;
+    private int turn;
 
     private MatchState currentState;
 
@@ -220,15 +222,14 @@ public class Match {
             ResourceCard resourceCard2 = resourcesDeck.pop();
 
             // Add each card to the player's hand
-            player.getBoard().addHandCard(goldCard);
-            player.getBoard().addHandCard(resourceCard1);
-            player.getBoard().addHandCard(resourceCard2);
+            // player.getBoard().addHandCard(goldCard);
+            // player.getBoard().addHandCard(resourceCard1);
+            // player.getBoard().addHandCard(resourceCard2);
 
             // Place the initial card to the player's board
             // By default, the initial card is placed on front side
             Pair<Integer, Integer> initialCoords = new Pair<>(0,0);
             InitialCard initial = initialsDeck.pop();
-            player.getBoard().placeCard(initialCoords, initial, Side.FRONT);
 
         }
     }
@@ -252,11 +253,21 @@ public class Match {
 
             // Place the card in the current player's board
             // and save the points possibly gained because of the move
-            int gainedPoints = currentPlayerBoard.placeCard(coords, card, side);
+            int gainedPoints = 0;
+            try {
+                gainedPoints = currentPlayerBoard.placeCard(coords, card, side, turn);
+            } catch(Exception e) {
+
+            }
 
             // Remove the card from the player's hand
             // since it has been placed on the board
-            currentPlayerBoard.removeHandCard(card);
+            try {
+                currentPlayerBoard.removeHandCard(card);
+            } catch (Exception e) {
+
+            }
+            
 
             // Update the current player's points
             currentPlayer.addPoints(gainedPoints);

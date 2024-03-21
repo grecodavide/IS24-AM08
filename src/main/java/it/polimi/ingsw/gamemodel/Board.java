@@ -1,5 +1,6 @@
 package it.polimi.ingsw.gamemodel;
 
+import it.polimi.ingsw.exceptions.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +24,16 @@ public class Board {
         currentHand = new ArrayList<>();
         placed = new HashMap<>();
         availableResources = new HashMap<>();
+        for (Symbol s : Symbol.getBasicResources()) {
+            availableResources.put(s, 0);
+        }
+    }
+
+    /**
+    * Getter for the total resources of a player
+    */
+    public Map<Symbol, Integer> getAvailableResources() {
+        return this.availableResources;
     }
 
     /**
@@ -76,7 +87,7 @@ public class Board {
         PlacedCard last = new PlacedCard(card, turn);
         placed.put(coord, last);
         if (card instanceof GoldCard) {
-            return ((GoldCard)card).totPoints(this);
+            return ((GoldCard)card).calculatePoints(this);
         } else if (card instanceof ResourceCard) {
             return ((ResourceCard)card).getPoints();
         } else {
@@ -91,9 +102,12 @@ public class Board {
     * @return whether the given coordinates are valid or not
     */
     public boolean verifyCardPlacement(Pair<Integer, Integer> coord, Card card, Side side) {
-        // if (placed) {
-        //     
-        // }
+        if (placed.keySet().contains(coord)) {
+            return false;
+        }
+        Pair<Integer, Integer> cmp = new Pair(coord.first()-1, coord.second());
+        
+
         return true;
     }
 
