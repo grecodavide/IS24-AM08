@@ -17,6 +17,8 @@ import it.polimi.ingsw.exceptions.*;
  * an event occurred, such as nextPlayer(...).
  */
 public class Match {
+    // TODO: Fix exception throwing/handling
+
     private final List<Player> players;
     private final int maxPlayers;
     private Player currentPlayer;
@@ -307,12 +309,12 @@ public class Match {
      * @param coords coordinates in which to place the card
      * @param card card to place
      * @param side side of the card to be placed
-     * @throws WrongStateException if called during a state that does not allow making moves
+     * @throws WrongStateException if called while in a state that doesn't allow making moves
      * @throws WrongCardPlacementException if the placement is not valid
      */
-    protected void makeMove(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws WrongStateException {
+    protected void makeMove(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws WrongStateException, WrongChoiceException {
         Board currentPlayerBoard = currentPlayer.getBoard();
-        // TODO: Improve error handling and identation
+
         // If placing the card in the current player's board is allowed by rules
         PlacementOutcome outcome = currentPlayerBoard.verifyCardPlacement(coords, card, side);
         switch (outcome) {
@@ -342,13 +344,11 @@ public class Match {
                 // the match is now finished
                 if (currentPlayer.equals(players.getLast()) && lastTurn)
                     finished = true;
-                    break;
+                break;
             case INVALID_COORDS:
                 throw new WrongChoiceException("Invalid coordinates!");
-                break;
             case INVALID_ENOUGH_RESOURCES:
                 throw new WrongChoiceException("Not enough resources!");
-                break;
         }
     }
 
@@ -362,7 +362,9 @@ public class Match {
      * @return the card drawn
      */
     protected PlayableCard drawCard(DrawSource source) throws WrongStateException, WrongChoiceException {
+
         currentState.drawCard();
+
         PlayableCard card;
         switch (source) {
             case GOLDS_DECK:
@@ -427,5 +429,13 @@ public class Match {
     */
     public Pair<Objective, Objective> getVisibleObjectives() {
         return visibleObjectives;
+    }
+
+    /**
+     * Getter for the current match state.
+     * @return the current state of the match
+     */
+    public MatchState getCurrentState() {
+        return currentState;
     }
 }
