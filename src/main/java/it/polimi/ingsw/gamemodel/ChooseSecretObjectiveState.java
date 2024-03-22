@@ -7,7 +7,7 @@ public class ChooseSecretObjectiveState extends MatchState {
     }
 
     @Override
-    public void chooseSecretObjectives() {
+    public void chooseSecretObjective() {
         Player lastPlayer = match.getPlayers().getLast();
 
         if (match.getCurrentPlayer().equals(lastPlayer))

@@ -5,7 +5,6 @@ public class NextTurnState extends MatchState {
 
     public NextTurnState(Match match) {
         super(match);
-
         match.nextPlayer();
     }
 
@@ -23,6 +22,14 @@ public class NextTurnState extends MatchState {
             this.transition();
         else
             throw new WrongStateException("makeMove called when match was not started yet");
+    }
+
+    @Override
+    public void drawInitialCard() throws WrongStateException {
+        if (match.isInitialTurnFinished())
+            throw new WrongStateException("drawInitialCard called after the initial turn was finished");
+        else
+            this.transition();
     }
 
     @Override

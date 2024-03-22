@@ -18,6 +18,10 @@ public abstract class MatchState {
         throw new WrongStateException("removePlayer not allowed from the current match state!");
     }
     
+    public void drawInitialCard() throws WrongStateException{
+        throw new WrongStateException("deawInitialCard not allowed from the current match state!");
+    }
+   
     public void chooseInitialSide() throws WrongStateException{
         throw new WrongStateException("chooseInitialSide not allowed from the current match state!");
     }
@@ -34,7 +38,7 @@ public abstract class MatchState {
         throw new WrongStateException("proposeSecretObjective not allowed from the current match state!");
     }
 
-    public void chooseSecretObjectives() throws WrongStateException {
+    public void chooseSecretObjective() throws WrongStateException {
         throw new WrongStateException("chooseSecretObjective not allowed from the current match state!");
     }
 }

@@ -37,11 +37,27 @@ public class Player {
         }
     }
 
+    public InitialCard drawInitialCard() throws WrongTurnException, Exception, WrongStateException {
+        if (match.getCurrentPlayer().equals(this)) {
+            InitialCard card = match.drawInitialCard();
+            return card;
+        } else {
+            throw new WrongTurnException("Only the current player can draw the initial card"); 
+        }
+    }
+
+    public void chooseInitialCardSide(Side side) throws WrongTurnException, WrongStateException {
+       if (match.getCurrentPlayer().equals(this)) {
+           match.setInitialSide(side);
+       } else {
+           throw new WrongTurnException("Only the current player can choose the initial card side");
+       }
+    }
     /**
      * Adds a card to the player's hand, popping it from the required source
      * @param source represents the source of the draw, which can be either one of the two decks or one of the four cards on the table
      */
-    public void drawcard(DrawSource source) throws WrongTurnException {
+    public void drawcard(DrawSource source) throws WrongTurnException, WrongChoiceException {
         if (match.getCurrentPlayer().equals(this)) {
             PlayableCard card = match.drawCard(source);
             board.addHandCard(card);

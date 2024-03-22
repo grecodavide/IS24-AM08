@@ -35,7 +35,7 @@ public class Match {
     private Pair<Objective, Objective> visibleObjectives;
 
     private Pair<Objective, Objective> currentProposedObjectives;
-
+    private InitialCard currentGivenInitialCard;
     // Denotes if the match has been started or has finished
     private boolean started = false;
     private boolean initialTurnFinished = false;
@@ -109,6 +109,7 @@ public class Match {
         if (currentPlayer == null || currentPlayer.equals(players.getLast())) {
             // Set currentPlayer as the first one
             currentPlayer = players.getFirst();
+            turn++;
         } else {
             // Get the index of the current player and choose the next one
             int currentPlayerIndex = players.indexOf(currentPlayer);
@@ -193,6 +194,11 @@ public class Match {
         this.currentState = state;
     }
 
+    protected InitialCard drawInitialCard() throws Exception, WrongStateException {
+        currentState.drawInitialCard();
+        currentGivenInitialCard = initialsDeck.pop();
+        return currentGivenInitialCard;
+    }
     /**
      * Extracts two cards from the deck of objectives and returns them.
      * Note: Called by the Controller.
@@ -212,7 +218,8 @@ public class Match {
      * Note: Called by the current player
      * @param objective the accepted objective by the player (NOT the discarded one)
      */
-    protected void chooseSecretObjective(Objective objective) throws WrongThreadException {
+    protected void setSecretObjective(Objective objective) throws WrongChoiceException, WrongStateException {
+        currentState.chooseSecretObjective();
         // Get proposed objectives
         Objective firstProposedObjective = currentProposedObjectives.first();
         Objective secondProposedObjective = currentProposedObjectives.second();
@@ -225,7 +232,7 @@ public class Match {
         } else {
             // If the objective is not one of the proposed ones
             // throw an exception
-            throw new WrongThreadException("The chosen objective is not one of the proposed ones");
+            throw new WrongChoiceException("The chosen objective is not one of the proposed ones"); 
         }
     }
 
@@ -289,11 +296,6 @@ public class Match {
             player.getBoard().addHandCard(goldCard);
             player.getBoard().addHandCard(resourceCard1);
             player.getBoard().addHandCard(resourceCard2);
-
-            // Place the initial card to the player's board
-            InitialCard initialCard = initialsDeck.pop();
-            player.getBoard().setInitialCard(initialCard);
-
         }
     }
 
@@ -310,37 +312,43 @@ public class Match {
      */
     protected void makeMove(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws WrongStateException {
         Board currentPlayerBoard = currentPlayer.getBoard();
-        // TODO: Fix implementation with new verifyCardPlacement method
+        // TODO: Improve error handling and identation
         // If placing the card in the current player's board is allowed by rules
-        if (currentPlayerBoard.verifyCardPlacement(coords, card, side)) {
+        PlacementOutcome outcome = currentPlayerBoard.verifyCardPlacement(coords, card, side);
+        switch (outcome) {
+            case VALID:
+                 // Trigger current state behavior
+                currentState.makeMove();
 
-            // Trigger current state behavior
-            currentState.makeMove();
+                // Place the card in the current player's board
+                // and save the points possibly gained because of the move
+                int gainedPoints = currentPlayerBoard.placeCard(coords, card, side, turn);
 
-            // Place the card in the current player's board
-            // and save the points possibly gained because of the move
-            int gainedPoints = currentPlayerBoard.placeCard(coords, card, side, turn);
+                // Remove the card from the player's hand
+                // since it has been placed on the board
+                currentPlayerBoard.removeHandCard(card);
 
-            // Remove the card from the player's hand
-            // since it has been placed on the board
-            currentPlayerBoard.removeHandCard(card);
+                // Update the current player's points
+                currentPlayer.addPoints(gainedPoints);
 
-            // Update the current player's points
-            currentPlayer.addPoints(gainedPoints);
+                // If the current player reaches 20 points or more
+                // the last turn of the match starts
+                if (currentPlayer.getPoints() >= 20)
+                    lastTurn = true;
 
-            // If the current player reaches 20 points or more
-            // the last turn of the match starts
-            if (currentPlayer.getPoints() >= 20)
-                lastTurn = true;
-
-            // If the current player is the last one in the match turns rotation
-            // i.e. the last one in the players List
-            // AND the current turn is the last one
-            // the match is now finished
-            if (currentPlayer.equals(players.getLast()) && lastTurn)
-                finished = true;
-        } else {
-            throw new WrongCardPlacementException("Card placement not valid!");
+                // If the current player is the last one in the match turns rotation
+                // i.e. the last one in the players List
+                // AND the current turn is the last one
+                // the match is now finished
+                if (currentPlayer.equals(players.getLast()) && lastTurn)
+                    finished = true;
+                    break;
+            case INVALID_COORDS:
+                throw new WrongChoiceException("Invalid coordinates!");
+                break;
+            case INVALID_ENOUGH_RESOURCES:
+                throw new WrongChoiceException("Not enough resources!");
+                break;
         }
     }
 
@@ -405,9 +413,19 @@ public class Match {
      * @param side the side to put the initial card on
      * @throws WrongStateException if called while in a state that doesn't allow choosing the initial card side
      */
-    protected void chooseInitialSide(Side side) throws WrongStateException {
-        // TODO
+    protected void setInitialSide(Side side) throws WrongStateException {
         currentState.chooseInitialSide();
-        currentPlayer.getBoard().setInitialSide(side);
+        currentPlayer.getBoard().setInitialCard(currentGivenInitialCard, side);
+        currentGivenInitialCard = null;
+    }
+    
+    /** 
+     * Returns the visible objectives
+     * 
+     * @return a pair containing two objectives that are visible
+     *
+    */
+    public Pair<Objective, Objective> getVisibleObjectives() {
+        return visibleObjectives;
     }
 }
