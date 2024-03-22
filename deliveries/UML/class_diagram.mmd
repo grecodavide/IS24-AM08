@@ -176,11 +176,10 @@ classDiagram
         # getPlacedMap() Map&ltPair&ltInteger,Integer&gt, PlacedCard&gt
         # addHandCard(PlayableCard card) void
         # removeHandCard(PlayableCard card) void
-        # setInitialSide(Side side) void
         # placeCard(Pair~Integer, Integer~, PlayableCard card, Side side, int turn) int
-        # setInitialCard(InitialCard card) void
+        # setInitialCard(InitialCard card, Side side) void
         + verifyCardPlacement(Pair~Integer, Integer~ coords, Card card, Side side) PlacementOutcome
-    }
+     }
     class PlacedCard {
         <<Record>>
         - card: Card
@@ -203,6 +202,7 @@ classDiagram
         - visibleResources: Pair~ResourceCard, ResourceCard~
         - visibleObjectives: Pair~Objective, Objective~
         - currentProposedObjectives: Pair~Objective, Objective~
+        - currentGivenInitialCard: InitialCard
         - started: bool
         - initialTurn: bool
         - lastTurn: bool
@@ -219,11 +219,11 @@ classDiagram
         + getPlayers() List~Player~
         # getPoints() int
         # addPoints() void
-        # chooseSecretObjective(Objective obj) void
+        # setSecretObjective(Objective obj) void
         # proposeSecretObjectives() Pair~Objective, Objective~
         # makeMove(Pair~Integer, Integer~ coords, PlayableCard card, Side side) void
         # drawCard(DrawSource draw) PlayableCard
-        # chooseInitialSide(Side side) void
+        # setInitialSide(Side side) void
         # doStart() void
         # doInitialTurnFinish() void
         # doFinish() void
@@ -253,7 +253,8 @@ classDiagram
         + removePlayer() void
 	    + proposeSecretObjectives() void
 	    + chooseSecretObjective() void
-        + chooseInitialSide(Side side) void
+        + chooseInitialSide() void
+        + drawInitialCard() void
 	    + makeMove() void
 	    + drawCard() void
 
@@ -274,6 +275,7 @@ classDiagram
         + NextTurnState(Match match) void
         + proposeSecretObjectives() void
         + makeMove() void
+        + drawInitialCard() void
         + transition() void
     }
     class ChooseInitialSideState{ 
