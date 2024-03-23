@@ -10,7 +10,7 @@ import it.polimi.ingsw.exceptions.*;
  * Represents the match being played by {@link Player} instances, therefore implements a slice of game logic
  * using drawCard(...), setInitialSide(...), setSecretObjective(...), proposeSecretObjective(...), etc.
  * Other methods serve the purpose of being called by {@link MatchState} subclasses in order to notify the change
- * of the current game state or trigger some changes in the match, such as setupBoards(...), dofinish(...),
+ * of the current game state or trigger some changes in the match, such as setupBoards(...),
  * doStart(...), etc.
  * Few methods are called by the current player of the match, used to trigger a change in the match and so notify that
  * an event occurred, such as nextPlayer(...).
@@ -53,13 +53,27 @@ public class Match {
      * @param resourcesDeck deck of resource cards
      * @param goldsDeck deck of gold cards
      * @param objectivesDeck deck of objectives
+     * @throws IllegalArgumentException if the decks provided do not have enough cards to start a game or maxPlayers are not 2,3,4
      */
-    public Match(int maxPlayers, GameDeck<InitialCard> initialsDeck, GameDeck<ResourceCard> resourcesDeck, GameDeck<GoldCard> goldsDeck, GameDeck<Objective> objectivesDeck) {
+    public Match(int maxPlayers, GameDeck<InitialCard> initialsDeck, GameDeck<ResourceCard> resourcesDeck, GameDeck<GoldCard> goldsDeck, GameDeck<Objective> objectivesDeck) throws IllegalArgumentException{
         this.maxPlayers = maxPlayers;
         this.initialsDeck = initialsDeck;
         this.resourcesDeck = resourcesDeck;
         this.goldsDeck = goldsDeck;
         this.objectivesDeck = objectivesDeck;
+        this.currentState = new WaitState(this);
+
+        if (goldsDeck.getSize() < 6) {
+            throw new IllegalArgumentException("goldsDeck does not have enough cards");
+        } else if (resourcesDeck.getSize() < 10) {
+            throw new IllegalArgumentException("resourcesDeck does not have enough cards");
+        } else if (initialsDeck.getSize() < maxPlayers) {
+            throw new IllegalArgumentException("initialDeck does not have enough cards");
+        } else if (objectivesDeck.getSize() < 6) {
+            throw new IllegalArgumentException("objectivesDeck does not have enough cards");
+        } else if (maxPlayers < 2 || maxPlayers > 4) {
+            throw new IllegalArgumentException("The players must be at least 2 or maximum 4");
+        }
 
         this.players = new ArrayList<Player>();
         this.visiblePlayableCards = new HashMap<>();
@@ -75,6 +89,7 @@ public class Match {
         if(!players.contains(player)) {
             currentState.addPlayer();
             players.add(player);
+            currentState.transition();
         } else {
             throw new IllegalArgumentException("Duplicated Player in a Match");
         }
@@ -85,8 +100,10 @@ public class Match {
      * Note: Called by the Controller when a player quits the match.
      * @param player player to be removed from the match
      */
-    public void removePlayer(Player player) {
+    public void removePlayer(Player player) throws WrongStateException{
+        currentState.removePlayer();
         players.remove(player);
+        currentState.transition();
     }
 
     /**
@@ -117,14 +134,6 @@ public class Match {
             int currentPlayerIndex = players.indexOf(currentPlayer);
             currentPlayer = players.get(currentPlayerIndex + 1);
         }
-    }
-
-    /**
-     * Marks the match as finished, assuming the match hasn't finished yet.
-     * Note: Called by FinalState once the match is ready to finish.
-     */
-    protected void doFinish() {
-        finished = true;
     }
 
     /**
@@ -198,9 +207,8 @@ public class Match {
 
     protected InitialCard drawInitialCard() throws Exception, WrongStateException {
         currentState.drawInitialCard();
-
         currentGivenInitialCard = initialsDeck.pop();
-
+        currentState.transition();
         return currentGivenInitialCard;
     }
 
@@ -209,12 +217,17 @@ public class Match {
      * Note: Called by the Controller.
      * @return two objective cards extracted from the objectives deck
      */
-    protected Pair<Objective, Objective> proposeSecretObjectives() {
-        Objective obj1 = objectivesDeck.pop();
-        Objective obj2 = objectivesDeck.pop();
-
-        currentProposedObjectives = new Pair<>(obj1, obj2);
-        return currentProposedObjectives;
+    protected Pair<Objective, Objective> proposeSecretObjectives() throws WrongStateException {
+        currentState.proposeSecretObjectives();
+        try {
+            Objective obj1 = objectivesDeck.pop();
+            Objective obj2 = objectivesDeck.pop();
+            currentProposedObjectives = new Pair<>(obj1, obj2);
+            currentState.transition();
+            return currentProposedObjectives;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -237,6 +250,7 @@ public class Match {
         else
             // If the objective is not one of the proposed ones, throw an exception
             throw new WrongChoiceException("The chosen objective is not one of the proposed ones");
+        currentState.transition();
     }
 
     /**
@@ -263,26 +277,29 @@ public class Match {
         resourcesDeck.shuffle();
         goldsDeck.shuffle();
         objectivesDeck.shuffle();
+        try {
+            // Pop two resources to be placed on the common table
+            ResourceCard resourceCard1 = resourcesDeck.pop();
+            ResourceCard resourceCard2 = resourcesDeck.pop();
 
-        // Pop two resources to be placed on the common table
-        ResourceCard resourceCard1 = resourcesDeck.pop();
-        ResourceCard resourceCard2 = resourcesDeck.pop();
+            // Pop two golds to be placed on the common table
+            GoldCard goldCard1 = goldsDeck.pop();
+            GoldCard goldCard2 = goldsDeck.pop();
 
-        // Pop two golds to be placed on the common table
-        GoldCard goldCard1 = goldsDeck.pop();
-        GoldCard goldCard2 = goldsDeck.pop();
+            // Pop two golds to be placed on the common table
+            Objective objective1 = objectivesDeck.pop();
+            Objective objective2 = objectivesDeck.pop();
 
-        // Pop two golds to be placed on the common table
-        Objective objective1 = objectivesDeck.pop();
-        Objective objective2 = objectivesDeck.pop();
+            // Put golds and resources in visiblePlayableCards
+            visiblePlayableCards.put(DrawSource.FIRST_VISIBLE, resourceCard1);
+            visiblePlayableCards.put(DrawSource.SECOND_VISIBLE, resourceCard2);
+            visiblePlayableCards.put(DrawSource.THIRD_VISIBLE, goldCard1);
+            visiblePlayableCards.put(DrawSource.FOURTH_VISIBLE, goldCard2);
 
-        // Put golds and resources in visiblePlayableCards
-        visiblePlayableCards.put(DrawSource.FIRST_VISIBLE, resourceCard1);
-        visiblePlayableCards.put(DrawSource.SECOND_VISIBLE, resourceCard2);
-        visiblePlayableCards.put(DrawSource.THIRD_VISIBLE, goldCard1);
-        visiblePlayableCards.put(DrawSource.FOURTH_VISIBLE, goldCard2);
-
-        visibleObjectives = new Pair<>(objective1, objective2);
+            visibleObjectives = new Pair<>(objective1, objective2);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -293,15 +310,19 @@ public class Match {
     protected void setupBoards() {
         // Give starting cards to players
         for (Player player : players) {
-            // Pop a card from the resources deck and one from the golds deck
-            GoldCard goldCard = goldsDeck.pop();
-            ResourceCard resourceCard1 = resourcesDeck.pop();
-            ResourceCard resourceCard2 = resourcesDeck.pop();
+            try {
+                // Pop a card from the resources deck and one from the golds deck
+                GoldCard goldCard = goldsDeck.pop();
+                ResourceCard resourceCard1 = resourcesDeck.pop();
+                ResourceCard resourceCard2 = resourcesDeck.pop();
 
-            // Add each card to the player's hand
-            player.getBoard().addHandCard(goldCard);
-            player.getBoard().addHandCard(resourceCard1);
-            player.getBoard().addHandCard(resourceCard2);
+                // Add each card to the player's hand
+                player.getBoard().addHandCard(goldCard);
+                player.getBoard().addHandCard(resourceCard1);
+                player.getBoard().addHandCard(resourceCard2);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -315,7 +336,7 @@ public class Match {
      * @param side side of the card to be placed
      * @throws WrongStateException if called while in a state that doesn't allow making moves
      */
-    protected void makeMove(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws WrongStateException, WrongChoiceException {
+    protected void makeMove(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws WrongStateException, WrongChoiceException, CardException {
         Board currentPlayerBoard = currentPlayer.getBoard();
 
         // If placing the card in the current player's board is allowed by rules
@@ -347,6 +368,7 @@ public class Match {
                 // the match is now finished
                 if (currentPlayer.equals(players.getLast()) && lastTurn)
                     finished = true;
+                currentState.transition();
                 break;
             case INVALID_COORDS:
                 throw new WrongChoiceException("Invalid coordinates!");
@@ -373,13 +395,13 @@ public class Match {
                 if (goldsDeck.isEmpty())
                     throw new WrongChoiceException("Golds deck is empty!");
 
-                card = goldsDeck.pop();
+                card = goldsDeck.poll();
             }
             case RESOURCES_DECK -> {
                 if (resourcesDeck.isEmpty())
                     throw new WrongChoiceException("Resources deck is empty!");
 
-                card = resourcesDeck.pop();
+                card = resourcesDeck.poll();
             }
             case FIRST_VISIBLE, SECOND_VISIBLE -> {
                 // Get the chosen card
@@ -421,13 +443,14 @@ public class Match {
                 // If the golds deck is empty too, the GameDeck.poll() method returns null,
                 // then the corresponding visible card will be null
             }
-            default:
+            default -> {
                 throw new WrongChoiceException("Unexpected value: " + source);
+            }
         }
 
         if (goldsDeck.isEmpty() && resourcesDeck.isEmpty())
             lastTurn = true;
-
+        currentState.transition();
         return card;
     }
 
@@ -440,6 +463,7 @@ public class Match {
         currentState.chooseInitialSide();
         currentPlayer.getBoard().setInitialCard(currentGivenInitialCard, side);
         currentGivenInitialCard = null;
+        currentState.transition();
     }
     
     /** 
@@ -458,5 +482,9 @@ public class Match {
      */
     public MatchState getCurrentState() {
         return currentState;
+    }
+
+    public int getMaxPlayers() {
+        return maxPlayers;
     }
 }

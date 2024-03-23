@@ -38,11 +38,19 @@ public class Player {
      * @param card the card to be placed
      * @param side whether the card should be placed on the front or on the back
      */
-    public void playCard(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws WrongTurnException, WrongStateException, WrongChoiceException {
+    public void playCard(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws WrongTurnException, WrongStateException, WrongChoiceException, CardException {
         if (match.getCurrentPlayer().equals(this))
             match.makeMove(coords, card, side);
         else
             throw new WrongTurnException("Only the current player can play cards");
+    }
+
+    public Pair<Objective, Objective> drawSecretObjectives() throws WrongStateException, WrongTurnException {
+        if (match.getCurrentPlayer().equals(this)) {
+            return match.proposeSecretObjectives();
+        } else {
+            throw new WrongTurnException("Only the current player can draw secret objectives");
+        }
     }
 
     /**
@@ -79,7 +87,7 @@ public class Player {
      * @throws WrongChoiceException if called on a drawing source which is empty (e.g. empty deck)
      * @throws WrongStateException if called during the wrong match state
      */
-    public void drawCard(DrawSource source) throws WrongTurnException, WrongStateException, WrongChoiceException {
+    public void drawCard(DrawSource source) throws Exception {
         if (match.getCurrentPlayer().equals(this)) {
             PlayableCard card = match.drawCard(source);
             board.addHandCard(card);
