@@ -1,15 +1,15 @@
 package it.polimi.ingsw.gamemodel;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
 
+import it.polimi.ingsw.utils.Pair;
 import org.junit.Test;
 
 import it.polimi.ingsw.exceptions.WrongStateException;
+
+import static org.junit.Assert.*;
 
 public class MatchTest {
 
@@ -23,19 +23,51 @@ public class MatchTest {
         Match match = new Match(2, initialsDeck, resourcesDeck, goldsDeck, objectivesDeck);
         Player p1 = new Player("Oingo", match);
         Player p2 = new Player("Boingo", match);
+        Player p3 = new Player("Foingo", match);
         
         try {
             match.addPlayer(p1);
-            match.addPlayer(p2);
+            match.addPlayer(p2); 
         } catch (WrongStateException e) {
-            e.printStackTrace();
+            fail("Players not added correctly");
         }
+        assertTrue("Match should have been full", match.isFull());
+        assertTrue("Wrong state: " + match.getCurrentState(), match.getCurrentState() instanceof NextTurnState);
+        try {
+            match.addPlayer(p3);
+            fail("Should have thrown an exception");
+        } catch (WrongStateException e) {
+            System.out.println(e.getMessage());
+        }
+        for (int i = 0; i < match.getMaxPlayers(); i++) {
+            try {
+                System.out.println("Player: " + match.getCurrentPlayer().getNickname() + "Chooses the initial card");
+                InitialCard initial = match.getCurrentPlayer().drawInitialCard();
+                assertTrue("Wrong state: " + match.getCurrentState(), match.getCurrentState() instanceof ChooseInitialSideState);
+                match.getCurrentPlayer().chooseInitialCardSide(Side.FRONT);
+            } catch (Exception e) {
+                fail(e.getMessage());
+            }
+        }
+        assertFalse("Match should not have started", match.isStarted());
+
+        for (int i = 0; i < match.getMaxPlayers(); i++) {
+            try {
+                System.out.println("Player: " + match.getCurrentPlayer().getNickname() + "Chooses their objective");
+                Pair<Objective, Objective> objectives = match.getCurrentPlayer().drawSecretObjectives();
+                assertTrue("Wrong state: " + match.getCurrentState(), match.getCurrentState() instanceof ChooseSecretObjectiveState);
+                match.getCurrentPlayer().chooseSecretObjective(objectives.first());
+            } catch (Exception e) {
+                fail("Player " + i + e.getMessage());
+            }
+        }
+        assertTrue("Wrong state: " + match.getCurrentState(), match.getCurrentState() instanceof NextTurnState);
         assertTrue( true );
     }
     
     private GameDeck<Objective> createObjectivesDeck() {
-        GameDeck<Objective> objectivesDeck = new GameDeck<Objective>(4);
-        for (int i = 0; i < 4; i++) {
+        GameDeck<Objective> objectivesDeck = new GameDeck<Objective>(8);
+        for (int i = 0; i < 8; i++) {
             objectivesDeck.add(generateRandomObjective());
         }
         return objectivesDeck;
