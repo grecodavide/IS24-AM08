@@ -8,16 +8,16 @@ public class ChooseSecretObjectiveState extends MatchState {
 
     @Override
     public void chooseSecretObjective() {
+
+    }
+
+    @Override
+    public void transition() {
         Player lastPlayer = match.getPlayers().getLast();
 
         if (match.getCurrentPlayer().equals(lastPlayer))
             match.doStart();
 
-        this.transition();
-    }
-
-    @Override
-    public void transition() {
         MatchState nextState = new NextTurnState(match);
         match.setState(nextState);
     }

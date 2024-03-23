@@ -8,16 +8,15 @@ public class ChooseInitialSideState extends MatchState {
 
     @Override
     public void chooseInitialSide() {
-        Player lastPlayer = match.getPlayers().getLast();
 
-        if (match.getCurrentPlayer().equals(lastPlayer))
-            match.doInitialTurnFinish();
-
-        this.transition();
     }
 
     @Override
     public void transition() {
+        Player lastPlayer = match.getPlayers().getLast();
+
+        if (match.getCurrentPlayer().equals(lastPlayer))
+            match.doInitialTurnFinish();
         MatchState nextState = new NextTurnState(match);
         match.setState(nextState);
     }

@@ -1,5 +1,7 @@
 package it.polimi.ingsw.gamemodel;
 
+import it.polimi.ingsw.exceptions.WrongStateException;
+
 public class AfterMoveState extends MatchState {
 
     public AfterMoveState(Match match) {
@@ -8,7 +10,7 @@ public class AfterMoveState extends MatchState {
 
     @Override
     public void drawCard() throws WrongStateException {
-        this.transition();
+
     }
 
     @Override

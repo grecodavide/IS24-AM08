@@ -13,4 +13,7 @@ public class ResourceCard extends PlayableCard{
         this.front = front; this.back = back; this.points = points;
     }
 
+    public int getPoints() {
+        return this.points;
+    }
 }

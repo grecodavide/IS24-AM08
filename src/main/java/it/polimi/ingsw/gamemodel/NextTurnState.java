@@ -10,17 +10,13 @@ public class NextTurnState extends MatchState {
 
     @Override
     public void proposeSecretObjectives() throws WrongStateException {
-        if (match.isStarted())
+        if (match.isStarted() || !match.isInitialTurnFinished())
             throw new WrongStateException("proposeSecretObjectives called after the match was started");
-        else
-            this.transition();
     }
 
     @Override
     public void makeMove() throws WrongStateException {
-        if (match.isStarted())
-            this.transition();
-        else
+        if (!match.isStarted())
             throw new WrongStateException("makeMove called when match was not started yet");
     }
 
@@ -28,8 +24,6 @@ public class NextTurnState extends MatchState {
     public void drawInitialCard() throws WrongStateException {
         if (match.isInitialTurnFinished())
             throw new WrongStateException("drawInitialCard called after the initial turn was finished");
-        else
-            this.transition();
     }
 
     @Override

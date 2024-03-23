@@ -1,5 +1,7 @@
 package it.polimi.ingsw.gamemodel;
 
+import it.polimi.ingsw.exceptions.WrongStateException;
+
 public class WaitState extends MatchState{
 
     public WaitState(Match match) {
@@ -8,8 +10,14 @@ public class WaitState extends MatchState{
 
     @Override
     public void transition() {
-        MatchState nextState = new SetupState(match);
-        match.setState(nextState);
+        if (match.isFull()) {
+            match.setupDecks();
+            match.setupPlayers();
+            match.setupBoards();
+            
+            MatchState nextState = new NextTurnState(match);
+            match.setState(nextState);
+        }
     }
 
     @Override
@@ -18,8 +26,7 @@ public class WaitState extends MatchState{
     }
 
     @Override
-    public void addPlayer() {
-        if (match.isFull())
-            transition();
+    public void addPlayer() throws WrongStateException {
+        //TBD
     }
 }
