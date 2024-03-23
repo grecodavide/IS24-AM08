@@ -1,10 +1,9 @@
 package it.polimi.ingsw.gamemodel;
 
 import it.polimi.ingsw.utils.Pair;
-import java.util.ArrayList;
-import it.polimi.ingsw.utils.MutablePair;
-import java.util.Collections;
-import java.util.List;
+
+import java.util.*;
+
 import it.polimi.ingsw.exceptions.*;
 
 /**
@@ -32,8 +31,7 @@ public class Match {
     private final GameDeck<Objective> objectivesDeck;
 
     // All the visible cards on the common table
-    private MutablePair<ResourceCard, ResourceCard> visibleResources;
-    private MutablePair<GoldCard, GoldCard> visibleGolds;
+    private final Map<DrawSource, PlayableCard> visiblePlayableCards;
     private Pair<Objective, Objective> visibleObjectives;
 
     private Pair<Objective, Objective> currentProposedObjectives;
@@ -64,6 +62,7 @@ public class Match {
         this.objectivesDeck = objectivesDeck;
 
         this.players = new ArrayList<Player>();
+        this.visiblePlayableCards = new HashMap<>();
     }
 
     /**
@@ -111,6 +110,7 @@ public class Match {
         if (currentPlayer == null || currentPlayer.equals(players.getLast())) {
             // Set currentPlayer as the first one
             currentPlayer = players.getFirst();
+
             turn++;
         } else {
             // Get the index of the current player and choose the next one
@@ -198,9 +198,12 @@ public class Match {
 
     protected InitialCard drawInitialCard() throws Exception, WrongStateException {
         currentState.drawInitialCard();
+
         currentGivenInitialCard = initialsDeck.pop();
+
         return currentGivenInitialCard;
     }
+
     /**
      * Extracts two cards from the deck of objectives and returns them.
      * Note: Called by the Controller.
@@ -227,15 +230,13 @@ public class Match {
         Objective secondProposedObjective = currentProposedObjectives.second();
 
         // Check if the chosen objective is one of the proposed ones and put it back in the deck
-        if (objective.equals(firstProposedObjective)) {
+        if (objective.equals(firstProposedObjective))
             objectivesDeck.add(secondProposedObjective);
-        } else if (objective.equals(secondProposedObjective)) {
+        else if (objective.equals(secondProposedObjective))
             objectivesDeck.add(firstProposedObjective);
-        } else {
-            // If the objective is not one of the proposed ones
-            // throw an exception
-            throw new WrongChoiceException("The chosen objective is not one of the proposed ones"); 
-        }
+        else
+            // If the objective is not one of the proposed ones, throw an exception
+            throw new WrongChoiceException("The chosen objective is not one of the proposed ones");
     }
 
     /**
@@ -275,9 +276,12 @@ public class Match {
         Objective objective1 = objectivesDeck.pop();
         Objective objective2 = objectivesDeck.pop();
 
-        // Set popped cards in Match attributes
-        visibleGolds = new MutablePair<GoldCard, GoldCard>(goldCard1, goldCard2);
-        visibleResources = new MutablePair<ResourceCard, ResourceCard>(resourceCard1, resourceCard2);
+        // Put golds and resources in visiblePlayableCards
+        visiblePlayableCards.put(DrawSource.FIRST_VISIBLE, resourceCard1);
+        visiblePlayableCards.put(DrawSource.SECOND_VISIBLE, resourceCard2);
+        visiblePlayableCards.put(DrawSource.THIRD_VISIBLE, goldCard1);
+        visiblePlayableCards.put(DrawSource.FOURTH_VISIBLE, goldCard2);
+
         visibleObjectives = new Pair<>(objective1, objective2);
     }
 
@@ -310,7 +314,6 @@ public class Match {
      * @param card card to place
      * @param side side of the card to be placed
      * @throws WrongStateException if called while in a state that doesn't allow making moves
-     * @throws WrongCardPlacementException if the placement is not valid
      */
     protected void makeMove(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws WrongStateException, WrongChoiceException {
         Board currentPlayerBoard = currentPlayer.getBoard();
@@ -362,51 +365,69 @@ public class Match {
      * @return the card drawn
      */
     protected PlayableCard drawCard(DrawSource source) throws WrongStateException, WrongChoiceException {
-
         currentState.drawCard();
 
         PlayableCard card;
         switch (source) {
-            case GOLDS_DECK:
+            case GOLDS_DECK -> {
                 if (goldsDeck.isEmpty())
                     throw new WrongChoiceException("Golds deck is empty!");
+
                 card = goldsDeck.pop();
-                break;
-            case RESOURCES_DECK:
+            }
+            case RESOURCES_DECK -> {
                 if (resourcesDeck.isEmpty())
                     throw new WrongChoiceException("Resources deck is empty!");
+
                 card = resourcesDeck.pop();
-                break;
-            case FIRST_VISIBLE_GOLDS:
-                card = visibleGolds.getFirst();
+            }
+            case FIRST_VISIBLE, SECOND_VISIBLE -> {
+                // Get the chosen card
+                card = visiblePlayableCards.get(source);
+
+                // If not present (e.g. on the last turn both decks are empty, so remaining turns will be played
+                // drawing the four visible cards, but they won't be substituted by others) throw an exception
                 if (card == null)
                     throw new WrongChoiceException("There is no visible gold in position one!");
-                visibleGolds.setFirst(goldsDeck.poll());
-                break;
-            case SECOND_VISIBLE_GOLDS:
-                card = visibleGolds.getSecond();
+
+                // If the golds deck is NOT empty, substitute the first/second visible
+                // card with a new gold
+                if(!goldsDeck.isEmpty())
+                    visiblePlayableCards.put(source, goldsDeck.poll());
+                // If the golds deck is empty, substitute the first/second visible
+                // card with a resource
+                else
+                    visiblePlayableCards.put(source, resourcesDeck.poll());
+                // If the resources deck is empty too, the GameDeck.poll() method returns null,
+                // then the corresponding visible card will be null
+            }
+            case THIRD_VISIBLE, FOURTH_VISIBLE -> {
+                // Get the chosen card
+                card = visiblePlayableCards.get(source);
+
+                // If not present (e.g. on the last turn both decks are empty, so remaining turns will be played
+                // drawing the four visible cards, but they won't be substituted by others) throw an exception
                 if (card == null)
-                    throw new WrongChoiceException("There is no visible gold in position two!");
-                visibleGolds.setSecond(goldsDeck.poll());
-                break;
-            case FIRST_VISIBLE_RESOURCES:
-                card = visibleResources.getFirst();
-                if (card == null)
-                    throw new WrongChoiceException("There is no visible resource in position one!");
-                visibleResources.setFirst(resourcesDeck.poll());
-                break;
-            case SECOND_VISIBLE_RESOURCES:
-                card = visibleResources.getSecond();
-                if (card == null)
-                    throw new WrongChoiceException("There is no visible resource in position two!");
-                visibleResources.setSecond(resourcesDeck.poll());
-                break;
+                    throw new WrongChoiceException("There is no visible gold in position one!");
+
+                // If the resources deck is NOT empty, substitute the third/fourth visible
+                // card with a new resource
+                if(!goldsDeck.isEmpty())
+                    visiblePlayableCards.put(source, resourcesDeck.poll());
+                // If the resources deck is empty, substitute the third/fourth visible
+                // card with a gold
+                else
+                    visiblePlayableCards.put(source, goldsDeck.poll());
+                // If the golds deck is empty too, the GameDeck.poll() method returns null,
+                // then the corresponding visible card will be null
+            }
             default:
                 throw new WrongChoiceException("Unexpected value: " + source);
         }
 
         if (goldsDeck.isEmpty() && resourcesDeck.isEmpty())
             lastTurn = true;
+
         return card;
     }
 
