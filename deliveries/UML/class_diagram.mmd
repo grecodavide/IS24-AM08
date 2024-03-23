@@ -7,7 +7,6 @@ classDiagram
     Match --> DrawSource
     Match -- Player
     MatchState <|-- WaitState
-    MatchState <|-- SetupState
     MatchState <|-- NextTurnState
     MatchState <|-- ChooseInitialSideState
     MatchState <|-- ChooseSecretObjectiveState
@@ -217,6 +216,7 @@ classDiagram
         + removePlayer(Player player) void
         + getCurrentPlayer() Player
         + getPlayers() List~Player~
+        + getMaxPlayers() int
         # getPoints() int
         # addPoints() void
         # setSecretObjective(Objective obj) void
@@ -238,10 +238,10 @@ classDiagram
         <<Enumeration>>
         GOLDS_DECK,
         RESOURCES_DECK,
-        FIRST_VISIBLE_GOLDS,
-        SECOND_VISIBLE_GOLDS,
-        FIRST_VISIBLE_RESOURCES,
-        SECOND_VISIBLE_RESOURCES
+        FIRST_VISIBLE,
+        SECOND_VISIBLE,
+        THIRD_VISIBLE,
+        FOURTH_VISIBLE
     }
 
     class MatchState {
@@ -265,11 +265,6 @@ classDiagram
         + transition() void
         + addPlayer() void
         + removePlayer() void
-    }
-    class SetupState{
-        + SetupState(Match match) void
-        + transition() void
-
     }
     class NextTurnState {
         + NextTurnState(Match match) void
@@ -321,5 +316,6 @@ classDiagram
         + poll() C
         + shuffle() void
         + isEmpty() void
+        + getSize() int
     }
 
