@@ -1,4 +1,5 @@
 package it.polimi.ingsw.gamemodel;
+
 import it.polimi.ingsw.utils.Pair;
 import it.polimi.ingsw.exceptions.*;
 
@@ -8,13 +9,18 @@ import it.polimi.ingsw.exceptions.*;
  * It's also responsible for the board's logic, which is a slice of the game logic.
 */
 public class Player {
-    private String nickname;
-    private Match match;
+    private final String nickname;
+    private final Match match;
     private int points;
-    private Board board;
+    private final Board board;
     private Color pawnColor;
     private Objective secretObjective;
 
+    /**
+     * Initializes the main player's attributes.
+     * @param nickname the player's nickname
+     * @param match the match the player belongs to
+     */
     public Player(String nickname, Match match) {
         this.nickname = nickname;
         this.match = match;
@@ -26,11 +32,12 @@ public class Player {
     }
 
     /**
-    * Places on the board the desired card (on the specified side) in the given position, if it is a valid one
-    * @param coords x and y position in which the card is played (where 0, 0 is the initial card)
-    * @param card the card to be placed
-    * @param side whether the card should be placed on the front or on the back
-    */
+     * Places a card on the player's board, on the give side and in the given position,
+     * assuming it's a valid one
+     * @param coords x and y position in which the card is played (where 0, 0 is the initial card)
+     * @param card the card to be placed
+     * @param side whether the card should be placed on the front or on the back
+     */
     public void playCard(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws WrongTurnException, WrongStateException, WrongChoiceException {
         if (match.getCurrentPlayer().equals(this))
             match.makeMove(coords, card, side);
@@ -38,6 +45,11 @@ public class Player {
             throw new WrongTurnException("Only the current player can play cards");
     }
 
+    /**
+     * Get an initial card from the match.
+     * @throws WrongTurnException if called by the player when it's not its turn
+     * @throws WrongStateException if called during the wrong match state
+     */
     public InitialCard drawInitialCard() throws WrongTurnException, Exception, WrongStateException {
         if (match.getCurrentPlayer().equals(this)) {
             InitialCard card = match.drawInitialCard();
@@ -47,6 +59,12 @@ public class Player {
         }
     }
 
+    /**
+     * Choose the initial card side.
+     * @param side the side of the initial
+     * @throws WrongTurnException if called by the player when it's not its turn
+     * @throws WrongStateException if called during the wrong match state
+     */
     public void chooseInitialCardSide(Side side) throws WrongTurnException, WrongStateException {
         if (match.getCurrentPlayer().equals(this))
             match.setInitialSide(side);
@@ -71,13 +89,15 @@ public class Player {
     }
 
     /**
-    * Sets the player private objective (only at the start of the game).
-    * @param objective the chosen objective between the two proposed
-    * @throws WrongTurnException if called by the player when it's not its turn
-    */
-    public void chooseSecretObjective(Objective objective) throws WrongTurnException {
+     * Sets the player private objective (only at the start of the game).
+     * @param objective the chosen objective between the two proposed
+     * @throws WrongTurnException if called by the player when it's not its turn
+     * @throws WrongStateException if called during the wrong match state
+     * @throws WrongChoiceException if called on an objective which is not one of the proposed ones
+     */
+    public void chooseSecretObjective(Objective objective) throws WrongTurnException, WrongStateException, WrongChoiceException {
         if (match.getCurrentPlayer().equals(this)) {
-            match.chooseSecretObjective(objective);
+            match.setSecretObjective(objective);
             secretObjective = objective;
         } else {
             throw new WrongTurnException("Only the current player can choose an objective");
@@ -85,15 +105,15 @@ public class Player {
     }
     
     /**
-    * Getter for the player's board.
-    */
+     * Getter for the player's board.
+     */
     public Board getBoard() {
         return board;
     }
 
     /**
-    * Getter for the player's points.
-    */
+     * Getter for the player's points.
+     */
     public int getPoints() {
         return points;
     }
