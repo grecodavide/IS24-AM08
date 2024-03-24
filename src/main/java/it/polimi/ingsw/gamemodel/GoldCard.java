@@ -3,7 +3,6 @@ package it.polimi.ingsw.gamemodel;
 import it.polimi.ingsw.exceptions.InvalidResourceException;
 
 import java.util.EnumSet;
-import java.util.Map;
 
 /**
 * The front side of these cards always gives points, but needs a certain requirement to be met in order to be played
@@ -57,7 +56,6 @@ public class GoldCard extends PlayableCard{
     * @param board The board on which we want to compute the points this card will give
     */
     public int calculatePoints(Board board) {
-
         return this.points; // will need to compute tot resources of board and get the tot resource
     }
 }
