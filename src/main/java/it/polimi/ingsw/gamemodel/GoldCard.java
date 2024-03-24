@@ -1,6 +1,10 @@
 package it.polimi.ingsw.gamemodel;
 
 import it.polimi.ingsw.exceptions.InvalidResourceException;
+
+import java.util.EnumSet;
+import java.util.Map;
+
 /**
 * The front side of these cards always gives points, but needs a certain requirement to be met in order to be played
 * @see CardFace
@@ -22,8 +26,14 @@ public class GoldCard extends PlayableCard{
         super(reign);
         this.front = front;
         this.points = points;
+        this.req = req; // integrity check already provided in the constructor of QuantityRequirement
+
+        // integrity check for allowed multipliers
+        EnumSet<Symbol> validMultiplier = Symbol.getValidMultiplier();
+        if(!validMultiplier.contains(multiplier)){
+            throw new InvalidResourceException("Resource " + multiplier.toString() + " is not valid for a " + this.getClass().toString());
+        }
         this.multiplier = multiplier;
-        this.req = req;
     }
 
     /**
@@ -47,6 +57,7 @@ public class GoldCard extends PlayableCard{
     * @param board The board on which we want to compute the points this card will give
     */
     public int calculatePoints(Board board) {
+
         return this.points; // will need to compute tot resources of board and get the tot resource
     }
 }
