@@ -57,7 +57,7 @@ public class Match {
      * @param player player to be added to the match
      * @throws IllegalArgumentException thrown if player already in the match
      */
-    public void addPlayer(Player player) throws IllegalArgumentException, WrongStateException {
+    public void addPlayer(Player player) throws Exception {
         if(!players.contains(player)) {
             currentState.addPlayer();
             players.add(player);

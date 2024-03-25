@@ -2,7 +2,7 @@ package it.polimi.ingsw.gamemodel;
 
 public class SetupState extends MatchState {
 
-    SetupState(Match match) {
+    SetupState(Match match) throws Exception {
         super(match);
 
         match.setupDecks();
