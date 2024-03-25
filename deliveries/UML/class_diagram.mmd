@@ -110,20 +110,20 @@ classDiagram
 
     class Requirement {
         <<Abstract>>
-        + isSatisfied(Board board) bool
         - Requirement()
+        + timesMet(Board board) int
     }
 
     class QuantityRequirement {
         - reqs : Map~Symbol, Integer~
         + QuantityRequirement(Symbol simbol, Integer quantity)
-        + isSatisfied(Board board) bool
+        + timesMet(Board board) int
     }
 
     class PositionRequirement {
         - reqs: Map&ltPair&ltInteger, Integer&gt, Color&gt
         + PositionRequirement(Map&ltPair&ltInteger, Integer&gt, Color&gt)
-        + isSatisfied(Board board) bool
+        + timesMet(Board board) int
     }
     class Objective {
         - points: int
