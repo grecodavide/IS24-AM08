@@ -44,6 +44,14 @@ public class Board {
     }
 
     /**
+    * Getter for the board's placed cards
+    * @return map containing all the placed cards indexed by their coordinates
+    */
+    public Map<Pair<Integer, Integer>, PlacedCard> getPlacedCards() {
+        return this.placed;
+    }
+
+    /**
     * Getter for the hand of the player (which must be composed of three {@link PlayableCard}), which is visible
     * to every player
     * @return the player's hand
@@ -118,7 +126,7 @@ public class Board {
         int points = 0;
 
         if (card instanceof GoldCard) {
-            points = ((GoldCard)card).calculatePoints(this);
+            points = ((GoldCard)card).calculatePoints(this, coord);
         } else if (card instanceof ResourceCard) {
             points = ((ResourceCard)card).getPoints();
         } else {
@@ -155,8 +163,8 @@ public class Board {
         return points;
     }
 
-    private Symbol getSymbolIfPresent(Pair<Integer, Integer> coords, Corner corner) {
-        PlacedCard placedCard = placed.get(coords);
+    private Symbol getSymbolIfPresent(Pair<Integer, Integer> coord, Corner corner) {
+        PlacedCard placedCard = placed.get(coord);
         if (placedCard == null) {
             return null;
         }
