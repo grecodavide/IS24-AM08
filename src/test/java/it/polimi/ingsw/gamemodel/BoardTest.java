@@ -9,66 +9,114 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.*;
 
-/**
- * Unit test for simple App.
- */
-public class BoardTest 
-{
-    /**
-     * Rigorous Test :-)
-     */
-    @Test
-    public void shouldAnswerWithTrue() {
-        Board board = new Board();
+public class BoardTest {
+        InitialCard initial;
+        PlayableCard base;
+        PlayableCard validGold;
+        PlayableCard invalidGold;
+        PlayableCard brempty;
 
+        PlayableCard nores;
+
+        Board board;
+    public BoardTest() {
+        board = new Board();
 
         try {
-
-            InitialCard initial = new InitialCard(
+            initial = new InitialCard(
                 new CardFace(Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.FULL_CORNER, Set.of(Symbol.PLANT)),
                 new CardFace(Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.FULL_CORNER, Set.of(Symbol.PLANT))
             );
 
-            PlayableCard init = new ResourceCard(
-                new CardFace(Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.FULL_CORNER, Set.of(Symbol.PLANT)),
+            base = new ResourceCard(
+                new CardFace(Symbol.PLANT, Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.FULL_CORNER, Set.of(Symbol.PLANT)),
                 Symbol.PLANT, 1
             );
 
-            PlayableCard empty = new ResourceCard(
-                new CardFace(Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.EMPTY_CORNER, Set.of(Symbol.PLANT)),
+            brempty = new ResourceCard(
+                new CardFace(Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.EMPTY_CORNER, Set.of()),
                 Symbol.PLANT, 1
             );
-            Map<Symbol, Integer> m = new HashMap<Symbol, Integer>();
-            m.put(Symbol.PLANT, 2);
 
-            PlayableCard gold = new GoldCard(
-                new CardFace(Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.EMPTY_CORNER, Set.of(Symbol.PLANT)),
-                Symbol.PLANT, Symbol.INKWELL, 2, new QuantityRequirement(m)
+            nores = new ResourceCard(
+                new CardFace(Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.FULL_CORNER, Set.of()),
+                Symbol.PLANT, 1
             );
 
-            board.addHandCard(init);
-            board.addHandCard(empty);
-            board.addHandCard(gold);
-            assertEquals(board.verifyCardPlacement(new Pair<>(0, 0), initial, Side.FRONT), PlacementOutcome.INVALID_COORDS);
-            board.setInitialCard(initial);
-            board.placeCard(new Pair<Integer,Integer>(1, 1), init, Side.FRONT, 0);
-            board.placeCard(new Pair<Integer,Integer>(2, 0), empty, Side.FRONT, 0);
-            board.placeCard(new Pair<Integer,Integer>(-1, -1), init, Side.FRONT, 0);
-            board.placeCard(new Pair<Integer,Integer>(0, -2), init, Side.FRONT, 0);
-            board.placeCard(new Pair<Integer,Integer>(1, -3), init, Side.FRONT, 0);
-            board.placeCard(new Pair<Integer,Integer>(2, -2), init, Side.FRONT, 0);
-            assertEquals(board.verifyCardPlacement(new Pair<>(3, -1), init, Side.FRONT), PlacementOutcome.INVALID_COORDS);
-            assertEquals(board.verifyCardPlacement(new Pair<>(-1, -1), init, Side.FRONT), PlacementOutcome.INVALID_COORDS);
-            assertEquals(board.verifyCardPlacement(new Pair<>(0, -1), init, Side.FRONT), PlacementOutcome.INVALID_COORDS);
-            assertEquals(board.verifyCardPlacement(new Pair<>(2, 2), empty, Side.FRONT), PlacementOutcome.VALID);
-            assertEquals(board.verifyCardPlacement(new Pair<>(2, 2), gold, Side.FRONT), PlacementOutcome.INVALID_ENOUGH_RESOURCES);
+            Map<Symbol, Integer> valid = new HashMap<Symbol, Integer>();
+            valid.put(Symbol.PLANT, 5);
 
+            Map<Symbol, Integer> invalid = new HashMap<Symbol, Integer>();
+            invalid.put(Symbol.FUNGUS, 2);
+
+            validGold = new GoldCard(
+                new CardFace(Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.EMPTY_CORNER, Set.of(Symbol.PLANT)),
+                Symbol.PLANT, Symbol.INKWELL, 2, new QuantityRequirement(valid)
+            );
+
+            board.setInitialCard(initial, Side.FRONT); // +1 plant
+            board.placeCard(new Pair<>(1,1), brempty, Side.FRONT, 0); // +0 plant
+            board.placeCard(new Pair<>(-1,-1), base, Side.FRONT, 0); // +2 plant
+            board.placeCard(new Pair<>(0,-2), base, Side.FRONT, 0); // +2 plant
+            board.placeCard(new Pair<>(1,-3), base, Side.FRONT, 0); // +2 plant
+            board.placeCard(new Pair<>(2,-2), base, Side.FRONT, 0); // +2 plant
+            board.placeCard(new Pair<>(3,-1), base, Side.FRONT, 0); // +2 plant
+            board.placeCard(new Pair<>(-2,0), base, Side.FRONT, 0); // +2 plant -1 plant
+
+            board.placeCard(new Pair<>(0,-4), nores, Side.FRONT, 0); // +0
+            board.placeCard(new Pair<>(-1,-5), nores, Side.FRONT, 0); // +0
+            board.placeCard(new Pair<>(0,-6), nores, Side.FRONT, 0); // +0
+            board.placeCard(new Pair<>(1,-7), nores, Side.FRONT, 0); // +0
+            board.placeCard(new Pair<>(2,-6), nores, Side.FRONT, 0); // +0
+            board.placeCard(new Pair<>(3,-5), nores, Side.FRONT, 0); // +0
+            board.placeCard(new Pair<>(2,-4), nores, Side.FRONT, 0); // +0
+
+            board.addHandCard(base);
+            board.addHandCard(brempty);
+            board.addHandCard(validGold);
+
+            verifyResources(Symbol.PLANT, 12);
         } catch (Exception e) {
             System.err.println(e);
-            assertTrue(false); // not expecting any exception for now, if exception was expected remove this and adapt
+            assertTrue(false);
         }
+    }
+
+    @Test
+    public void verifyBasicPlacement() {
+        try {
+            // (0, 0) is reserved to initial
+            assertEquals(PlacementOutcome.INVALID_COORDS, board.verifyCardPlacement(new Pair<>(0, 0), base, Side.FRONT));
+            // (1, 1) is already occupied
+            assertEquals(PlacementOutcome.INVALID_COORDS, board.verifyCardPlacement(new Pair<>(0, 0), base, Side.FRONT));
+            // (2, 0) is invalid since in (1, 1) there is a bottom right corner empty
+            assertEquals(PlacementOutcome.INVALID_COORDS, board.verifyCardPlacement(new Pair<>(2, 0), base, Side.FRONT));
+            // (1, -1) is a valid placement (covers 4 corners)
+            assertEquals(PlacementOutcome.VALID, board.verifyCardPlacement(new Pair<>(1, -1), base, Side.FRONT));
+            // (1, -5) is a valid placement
+            assertEquals(PlacementOutcome.VALID, board.verifyCardPlacement(new Pair<>(1, -5), base, Side.FRONT));
+            // no adjacent
+            assertEquals(PlacementOutcome.INVALID_COORDS, board.verifyCardPlacement(new Pair<>(5, 5), base, Side.FRONT));
+            // enough res
+            assertEquals(PlacementOutcome.VALID, board.verifyCardPlacement(new Pair<>(1, -5), validGold, Side.FRONT));
+
+            board.removeHandCard(base);
+            board.addHandCard(invalidGold);
+            // not enough res
+            assertEquals(PlacementOutcome.VALID, board.verifyCardPlacement(new Pair<>(1, -5), invalidGold, Side.FRONT));
+            board.removeHandCard(invalidGold);
+            board.addHandCard(base);
+
+            board.verifyCardPlacement(new Pair<>(1, -5), invalidGold, Side.FRONT);
+        } catch (Exception e) {
+            System.err.println(e);
+            assertEquals("The card is not in the player's hand!", e.getMessage());
+        }
+    }
+
+    public void verifyResources(Symbol s, Integer expected) {
+        assertEquals(expected, board.getAvailableResources().get(s));
     }
 }
