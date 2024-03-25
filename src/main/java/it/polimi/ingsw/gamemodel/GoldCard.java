@@ -1,9 +1,13 @@
 package it.polimi.ingsw.gamemodel;
 
 import it.polimi.ingsw.exceptions.InvalidResourceException;
+import it.polimi.ingsw.utils.Pair;
 
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+
 
 /**
 * The front side of these cards always gives points, but needs a certain requirement to be met in order to be played
@@ -56,28 +60,51 @@ public class GoldCard extends PlayableCard{
     * Will compute the total points this card gives based on the board it's played on.
     * It MUST be called AFTER the placement of the gold card.
     * @param board the board on which we want to compute the points this card will give
+    * @param coord the coordinates of the card just placed (needed fot corner objectives)
     * @return the points gained from playing the gold card
     */
-    public int calculatePoints(Board board) {
+    public int calculatePoints(Board board, Pair<Integer, Integer> coord) {
         Map<Symbol, Integer> availableResources = board.getAvailableResources();
 
         int totalElements = 0;
-        for(Symbol s : availableResources.keySet()){
-            if(s.equals(this.multiplier)){
-                totalElements = availableResources.get(s);
+
+        // multiplier is basic resource (subset of symbols)
+        if(Symbol.getBasicResources().contains(this.multiplier)){
+
+            for(Symbol s : availableResources.keySet()){
+                if(s.equals(this.multiplier)){
+                    totalElements = availableResources.get(s);
+                }
+            }
+        } else if (this.multiplier.equals(Symbol.CORNER_OBJ)) { //multiplier is a corner_objective kind
+
+            // Pair<Integer, Integer> currentCoord = board.getCoordinatesPlacedCard();
+            Set<Pair<Integer, Integer>> edges = getEdges(coord);
+
+            Map<Pair<Integer, Integer>, PlacedCard> map = board.getPlacedCards();
+            for(Pair<Integer, Integer> p : edges){
+
+                // check if the board has a value (card) associated to the key (coordinates)
+                if(map.get(p) != null){
+                    totalElements++;
+                }
             }
         }
 
         return totalElements * this.points;
     }
+
+    private static Set<Pair<Integer, Integer>> getEdges(Pair<Integer, Integer> currentCoord) {
+        Pair<Integer, Integer> tr = new Pair<>(currentCoord.first()+1, currentCoord.second()+1);
+        Pair<Integer, Integer> br = new Pair<>(currentCoord.first()+1, currentCoord.second()-1);
+        Pair<Integer, Integer> tl = new Pair<>(currentCoord.first()-1, currentCoord.second()-1);
+        Pair<Integer, Integer> bl = new Pair<>(currentCoord.first()-1, currentCoord.second()+1);
+
+        Set<Pair<Integer, Integer>> edges = new HashSet<>();
+        edges.add(tr);
+        edges.add(br);
+        edges.add(tl);
+        edges.add(bl);
+        return edges;
+    }
 }
-
-
-
-
-
-
-
-
-
-
