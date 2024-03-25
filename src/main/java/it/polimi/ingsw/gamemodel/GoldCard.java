@@ -1,12 +1,12 @@
 package it.polimi.ingsw.gamemodel;
 
-import it.polimi.ingsw.exceptions.InvalidResourceException;
-import it.polimi.ingsw.utils.Pair;
-
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import it.polimi.ingsw.exceptions.InvalidResourceException;
+import it.polimi.ingsw.utils.Pair;
 
 
 /**
@@ -42,7 +42,7 @@ public class GoldCard extends PlayableCard{
 
     /**
     * Getter for the GoldCard class
-    * @return the multiplier.
+    * @return the multiplier
     */
     public Symbol getMultiplier(){
         return this.multiplier;
@@ -50,7 +50,7 @@ public class GoldCard extends PlayableCard{
 
     /**
     * Getter for the GoldCard class
-    * @return the quantity requirement for the gold card to be played.
+    * @return the quantity requirement for the gold card to be played
     */
     public QuantityRequirement getRequirement(){
         return this.req;
@@ -58,7 +58,7 @@ public class GoldCard extends PlayableCard{
 
     /**
     * Will compute the total points this card gives based on the board it's played on.
-    * It MUST be called AFTER the placement of the gold card.
+    * It MUST be called AFTER the placement of the gold card
     * @param board the board on which we want to compute the points this card will give
     * @param coord the coordinates of the card just placed (needed fot corner objectives)
     * @return the points gained from playing the gold card

@@ -1,11 +1,12 @@
 package it.polimi.ingsw.gamemodel;
 
-import it.polimi.ingsw.exceptions.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import it.polimi.ingsw.exceptions.CardException;
+import it.polimi.ingsw.exceptions.HandException;
 import it.polimi.ingsw.utils.Pair;
 
 /**
@@ -158,7 +159,6 @@ public class Board {
         } else {
             throw new CardException("Unknow card type: " + card.getClass().toString() + "!");
         }
-
 
         return points;
     }

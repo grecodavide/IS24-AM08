@@ -29,6 +29,11 @@ public abstract class PlayableCard extends Card {
         }
     }
 
+    /**
+    * Getter for the card reign
+    * @return the card's reign
+    * @see Symbol#getReigns()
+    */
     public Symbol getReign() {
         return this.reign;
     }

@@ -9,7 +9,9 @@ public class PlacedCard {
     private Side playedSide;
 
     /**
+    * Class constructor, which only needs to initialize the card and the turn it is played, as well as the side it was played on
     * @param card the {@link Card} played
+    * @param playedSide the side the card was played on
     * @param turn the turn said card is played. Needed to know which card covers which, since a card played in a certain turn will
     * always cover one played before
     */
@@ -41,6 +43,11 @@ public class PlacedCard {
         return this.playedSide;
     }
 
+
+    /**
+    * Getter for the Card face
+    * @return the topological description of the side the card was played on
+    */
     public CardFace getPlayedCardFace() {
         return this.card.getSide(this.playedSide);
     }

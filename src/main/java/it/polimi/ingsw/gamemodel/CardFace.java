@@ -2,7 +2,9 @@ package it.polimi.ingsw.gamemodel;
 
 import java.util.Set;
 
-/*
+import it.polimi.ingsw.exceptions.CardException;
+
+/**
 * Topological definition of a card's side
 */
 public class CardFace {
@@ -24,8 +26,9 @@ public class CardFace {
     * Used to get the symbol present in one of the four corners of a card
     * @param corner which of the four corners we want
     * @return the symbol the specified corner contains
+    * @throws CardException if the specified corner does not exist
     */
-    public Symbol getCorner(Corner corner) {
+    public Symbol getCorner(Corner corner) throws CardException {
         switch (corner) {
             case TOP_LEFT:
                 return this.topLeft;
@@ -36,11 +39,12 @@ public class CardFace {
             case BOTTOM_RIGHT:
                 return this.bottomRight;
             default:
-                return null;
+                throw new CardException("The specified corner does not exist!");
         }
     }
 
     /**
+    * Getter for the center of the card
     * @return the set containing all symbols the center of the card contains
     */
     public Set<Symbol> getCenter() {
