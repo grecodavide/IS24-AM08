@@ -3,103 +3,113 @@ package it.polimi.ingsw.gamemodel;
 import it.polimi.ingsw.utils.Pair;
 import org.junit.Test;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit test for class GoldCard.
  */
 public class GoldCardTest
 {
+    Board board;
+    InitialCard initialCard;
+    PlayableCard goldAutopoint;
+    PlayableCard goldCovering;
+    PlayableCard goldNoPoints;
+    PlayableCard goldPositioning;
+
+    Pair<Integer, Integer> coordAutopoint;
+    Pair<Integer, Integer> coordCovering;
+    Pair<Integer, Integer> coordNoPoints;
+    Pair<Integer, Integer> coordPositioning;
+
     /**
-     * Unit test for method calculatePoints.
-     */
-    @Test
-    public void testGoldCard(){
-        Board board = new Board(); // created empty board
+    * Unit test for method calculatePoints.
+    */
+    public GoldCardTest(){
+        board = new Board(); // created empty board
 
         try{
-            // created initial card with full corners, a plant in the bottom right and a fungus in the center, for both front and back
-            InitialCard initial_alpha = new InitialCard(
+            // map of symbols for the center of the card
+            Map<Symbol, Integer> mapGoldAutopoint = Map.of(Symbol.PLANT, 1);
+            Map<Symbol, Integer> mapGoldCovering = Map.of(Symbol.INKWELL, 1);
+            Map<Symbol, Integer> mapGoldNoPoints_Positioning = Map.of(Symbol.FUNGUS, 1);
+
+            // coordinates for each card to be placed
+            coordAutopoint = new Pair<Integer,Integer>(1, -1);
+            coordCovering = new Pair<Integer,Integer>(2, -2);
+            coordNoPoints = new Pair<Integer,Integer>(1, 1);
+            coordPositioning = new Pair<Integer,Integer>(2, 0);
+
+            // creation of the cards
+            initialCard = new InitialCard(
                     new CardFace(Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.PLANT, Set.of(Symbol.FUNGUS)),
                     new CardFace(Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.PLANT, Set.of(Symbol.FUNGUS))
             );
 
-            // created gold card with full corners, an inkwell on the bottom right and an insect in the center of the back
-            // 1 point, multiplier is inkwell, requires 1 plant
-            Map<Symbol, Integer> m1 = new HashMap<Symbol, Integer>();  m1.put(Symbol.PLANT, 1);
-            PlayableCard gold_beta = new GoldCard(
+            goldAutopoint = new GoldCard(
                     new CardFace(Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.INKWELL, Set.of(Symbol.INSECT)),
-                    Symbol.INSECT,
-                    Symbol.INKWELL,
-                    1,
-                    new QuantityRequirement(m1)
-
+                    Symbol.INSECT, Symbol.INKWELL, 1, new QuantityRequirement(mapGoldAutopoint)
             );
 
-            // created gold card with full corners and an insect in the center of the back
-            // 2 points, multiplier is inkwell, requires 1 inkwell
-            Map<Symbol, Integer> m2 = new HashMap<Symbol, Integer>();  m2.put(Symbol.INKWELL, 1);
-            PlayableCard gold_gamma = new GoldCard(
+            goldCovering = new GoldCard(
                     new CardFace(Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.FULL_CORNER, Set.of(Symbol.INSECT)),
-                    Symbol.INSECT,
-                    Symbol.INKWELL,
-                    2,
-                    new QuantityRequirement(m2)
+                    Symbol.INSECT, Symbol.INKWELL, 2, new QuantityRequirement(mapGoldCovering)
             );
 
-            // created gold card with full corners and an insect in the center of the back
-            // 2 points, multiplier is animal, requires 1 fungus
-            Map<Symbol, Integer> m3 = new HashMap<Symbol, Integer>();  m3.put(Symbol.FUNGUS, 1);
-            PlayableCard gold_delta = new GoldCard(
+            goldNoPoints = new GoldCard(
                     new CardFace(Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.FULL_CORNER, Set.of(Symbol.INSECT)),
-                    Symbol.INSECT,
-                    Symbol.ANIMAL,
-                    3,
-                    new QuantityRequirement(m3)
+                    Symbol.INSECT, Symbol.ANIMAL, 3, new QuantityRequirement(mapGoldNoPoints_Positioning)
             );
 
-            // created gold card with full corners and an insect in the center of the back
-            // 2 points, multiplier is corner_object, requires 1 fungus
-            PlayableCard gold_epsilon = new GoldCard(
+            goldPositioning = new GoldCard(
                     new CardFace(Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.FULL_CORNER, Set.of(Symbol.INSECT)),
-                    Symbol.INSECT,
-                    Symbol.CORNER_OBJ,
-                    2,
-                    new QuantityRequirement(m3)
+                    Symbol.INSECT, Symbol.CORNER_OBJ, 2, new QuantityRequirement(mapGoldNoPoints_Positioning)
             );
 
-            // placement phase: initial card and the four gold cards
-            board.setInitialCard(initial_alpha, Side.FRONT);
-
-            // case auto-point: gold_beta contains its multiplier on one corner
-            Pair<Integer, Integer> coord_beta = new Pair<Integer,Integer>(-1, 1);
-            board.placeCard(coord_beta, gold_beta, Side.FRONT, 0);
-            assertEquals(1, ((GoldCard) gold_beta).calculatePoints(board, coord_beta));
-
-            // case self-sabotage: gold_gamma placement covers the only corner containing the multiplier
-            Pair<Integer, Integer> coord_gamma = new Pair<Integer,Integer>(-2, 2);
-            board.placeCard(coord_gamma, gold_gamma, Side.FRONT, 0);
-            assertEquals(0, ((GoldCard) gold_gamma).calculatePoints(board, coord_gamma));
-
-            // case normal-none: there are no multipliers on board
-            Pair<Integer, Integer> coord_delta = new Pair<Integer,Integer>(1, 1);
-            board.placeCard(coord_delta, gold_delta, Side.FRONT, 0);
-            assertEquals(0, ((GoldCard) gold_delta).calculatePoints(board, coord_delta));
-
-            // case positioning: gold_epsilon covers 2 edges
-            Pair<Integer, Integer> coord_epsilon = new Pair<Integer,Integer>(0, 2);
-            board.placeCard(coord_epsilon, gold_epsilon, Side.FRONT, 0);
-            assertEquals(4, ((GoldCard) gold_epsilon).calculatePoints(board, coord_epsilon));
+            // placement phase: initial card
+            board.setInitialCard(initialCard, Side.FRONT);
 
         } catch (Exception e) {
             System.err.println(e);
-            // fail("Error: " + e.getMessage());
+            assertTrue(false);
+        }
+    }
+
+    @Test
+    public void verifyPointCalculation(){
+        try{
+            assertEquals(1, board.placeCard(coordAutopoint, goldAutopoint, Side.FRONT, 0));
+            assertEquals(0, board.placeCard(coordCovering, goldCovering, Side.FRONT, 0));
+            assertEquals(0, board.placeCard(coordNoPoints, goldNoPoints, Side.FRONT, 0));
+            assertEquals(4, board.placeCard(coordPositioning, goldPositioning, Side.FRONT, 0));
+        } catch (Exception e) {
+            System.err.println(e);
+            assertTrue(false);
         }
     }
 
 
+/* info:
+    // initial card has full corners, a plant in the bottom right and a fungus in the center, for both front and back
+
+    // goldAutopoint contains its multiplier on one corner
+        // created gold card with full corners, an inkwell on the bottom right and an insect in the center of the back
+        // 1 point, multiplier is inkwell, requires 1 plant
+
+    // goldCovering placement covers the only corner containing the multiplier
+        // created gold card with full corners and an insect in the center of the back
+        // 2 points, multiplier is inkwell, requires 1 inkwell
+
+    // goldNoPoints has no multipliers on board
+        // created gold card with full corners and an insect in the center of the back
+        // 2 points, multiplier is animal, requires 1 fungus
+
+    // goldPositioning covers 2 edges
+        // created gold card with full corners and an insect in the center of the back
+        // 2 points, multiplier is corner_object, requires 1 fungus
+*/
 }
