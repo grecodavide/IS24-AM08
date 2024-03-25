@@ -184,7 +184,6 @@ public class Board {
         if (coord.equals(new Pair<>(0, 0))) {
             return PlacementOutcome.INVALID_COORDS;
         }
-
         if (!currentHand.contains(card)) {
             throw new CardException("The card is not in the player's hand!");
         }

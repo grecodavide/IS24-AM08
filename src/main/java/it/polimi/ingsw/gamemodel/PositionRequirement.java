@@ -1,6 +1,8 @@
 package it.polimi.ingsw.gamemodel;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Map;
 
 import it.polimi.ingsw.exceptions.InvalidResourceException;
@@ -36,21 +38,36 @@ public class PositionRequirement extends Requirement{
 	@Override
 	public int isSatisfied(Board board) {
         Map<Pair<Integer, Integer>, PlacedCard> placedCards = board.getPlacedCards();
+        List<Pair<Integer, Integer>> alreadyUsed = new ArrayList<>();
 
-        Card cmpPlaced;
+        PlacedCard cmpPlaced;
+        Card cmp;
 
         boolean requirementMatched;
         int timesMet = 0;
 
+        Pair<Integer, Integer> tmp;
+
         for (Pair<Integer, Integer> coord : placedCards.keySet()) {
             requirementMatched = true;
+            // for each card in the board
             for (Pair<Integer, Integer> offset : this.reqs.keySet()) {
-                cmpPlaced = placedCards.get(new Pair<>(coord.first()+offset.first(), coord.second()+offset.second())).getCard();
-                if ((!(cmpPlaced instanceof PlayableCard)) || ((PlayableCard)cmpPlaced).getReign() != this.reqs.get(offset)) {
+                tmp = new Pair<>(coord.first()+offset.first(), coord.second()+offset.second());
+                cmpPlaced = placedCards.get(tmp);
+                if (cmpPlaced != null) { // card in required position does not exist so go next
+                    cmp = cmpPlaced.getCard();
+                    // if the card is not a playable it is the initial (so go next), and if the reign is not matched go next
+                    if ((!(cmp instanceof PlayableCard)) || ((PlayableCard)cmp).getReign() != this.reqs.get(offset) || alreadyUsed.indexOf(tmp) != -1) {
+                        requirementMatched = false;
+                    }
+                } else {
                     requirementMatched = false;
                 }
             }
             if (requirementMatched) {
+                for (Pair<Integer, Integer> offset : reqs.keySet()) {
+                    alreadyUsed.add(new Pair<>(coord.first() + offset.first(), coord.second()+offset.second()));
+                }
                 timesMet++;
             }
         }
