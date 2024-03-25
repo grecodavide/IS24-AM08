@@ -15,5 +15,5 @@ public abstract class Requirement {
     * @param board the board that will be used to check if the requirement is met
     * @return whether the requirement is met or not
     */
-	public abstract boolean isSatisfied(Board board);
+	public abstract int isSatisfied(Board board);
 }

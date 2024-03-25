@@ -16,7 +16,7 @@ public class Board {
     private Map<Pair<Integer, Integer>, PlacedCard> placed;
     private Map<Symbol, Integer> availableResources;
 
-    private static final Map<Pair<Integer, Integer>, Corner> diagonalChecks = Map.of(
+    private static final Map<Pair<Integer, Integer>, Corner> diagonalOffsets = Map.of(
         new Pair<>(-1, +1), Corner.BOTTOM_RIGHT,
         new Pair<>(+1, +1), Corner.BOTTOM_LEFT,
         new Pair<>(-1, -1), Corner.TOP_RIGHT,
@@ -129,8 +129,8 @@ public class Board {
         Integer x = coord.first();
         Integer y = coord.second();
 
-        for (Pair<Integer, Integer> diagOffset : diagonalChecks.keySet()) {
-            cornerSymbol = this.getSymbolIfPresent(new Pair<>(x+diagOffset.first(), y+diagOffset.second()), diagonalChecks.get(diagOffset));
+        for (Pair<Integer, Integer> diagOffset : diagonalOffsets.keySet()) {
+            cornerSymbol = this.getSymbolIfPresent(new Pair<>(x+diagOffset.first(), y+diagOffset.second()), diagonalOffsets.get(diagOffset));
             if (cornerSymbol != null) {
                 if (Symbol.getBasicResources().contains(cornerSymbol)) {
                     availableResources.put(cornerSymbol, availableResources.get(cornerSymbol) - 1);
@@ -191,7 +191,7 @@ public class Board {
         if (placed.keySet().contains(coord)) {
             return PlacementOutcome.INVALID_COORDS;
         }
-        if (card instanceof GoldCard && !((GoldCard)card).getRequirement().isSatisfied(this)) {
+        if (card instanceof GoldCard && ((GoldCard)card).getRequirement().isSatisfied(this) == 0) {
             return PlacementOutcome.INVALID_ENOUGH_RESOURCES;
         }
 
@@ -218,12 +218,12 @@ public class Board {
         Integer x = coord.first();
         Integer y = coord.second();
 
-        for (Pair<Integer, Integer> diagOffset : Board.diagonalChecks.keySet()) {
+        for (Pair<Integer, Integer> diagOffset : Board.diagonalOffsets.keySet()) {
             cmp = new Pair<Integer, Integer>(x+diagOffset.first(), y+diagOffset.second());
 
             if (placed.get(cmp) != null ) {
                 hasAdjacent = true;
-                if (placed.get(cmp).getPlayedCardFace().getCorner(diagonalChecks.get(diagOffset)) == Symbol.EMPTY_CORNER) {
+                if (placed.get(cmp).getPlayedCardFace().getCorner(diagonalOffsets.get(diagOffset)) == Symbol.EMPTY_CORNER) {
                     return PlacementOutcome.INVALID_COORDS;
                 }
             }

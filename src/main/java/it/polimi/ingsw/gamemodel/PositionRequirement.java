@@ -34,9 +34,31 @@ public class PositionRequirement extends Requirement{
     * @return wheter the board actually meets the requirement or not
     */
 	@Override
-	public boolean isSatisfied(Board board) {
+	public int isSatisfied(Board board) {
+        Map<Pair<Integer, Integer>, PlacedCard> placedCards = board.getPlacedCards();
 
-        return true;
+        Card cmpPlaced;
+
+        boolean requirementMatched;
+        int timesMet = 0;
+
+        for (Pair<Integer, Integer> coord : placedCards.keySet()) {
+            requirementMatched = true;
+            for (Pair<Integer, Integer> offset : this.reqs.keySet()) {
+                cmpPlaced = placedCards.get(new Pair<>(coord.first()+offset.first(), coord.second()+offset.second())).getCard();
+                if ((!(cmpPlaced instanceof PlayableCard)) || ((PlayableCard)cmpPlaced).getReign() != this.reqs.get(offset)) {
+                    requirementMatched = false;
+                }
+            }
+            if (requirementMatched) {
+                timesMet++;
+            }
+        }
+        return timesMet;
 	}
 
 }
+
+// (0, 0), FUNGUS
+// (1, 1), INSECT
+// (2, 2), FUNGUS

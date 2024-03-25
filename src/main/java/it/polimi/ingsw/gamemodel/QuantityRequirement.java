@@ -32,13 +32,18 @@ public class QuantityRequirement extends Requirement{
     * @return whether the requirement is satisfied or not
     */
 	@Override
-	public boolean isSatisfied(Board board) {
-        for (Symbol s : reqs.keySet()) {
-            if (board.getAvailableResources().get(s) < reqs.get(s)) {
-                return false;
+	public int isSatisfied(Board board) {
+        Map<Symbol, Integer> availableResources = board.getAvailableResources();
+        Integer min = null;
+        Integer curr;
+
+        for (Symbol req : reqs.keySet()) {
+            curr = availableResources.get(req)/reqs.get(req);
+            if (min == null || curr < min) {
+                min = curr;
             }
         }
 
-        return true;
+        return min;
 	}
 }
