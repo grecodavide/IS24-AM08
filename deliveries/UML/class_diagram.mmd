@@ -20,22 +20,22 @@ classDiagram
     PlayableCard <|-- ResourceCard
     PlayableCard <|-- GoldCard
 
+    Board -- PlacementOutcome
     Requirement <|-- QuantityRequirement
     Requirement <|-- PositionRequirement
     Requirement <-- Objective
     QuantityRequirement <-- GoldCard
 
     Board --> PlacedCard
-    Board -- PlacementOutcome
+    Side <-- PlacedCard
     Player --> Board
     Player --> Objective
+    Player --> Color
     CardFace <-- Card
     Symbol <-- CardFace
-    Player --> Color
     Board --> Requirement
     %%Side <-- Player
     %%Side <-- Match
-    Side <-- PlacedCard
     Corner <-- CardFace
     %%Symbol <-- GoldCard
     %% DrawSource <-- Player
