@@ -125,14 +125,6 @@ public class Board {
         this.placed.put(coord, last);
         int points = 0;
 
-        if (card instanceof GoldCard) {
-            points = ((GoldCard)card).calculatePoints(this, coord);
-        } else if (card instanceof ResourceCard) {
-            points = ((ResourceCard)card).getPoints();
-        } else {
-            throw new CardException("Unknow card type: " + card.getClass().toString() + "!");
-        }
-
         Symbol cornerSymbol;
         Integer x = coord.first();
         Integer y = coord.second();
@@ -157,6 +149,14 @@ public class Board {
             if (Symbol.getBasicResources().contains(s)) {
                 availableResources.put(s, availableResources.get(s)+1);
             }
+        }
+
+        if (card instanceof GoldCard) {
+            points = ((GoldCard)card).calculatePoints(this, coord);
+        } else if (card instanceof ResourceCard) {
+            points = ((ResourceCard)card).getPoints();
+        } else {
+            throw new CardException("Unknow card type: " + card.getClass().toString() + "!");
         }
 
 
