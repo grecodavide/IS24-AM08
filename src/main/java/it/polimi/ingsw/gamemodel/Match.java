@@ -240,9 +240,9 @@ public class Match {
      * @param card
      * @param side
      * @throws WrongStateException
-     * @throws WrongCardPlacementException
+     * @throws CardException
      */
-    protected void makeMove(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws WrongStateException {
+    protected void makeMove(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws WrongStateException, CardException {
         Board currentPlayerBoard = currentPlayer.getBoard();
 
         // If placing the card in the current player's board is allowed by rules

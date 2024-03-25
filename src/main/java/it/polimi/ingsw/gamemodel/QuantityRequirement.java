@@ -12,8 +12,8 @@ public class QuantityRequirement extends Requirement{
     private Map<Symbol, Integer> reqs;
 
     /**
+    * Only valid symbols are the ones returned by {@link Symbol#getBasicResources()}
     * @param reqs how many resources of a certain type are needed to fulfill the requirement.
-    * Only valid symbols are the ones returned by {@link Symbol#getValidRequirement()}
     * @throws InvalidResourceException if a requirement is not made up only of those symbols
     */
     public QuantityRequirement(Map<Symbol, Integer> reqs) throws InvalidResourceException {
