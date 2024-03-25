@@ -32,7 +32,7 @@ public class QuantityRequirement extends Requirement{
     * @return whether the requirement is satisfied or not
     */
 	@Override
-	public int isSatisfied(Board board) {
+	public int timesMet(Board board) {
         Map<Symbol, Integer> availableResources = board.getAvailableResources();
         Integer min = null;
         Integer curr;

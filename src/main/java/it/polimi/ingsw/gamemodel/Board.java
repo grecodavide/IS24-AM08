@@ -190,7 +190,7 @@ public class Board {
         if (placed.keySet().contains(coord)) {
             return PlacementOutcome.INVALID_COORDS;
         }
-        if (card instanceof GoldCard && ((GoldCard)card).getRequirement().isSatisfied(this) == 0) {
+        if (card instanceof GoldCard && ((GoldCard)card).getRequirement().timesMet(this) == 0) {
             return PlacementOutcome.INVALID_ENOUGH_RESOURCES;
         }
 

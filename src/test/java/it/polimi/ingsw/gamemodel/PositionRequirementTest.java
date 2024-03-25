@@ -72,7 +72,7 @@ public class PositionRequirementTest {
                     new Pair<>(0, 2), Symbol.INSECT,
                     new Pair<>(1, 3), Symbol.PLANT
                 )
-            ).isSatisfied(board));
+            ).timesMet(board));
 
             assertEquals(0, new PositionRequirement(
                 Map.of(
@@ -80,7 +80,7 @@ public class PositionRequirementTest {
                     new Pair<>(0, 2), Symbol.INSECT,
                     new Pair<>(1, 3), Symbol.INSECT
                 )
-            ).isSatisfied(board));
+            ).timesMet(board));
 
             assertEquals(1, new PositionRequirement(
                 Map.of(
@@ -88,7 +88,7 @@ public class PositionRequirementTest {
                     new Pair<>(1, 1), Symbol.PLANT,
                     new Pair<>(2, 2), Symbol.PLANT
                 )
-            ).isSatisfied(board));
+            ).timesMet(board));
 
             assertEquals(1, new PositionRequirement(
                 Map.of(
@@ -96,7 +96,7 @@ public class PositionRequirementTest {
                     new Pair<>(0, 2), Symbol.INSECT,
                     new Pair<>(1, 3), Symbol.INSECT
                 )
-            ).isSatisfied(board));
+            ).timesMet(board));
 
             assertEquals(1, new PositionRequirement(
                 Map.of(
@@ -104,7 +104,7 @@ public class PositionRequirementTest {
                     new Pair<>(1, -1), Symbol.INSECT,
                     new Pair<>(2, -2), Symbol.INSECT
                 )
-            ).isSatisfied(board));
+            ).timesMet(board));
         } catch (Exception e) {
             System.err.println(e);
             assertTrue(false);

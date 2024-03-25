@@ -36,7 +36,7 @@ public class PositionRequirement extends Requirement{
     * @return wheter the board actually meets the requirement or not
     */
 	@Override
-	public int isSatisfied(Board board) {
+	public int timesMet(Board board) {
         Map<Pair<Integer, Integer>, PlacedCard> placedCards = board.getPlacedCards();
         List<Pair<Integer, Integer>> alreadyUsed = new ArrayList<>();
 
