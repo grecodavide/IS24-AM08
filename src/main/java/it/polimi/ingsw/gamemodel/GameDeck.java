@@ -1,37 +1,73 @@
 package it.polimi.ingsw.gamemodel;
 
+import it.polimi.ingsw.exceptions.DeckException;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-/*
+/**
 * Generic used to create the decks for all the types of cards
 */
 public class GameDeck<T> {
-    private int size;
     private List<T> cardsList;
 
     /**
-    * Constructor of the class, which will initialize the deck empty
-    * @param size initial size of the deck
+    * Class constructor, takes no argument as the decks start empty
     */
-    public GameDeck(int size) {
-        this.size = size;
+    public GameDeck() {
         cardsList = new ArrayList<>();
     }
 
+    /**
+    * Adds a card to the bottom of the deck
+    * @param card the card to add
+    */
     public void add(T card) {
-
+        this.cardsList.add(card);
     }
 
-    public T pop() {
-        return null;
+    /**
+    * Getter for the deck's size
+    * @return the deck's size
+    */
+    public int getSize() {
+        return this.cardsList.size();
     }
 
+    /**
+    * Removes a card from the deck's top (throws exception if the deck is empty)
+    * @return the removed card
+    * @throws DeckException if the deck is empty
+    */
+    public T pop() throws DeckException {
+        if (this.isEmpty())
+            throw new DeckException("Tried to draw from an empty deck!");
+        return cardsList.removeLast();
+    }
+
+    /**
+    * Removes a card from the deck's top (null if the deck is empty)
+    * @return the removed card (null if the deck is empty)
+    */
+    public T poll() {
+        if (this.isEmpty())
+            return null;
+        return cardsList.removeLast();
+    }
+
+    /**
+    * Shuffles the deck
+    */
     public void shuffle() {
-
+        Collections.shuffle(this.cardsList);
     }
 
-    public void isEmpty() {
-
+    /**
+    * Checks whether the deck is empty or not
+    * @return whether the deck is empty or not
+    */
+    public boolean isEmpty() {
+        return this.cardsList.isEmpty();
     }
 }

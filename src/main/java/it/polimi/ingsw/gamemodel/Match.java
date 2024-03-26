@@ -1,6 +1,7 @@
 package it.polimi.ingsw.gamemodel;
 
 import it.polimi.ingsw.utils.Pair;
+import it.polimi.ingsw.exceptions.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -9,6 +10,7 @@ public class Match {
     private final List<Player> players;
     private final int maxPlayers;
     private Player currentPlayer;
+    private int turn;
 
     private MatchState currentState;
 
@@ -55,7 +57,7 @@ public class Match {
      * @param player player to be added to the match
      * @throws IllegalArgumentException thrown if player already in the match
      */
-    public void addPlayer(Player player) throws IllegalArgumentException, WrongStateException {
+    public void addPlayer(Player player) throws Exception {
         if(!players.contains(player)) {
             currentState.addPlayer();
             players.add(player);
@@ -150,7 +152,7 @@ public class Match {
      *
      * @return
      */
-    protected Pair<Objective, Objective> proposeSecretObjectives() {
+    protected Pair<Objective, Objective> proposeSecretObjectives() throws Exception {
         Objective obj1 = objectivesDeck.pop();
         Objective obj2 = objectivesDeck.pop();
         currentProposedObjectives = new Pair<>(obj1, obj2);
@@ -183,7 +185,7 @@ public class Match {
     /**
      *
      */
-    protected void setupDecks() {
+    protected void setupDecks() throws Exception {
         // Shuffle each deck
         initialsDeck.shuffle();
         resourcesDeck.shuffle();
@@ -211,7 +213,7 @@ public class Match {
     /**
      *
      */
-    protected void setupBoards() {
+    protected void setupBoards() throws Exception {
         // Give starting cards to players
         for (Player player : players) {
             // Pop a card from the resources deck and one from the golds deck
@@ -220,15 +222,14 @@ public class Match {
             ResourceCard resourceCard2 = resourcesDeck.pop();
 
             // Add each card to the player's hand
-            player.getBoard().addHandCard(goldCard);
-            player.getBoard().addHandCard(resourceCard1);
-            player.getBoard().addHandCard(resourceCard2);
+            // player.getBoard().addHandCard(goldCard);
+            // player.getBoard().addHandCard(resourceCard1);
+            // player.getBoard().addHandCard(resourceCard2);
 
             // Place the initial card to the player's board
             // By default, the initial card is placed on front side
             Pair<Integer, Integer> initialCoords = new Pair<>(0,0);
             InitialCard initial = initialsDeck.pop();
-            player.getBoard().placeCard(initialCoords, initial, Side.FRONT);
 
         }
     }
@@ -239,24 +240,34 @@ public class Match {
      * @param card
      * @param side
      * @throws WrongStateException
-     * @throws WrongCardPlacementException
+     * @throws CardException
      */
-    protected void makeMove(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws WrongStateException, WrongCardPlacementException {
+    protected void makeMove(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws WrongStateException, CardException {
         Board currentPlayerBoard = currentPlayer.getBoard();
 
         // If placing the card in the current player's board is allowed by rules
-        if (currentPlayerBoard.verifyCardPlacement(coords, card, side)) {
+        /* if (currentPlayerBoard.verifyCardPlacement(coords, card, side)) {
 
             // Trigger current state behavior
             currentState.makeMove();
 
             // Place the card in the current player's board
             // and save the points possibly gained because of the move
-            int gainedPoints = currentPlayerBoard.placeCard(coords, card, side);
+            int gainedPoints = 0;
+            try {
+                gainedPoints = currentPlayerBoard.placeCard(coords, card, side, turn);
+            } catch(Exception e) {
+
+            }
 
             // Remove the card from the player's hand
             // since it has been placed on the board
-            currentPlayerBoard.removeHandCard(card);
+            try {
+                currentPlayerBoard.removeHandCard(card);
+            } catch (Exception e) {
+
+            }
+            
 
             // Update the current player's points
             currentPlayer.addPoints(gainedPoints);
@@ -272,8 +283,8 @@ public class Match {
             // the match is now finished
             if (currentPlayer.equals(players.getLast()) && lastTurn)
                 finished = true;
-        } else {
+        }  else {
             throw new WrongCardPlacementException("Card placement not valid!");
-        }
+        }*/
     }
 }

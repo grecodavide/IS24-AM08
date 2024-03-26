@@ -1,4 +1,5 @@
 package it.polimi.ingsw.gamemodel;
+import it.polimi.ingsw.exceptions.*;
 
 public abstract class MatchState {
     Match match;
@@ -7,9 +8,9 @@ public abstract class MatchState {
         this.match = match;
     }
 
-    public abstract void transition();
+    public abstract void transition() throws Exception;
 
-    public void addPlayer() throws WrongStateException{
+    public void addPlayer() throws Exception {
         throw new WrongStateException("addPlayer not allowed from the current match state!");
     }
 
