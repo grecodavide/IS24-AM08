@@ -10,7 +10,7 @@ import it.polimi.ingsw.exceptions.HandException;
 import it.polimi.ingsw.utils.Pair;
 
 /**
-* Board is the class that contains all the informations relative to a {@link Player}'s status
+* Board is the class that contains all the information relative to a {@link Player}'s status
 */
 public class Board {
     private List<PlayableCard> currentHand;
@@ -131,11 +131,15 @@ public class Board {
         Integer y = coord.second();
 
         for (Pair<Integer, Integer> diagOffset : diagonalOffsets.keySet()) {
-            cornerSymbol = this.getSymbolIfPresent(new Pair<>(x+diagOffset.first(), y+diagOffset.second()), diagonalOffsets.get(diagOffset));
-            if (cornerSymbol != null) {
-                if (Symbol.getBasicResources().contains(cornerSymbol)) {
-                    availableResources.put(cornerSymbol, availableResources.get(cornerSymbol) - 1);
+            try {
+                cornerSymbol = this.getSymbolIfPresent(new Pair<>(x+diagOffset.first(), y+diagOffset.second()), diagonalOffsets.get(diagOffset));
+                if (cornerSymbol != null) {
+                    if (Symbol.getBasicResources().contains(cornerSymbol)) {
+                        availableResources.put(cornerSymbol, availableResources.get(cornerSymbol) - 1);
+                    }
                 }
+            } catch (CardException e) {
+                System.err.println(e.getMessage());
             }
         }
 
@@ -157,13 +161,13 @@ public class Board {
         } else if (card instanceof ResourceCard) {
             points = ((ResourceCard)card).getPoints();
         } else {
-            throw new CardException("Unknow card type: " + card.getClass().toString() + "!");
+            throw new CardException("Unknown card type: " + card.getClass().toString() + "!");
         }
 
         return points;
     }
 
-    private Symbol getSymbolIfPresent(Pair<Integer, Integer> coord, Corner corner) {
+    private Symbol getSymbolIfPresent(Pair<Integer, Integer> coord, Corner corner) throws CardException {
         PlacedCard placedCard = placed.get(coord);
         if (placedCard == null) {
             return null;
@@ -172,7 +176,7 @@ public class Board {
     }
 
     /**
-    * Checks wheter the positioning is valid: the card has to be in the player's hand (note that this method won't be called on the initial card),
+    * Checks whether the positioning is valid: the card has to be in the player's hand (note that this method won't be called on the initial card),
     * the given coordinates must be valid, and if the card has a requirement it must be met
     * @param coord the coordinates in which the card should be played
     * @param card the card to check on
@@ -199,7 +203,7 @@ public class Board {
 
         Pair<Integer, Integer> cmp;
 
-        // cross check: none exists
+        // cross-check: none exists
         for (Integer offset : offsets) {
             cmp = new Pair<>(coord.first()+offset, coord.second());
             if (placed.keySet().contains(cmp)) {
