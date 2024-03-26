@@ -33,7 +33,7 @@ public class PositionRequirement extends Requirement{
     /**
     * The requirement will be satisfied if the board has cards of the specified faction in the correct relative positions
     * @param board the {@link Board} on which the requirement must be checked
-    * @return wheter the board actually meets the requirement or not
+    * @return whether the board actually meets the requirement or not
     */
 	@Override
 	public int timesMet(Board board) {

@@ -1,6 +1,6 @@
 package it.polimi.ingsw.gamemodel;
 
-import it.polimi.ingsw.exceptions.*;
+import it.polimi.ingsw.exceptions.WrongStateException;
 
 public class AfterMoveState extends MatchState {
 
@@ -9,8 +9,8 @@ public class AfterMoveState extends MatchState {
     }
 
     @Override
-    public void drawCard() {
-        this.transition();
+    public void drawCard() throws WrongStateException {
+
     }
 
     @Override

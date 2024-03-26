@@ -7,9 +7,15 @@ public class WaitState extends MatchState{
     }
 
     @Override
-    public void transition() throws Exception {
-        MatchState nextState = new SetupState(match);
-        match.setState(nextState);
+    public void transition() {
+        if (match.isFull()) {
+            match.setupDecks();
+            match.setupPlayers();
+            match.setupBoards();
+            
+            MatchState nextState = new NextTurnState(match);
+            match.setState(nextState);
+        }
     }
 
     @Override
@@ -18,8 +24,7 @@ public class WaitState extends MatchState{
     }
 
     @Override
-    public void addPlayer() throws Exception {
-        if (match.isFull())
-            transition();
+    public void addPlayer() {
+        //TBD
     }
 }

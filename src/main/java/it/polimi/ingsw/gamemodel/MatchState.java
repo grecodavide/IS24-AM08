@@ -1,6 +1,7 @@
 package it.polimi.ingsw.gamemodel;
-import it.polimi.ingsw.exceptions.*;
+import it.polimi.ingsw.exceptions.WrongStateException;
 
+// TODO: Choose if to remove all methods except transition
 public abstract class MatchState {
     Match match;
 
@@ -17,6 +18,14 @@ public abstract class MatchState {
     public void removePlayer() throws WrongStateException{
         throw new WrongStateException("removePlayer not allowed from the current match state!");
     }
+    
+    public void drawInitialCard() throws WrongStateException{
+        throw new WrongStateException("deawInitialCard not allowed from the current match state!");
+    }
+   
+    public void chooseInitialSide() throws WrongStateException{
+        throw new WrongStateException("chooseInitialSide not allowed from the current match state!");
+    }
 
     public void makeMove() throws WrongStateException{
         throw new WrongStateException("makeMove not allowed from the current match state!");
@@ -30,7 +39,7 @@ public abstract class MatchState {
         throw new WrongStateException("proposeSecretObjective not allowed from the current match state!");
     }
 
-    public void chooseSecretObjectives() throws WrongStateException {
+    public void chooseSecretObjective() throws WrongStateException {
         throw new WrongStateException("chooseSecretObjective not allowed from the current match state!");
     }
 }
