@@ -17,8 +17,9 @@ public enum Symbol {
     PARCHMENT,
     EMPTY_CORNER,
     FULL_CORNER,
+    NO_MULT,
     CORNER_OBJ;
-
+    
     /**
     * Generates subset containing only the four basic reigns
     * @return the subset containing only the four basic reigns
@@ -79,6 +80,7 @@ public enum Symbol {
             FEATHER,
             INKWELL,
             PARCHMENT,
+            NO_MULT,
             CORNER_OBJ
         );
     }
