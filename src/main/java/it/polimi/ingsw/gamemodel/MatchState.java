@@ -1,7 +1,6 @@
 package it.polimi.ingsw.gamemodel;
 import it.polimi.ingsw.exceptions.WrongStateException;
 
-// TODO: Choose if to remove all methods except transition
 public abstract class MatchState {
     Match match;
 
@@ -9,14 +8,16 @@ public abstract class MatchState {
         this.match = match;
     }
 
-    public abstract void transition() throws Exception;
+    public abstract void transition();
 
-    public void addPlayer() throws Exception {
+    public void addPlayer() throws WrongStateException {
         throw new WrongStateException("addPlayer not allowed from the current match state!");
     }
 
-    public void removePlayer() throws WrongStateException{
-        throw new WrongStateException("removePlayer not allowed from the current match state!");
+    // TODO: Add PlayerAbortedState
+    public void removePlayer() {
+        // throw new WrongStateException("removePlayer not allowed from the current match state!");
+        match.setState(new FinalState(match));
     }
     
     public void drawInitialCard() throws WrongStateException{
