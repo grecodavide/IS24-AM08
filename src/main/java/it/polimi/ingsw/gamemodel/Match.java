@@ -83,15 +83,16 @@ public class Match {
      * Adds a new player to the match, assuming it's not null.
      * Note: Called by the Controller when a player joins the match.
      * @param player player to be added to the match
-     * @throws IllegalArgumentException if the player is already in the match
+     * @throws IllegalArgumentException if the player is already in the match or too many players would be in the match
+     * @throws WrongStateException if called while in a state that doesn't allow adding players
      */
-    public void addPlayer(Player player) throws Exception {
+    public void addPlayer(Player player) throws IllegalArgumentException, WrongStateException {
         if(!players.contains(player)) {
             currentState.addPlayer();
             players.add(player);
             currentState.transition();
         } else {
-            throw new IllegalArgumentException("Duplicated Player in a Match");
+            throw new IllegalArgumentException("Duplicated player in a match");
         }
     }
 
@@ -100,7 +101,8 @@ public class Match {
      * Note: Called by the Controller when a player quits the match.
      * @param player player to be removed from the match
      */
-    public void removePlayer(Player player) throws WrongStateException, Exception {
+    // TODO: Add PlayerAbortedState
+    public void removePlayer(Player player) throws WrongStateException {
         currentState.removePlayer();
         players.remove(player);
         currentState.transition();
@@ -116,23 +118,26 @@ public class Match {
     }
 
     /**
-     * Modifies the current player according to the next turn:
-     * If it's the first turn, the current player gets initialized as the
-     * first one in the players List; the turn order then follows the players List order, in a circular way.
-     * Ex. 1 -> 2 -> 3 -> 1 -> etc.
+     * Modifies the current player according to the next turn: if it's the first turn, the current player is the first
+     * one in the players List, the turn order then follows the players List order, in a circular way.
+     * Ex. 1st -> 2nd -> 3rd ---> 1st -> 2nd etc.
      * Note: Called by NextTurnState every time a new turn starts.
      */
     protected void nextPlayer() {
-        // If player has never been initialized OR the current player is the last one
-        if (currentPlayer == null || currentPlayer.equals(players.getLast())) {
-            // Set currentPlayer as the first one
-            currentPlayer = players.getFirst();
+        if(!players.isEmpty()) {
+            // If player has never been initialized OR the current player is the last one
+            if (currentPlayer == null || currentPlayer.equals(players.getLast())) {
+                // Set currentPlayer as the first one
+                currentPlayer = players.getFirst();
 
-            turn++;
+                turn++;
+            } else {
+                // Get the index of the current player and choose the next one
+                int currentPlayerIndex = players.indexOf(currentPlayer);
+                currentPlayer = players.get(currentPlayerIndex + 1);
+            }
         } else {
-            // Get the index of the current player and choose the next one
-            int currentPlayerIndex = players.indexOf(currentPlayer);
-            currentPlayer = players.get(currentPlayerIndex + 1);
+            throw new RuntimeException("No players in the match, the next player cannot be set");
         }
     }
 
@@ -205,10 +210,23 @@ public class Match {
         this.currentState = state;
     }
 
-    protected InitialCard drawInitialCard() throws Exception, WrongStateException {
+    /**
+     *
+     * @return
+     * @throws WrongStateException
+     * @throws DeckException
+     */
+    protected InitialCard drawInitialCard() throws WrongStateException {
         currentState.drawInitialCard();
-        currentGivenInitialCard = initialsDeck.pop();
+
+        try {
+            currentGivenInitialCard = initialsDeck.pop();
+        } catch (DeckException e) {
+            throw new RuntimeException(e);
+        }
+
         currentState.transition();
+
         return currentGivenInitialCard;
     }
 
@@ -222,8 +240,11 @@ public class Match {
         try {
             Objective obj1 = objectivesDeck.pop();
             Objective obj2 = objectivesDeck.pop();
+
             currentProposedObjectives = new Pair<>(obj1, obj2);
+
             currentState.transition();
+
             return currentProposedObjectives;
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -238,6 +259,7 @@ public class Match {
      */
     protected void setSecretObjective(Objective objective) throws WrongChoiceException, WrongStateException, Exception {
         currentState.chooseSecretObjective();
+
         // Get proposed objectives
         Objective firstProposedObjective = currentProposedObjectives.first();
         Objective secondProposedObjective = currentProposedObjectives.second();
@@ -250,6 +272,7 @@ public class Match {
         else
             // If the objective is not one of the proposed ones, throw an exception
             throw new WrongChoiceException("The chosen objective is not one of the proposed ones");
+
         currentState.transition();
     }
 
@@ -336,7 +359,8 @@ public class Match {
      * @param side side of the card to be placed
      * @throws WrongStateException if called while in a state that doesn't allow making moves
      */
-    protected void makeMove(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws WrongStateException, WrongChoiceException, CardException, Exception {
+    protected void makeMove(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws WrongStateException, WrongChoiceException, CardException {
+        currentState.makeMove();
         Board currentPlayerBoard = currentPlayer.getBoard();
 
         // If placing the card in the current player's board is allowed by rules
@@ -352,7 +376,11 @@ public class Match {
 
                 // Remove the card from the player's hand
                 // since it has been placed on the board
-                currentPlayerBoard.removeHandCard(card);
+                try {
+                    currentPlayerBoard.removeHandCard(card);
+                } catch (HandException e) {
+                    throw new RuntimeException(e);
+                }
 
                 // Update the current player's points
                 currentPlayer.addPoints(gainedPoints);
@@ -368,6 +396,7 @@ public class Match {
                 // the match is now finished
                 if (currentPlayer.equals(players.getLast()) && lastTurn)
                     finished = true;
+
                 currentState.transition();
                 break;
             case INVALID_COORDS:
@@ -375,6 +404,7 @@ public class Match {
             case INVALID_ENOUGH_RESOURCES:
                 throw new WrongChoiceException("Not enough resources!");
         }
+        currentState.transition();
     }
 
     /**
@@ -386,7 +416,7 @@ public class Match {
      * @throws WrongChoiceException if the source does not have cards
      * @return the card drawn
      */
-    protected PlayableCard drawCard(DrawSource source) throws WrongStateException, WrongChoiceException, Exception {
+    protected PlayableCard drawCard(DrawSource source) throws WrongStateException, WrongChoiceException {
         currentState.drawCard();
 
         PlayableCard card;
@@ -459,10 +489,17 @@ public class Match {
      * @param side the side to put the initial card on
      * @throws WrongStateException if called while in a state that doesn't allow choosing the initial card side
      */
-    protected void setInitialSide(Side side) throws WrongStateException, CardException, Exception {
+    protected void setInitialSide(Side side) throws WrongStateException {
         currentState.chooseInitialSide();
-        currentPlayer.getBoard().setInitialCard(currentGivenInitialCard, side);
+
+        try {
+            currentPlayer.getBoard().setInitialCard(currentGivenInitialCard, side);
+        } catch (CardException e) {
+            throw new RuntimeException(e);
+        }
+
         currentGivenInitialCard = null;
+
         currentState.transition();
     }
     
