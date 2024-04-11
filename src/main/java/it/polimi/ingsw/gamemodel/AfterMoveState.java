@@ -17,5 +17,7 @@ public class AfterMoveState extends MatchState {
     public void transition() {
         MatchState nextState = new AfterDrawState(match);
         match.setState(nextState);
+
+        nextState.transition();
     }
 }

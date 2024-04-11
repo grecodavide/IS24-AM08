@@ -1,4 +1,7 @@
 package it.polimi.ingsw.exceptions;
 
-public class PlayerQuitException {
+public class PlayerQuitException extends Exception{
+    public PlayerQuitException(String message) {
+        super(message);
+    }
 }

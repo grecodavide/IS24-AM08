@@ -2,7 +2,9 @@ package it.polimi.ingsw.gamemodel;
 
 import it.polimi.ingsw.utils.Pair;
 
+import java.sql.Array;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import it.polimi.ingsw.exceptions.*;
 
@@ -16,8 +18,6 @@ import it.polimi.ingsw.exceptions.*;
  * an event occurred, such as nextPlayer(...).
  */
 public class Match {
-    // TODO: Fix exception throwing/handling
-
     private final List<Player> players;
     private final int maxPlayers;
     private Player currentPlayer;
@@ -46,6 +46,11 @@ public class Match {
     // Current match turn as an integer (incremental)
     private int turn;
 
+    // Players ranking of the match at the end of it.
+    // The List order represents the ranking order, the Boolean represent if the related player is a winner.
+    // This is needed since the match can end in a tie, in such case the first two/three players of the List will have a
+    // True flag.
+    private List<Pair<Player, Boolean>> playersFinalRanking;
 
     /**
      * Initializes main Match attributes and allocate the attribute players List, assuming no parameter is null.
@@ -64,9 +69,9 @@ public class Match {
         this.objectivesDeck = objectivesDeck;
         this.currentState = new WaitState(this);
 
-        if (goldsDeck.getSize() < 6)
+        if (goldsDeck.getSize() < maxPlayers + 2)
             throw new IllegalArgumentException("goldsDeck does not have enough cards");
-        else if (resourcesDeck.getSize() < 10)
+        else if (resourcesDeck.getSize() < maxPlayers*2 + 2)
             throw new IllegalArgumentException("resourcesDeck does not have enough cards");
         else if (initialsDeck.getSize() < maxPlayers)
             throw new IllegalArgumentException("initialDeck does not have enough cards");
@@ -101,8 +106,8 @@ public class Match {
      * Note: Called by the Controller when a player quits the match.
      * @param player player to be removed from the match
      */
-    // TODO: Add PlayerAbortedState
-    public void removePlayer(Player player) throws WrongStateException {
+    // TODO: Change Javadoc
+    public void removePlayer(Player player) throws PlayerQuitException {
         currentState.removePlayer();
         players.remove(player);
         currentState.transition();
@@ -211,10 +216,9 @@ public class Match {
     }
 
     /**
-     *
-     * @return
-     * @throws WrongStateException
-     * @throws DeckException
+     * Draws a card from the initial cards deck
+     * @return the card drawn from the initial cards deck
+     * @throws WrongStateException if called while in a state that doesn't allow drawing an initial card
      */
     protected InitialCard drawInitialCard() throws WrongStateException {
         currentState.drawInitialCard();
@@ -300,6 +304,7 @@ public class Match {
         resourcesDeck.shuffle();
         goldsDeck.shuffle();
         objectivesDeck.shuffle();
+
         try {
             // Pop two resources to be placed on the common table
             ResourceCard resourceCard1 = resourcesDeck.pop();
@@ -320,7 +325,7 @@ public class Match {
             visiblePlayableCards.put(DrawSource.FOURTH_VISIBLE, goldCard2);
 
             visibleObjectives = new Pair<>(objective1, objective2);
-        } catch (Exception e) {
+        } catch (DeckException e) {
             throw new RuntimeException(e);
         }
     }
@@ -351,28 +356,39 @@ public class Match {
 
     /**
      * Makes the chosen move on the board of the current player (known because of the internal Match state);
-     * in particular checks if the placement is valid, then places the card on the player's board and add points
+     * in particular, checks if the placement is valid, then places the card on the player's board and add points
      * to the player.
      * Note: Called by the current player.
      * @param coords coordinates in which to place the card
      * @param card card to place
      * @param side side of the card to be placed
      * @throws WrongStateException if called while in a state that doesn't allow making moves
+     * @throws WrongChoiceException if the move is not allowed (placement not allowed, or not enough resources, or card
+     * not in player's hand)
      */
-    protected void makeMove(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws WrongStateException, WrongChoiceException, CardException {
+    protected void makeMove(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws WrongStateException, WrongChoiceException {
         currentState.makeMove();
+
         Board currentPlayerBoard = currentPlayer.getBoard();
 
+        PlacementOutcome outcome;
+        try {
+            outcome = currentPlayerBoard.verifyCardPlacement(coords, card, side);
+        } catch (CardException e) {
+            throw new WrongChoiceException(e.getMessage());
+        }
+
         // If placing the card in the current player's board is allowed by rules
-        PlacementOutcome outcome = currentPlayerBoard.verifyCardPlacement(coords, card, side);
         switch (outcome) {
             case VALID:
-                 // Trigger current state behavior
-                currentState.makeMove();
-
                 // Place the card in the current player's board
                 // and save the points possibly gained because of the move
-                int gainedPoints = currentPlayerBoard.placeCard(coords, card, side, turn);
+                int gainedPoints;
+                try {
+                    gainedPoints = currentPlayerBoard.placeCard(coords, card, side, turn);
+                } catch (CardException e) {
+                    throw new RuntimeException(e);
+                }
 
                 // Remove the card from the player's hand
                 // since it has been placed on the board
@@ -390,13 +406,6 @@ public class Match {
                 if (currentPlayer.getPoints() >= 20)
                     lastTurn = true;
 
-                // If the current player is the last one in the match turns rotation
-                // i.e. the last one in the players List
-                // AND the current turn is the last one
-                // the match is now finished
-                if (currentPlayer.equals(players.getLast()) && lastTurn)
-                    finished = true;
-
                 currentState.transition();
                 break;
             case INVALID_COORDS:
@@ -404,43 +413,49 @@ public class Match {
             case INVALID_ENOUGH_RESOURCES:
                 throw new WrongChoiceException("Not enough resources!");
         }
-        currentState.transition();
     }
 
     /**
-     * Draws a card from the requested source; if a visible card is chosen, this one gets substituted by a new one
-     * drawn by a deck.
+     * Draws a card from the passed source. If the caller wants to draw one of the four visible cards, a rule is applied:
+     * the first and second visible cards (FIRST/SECOND_VISIBLE) will be substituted by a gold card if possible, if not,
+     * by a resource card, if not again, they will be null (then not substituted); the first and second visible cards
+     * (THIRD/FOURTH_VISIBLE) will be substituted by a resource card if possible, if not, by a gold card, if not again,
+     * they will be null (then not substituted).
      * Note: Called by the current player.
-     * @param source represents the source of the draw
+     * @param source  the source to draw a card from
      * @throws WrongStateException if called while in a state that doesn't allow making moves
      * @throws WrongChoiceException if the source does not have cards
      * @return the card drawn
      */
     protected PlayableCard drawCard(DrawSource source) throws WrongStateException, WrongChoiceException {
+        PlayableCard card;
+
         currentState.drawCard();
 
-        PlayableCard card;
         switch (source) {
             case GOLDS_DECK -> {
-                if (goldsDeck.isEmpty())
-                    throw new WrongChoiceException("Golds deck is empty!");
-
-                card = goldsDeck.poll();
+                try {
+                    card = goldsDeck.pop();
+                } catch (DeckException e) {
+                    throw new WrongChoiceException("The gold cards deck is empty!");
+                }
             }
+
             case RESOURCES_DECK -> {
-                if (resourcesDeck.isEmpty())
-                    throw new WrongChoiceException("Resources deck is empty!");
-
-                card = resourcesDeck.poll();
+                try {
+                    card = resourcesDeck.pop();
+                } catch (DeckException e) {
+                    throw new WrongChoiceException("The resource cards deck is empty!");
+                }
             }
+
             case FIRST_VISIBLE, SECOND_VISIBLE -> {
-                // Get the chosen card
                 card = visiblePlayableCards.get(source);
 
                 // If not present (e.g. on the last turn both decks are empty, so remaining turns will be played
                 // drawing the four visible cards, but they won't be substituted by others) throw an exception
                 if (card == null)
-                    throw new WrongChoiceException("There is no visible gold in position one!");
+                    throw new WrongChoiceException("There is no visible card in the chosen position!");
 
                 // If the golds deck is NOT empty, substitute the first/second visible
                 // card with a new gold
@@ -453,18 +468,18 @@ public class Match {
                 // If the resources deck is empty too, the GameDeck.poll() method returns null,
                 // then the corresponding visible card will be null
             }
+
             case THIRD_VISIBLE, FOURTH_VISIBLE -> {
-                // Get the chosen card
                 card = visiblePlayableCards.get(source);
 
                 // If not present (e.g. on the last turn both decks are empty, so remaining turns will be played
                 // drawing the four visible cards, but they won't be substituted by others) throw an exception
                 if (card == null)
-                    throw new WrongChoiceException("There is no visible gold in position one!");
+                    throw new WrongChoiceException("There is no visible card in the chosen position!");
 
                 // If the resources deck is NOT empty, substitute the third/fourth visible
                 // card with a new resource
-                if(!goldsDeck.isEmpty())
+                if(!resourcesDeck.isEmpty())
                     visiblePlayableCards.put(source, resourcesDeck.poll());
                 // If the resources deck is empty, substitute the third/fourth visible
                 // card with a gold
@@ -473,19 +488,28 @@ public class Match {
                 // If the golds deck is empty too, the GameDeck.poll() method returns null,
                 // then the corresponding visible card will be null
             }
+
             default -> {
-                throw new WrongChoiceException("Unexpected value: " + source);
+                throw new RuntimeException("Unexpected value of source");
             }
+
         }
 
         if (goldsDeck.isEmpty() && resourcesDeck.isEmpty())
             lastTurn = true;
+
+        // If the current player is the last one in the match turns rotation, i.e. the last one in the players List
+        // AND the current turn is the last one the match is now finished
+        if (currentPlayer.equals(players.getLast()) && lastTurn)
+            finished = true;
+
         currentState.transition();
+
         return card;
     }
 
     /**
-     * Sets the current player's initial card side
+     * Sets the current player's initial card side.
      * @param side the side to put the initial card on
      * @throws WrongStateException if called while in a state that doesn't allow choosing the initial card side
      */
@@ -502,15 +526,100 @@ public class Match {
 
         currentState.transition();
     }
-    
-    /** 
-     * Returns the visible objectives
-     * 
-     * @return a pair containing two objectives that are visible
-     *
+
+    // Returns a Map that links each player to the number of DIFFERENT objectives achieved
+    private Map<Player, Integer> checkObjectivesAchievement() {
+        // Map that links each player to the number of DIFFERENT objectives achieved
+        Map<Player, Integer> playersAchievedObjectives = new HashMap<>();
+
+        Objective firstObjective = visibleObjectives.first();
+        Objective secondObjective = visibleObjectives.second();
+
+        for (Player p : players) {
+            Board board = p.getBoard();
+            Objective secretObjective = p.getSecretObjective();
+            int numAchievedObjectives = 0;
+
+            // Add to the player the points of the specific objective MULTIPLIED BY how many times they met the
+            // objective requirement
+            p.addPoints(secretObjective.getPoints() * secretObjective.getReq().timesMet(board));
+            p.addPoints(firstObjective.getPoints() * firstObjective.getReq().timesMet(board));
+            p.addPoints(secondObjective.getPoints() * secondObjective.getReq().timesMet(board));
+
+            // Count the number of achieved ojectives by the player
+            if (secretObjective.getReq().timesMet(board) >= 1)
+                numAchievedObjectives++;
+            if (firstObjective.getReq().timesMet(board) >= 1)
+                numAchievedObjectives++;
+            if (secondObjective.getReq().timesMet(board) >= 1)
+                numAchievedObjectives++;
+
+            playersAchievedObjectives.put(p, numAchievedObjectives);
+        }
+
+        return playersAchievedObjectives;
+    }
+
+    /**
+     * Calculates the winner (or winners)
+     */
+    protected void decideWinner() {
+        Map<Player, Integer> achievedObjectives = checkObjectivesAchievement();
+
+        List<Player> sortedPlayers = players.stream()
+                .sorted(
+                        // Create a comparator that firstly sorts for player points
+                        // and in case of same points, for the number of achieved objectives
+                        Comparator.comparingInt(Player::getPoints)
+                                .thenComparing(achievedObjectives::get)
+                                .reversed()
+                )
+                .toList();
+
+        Player bestPlayer = sortedPlayers.get(0);
+        int bestAchievedObjectives = achievedObjectives.get(bestPlayer);
+        int bestPoints = bestPlayer.getPoints();
+        boolean winner;
+
+        for (Player p : sortedPlayers) {
+            winner = false;
+
+            // If the current player has as many points and as many achieved objectives as the winner, then they're
+            // winner too
+            if (p.getPoints() == bestPoints && achievedObjectives.get(p) == bestAchievedObjectives)
+                winner = true;
+
+            playersFinalRanking.add(new Pair<>(p, winner));
+        }
+    }
+
+    /**
+     * Getter for the final ranking of players. Return a valid result if and only if called when the match is in the
+     * FinalState, so it's finished.
+     * @return Players ranking of the match at the end of it; the List order represents the ranking order, the Boolean
+     * represent if the related player is a winner; this is needed since the match can end in a tie, in such case the
+     * first two/three players of the List will have a True flag
+     */
+    public List<Pair<Player, Boolean>> getPlayersFinalRanking() {
+        return playersFinalRanking;
+    }
+
+    /**
+     * Returns the visible objectives.
+     * @return a Pair containing the two visible objectives
     */
     public Pair<Objective, Objective> getVisibleObjectives() {
         return visibleObjectives;
+    }
+
+    /**
+     * Getter for the four visible playable cards (i.e. resource cards and gold cards, not objectives) on the common
+     * table.
+     * @return a Map that links each visible playable card to a DrawSource (restricted to FIRST_VISIBLE, SECOND_VISIBLE,
+     * THIRD_VISIBLE, FOURTH_VISIBLE)
+     */
+    public Map<DrawSource, PlayableCard> getVisiblePlayableCards() {
+        return visiblePlayableCards;
     }
 
     /**
