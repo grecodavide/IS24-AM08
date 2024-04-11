@@ -90,7 +90,7 @@ public class MatchTest {
         // Verify that Match throws an exception when a plyer is added while the match
         // is in a state which is not valid (i.e. not equal to WaitState)
         try {
-            match.setState(new FinalState(match));
+            match.setState(new AfterMoveState(match));
             match.addPlayer(player1);
             // An exception is supposed to be thrown here
             fail("Exception about wrong state not thrown ");
@@ -202,13 +202,17 @@ public class MatchTest {
         assertTrue("Match not in correct state", match.getCurrentState() instanceof NextTurnState);
 
         // Match is not in NextTurnState
-        // Tests while Match is NOT in WaitState: removePlayer cannot be called
+        // Tests while Match is NOT in WaitState: removePlayer stops the match
         try {
             // Verify that Match throws an exception when the method is called while being in the wrong state
             match.removePlayer(player1);
             // An exception is supposed to be thrown here
             fail("match.removePlayer called in wrong state and an exception hasn't been thrown");
-        } catch (PlayerQuitException e) {}
+        } catch (PlayerQuitException e) {
+
+        } catch (Exception e) {
+            fail("Wrong exception: " + e.getMessage());
+        }
 
         // Verify that Match, after a player quit in the wrong state, is in FinalState
         assertTrue("Match is not in FinalState even if a player quit in the wrong state", match.getCurrentState() instanceof FinalState);
@@ -233,7 +237,7 @@ public class MatchTest {
         assertTrue("State not changed after drawInitialCard", match.getCurrentState() instanceof ChooseInitialSideState);
 
         // Verify that Match throws an exception when the method is called while being in the wrong state
-        match.setState(new FinalState(match));
+        match.setState(new AfterMoveState(match));
 
         try {
             match.drawInitialCard();
@@ -538,13 +542,14 @@ public class MatchTest {
         Objective objective = null;
         HashMap<Symbol, Integer> resources = new HashMap<>();
         resources.put(Symbol.ANIMAL, 90);
+        Requirement req;
         try {
-            Requirement req = new QuantityRequirement(resources);
+            req = new QuantityRequirement(resources);
         } catch (Exception e) {
             throw new RuntimeException();
         }
         for (int i = 0; i < size; i++) {
-            objective = new Objective(2, null);
+            objective = new Objective(2, req);
             objectivesDeck.add(objective);
         }
         return objectivesDeck;

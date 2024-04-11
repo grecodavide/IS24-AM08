@@ -542,12 +542,13 @@ public class Match {
 
             // Add to the player the points of the specific objective MULTIPLIED BY how many times they met the
             // objective requirement
-            p.addPoints(secretObjective.getPoints() * secretObjective.getReq().timesMet(board));
+            if (secretObjective != null)
+                p.addPoints(secretObjective.getPoints() * secretObjective.getReq().timesMet(board));
             p.addPoints(firstObjective.getPoints() * firstObjective.getReq().timesMet(board));
             p.addPoints(secondObjective.getPoints() * secondObjective.getReq().timesMet(board));
 
             // Count the number of achieved ojectives by the player
-            if (secretObjective.getReq().timesMet(board) >= 1)
+            if (secretObjective != null && secretObjective.getReq().timesMet(board) >= 1)
                 numAchievedObjectives++;
             if (firstObjective.getReq().timesMet(board) >= 1)
                 numAchievedObjectives++;
@@ -564,6 +565,7 @@ public class Match {
      * Calculates the winner (or winners)
      */
     protected void decideWinner() {
+        playersFinalRanking = new ArrayList<>();
         Map<Player, Integer> achievedObjectives = checkObjectivesAchievement();
 
         List<Player> sortedPlayers = players.stream()
