@@ -1,11 +1,7 @@
 package it.polimi.ingsw.gamemodel;
 
 import java.security.spec.ECField;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.management.RuntimeErrorException;
 
@@ -522,8 +518,188 @@ public class MatchTest {
         assertTrue(match.isFinished());
     }
 
+    @Test
+    public void decideWinners() {
+        // Note: match and because of deck end has already been tested
+        // in drawCard testing
+        // Create a match where both players win
+        initializeBlankStartedMatch(2, 2, 10, 9, 7);
+        // The objectives used as a test give
+        // two points for every two fungus
+        Integer i = 1;
+        // For every move, a fungus is placed, the index is the number of fungus a player has
+        while (!match.isFinished()) {
+            try {
+                match.getCurrentPlayer().playCard(new Pair<>(i, i), match.getCurrentPlayer().getBoard().getCurrentHand().get(1), Side.BACK);
+                match.getCurrentPlayer().drawCard(decideDrawSource());
+                match.getCurrentPlayer().playCard(new Pair<>(i, i), match.getCurrentPlayer().getBoard().getCurrentHand().get(1), Side.BACK);
+                match.getCurrentPlayer().drawCard(decideDrawSource());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            i++;
+        }
+        int pair_i = i%2==0 ? i :  i-1;
+        // Since there are three objectives,
+        // the expected number of points from each player is
+        // pair_i * 3
+        for (Player p : match.getPlayers()) {
+            assertEquals(i, p.getBoard().getAvailableResources().get(Symbol.FUNGUS));
+            assertEquals("Wrong points given to players",pair_i * 3, p.getPoints());
+        }
+        // Check if the ranking is right
+        List<Pair<Player, Boolean>> ranking = match.getPlayersFinalRanking();
+        assertTrue("Player is not marked as winner", ranking.get(0).second());
+        assertTrue("Player is not marked as winner", ranking.get(1).second());
+        // Create a match where only one player wins
+        initializeBlankMatch(2, 2, 6, 9, 7);
+        try {
+            // Finish initials card turn
+            match.getCurrentPlayer().drawInitialCard();
+            match.getCurrentPlayer().chooseInitialCardSide(Side.FRONT);
+            match.getCurrentPlayer().drawInitialCard();
+            match.getCurrentPlayer().chooseInitialCardSide(Side.FRONT);
 
+            // Change objectives deck
+            Objective[] normalObjectives = {objectivesDeck.poll(), objectivesDeck.poll()};
+            while (!objectivesDeck.isEmpty()) objectivesDeck.poll();
+            HashMap<Symbol, Integer> impossibleRequirement = new HashMap<>();
+            impossibleRequirement.put(Symbol.ANIMAL, 900000);
+            Objective impossible = new Objective(0, new QuantityRequirement(impossibleRequirement));
+            objectivesDeck.add(impossible);
+            objectivesDeck.add(normalObjectives[0]);
+            objectivesDeck.add(normalObjectives[1]);
+
+            // Let players "choose" their objectives
+            match.getCurrentPlayer().drawSecretObjectives();
+            match.getCurrentPlayer().chooseSecretObjective(impossible);
+            match.getCurrentPlayer().drawSecretObjectives();
+            match.getCurrentPlayer().chooseSecretObjective(normalObjectives[1]);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        i = 1;
+        // For every move, a fungus is placed, the index is the number of fungus a player has
+        while (!match.isFinished()) {
+            try {
+                match.getCurrentPlayer().playCard(new Pair<>(i, i), match.getCurrentPlayer().getBoard().getCurrentHand().get(1), Side.BACK);
+                match.getCurrentPlayer().drawCard(decideDrawSource());
+                match.getCurrentPlayer().playCard(new Pair<>(i, i), match.getCurrentPlayer().getBoard().getCurrentHand().get(1), Side.BACK);
+                match.getCurrentPlayer().drawCard(decideDrawSource());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            i++;
+        }
+        player1 = match.getPlayers().get(0);
+        player2 = match.getPlayers().get(1);
+        assertEquals("Wrong points given to players",pair_i * 3, player2.getPoints());
+        // player 1 has only two objectives
+        assertEquals("Wrong points given to players",pair_i * 2, player1.getPoints());
+        // Check if the ranking is right
+        ranking = match.getPlayersFinalRanking();
+        // Player 2 wins, player 1 lost
+        assertEquals(player2, ranking.get(0).first());
+        assertEquals(player1, ranking.get(1).first());
+        assertTrue("Player is not marked as winner", ranking.get(0).second());
+        assertFalse("Player is marked as winner", ranking.get(1).second());
+
+        // This variable is useful for next test
+        int pointDifference = player2.getPoints() - player1.getPoints();
+        // Test that the winner is choosen correctly when
+        // they have the same amount of points but different amount of objectives
+
+
+        // Same as before...
+        initializeBlankMatch(2, 2, 6, 9, 7);
+        player1 = match.getPlayers().get(0);
+        player2 = match.getPlayers().get(1);
+        try {
+            // Finish initials card turn
+            match.getCurrentPlayer().drawInitialCard();
+            match.getCurrentPlayer().chooseInitialCardSide(Side.FRONT);
+            match.getCurrentPlayer().drawInitialCard();
+            match.getCurrentPlayer().chooseInitialCardSide(Side.FRONT);
+
+            // Change objectives deck
+            Objective[] normalObjectives = {objectivesDeck.poll(), objectivesDeck.poll()};
+            while (!objectivesDeck.isEmpty()) objectivesDeck.poll();
+            HashMap<Symbol, Integer> impossibleRequirement = new HashMap<>();
+            impossibleRequirement.put(Symbol.ANIMAL, 900000);
+            Objective impossible = new Objective(0, new QuantityRequirement(impossibleRequirement));
+            objectivesDeck.add(impossible);
+            objectivesDeck.add(normalObjectives[0]);
+            objectivesDeck.add(normalObjectives[1]);
+
+            // Let players "choose" their objectives
+            match.getCurrentPlayer().drawSecretObjectives();
+            match.getCurrentPlayer().chooseSecretObjective(impossible);
+            match.getCurrentPlayer().drawSecretObjectives();
+            match.getCurrentPlayer().chooseSecretObjective(normalObjectives[1]);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        i = 1;
+        // For every move, a fungus is placed, the index is the number of fungus a player has
+        // Let's add a cheat gold card to player1 hand
+        GoldCard cheatCard = null;
+        HashMap<Symbol, Integer> noreq = new HashMap<>();
+        noreq.put(Symbol.FUNGUS, 1);
+        try {
+            player1.getBoard().removeHandCard(player1.getBoard().getCurrentHand().get(1));
+            cheatCard = new GoldCard(
+                    new CardFace(Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.FULL_CORNER, Collections.emptySet()),
+                    Symbol.FUNGUS,
+                    Symbol.NO_MULT,
+                    pointDifference,
+                    new QuantityRequirement(noreq)
+            );
+            player1.getBoard().addHandCard(cheatCard);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        // Simulate the match
+        while (!match.isFinished()) {
+            try {
+                match.getCurrentPlayer().playCard(new Pair<>(i, i), match.getCurrentPlayer().getBoard().getCurrentHand().get(1), Side.BACK);
+                match.getCurrentPlayer().drawCard(decideDrawSource());
+                match.getCurrentPlayer().playCard(new Pair<>(i, i), match.getCurrentPlayer().getBoard().getCurrentHand().get(1), Side.BACK);
+                match.getCurrentPlayer().drawCard(decideDrawSource());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            i++;
+        }
+        // Check that the players have the same amount of points
+        assertEquals(player1.getPoints(), player2.getPoints());
+        // Check if the ranking is right
+        ranking = match.getPlayersFinalRanking();
+        // Player 2 wins, player 1 lost
+        assertEquals(player2, ranking.get(0).first());
+        assertEquals(player1, ranking.get(1).first());
+        assertTrue("Player is not marked as winner", ranking.get(0).second());
+        assertFalse("Player is marked as winner", ranking.get(1).second());
+    } 
     // Private helper Methods
+    private DrawSource decideDrawSource() {
+        Map<DrawSource, PlayableCard> visible = match.getVisiblePlayableCards();
+        if (!resourcesDeck.isEmpty()) {
+            return DrawSource.RESOURCES_DECK;
+        } else if (!goldsDeck.isEmpty()) {
+            return DrawSource.GOLDS_DECK;
+        } else {
+            DrawSource[] values = DrawSource.values();
+            for (int i=2; i < 6; i++) {
+                if (visible.get(values[i]) != null) {
+                    return values[i];
+                }
+            }
+        }
+        return null;
+    }
+
     private void initializeAllEqualDecks() {
         // Initialize Initial Cards deck
         initializeAllEqualDecks(4, 10, 40, 40);
@@ -541,7 +717,7 @@ public class MatchTest {
         GameDeck<Objective> objectivesDeck = new GameDeck<>();
         Objective objective = null;
         HashMap<Symbol, Integer> resources = new HashMap<>();
-        resources.put(Symbol.ANIMAL, 90);
+        resources.put(Symbol.FUNGUS, 2);
         Requirement req;
         try {
             req = new QuantityRequirement(resources);
