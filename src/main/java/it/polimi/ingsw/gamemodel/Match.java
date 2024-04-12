@@ -632,6 +632,25 @@ public class Match {
         return currentState;
     }
 
+    /**
+     * Getter of the visible cards back on the top of the decks
+     * @return Pair of two CardFace, the first one is the CardFace at the
+     * top of golds deck, the second one is the CardFace at the top of resources deck
+     */
+    public Pair<CardFace, CardFace> getVisibleCardsBack() {
+        Card goldCard = goldsDeck.peek();
+        Card resourceCard = resourcesDeck.peek();
+        CardFace gold = null;
+        CardFace resource = null;
+
+        if (goldCard != null)
+            gold = goldCard.getSide(Side.BACK);
+        if (resourceCard != null)
+            resource = resourceCard.getSide(Side.BACK);
+
+        return new Pair<>(gold, resource);
+    }
+
     public int getMaxPlayers() {
         return maxPlayers;
     }
