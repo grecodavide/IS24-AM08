@@ -24,7 +24,7 @@ public class GameDeck<T> {
     * @param card the card to add
     */
     public void add(T card) {
-        this.cardsList.add(card);
+        this.cardsList.addFirst(card);
     }
 
     /**
@@ -44,6 +44,16 @@ public class GameDeck<T> {
         if (this.isEmpty())
             throw new DeckException("Tried to draw from an empty deck!");
         return cardsList.removeLast();
+    }
+
+    /**
+     * Retruns a card from the deck's top without removing it (returns null if empty)
+     * @return the card
+     */
+    public T peek() {
+        if (this.isEmpty())
+            return null;
+        return cardsList.getLast();
     }
 
     /**
