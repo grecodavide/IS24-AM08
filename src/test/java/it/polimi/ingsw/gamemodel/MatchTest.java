@@ -1,6 +1,5 @@
 package it.polimi.ingsw.gamemodel;
 
-import java.security.spec.ECField;
 import java.util.*;
 
 import javax.management.RuntimeErrorException;
@@ -681,7 +680,8 @@ public class MatchTest {
         assertEquals(player1, ranking.get(1).first());
         assertTrue("Player is not marked as winner", ranking.get(0).second());
         assertFalse("Player is marked as winner", ranking.get(1).second());
-    } 
+    }
+
     // Private helper Methods
     private DrawSource decideDrawSource() {
         Map<DrawSource, PlayableCard> visible = match.getVisiblePlayableCards();
@@ -712,7 +712,7 @@ public class MatchTest {
         resourcesDeck = createDeterministicResourcesDeck(resourcesNum);
     }
 
-    private static GameDeck<Objective> createDeterministicObjectivesDeck(int size) {
+    protected static GameDeck<Objective> createDeterministicObjectivesDeck(int size) {
         // Initialize Objective deck
         GameDeck<Objective> objectivesDeck = new GameDeck<>();
         Objective objective = null;
@@ -731,7 +731,7 @@ public class MatchTest {
         return objectivesDeck;
     }
 
-    private static GameDeck<InitialCard> createDeterministicInitialsDeck(int size) {
+    protected static GameDeck<InitialCard> createDeterministicInitialsDeck(int size) {
         // Initialize Initial Cards deck
         GameDeck<InitialCard> initialsDeck = new GameDeck<InitialCard>();
         InitialCard card = null;
@@ -745,7 +745,7 @@ public class MatchTest {
         return initialsDeck;
     }
 
-    private static GameDeck<ResourceCard> createDeterministicResourcesDeck(int size) {
+    protected static GameDeck<ResourceCard> createDeterministicResourcesDeck(int size) {
         GameDeck<ResourceCard> resourcesDeck = new GameDeck<>();
         ResourceCard card = null;
         for (int i = 0; i < size; i++) {
@@ -762,7 +762,7 @@ public class MatchTest {
         return resourcesDeck;
     }
 
-    private static GameDeck<GoldCard> createDeterministicGoldsDeck(int size) {
+    protected static GameDeck<GoldCard> createDeterministicGoldsDeck(int size) {
         GameDeck<GoldCard> goldsDeck = new GameDeck<>();
         GoldCard card = null;
         HashMap<Symbol, Integer> resources = new HashMap<>();
@@ -812,7 +812,7 @@ public class MatchTest {
         return initialsDeck;
     }
 
-    private ResourceCard generateRandomResourceCard() {
+    protected static ResourceCard generateRandomResourceCard() {
         EnumSet<Symbol> reigns = Symbol.getReigns();
         EnumSet<Symbol> corners = Symbol.getValidCorner();
         try {
@@ -826,7 +826,7 @@ public class MatchTest {
         }
     }
 
-    private GoldCard generateRandomGoldCard() {
+    protected static GoldCard generateRandomGoldCard() {
         EnumSet<Symbol> reigns = Symbol.getReigns();
         EnumSet<Symbol> corners = Symbol.getValidCorner();
         EnumSet<Symbol> multipliers = Symbol.getValidMultiplier();
@@ -845,7 +845,7 @@ public class MatchTest {
         }
     }
 
-    private InitialCard generateRandomInitialCard() {
+    protected static InitialCard generateRandomInitialCard() {
         EnumSet<Symbol> reigns = Symbol.getReigns();
         // Generate a random number between 0 and 3
         int index = (int) (Math.random() * 3);
@@ -857,7 +857,7 @@ public class MatchTest {
                         Set.of(randomSymbol(reigns))));
     }
 
-    private Objective generateRandomObjective() {
+    protected static Objective generateRandomObjective() {
         EnumSet<Symbol> resources = Symbol.getBasicResources();
         try {
             return new Objective((int) (Math.random() * 2),
@@ -867,7 +867,7 @@ public class MatchTest {
         }
     }
 
-    private Symbol randomSymbol(EnumSet<Symbol> validSymbols) {
+    private static Symbol randomSymbol(EnumSet<Symbol> validSymbols) {
         int size = validSymbols.size();
         // Generate a random number between 0 and 3
         int index = (int) (Math.random() * size);
@@ -900,7 +900,7 @@ public class MatchTest {
         }
     }
 
-    protected void initializeBlankMatch(int maxPlayers) {
+    private void initializeBlankMatch(int maxPlayers) {
         initializeBlankMatch(maxPlayers, 4, 10, 40, 40);
     }
 
