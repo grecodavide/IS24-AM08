@@ -54,6 +54,7 @@ classDiagram
         EMPTY_CORNER
         FULL_CORNER
         CORNER_OBJ
+        NO_MULT
 
         + getReigns() EnumSet~Symbol~ <<Static>>
         + getBasicResources() EnumSet~Symbol~ <<Static>>
@@ -239,10 +240,13 @@ classDiagram
         + addPlayer(Player player) void
         + removePlayer(Player player) void
         + getCurrentPlayer() Player
+        + getCurrentState() MatchState
         + getPlayers() List~Player~
         + getMaxPlayers() int
         + getVisiblePlayableCards Map~DrawSource, PlayableCard~
         + getVisibleObjectives() Pair~Objective, Objective~
+        + getVisibleCardsBack() Pair~CardFace, CardFace~
+        + getPlayersFinalRanking() List~Pair~Player, Boolean~~
         # getPoints() int
         # addPoints() void
         # setSecretObjective(Objective obj) void
@@ -259,7 +263,9 @@ classDiagram
         # setupPlayers() void
         # setupBoards() void
         # nextPlayer() void
-
+        # decideWinner() void
+        - checkObjectivesAchievement() Map~Player, Integer~
+        
     }
     class DrawSource {
         <<Enumeration>>
@@ -347,6 +353,7 @@ classDiagram
         + getSize() int
         + pop() T
         + poll() T
+        + peek() T
         + shuffle() void
         + isEmpty() void
     }
