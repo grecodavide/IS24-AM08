@@ -4,12 +4,10 @@ import it.polimi.ingsw.utils.Pair;
 import it.polimi.ingsw.exceptions.*;
 
 /**
- * Represents each in-game user, so acts also as a gateway receiving input
- * by the Controller.
+ * Represents each in-game user, so acts also as a gateway receiving input by the Controller.
  * It's also responsible for the board's logic, which is a slice of the game logic.
 */
 public class Player {
-    // TODO: Fix exceptions
     private final String nickname;
     private final Match match;
     private int points;
@@ -33,19 +31,24 @@ public class Player {
     }
 
     /**
-     * Places a card on the player's board, on the give side and in the given position,
-     * assuming it's a valid one
+     * Places a card on the player's board, on the give side and in the given position, assuming it's valid.
      * @param coords x and y position in which the card is played (where 0, 0 is the initial card)
      * @param card the card to be placed
      * @param side whether the card should be placed on the front or on the back
      */
-    public void playCard(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws WrongTurnException, WrongStateException, WrongChoiceException, CardException, Exception {
+    public void playCard(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws WrongTurnException, WrongStateException, WrongChoiceException {
         if (match.getCurrentPlayer().equals(this))
             match.makeMove(coords, card, side);
         else
             throw new WrongTurnException("Only the current player can play cards");
     }
 
+    /**
+     * Gets two objectives from the match objectives deck considered to be secret.
+     * @return a pair of objectives
+     * @throws WrongStateException if called during the wrong match state
+     * @throws WrongTurnException if called by the player when it's not its turn
+     */
     public Pair<Objective, Objective> drawSecretObjectives() throws WrongStateException, WrongTurnException {
         if (match.getCurrentPlayer().equals(this)) {
             return match.proposeSecretObjectives();
@@ -55,11 +58,12 @@ public class Player {
     }
 
     /**
-     * Get an initial card from the match.
+     * Gets an initial card from the match.
+     * @return an initial card
      * @throws WrongTurnException if called by the player when it's not its turn
      * @throws WrongStateException if called during the wrong match state
      */
-    public InitialCard drawInitialCard() throws WrongTurnException, Exception, WrongStateException {
+    public InitialCard drawInitialCard() throws WrongTurnException, WrongStateException {
         if (match.getCurrentPlayer().equals(this))
             return match.drawInitialCard();
         else
@@ -67,12 +71,12 @@ public class Player {
     }
 
     /**
-     * Choose the initial card side.
-     * @param side the side of the initial
+     * Chooses the initial card side.
+     * @param side the side of the initial card
      * @throws WrongTurnException if called by the player when it's not its turn
      * @throws WrongStateException if called during the wrong match state
      */
-    public void chooseInitialCardSide(Side side) throws WrongTurnException, WrongStateException, Exception {
+    public void chooseInitialCardSide(Side side) throws WrongTurnException, WrongStateException {
         if (match.getCurrentPlayer().equals(this))
             match.setInitialSide(side);
         else
@@ -86,7 +90,7 @@ public class Player {
      * @throws WrongChoiceException if called on a drawing source which is empty (e.g. empty deck)
      * @throws WrongStateException if called during the wrong match state
      */
-    public void drawCard(DrawSource source) throws Exception {
+    public void drawCard(DrawSource source) throws HandException, WrongStateException, WrongChoiceException, WrongTurnException {
         if (match.getCurrentPlayer().equals(this)) {
             PlayableCard card = match.drawCard(source);
             board.addHandCard(card);
@@ -102,7 +106,7 @@ public class Player {
      * @throws WrongStateException if called during the wrong match state
      * @throws WrongChoiceException if called on an objective which is not one of the proposed ones
      */
-    public void chooseSecretObjective(Objective objective) throws WrongTurnException, WrongStateException, WrongChoiceException, Exception {
+    public void chooseSecretObjective(Objective objective) throws WrongTurnException, WrongStateException, WrongChoiceException {
         if (match.getCurrentPlayer().equals(this)) {
             match.setSecretObjective(objective);
             secretObjective = objective;

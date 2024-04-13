@@ -14,7 +14,7 @@ import it.polimi.ingsw.exceptions.WrongStateException;
 public abstract class MatchState {
     Match match;
 
-    public MatchState (Match match) {
+    protected MatchState (Match match) {
         this.match = match;
     }
 

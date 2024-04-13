@@ -1,15 +1,11 @@
 package it.polimi.ingsw.gamemodel;
 
 import it.polimi.ingsw.utils.Pair;
-
-import java.sql.Array;
-import java.util.*;
-import java.util.stream.Collectors;
-
 import it.polimi.ingsw.exceptions.*;
+import java.util.*;
 
 /**
- * Represents the match being played by {@link Player} instances, therefore implements a slice of game logic
+ * Represents the match played by {@link Player} instances, therefore implements a slice of game logic
  * using drawCard(...), setInitialSide(...), setSecretObjective(...), proposeSecretObjective(...), etc.
  * Other methods serve the purpose of being called by {@link MatchState} subclasses in order to notify the change
  * of the current game state or trigger some changes in the match, such as setupBoards(...),
@@ -250,7 +246,7 @@ public class Match {
             currentState.transition();
 
             return currentProposedObjectives;
-        } catch (Exception e) {
+        } catch (DeckException e) {
             throw new RuntimeException(e);
         }
     }
@@ -261,7 +257,7 @@ public class Match {
      * Note: Called by the current player
      * @param objective the accepted objective by the player (NOT the discarded one)
      */
-    protected void setSecretObjective(Objective objective) throws WrongChoiceException, WrongStateException, Exception {
+    protected void setSecretObjective(Objective objective) throws WrongChoiceException, WrongStateException {
         currentState.chooseSecretObjective();
 
         // Get proposed objectives
@@ -489,10 +485,7 @@ public class Match {
                 // then the corresponding visible card will be null
             }
 
-            default -> {
-                throw new RuntimeException("Unexpected value of source");
-            }
-
+            default -> throw new RuntimeException("Unexpected value of source");
         }
 
         if (goldsDeck.isEmpty() && resourcesDeck.isEmpty())
@@ -547,7 +540,7 @@ public class Match {
             p.addPoints(firstObjective.getPoints() * firstObjective.getReq().timesMet(board));
             p.addPoints(secondObjective.getPoints() * secondObjective.getReq().timesMet(board));
 
-            // Count the number of achieved ojectives by the player
+            // Count the number of achieved objectives by the player
             if (secretObjective != null && secretObjective.getReq().timesMet(board) >= 1)
                 numAchievedObjectives++;
             if (firstObjective.getReq().timesMet(board) >= 1)
@@ -570,8 +563,10 @@ public class Match {
 
         List<Player> sortedPlayers = players.stream()
                 .sorted(
-                        // Create a comparator that firstly sorts for player points
-                        // and in case of same points, for the number of achieved objectives
+                        // Create a comparator that firstly sorts based on player points
+                        // and secondly, in case of same points, on the number of achieved objectives
+                        // Please note: reversed() since the default sort is ascending (min first), but the expected
+                        // results requires a a descending sort (max points/objectives first)
                         Comparator.comparingInt(Player::getPoints)
                                 .thenComparing(achievedObjectives::get)
                                 .reversed()
@@ -581,17 +576,14 @@ public class Match {
         Player bestPlayer = sortedPlayers.get(0);
         int bestAchievedObjectives = achievedObjectives.get(bestPlayer);
         int bestPoints = bestPlayer.getPoints();
-        boolean winner;
+        boolean isWinner;
 
         for (Player p : sortedPlayers) {
-            winner = false;
+            // If the current player has as many points and as many achieved objectives as the winner,
+            // then they're winner too
+            isWinner = p.getPoints() == bestPoints && achievedObjectives.get(p) == bestAchievedObjectives;
 
-            // If the current player has as many points and as many achieved objectives as the winner, then they're
-            // winner too
-            if (p.getPoints() == bestPoints && achievedObjectives.get(p) == bestAchievedObjectives)
-                winner = true;
-
-            playersFinalRanking.add(new Pair<>(p, winner));
+            playersFinalRanking.add(new Pair<>(p, isWinner));
         }
     }
 
