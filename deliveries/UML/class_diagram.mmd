@@ -1,14 +1,15 @@
 ---
 title: Model diagram
 ---
+
 classDiagram
     Match --> GameDeck
     Match --> MatchState
     Match --> DrawSource
     Match -- Player
     MatchState <|-- WaitState
-    MatchState <|-- SetupState
     MatchState <|-- NextTurnState
+    MatchState <|-- ChooseInitialSideState
     MatchState <|-- ChooseSecretObjectiveState
     MatchState <|-- AfterMoveState
     MatchState <|-- AfterDrawState
@@ -20,25 +21,25 @@ classDiagram
     PlayableCard <|-- ResourceCard
     PlayableCard <|-- GoldCard
 
+    Board -- PlacementOutcome
     Requirement <|-- QuantityRequirement
     Requirement <|-- PositionRequirement
     Requirement <-- Objective
     QuantityRequirement <-- GoldCard
 
     Board --> PlacedCard
+    Side <-- PlacedCard
     Player --> Board
     Player --> Objective
+    Player --> Color
     CardFace <-- Card
     Symbol <-- CardFace
-    Player --> Color
     Board --> Requirement
     %%Side <-- Player
     %%Side <-- Match
-    Side <-- PlacedCard
     Corner <-- CardFace
-    %%Symbol <-- GoldCard
+    %% Symbol <-- GoldCard
     %% DrawSource <-- Player
-
 
 
     class Symbol {
@@ -53,6 +54,12 @@ classDiagram
         EMPTY_CORNER
         FULL_CORNER
         CORNER_OBJ
+        NO_MULT
+
+        + getReigns() EnumSet~Symbol~ <<Static>>
+        + getBasicResources() EnumSet~Symbol~ <<Static>>
+        + getValidCorner() EnumSet~Symbol~ <<Static>>
+        + getValidMultiplier( EnumSet~Symbol~ <<Static>>)
     }
 
     class Corner {
@@ -70,6 +77,7 @@ classDiagram
         - bottomLeft: Symbol
         - bottomRight: Symbol
         - center: Set~Symbol~
+
         + CardFace(Symbol topLeft, Symbol topRight, Symbol bottomLeft, Symbol bottomRight, Set~Symbol~ center)
         + getCorner(Corner corner) Symbol
         + getCenter() Set~Symbol~
@@ -77,13 +85,20 @@ classDiagram
 
     class Card {
         <<Abstract>>
-        # sides : Map~Side, CardFace~
+        %% # sides : Map~Side, CardFace~
+        # front : CardFace
+        # back : CardFace
+
         + getSide(Side side) CardFace
     }
 
     class PlayableCard {
         <<Abstract>>
+        # reign: Symbol
         # points: int
+
+        + PlayableCard(Symbol reign)
+        + getReign() Symbol
     }
 
     class InitialCard {
@@ -91,160 +106,192 @@ classDiagram
     }
 
     class ResourceCard {
-        + ResourceCard(CardFace front, CardFace back, int points)
-        + getPoints() : int
+        + ResourceCard(CardFace front, Symbol reign, int points)
+        + getPoints() int
     }
 
     class GoldCard {
         - multiplier: Symbol
         - req: QuantityRequirement
-        + GoldCard(CardFace front, CardFace back, int points, Symbol multiplier, QuantityRequirement req)
+
+        + GoldCard(CardFace front, Symbol reign, int points, Symbol multiplier, QuantityRequirement req)
         + getMultiplier() Symbol
         + getRequirement() QuantityRequirement
-        + totPoints(Board board) int
+        + calculatePoints(Board board, Pair~Integer, Integer~ coord) int
     }
 
     class Requirement {
         <<Abstract>>
-        + isSatisfied(Board board) bool
+        + Requirement()
+        + timesMet(Board board) int
     }
 
     class QuantityRequirement {
-        - reqs : Map~Integer, Symbol~
-        + QuantityRequirement(Symbol simbol, Integer quantity)
-        + isSatisfied(Board board) bool
+        - reqs : Map~Symbol, Integer~
+
+        + QuantityRequirement(Map~Symbol, Integer~ reqs)
+        + timesMet(Board board) int
     }
 
     class PositionRequirement {
         - reqs: Map&ltPair&ltInteger, Integer&gt, Color&gt
-        + PositionRequirement(Map&ltPair&ltInteger, Integer&gt, Color&gt)
-        + isSatisfied(Board board) bool
+
+        + PositionRequirement(Map&ltPair&ltInteger, Integer&gt, Color&gt reqs)
+        + timesMet(Board board) int
     }
+    
     class Objective {
         - points: int
         - req: Requirement
+
         + Objective(int points, Requirement req)
         + getPoints() int
         + getRequirement() Requirement
     }
+    
     class Player {
         - nickname: String
         - match: Match
         - points: Int
         - board: Board
-        - color: Color
-        - objective: Objective
+        - pawnColor: Color
+        - secretObjective: Objective
 
         + Player(String nickname, Match match)
         + playCard(Pair<Integer, Integer> coord, PlayableCard card, Side side) void
-        + drawCard(DrawSource draw) void
-        + chooseObjective(Objective objective) void
+        + drawSecretObjective Pair~Objective, Objective~
+        + drawInitialCard() InitialCard
+        + drawCard(DrawSource source) void
+        + chooseSecretObjective(Objective objective) void
+        + chooseInitialCardSide(Side side) void
         + getBoard() Board
         + getPoints() int
         + getSecretObjective() Objective
-        + getColor() Color
+        + getPawnColor() Color
         + getNickname() String
         # setColor() void
     }
-    class Color{
+    
+    class Color {
         <<Enumeration>>
         RED
         BLUE
         GREEN
         YELLOW
     }
-    class Side{
+    
+    class Side {
         <<Enumeration>>
         FRONT
         BACK
     }
+    
     class Board {
         - currentHand: List~PlayableCard~
         - placed: Map&ltPair&ltInteger,Integer&gt, PlacedCard&gt
         - availableResources: Map~Symbol, Integer~
 
         + Board()
-        + getCurrentHand() List~PlayableCard~
         + getAvailableResources() Map~Symbol, Integer~
-        # getPlacedMap() Map&ltPair&ltInteger,Integer&gt, PlacedCard&gt
-        # addHandCard(PlayableCard card) void
+        + getPlacedCards() Map&ltPair&ltInteger, Integer&gt, PlacedCard&gt
+        + getCurrentHand() List~PlayableCard~
+        + verifyCardPlacement(Pair~Integer, Integer~ coords, Card card, Side side) PlacementOutcome
         # removeHandCard(PlayableCard card) void
-        # setInitialSide(Side side) void
-        # placeCard(Pair~Integer, Integer~, PlayableCard card, Side side) int
-        # setInitialCard(InitialCard card) void
-        + verifyCardPlacement(Pair~Integer, Integer~ coords, Card card, Side side) bool
+        # addHandCard(PlayableCard card) void
+        # setInitialCard(InitialCard card, Side side) void
+        # placeCard(Pair~Integer, Integer~ coord, PlayableCard card, Side side, int turn) int
     }
+    
     class PlacedCard {
-        <<Record>>
         - card: Card
         - turn: int
-        + PlacedCard(Card card, int turn)
+        - playedSide: Side
+
+        + PlacedCard(Card card, Side playedSide, int turn)
         + getCard() Card
+        + getPlayedSide() Side
         + getTurn() int
+        + getPlayedCardFace() CardFace
     }
 
     class Match {
-        - players: list~Players~
+        - players: List~Players~
         - maxPlayers: int
-        - currState: MatchState
         - currentPlayer: Player
+        - currState: MatchState
         - initialsDeck: GameDeck~InitialCard~
         - resourcesDeck: GameDeck~ResourceCard~
         - goldsDeck: GameDeck~GoldCard~
         - objectivesDeck: GameDeck~Objective~
-        - visibleGolds: Pair~GoldCard, GoldCard~
-        - visibleResources: Pair~ResourceCard, ResourceCard~
+        - visiblePlayableCards: Map~DrawSource, PlayableCard~
         - visibleObjectives: Pair~Objective, Objective~
         - currentProposedObjectives: Pair~Objective, Objective~
-        - started: bool
-        - lastTurn: bool
-        - finished: bool
+        - currentGivenInitialCard: InitialCard
+        - started: boolean
+        - initialTurn: boolean
+        - lastTurn: boolean
+        - finished: boolean
 
-        + Match(int maxPlayers, resourceDeck ) void
-        + isFull() bool
-        + isStarted() bool
-        + isFinished() bool
+        + Match(int maxPlayers, GameDeck~InitialCard~ initialsDeck, GameDeck~ResourceCard~ resourcesDeck, GameDeck~GoldCard~ goldsDeck, GameDeck~Objective~ objectivesDeck) void
+        + isFull() boolean
+        + isStarted() boolean
+        + isInitialTurnFinished() boolean
+        + isFinished() boolean
         + addPlayer(Player player) void
         + removePlayer(Player player) void
         + getCurrentPlayer() Player
+        + getCurrentState() MatchState
         + getPlayers() List~Player~
+        + getMaxPlayers() int
+        + getVisiblePlayableCards Map~DrawSource, PlayableCard~
+        + getVisibleObjectives() Pair~Objective, Objective~
+        + getVisibleCardsBack() Pair~CardFace, CardFace~
+        + getPlayersFinalRanking() List~Pair~Player, Boolean~~
         # getPoints() int
         # addPoints() void
-        # chooseSecretObjective(Objective obj) void
+        # setSecretObjective(Objective obj) void
         # proposeSecretObjectives() Pair~Objective, Objective~
         # makeMove(Pair~Integer, Integer~ coords, PlayableCard card, Side side) void
         # drawCard(DrawSource draw) PlayableCard
+        # drawInitialCard() InitialCard
+        # setInitialSide(Side side) void
         # doStart() void
+        # doInitialTurnFinish() void
         # doFinish() void
-        # setState() void
+        # setState(MatchState state) void
         # setupDecks() void
         # setupPlayers() void
         # setupBoards() void
         # nextPlayer() void
-
+        # decideWinner() void
+        - checkObjectivesAchievement() Map~Player, Integer~
+        
     }
     class DrawSource {
         <<Enumeration>>
         GOLDS_DECK,
         RESOURCES_DECK,
-        FIRST_VISIBLE_GOLDS,
-        SECOND_VISIBLE_GOLDS,
-        FIRST_VISIBLE_RESOURCES,
-        SECOND_VISIBLE_RESOURCES
+        FIRST_VISIBLE,
+        SECOND_VISIBLE,
+        THIRD_VISIBLE,
+        FOURTH_VISIBLE
     }
 
     class MatchState {
         <<Abstract>>
-        + match: Match
+        - match: Match
+
         + MatchState(Match match)
         + transition() void
         + addPlayer() void
         + removePlayer() void
 	    + proposeSecretObjectives() void
 	    + chooseSecretObjective() void
+        + chooseInitialSide() void
+        + drawInitialCard() void
 	    + makeMove() void
 	    + drawCard() void
-
+	    # getMatch() Match
     }
 
     class WaitState{
@@ -253,18 +300,21 @@ classDiagram
         + addPlayer() void
         + removePlayer() void
     }
-    class SetupState{
-        + SetupState(Match match) void
-        + transition() void
-
-    }
+    
     class NextTurnState {
         + NextTurnState(Match match) void
         + proposeSecretObjectives() void
         + makeMove() void
+        + drawInitialCard() void
         + transition() void
     }
-
+    
+    class ChooseInitialSideState{ 
+        + ChooseInitialSideState(Match match) void
+        + chooseInitialSide(Side side) void
+        + transition() void
+    }
+    
     class ChooseSecretObjectiveState {
         + ChooseSecretObjectiveState() void
         + chooseSecretObjective() void
@@ -287,14 +337,23 @@ classDiagram
         + transition() void
     }
 
-
+    class PlacementOutcome {
+        <<Enumeration>>
+        VALID,
+        INVALID_COORDS,
+        INVALID_ENOUGH_RESOURCES,
+    }
+    
     class GameDeck {
         <<Generics>>
-        - int size
-        - cardsList: List~U~
-        + GameDeck(int size)
-        + add(U card) void
-        + pop() U
+        - cardsList: List~T~
+
+        + GameDeck()
+        + add(T card) void
+        + getSize() int
+        + pop() T
+        + poll() T
+        + peek() T
         + shuffle() void
         + isEmpty() void
     }

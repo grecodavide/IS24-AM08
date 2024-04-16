@@ -1,10 +1,18 @@
 package it.polimi.ingsw.gamemodel;
 
 import it.polimi.ingsw.utils.Pair;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import it.polimi.ingsw.exceptions.*;
+import java.util.*;
 
+/**
+ * Represents the match played by {@link Player} instances, therefore implements a slice of game logic
+ * using drawCard(...), setInitialSide(...), setSecretObjective(...), proposeSecretObjective(...), etc.
+ * Other methods serve the purpose of being called by {@link MatchState} subclasses in order to notify the change
+ * of the current game state or trigger some changes in the match, such as setupBoards(...),
+ * doStart(...), etc.
+ * Few methods are called by the current player of the match, used to trigger a change in the match and so notify that
+ * an event occurred, such as nextPlayer(...).
+ */
 public class Match {
     private final List<Player> players;
     private final int maxPlayers;
@@ -19,156 +27,258 @@ public class Match {
     private final GameDeck<Objective> objectivesDeck;
 
     // All the visible cards on the common table
-    private Pair<ResourceCard, ResourceCard> visibleResources;
-    private Pair<GoldCard, GoldCard> visibleGolds;
+    private final Map<DrawSource, PlayableCard> visiblePlayableCards;
     private Pair<Objective, Objective> visibleObjectives;
 
     private Pair<Objective, Objective> currentProposedObjectives;
+    private InitialCard currentGivenInitialCard;
 
-    // Denotes if the match has been started or has finished
+    // Denotes if the match has been started/finished
     private boolean started = false;
+    private boolean initialTurnFinished = false;
     private boolean lastTurn = false;
     private boolean finished = false;
 
+    // Current match turn as an integer (incremental)
+    private int turn;
+
+    // Players ranking of the match at the end of it.
+    // The List order represents the ranking order, the Boolean represent if the related player is a winner.
+    // This is needed since the match can end in a tie, in such case the first two/three players of the List will have a
+    // True flag.
+    private List<Pair<Player, Boolean>> playersFinalRanking;
 
     /**
-     * Constructor to be used to initialize main Match attributes and allocate the attribute players List.
-     * @param maxPlayers maximum number of players to be added to the match, chosen by the first player to join
+     * Initializes main Match attributes and allocate the attribute players List, assuming no parameter is null.
+     * @param maxPlayers maximum number of players to be added to the match, chosen by the first player joining the match
      * @param initialsDeck deck of initial cards
      * @param resourcesDeck deck of resource cards
      * @param goldsDeck deck of gold cards
      * @param objectivesDeck deck of objectives
+     * @throws IllegalArgumentException if the decks provided do not have enough cards to start a game or maxPlayers are not 2,3,4
      */
-    public Match(int maxPlayers, GameDeck<InitialCard> initialsDeck, GameDeck<ResourceCard> resourcesDeck, GameDeck<GoldCard> goldsDeck, GameDeck<Objective> objectivesDeck) {
+    public Match(int maxPlayers, GameDeck<InitialCard> initialsDeck, GameDeck<ResourceCard> resourcesDeck, GameDeck<GoldCard> goldsDeck, GameDeck<Objective> objectivesDeck) throws IllegalArgumentException{
         this.maxPlayers = maxPlayers;
         this.initialsDeck = initialsDeck;
         this.resourcesDeck = resourcesDeck;
         this.goldsDeck = goldsDeck;
         this.objectivesDeck = objectivesDeck;
+        this.currentState = new WaitState(this);
 
-        this.players = new ArrayList<Player>();
+        if (goldsDeck.getSize() < maxPlayers + 2)
+            throw new IllegalArgumentException("goldsDeck does not have enough cards");
+        else if (resourcesDeck.getSize() < maxPlayers*2 + 2)
+            throw new IllegalArgumentException("resourcesDeck does not have enough cards");
+        else if (initialsDeck.getSize() < maxPlayers)
+            throw new IllegalArgumentException("initialDeck does not have enough cards");
+        else if (objectivesDeck.getSize() < 6)
+            throw new IllegalArgumentException("objectivesDeck does not have enough cards");
+        else if (maxPlayers < 2 || maxPlayers > 4)
+            throw new IllegalArgumentException("The players must be at least 2 or maximum 4");
+
+        this.players = new ArrayList<>();
+        this.visiblePlayableCards = new HashMap<>();
     }
 
-    // Called by the controller
     /**
-     * Method that adds a new player to the match; if the player is already in, throws an exception.
+     * Adds a new player to the match, assuming it's not null.
+     * Note: Called by the Controller when a player joins the match.
      * @param player player to be added to the match
-     * @throws IllegalArgumentException thrown if player already in the match
+     * @throws IllegalArgumentException if the player is already in the match or too many players would be in the match
+     * @throws WrongStateException if called while in a state that doesn't allow adding players
      */
     public void addPlayer(Player player) throws IllegalArgumentException, WrongStateException {
         if(!players.contains(player)) {
             currentState.addPlayer();
             players.add(player);
+            currentState.transition();
         } else {
-            throw new IllegalArgumentException("Duplicated Player in a Match");
+            throw new IllegalArgumentException("Duplicated player in a match");
         }
     }
 
-    // Called by the controller
     /**
-     *
-     * @param player
+     * Removes a player from the match, assuming the player is in the match.
+     * Note: Called by the Controller when a player quits the match.
+     * @param player player to be removed from the match
      */
-    public void removePlayer(Player player) {
+    // TODO: Change Javadoc
+    public void removePlayer(Player player) throws PlayerQuitException {
+        currentState.removePlayer();
         players.remove(player);
+        currentState.transition();
     }
 
-    // Called by the controller
     /**
-     *
-     * @return
+     * Verifies if the match is full, thus no more players can join.
+     * Note: Used by the Controller
+     * @return true if the match is full, false otherwise
      */
     public boolean isFull() {
         return players.size() == maxPlayers;
     }
 
     /**
-     * Method that changes the currentPlayer based on the next turn
-     * If it is the first turn, currentPlayer gets initialized as the
-     * first one in the players List.The turn order follows the list order.
-     * Called by ChoosePlayerState every time a new turn starts
+     * Modifies the current player according to the next turn: if it's the first turn, the current player is the first
+     * one in the players List, the turn order then follows the players List order, in a circular way.
+     * Ex. 1st -> 2nd -> 3rd ---> 1st -> 2nd etc.
+     * Note: Called by NextTurnState every time a new turn starts.
      */
     protected void nextPlayer() {
-        // If player has never been initialized OR the current player is the last one
-        if (currentPlayer == null || currentPlayer.equals(players.getLast())) {
-            // Set currentPlayer as the first one
-            currentPlayer = players.getFirst();
+        if(!players.isEmpty()) {
+            // If player has never been initialized OR the current player is the last one
+            if (currentPlayer == null || currentPlayer.equals(players.getLast())) {
+                // Set currentPlayer as the first one
+                currentPlayer = players.getFirst();
+
+                turn++;
+            } else {
+                // Get the index of the current player and choose the next one
+                int currentPlayerIndex = players.indexOf(currentPlayer);
+                currentPlayer = players.get(currentPlayerIndex + 1);
+            }
         } else {
-            // Get the index of the current player and choose the next one
-            int currentPlayerIndex = players.indexOf(currentPlayer);
-            currentPlayer = players.get(currentPlayerIndex + 1);
+            throw new RuntimeException("No players in the match, the next player cannot be set");
         }
     }
-    // Called by the state
-    /**
-     *
-     */
-    protected void doFinish() {
-        finished = true;
-    }
 
-    // Called by the controller
     /**
-     *
-     * @return
+     * Verifies if the match is finished.
+     * Note: Called by the Controller and NextTurnState.
+     * @return true if the match is finished, false otherwise
      */
     public boolean isFinished() {
         return finished;
     }
 
+    /**
+     * Marks the initial turn as finished, assuming the initial turn hasn't finished yet.
+     * Called by ChooseInitialCardState once the initial turn is finished.
+     */
+    protected void doInitialTurnFinish() {
+        initialTurnFinished = true;
+    }
+
+    /**
+     * Verifies if the initial turn is finished.
+     * Note: Called by NextTurnState.
+     * @return true if the initial turn is finished, false otherwise
+     */
+    public boolean isInitialTurnFinished() {
+        return initialTurnFinished;
+    }
+
+    /**
+     * Marks the match as started, assuming the match hasn't started yet.
+     * Note: Called by ChooseSecretObjectiveState once the match is ready to start.
+     */
     protected void doStart() {
         started = true;
     }
 
+    /**
+     * Verifies if the match is started.
+     * Note: Called by NextTurnState to check when to effectively start the match.
+     * @return true if the match is started, false otherwise
+     */
     public boolean isStarted() {
         return started;
     }
 
-    // Called by the controller
     /**
-     *
-     * @return
+     * Gets the player who's playing (or choosing the secret objective) at the moment.
+     * Note: Used by the Controller.
+     * @return the player playing at the moment, null if the match has never reached NextTurnState
      */
     public Player getCurrentPlayer() {
         return currentPlayer;
     }
 
+    /**
+     * Gets the match players.
+     * @return the match players in a List, dynamically defined as an ArrayList
+     */
     public List<Player> getPlayers() {
         return players;
     }
-    // Called by the state
 
     /**
-     *
-     * @param state
+     * Sets the current match state, assuming it's not null.
+     * Note: Called by each state to let the match enter to the next state.
+     * @param state the state in which the match has to be
      */
     protected void setState(MatchState state) {
         this.currentState = state;
     }
 
     /**
-     *
-     * @return
+     * Draws a card from the initial cards deck
+     * @return the card drawn from the initial cards deck
+     * @throws WrongStateException if called while in a state that doesn't allow drawing an initial card
      */
-    protected Pair<Objective, Objective> proposeSecretObjectives() {
-        Objective obj1 = objectivesDeck.pop();
-        Objective obj2 = objectivesDeck.pop();
-        currentProposedObjectives = new Pair<>(obj1, obj2);
-        return currentProposedObjectives;
-    }
+    protected InitialCard drawInitialCard() throws WrongStateException {
+        currentState.drawInitialCard();
 
-    // Called by the controller
-    /**
-     *
-     * @param objective
-     */
-    protected void chooseSecretObjective(Objective objective) {
-        // Put back the player's refused secret objective
-        objectivesDeck.add(objective);
+        try {
+            currentGivenInitialCard = initialsDeck.pop();
+        } catch (DeckException e) {
+            throw new RuntimeException(e);
+        }
+
+        currentState.transition();
+
+        return currentGivenInitialCard;
     }
 
     /**
-     *
+     * Extracts two cards from the deck of objectives and returns them.
+     * Note: Called by the Controller.
+     * @return two objective cards extracted from the objectives deck
+     */
+    protected Pair<Objective, Objective> proposeSecretObjectives() throws WrongStateException {
+        currentState.proposeSecretObjectives();
+        try {
+            Objective obj1 = objectivesDeck.pop();
+            Objective obj2 = objectivesDeck.pop();
+
+            currentProposedObjectives = new Pair<>(obj1, obj2);
+
+            currentState.transition();
+
+            return currentProposedObjectives;
+        } catch (DeckException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Checks that the given objective is one of the proposed ones to the current player
+     * and put the discarded objective back in the objectives deck.
+     * Note: Called by the current player
+     * @param objective the accepted objective by the player (NOT the discarded one)
+     */
+    protected void setSecretObjective(Objective objective) throws WrongChoiceException, WrongStateException {
+        currentState.chooseSecretObjective();
+
+        // Get proposed objectives
+        Objective firstProposedObjective = currentProposedObjectives.first();
+        Objective secondProposedObjective = currentProposedObjectives.second();
+
+        // Check if the chosen objective is one of the proposed ones and put it back in the deck
+        if (objective.equals(firstProposedObjective))
+            objectivesDeck.add(secondProposedObjective);
+        else if (objective.equals(secondProposedObjective))
+            objectivesDeck.add(firstProposedObjective);
+        else
+            // If the objective is not one of the proposed ones, throw an exception
+            throw new WrongChoiceException("The chosen objective is not one of the proposed ones");
+
+        currentState.transition();
+    }
+
+    /**
+     * Shuffles the players turns order and gives them their pawn color.
+     * Note: Called by SetupState.
      */
     protected void setupPlayers() {
         // Shuffle players List
@@ -181,7 +291,8 @@ public class Match {
     }
 
     /**
-     *
+     * Shuffles all thr cards decks and places the visible cards on the board
+     * Note: Called by SetupState.
      */
     protected void setupDecks() {
         // Shuffle each deck
@@ -190,90 +301,349 @@ public class Match {
         goldsDeck.shuffle();
         objectivesDeck.shuffle();
 
-        // Pop two resources to be placed on the common table
-        ResourceCard resourceCard1 = resourcesDeck.pop();
-        ResourceCard resourceCard2 = resourcesDeck.pop();
+        try {
+            // Pop two resources to be placed on the common table
+            ResourceCard resourceCard1 = resourcesDeck.pop();
+            ResourceCard resourceCard2 = resourcesDeck.pop();
 
-        // Pop two golds to be placed on the common table
-        GoldCard goldCard1 = goldsDeck.pop();
-        GoldCard goldCard2 = goldsDeck.pop();
+            // Pop two golds to be placed on the common table
+            GoldCard goldCard1 = goldsDeck.pop();
+            GoldCard goldCard2 = goldsDeck.pop();
 
-        // Pop two golds to be placed on the common table
-        Objective objective1 = objectivesDeck.pop();
-        Objective objective2 = objectivesDeck.pop();
+            // Pop two golds to be placed on the common table
+            Objective objective1 = objectivesDeck.pop();
+            Objective objective2 = objectivesDeck.pop();
 
-        // Set popped cards in Match attributes
-        visibleGolds = new Pair<>(goldCard1, goldCard2);
-        visibleResources = new Pair<>(resourceCard1, resourceCard2);
-        visibleObjectives = new Pair<>(objective1, objective2);
+            // Put golds and resources in visiblePlayableCards
+            visiblePlayableCards.put(DrawSource.FIRST_VISIBLE, resourceCard1);
+            visiblePlayableCards.put(DrawSource.SECOND_VISIBLE, resourceCard2);
+            visiblePlayableCards.put(DrawSource.THIRD_VISIBLE, goldCard1);
+            visiblePlayableCards.put(DrawSource.FOURTH_VISIBLE, goldCard2);
+
+            visibleObjectives = new Pair<>(objective1, objective2);
+        } catch (DeckException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
-     *
+     * Gives one gold card and two resource cards to each player (hand)
+     * and sets the initial card for each of them.
+     * Note: Called by WaitState.
      */
     protected void setupBoards() {
         // Give starting cards to players
         for (Player player : players) {
-            // Pop a card from the resources deck and one from the golds deck
-            GoldCard goldCard = goldsDeck.pop();
-            ResourceCard resourceCard1 = resourcesDeck.pop();
-            ResourceCard resourceCard2 = resourcesDeck.pop();
+            try {
+                // Pop a card from the resources deck and one from the golds deck
+                GoldCard goldCard = goldsDeck.pop();
+                ResourceCard resourceCard1 = resourcesDeck.pop();
+                ResourceCard resourceCard2 = resourcesDeck.pop();
 
-            // Add each card to the player's hand
-            player.getBoard().addHandCard(goldCard);
-            player.getBoard().addHandCard(resourceCard1);
-            player.getBoard().addHandCard(resourceCard2);
-
-            // Place the initial card to the player's board
-            // By default, the initial card is placed on front side
-            Pair<Integer, Integer> initialCoords = new Pair<>(0,0);
-            InitialCard initial = initialsDeck.pop();
-            player.getBoard().placeCard(initialCoords, initial, Side.FRONT);
-
+                // Add each card to the player's hand
+                player.getBoard().addHandCard(goldCard);
+                player.getBoard().addHandCard(resourceCard1);
+                player.getBoard().addHandCard(resourceCard2);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
     /**
-     *
-     * @param coords
-     * @param card
-     * @param side
-     * @throws WrongStateException
-     * @throws WrongCardPlacementException
+     * Makes the chosen move on the board of the current player (known because of the internal Match state);
+     * in particular, checks if the placement is valid, then places the card on the player's board and add points
+     * to the player.
+     * Note: Called by the current player.
+     * @param coords coordinates in which to place the card
+     * @param card card to place
+     * @param side side of the card to be placed
+     * @throws WrongStateException if called while in a state that doesn't allow making moves
+     * @throws WrongChoiceException if the move is not allowed (placement not allowed, or not enough resources, or card
+     * not in player's hand)
      */
-    protected void makeMove(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws WrongStateException, WrongCardPlacementException {
+    protected void makeMove(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws WrongStateException, WrongChoiceException {
+        currentState.makeMove();
+
         Board currentPlayerBoard = currentPlayer.getBoard();
 
-        // If placing the card in the current player's board is allowed by rules
-        if (currentPlayerBoard.verifyCardPlacement(coords, card, side)) {
-
-            // Trigger current state behavior
-            currentState.makeMove();
-
-            // Place the card in the current player's board
-            // and save the points possibly gained because of the move
-            int gainedPoints = currentPlayerBoard.placeCard(coords, card, side);
-
-            // Remove the card from the player's hand
-            // since it has been placed on the board
-            currentPlayerBoard.removeHandCard(card);
-
-            // Update the current player's points
-            currentPlayer.addPoints(gainedPoints);
-
-            // If the current player reaches 20 points or more
-            // the last turn of the match starts
-            if (currentPlayer.getPoints() >= 20)
-                lastTurn = true;
-
-            // If the current player is the last one in the match turns rotation
-            // i.e. the last one in the players List
-            // AND the current turn is the last one
-            // the match is now finished
-            if (currentPlayer.equals(players.getLast()) && lastTurn)
-                finished = true;
-        } else {
-            throw new WrongCardPlacementException("Card placement not valid!");
+        PlacementOutcome outcome;
+        try {
+            outcome = currentPlayerBoard.verifyCardPlacement(coords, card, side);
+        } catch (CardException e) {
+            throw new WrongChoiceException(e.getMessage());
         }
+
+        // If placing the card in the current player's board is allowed by rules
+        switch (outcome) {
+            case VALID:
+                // Place the card in the current player's board
+                // and save the points possibly gained because of the move
+                int gainedPoints;
+                try {
+                    gainedPoints = currentPlayerBoard.placeCard(coords, card, side, turn);
+                } catch (CardException e) {
+                    throw new RuntimeException(e);
+                }
+
+                // Remove the card from the player's hand
+                // since it has been placed on the board
+                try {
+                    currentPlayerBoard.removeHandCard(card);
+                } catch (HandException e) {
+                    throw new RuntimeException(e);
+                }
+
+                // Update the current player's points
+                currentPlayer.addPoints(gainedPoints);
+
+                // If the current player reaches 20 points or more
+                // the last turn of the match starts
+                if (currentPlayer.getPoints() >= 20)
+                    lastTurn = true;
+
+                currentState.transition();
+                break;
+            case INVALID_COORDS:
+                throw new WrongChoiceException("Invalid coordinates!");
+            case INVALID_ENOUGH_RESOURCES:
+                throw new WrongChoiceException("Not enough resources!");
+        }
+    }
+
+    /**
+     * Draws a card from the passed source. If the caller wants to draw one of the four visible cards, a rule is applied:
+     * the first and second visible cards (FIRST/SECOND_VISIBLE) will be substituted by a gold card if possible, if not,
+     * by a resource card, if not again, they will be null (then not substituted); the first and second visible cards
+     * (THIRD/FOURTH_VISIBLE) will be substituted by a resource card if possible, if not, by a gold card, if not again,
+     * they will be null (then not substituted).
+     * Note: Called by the current player.
+     * @param source  the source to draw a card from
+     * @throws WrongStateException if called while in a state that doesn't allow making moves
+     * @throws WrongChoiceException if the source does not have cards
+     * @return the card drawn
+     */
+    protected PlayableCard drawCard(DrawSource source) throws WrongStateException, WrongChoiceException {
+        PlayableCard card;
+
+        currentState.drawCard();
+
+        switch (source) {
+            case GOLDS_DECK -> {
+                try {
+                    card = goldsDeck.pop();
+                } catch (DeckException e) {
+                    throw new WrongChoiceException("The gold cards deck is empty!");
+                }
+            }
+
+            case RESOURCES_DECK -> {
+                try {
+                    card = resourcesDeck.pop();
+                } catch (DeckException e) {
+                    throw new WrongChoiceException("The resource cards deck is empty!");
+                }
+            }
+
+            case FIRST_VISIBLE, SECOND_VISIBLE -> {
+                card = visiblePlayableCards.get(source);
+
+                // If not present (e.g. on the last turn both decks are empty, so remaining turns will be played
+                // drawing the four visible cards, but they won't be substituted by others) throw an exception
+                if (card == null)
+                    throw new WrongChoiceException("There is no visible card in the chosen position!");
+
+                // If the golds deck is NOT empty, substitute the first/second visible
+                // card with a new gold
+                if(!goldsDeck.isEmpty())
+                    visiblePlayableCards.put(source, goldsDeck.poll());
+                // If the golds deck is empty, substitute the first/second visible
+                // card with a resource
+                else
+                    visiblePlayableCards.put(source, resourcesDeck.poll());
+                // If the resources deck is empty too, the GameDeck.poll() method returns null,
+                // then the corresponding visible card will be null
+            }
+
+            case THIRD_VISIBLE, FOURTH_VISIBLE -> {
+                card = visiblePlayableCards.get(source);
+
+                // If not present (e.g. on the last turn both decks are empty, so remaining turns will be played
+                // drawing the four visible cards, but they won't be substituted by others) throw an exception
+                if (card == null)
+                    throw new WrongChoiceException("There is no visible card in the chosen position!");
+
+                // If the resources deck is NOT empty, substitute the third/fourth visible
+                // card with a new resource
+                if(!resourcesDeck.isEmpty())
+                    visiblePlayableCards.put(source, resourcesDeck.poll());
+                // If the resources deck is empty, substitute the third/fourth visible
+                // card with a gold
+                else
+                    visiblePlayableCards.put(source, goldsDeck.poll());
+                // If the golds deck is empty too, the GameDeck.poll() method returns null,
+                // then the corresponding visible card will be null
+            }
+
+            default -> throw new RuntimeException("Unexpected value of source");
+        }
+
+        if (goldsDeck.isEmpty() && resourcesDeck.isEmpty())
+            lastTurn = true;
+
+        // If the current player is the last one in the match turns rotation, i.e. the last one in the players List
+        // AND the current turn is the last one the match is now finished
+        if (currentPlayer.equals(players.getLast()) && lastTurn)
+            finished = true;
+
+        currentState.transition();
+
+        return card;
+    }
+
+    /**
+     * Sets the current player's initial card side.
+     * @param side the side to put the initial card on
+     * @throws WrongStateException if called while in a state that doesn't allow choosing the initial card side
+     */
+    protected void setInitialSide(Side side) throws WrongStateException {
+        currentState.chooseInitialSide();
+
+        try {
+            currentPlayer.getBoard().setInitialCard(currentGivenInitialCard, side);
+        } catch (CardException e) {
+            throw new RuntimeException(e);
+        }
+
+        currentGivenInitialCard = null;
+
+        currentState.transition();
+    }
+
+    // Returns a Map that links each player to the number of DIFFERENT objectives achieved
+    private Map<Player, Integer> checkObjectivesAchievement() {
+        // Map that links each player to the number of DIFFERENT objectives achieved
+        Map<Player, Integer> playersAchievedObjectives = new HashMap<>();
+
+        Objective firstObjective = visibleObjectives.first();
+        Objective secondObjective = visibleObjectives.second();
+
+        for (Player p : players) {
+            Board board = p.getBoard();
+            Objective secretObjective = p.getSecretObjective();
+            int numAchievedObjectives = 0;
+
+            // Add to the player the points of the specific objective MULTIPLIED BY how many times they met the
+            // objective requirement
+            if (secretObjective != null)
+                p.addPoints(secretObjective.getPoints() * secretObjective.getReq().timesMet(board));
+            p.addPoints(firstObjective.getPoints() * firstObjective.getReq().timesMet(board));
+            p.addPoints(secondObjective.getPoints() * secondObjective.getReq().timesMet(board));
+
+            // Count the number of achieved objectives by the player
+            if (secretObjective != null && secretObjective.getReq().timesMet(board) >= 1)
+                numAchievedObjectives++;
+            if (firstObjective.getReq().timesMet(board) >= 1)
+                numAchievedObjectives++;
+            if (secondObjective.getReq().timesMet(board) >= 1)
+                numAchievedObjectives++;
+
+            playersAchievedObjectives.put(p, numAchievedObjectives);
+        }
+
+        return playersAchievedObjectives;
+    }
+
+    /**
+     * Calculates the winner (or winners)
+     */
+    protected void decideWinner() {
+        playersFinalRanking = new ArrayList<>();
+        Map<Player, Integer> achievedObjectives = checkObjectivesAchievement();
+
+        List<Player> sortedPlayers = players.stream()
+                .sorted(
+                        // Create a comparator that firstly sorts based on player points
+                        // and secondly, in case of same points, on the number of achieved objectives
+                        // Please note: reversed() since the default sort is ascending (min first), but the expected
+                        // results requires a descending sort (max points/objectives first)
+                        Comparator.comparingInt(Player::getPoints)
+                                .thenComparing(achievedObjectives::get)
+                                .reversed()
+                )
+                .toList();
+
+        Player bestPlayer = sortedPlayers.get(0);
+        int bestAchievedObjectives = achievedObjectives.get(bestPlayer);
+        int bestPoints = bestPlayer.getPoints();
+        boolean isWinner;
+
+        for (Player p : sortedPlayers) {
+            // If the current player has as many points and as many achieved objectives as the winner,
+            // then they're winner too
+            isWinner = p.getPoints() == bestPoints && achievedObjectives.get(p) == bestAchievedObjectives;
+
+            playersFinalRanking.add(new Pair<>(p, isWinner));
+        }
+    }
+
+    /**
+     * Getter for the final ranking of players. Return a valid result if and only if called when the match is in the
+     * FinalState, so it's finished.
+     * @return Players ranking of the match at the end of it; the List order represents the ranking order, the Boolean
+     * represent if the related player is a winner; this is needed since the match can end in a tie, in such case the
+     * first two/three players of the List will have a True flag
+     */
+    public List<Pair<Player, Boolean>> getPlayersFinalRanking() {
+        return playersFinalRanking;
+    }
+
+    /**
+     * Returns the visible objectives.
+     * @return a Pair containing the two visible objectives
+    */
+    public Pair<Objective, Objective> getVisibleObjectives() {
+        return visibleObjectives;
+    }
+
+    /**
+     * Getter for the four visible playable cards (i.e. resource cards and gold cards, not objectives) on the common
+     * table.
+     * @return a Map that links each visible playable card to a DrawSource (restricted to FIRST_VISIBLE, SECOND_VISIBLE,
+     * THIRD_VISIBLE, FOURTH_VISIBLE)
+     */
+    public Map<DrawSource, PlayableCard> getVisiblePlayableCards() {
+        return visiblePlayableCards;
+    }
+
+    /**
+     * Getter for the current match state.
+     * @return the current state of the match
+     */
+    public MatchState getCurrentState() {
+        return currentState;
+    }
+
+    /**
+     * Getter of the visible cards back on the top of the decks
+     * @return Pair of two CardFace, the first one is the CardFace at the
+     * top of golds deck, the second one is the CardFace at the top of resources deck
+     */
+    public Pair<CardFace, CardFace> getVisibleCardsBack() {
+        Card goldCard = goldsDeck.peek();
+        Card resourceCard = resourcesDeck.peek();
+        CardFace gold = null;
+        CardFace resource = null;
+
+        if (goldCard != null)
+            gold = goldCard.getSide(Side.BACK);
+        if (resourceCard != null)
+            resource = resourceCard.getSide(Side.BACK);
+
+        return new Pair<>(gold, resource);
+    }
+
+    public int getMaxPlayers() {
+        return maxPlayers;
     }
 }

@@ -10,11 +10,28 @@ public class Objective {
     private Requirement req;
 
     /**
+    * Class constructor. It is composed only of a requirement (using polymorphism) and the points it gives
     * @param points the number of points the objective will give (which is always an absolute number, it never depends on any resource)
     * @param req the requirement to satisfy in order to receive the points
     */
     public Objective(int points, Requirement req) {
         this.points = points; this.req = req;
+    }
+
+    /**
+    * Getter for the Objective class
+    * @return the points held by the objective card.
+    */
+    public int getPoints() {
+        return this.points;
+    }
+
+    /**
+    * Getter for the Objective class
+    * @return the requirement for the objective card to be placed.
+    */
+    public Requirement getReq() {
+        return this.req;
     }
 }
 

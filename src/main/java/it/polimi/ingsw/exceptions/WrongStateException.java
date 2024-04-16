@@ -1,4 +1,4 @@
-package it.polimi.ingsw.gamemodel;
+package it.polimi.ingsw.exceptions;
 
 public class WrongStateException extends Exception{
     public WrongStateException(String message) {

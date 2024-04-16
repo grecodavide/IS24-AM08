@@ -4,6 +4,8 @@ public class FinalState extends MatchState {
 
     public FinalState(Match match) {
         super(match);
+
+        match.decideWinner();
     }
 
     @Override
