@@ -14,15 +14,9 @@ public abstract class Card {
     * @see CardFace
     */
     public CardFace getSide(Side side) {
-        switch (side) {
-            case FRONT:
-                return this.front;
-
-            case BACK:
-                return this.back;
-
-            default:
-                return null;
-        }
+        return switch (side) {
+            case FRONT -> this.front;
+            case BACK -> this.back;
+        };
     }
 }

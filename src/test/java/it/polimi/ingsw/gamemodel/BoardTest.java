@@ -112,7 +112,6 @@ public class BoardTest {
 
             board.verifyCardPlacement(new Pair<>(1, -5), invalidGold, Side.FRONT);
         } catch (Exception e) {
-            System.err.println(e);
             assertEquals("The card is not in the player's hand!", e.getMessage());
         }
     }
