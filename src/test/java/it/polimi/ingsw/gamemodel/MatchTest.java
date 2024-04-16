@@ -26,7 +26,7 @@ public class MatchTest {
         player3 = new Player("Foingo", match);
         player4 = new Player("Francesco Edoardo Caracciolo", match);
 
-        // Verify that Match throws an exception when the initial cards deck has less
+        // Verify that Match throws an exception when the initial cards deck has fewer
         // cards than the number of players (3 cards in this case, minus than 4
         // players in the match)
         initializeAllEqualDecks();
@@ -243,7 +243,7 @@ public class MatchTest {
 
     @Test
     public void setInitialSide() {
-        // Setup a basic game
+        // Set up a basic game
         initializeBlankMatch(2);
 
         // For each player in the match
@@ -882,7 +882,7 @@ public class MatchTest {
     }
 
     private void initializeBlankMatch(int maxPlayers, int initialsNum, int objectivesNum, int resourcesNum, int goldsNum) {
-        // Setup a basic game
+        // Set up a basic game
         String names[] = {"Oingo", "Boingo", "Jotaro", "Polnareff"};
         Player players[] = new Player[4];
 
@@ -905,7 +905,7 @@ public class MatchTest {
     }
 
     private void initializeBlankStartedMatch(int maxPlayers, int initialsNum, int objectivesNum, int resourcesNum, int goldsNum) {
-        // Setup a basic game
+        // Set up a basic game
         initializeBlankMatch(maxPlayers, initialsNum, objectivesNum, resourcesNum, goldsNum);
 
         try {

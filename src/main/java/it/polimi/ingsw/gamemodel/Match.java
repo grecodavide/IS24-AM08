@@ -566,7 +566,7 @@ public class Match {
                         // Create a comparator that firstly sorts based on player points
                         // and secondly, in case of same points, on the number of achieved objectives
                         // Please note: reversed() since the default sort is ascending (min first), but the expected
-                        // results requires a a descending sort (max points/objectives first)
+                        // results requires a descending sort (max points/objectives first)
                         Comparator.comparingInt(Player::getPoints)
                                 .thenComparing(achievedObjectives::get)
                                 .reversed()
