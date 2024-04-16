@@ -81,8 +81,7 @@ public class BoardTest {
 
             verifyResources(Symbol.PLANT, 12);
         } catch (Exception e) {
-            System.err.println(e);
-            assertTrue(false);
+            throw new RuntimeException(e);
         }
     }
 

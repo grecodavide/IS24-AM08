@@ -9,7 +9,7 @@ public class AfterMoveState extends MatchState {
     }
 
     @Override
-    public void drawCard() throws WrongStateException {
+    public void drawCard() {
 
     }
 
@@ -17,5 +17,7 @@ public class AfterMoveState extends MatchState {
     public void transition() {
         MatchState nextState = new AfterDrawState(match);
         match.setState(nextState);
+
+        nextState.transition();
     }
 }

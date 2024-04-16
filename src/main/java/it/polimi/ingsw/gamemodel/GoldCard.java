@@ -64,6 +64,9 @@ public class GoldCard extends PlayableCard{
     * @return the points gained from playing the gold card
     */
     public int calculatePoints(Board board, Pair<Integer, Integer> coord) {
+        if (this.multiplier == Symbol.NO_MULT) {
+            return this.points;
+        }
         Map<Symbol, Integer> availableResources = board.getAvailableResources();
 
         int totalElements = 0;
