@@ -15,6 +15,9 @@ public class WaitState extends MatchState{
             
             MatchState nextState = new NextTurnState(match);
             match.setState(nextState);
+
+            // Notify observers
+            match.notifyMatchStart();
         }
     }
 

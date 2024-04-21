@@ -48,6 +48,9 @@ public class Match {
     // True flag.
     private List<Pair<Player, Boolean>> playersFinalRanking;
 
+    // List of observers
+    private final List<MatchObserver> observers;
+
     /**
      * Initializes main Match attributes and allocate the attribute players List, assuming no parameter is null.
      * @param maxPlayers maximum number of players to be added to the match, chosen by the first player joining the match
@@ -64,6 +67,7 @@ public class Match {
         this.goldsDeck = goldsDeck;
         this.objectivesDeck = objectivesDeck;
         this.currentState = new WaitState(this);
+        this.observers = new ArrayList<>();
 
         if (goldsDeck.getSize() < maxPlayers + 2)
             throw new IllegalArgumentException("goldsDeck does not have enough cards");
@@ -225,6 +229,8 @@ public class Match {
             throw new RuntimeException(e);
         }
 
+        // Notify observers and trigger state transition
+        observers.forEach(observer -> observer.someoneDrewInitialCard(currentPlayer, currentGivenInitialCard));
         currentState.transition();
 
         return currentGivenInitialCard;
@@ -243,6 +249,8 @@ public class Match {
 
             currentProposedObjectives = new Pair<>(obj1, obj2);
 
+            // Notify observers and trigger state transition
+            observers.forEach(observer -> observer.someoneDrewSecretObjective(currentPlayer, currentProposedObjectives));
             currentState.transition();
 
             return currentProposedObjectives;
@@ -273,6 +281,8 @@ public class Match {
             // If the objective is not one of the proposed ones, throw an exception
             throw new WrongChoiceException("The chosen objective is not one of the proposed ones");
 
+        // Notify observers and trigger state transition
+        observers.forEach(observer -> observer.someoneChoseSecretObjective(currentPlayer, objective));
         currentState.transition();
     }
 
@@ -402,6 +412,8 @@ public class Match {
                 if (currentPlayer.getPoints() >= 20)
                     lastTurn = true;
 
+                // Notify observers and trigger state transition
+                observers.forEach(observer -> observer.someonePlayedCard(currentPlayer, coords, card, side));
                 currentState.transition();
                 break;
             case INVALID_COORDS:
@@ -496,6 +508,8 @@ public class Match {
         if (currentPlayer.equals(players.getLast()) && lastTurn)
             finished = true;
 
+        // Notify observers and trigger state transition
+        observers.forEach(observer -> observer.someoneDrewCard(currentPlayer, source, card));
         currentState.transition();
 
         return card;
@@ -516,7 +530,8 @@ public class Match {
         }
 
         currentGivenInitialCard = null;
-
+        // Notify observers and trigger state transition
+        observers.forEach(observer -> observer.someoneSetInitialSide(currentPlayer, side));
         currentState.transition();
     }
 
@@ -585,6 +600,9 @@ public class Match {
 
             playersFinalRanking.add(new Pair<>(p, isWinner));
         }
+
+        // Notify observers
+        observers.forEach(MatchObserver::matchFinished);
     }
 
     /**
@@ -645,5 +663,16 @@ public class Match {
 
     public int getMaxPlayers() {
         return maxPlayers;
+    }
+
+    public void subscribeObserver(MatchObserver observer) {
+        observers.add(observer);
+    }
+
+    /**
+     * Notify observers when the match is started, called by WaitState after match setup
+     */
+    protected void notifyMatchStart() {
+        observers.forEach(MatchObserver::matchStarted);
     }
 }
