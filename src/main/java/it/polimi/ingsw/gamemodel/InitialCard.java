@@ -10,6 +10,7 @@ public class InitialCard extends Card{
     * @param back the back side of the card
     */
     public InitialCard(CardFace front, CardFace back) {
+        super();
         this.front = front; this.back = back;
     }
 }
