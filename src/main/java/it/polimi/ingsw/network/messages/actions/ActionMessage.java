@@ -7,6 +7,7 @@ import it.polimi.ingsw.network.messages.Message;
  */
 public class ActionMessage extends Message {
     public String username;
+    public String action = this.getClass().getSimpleName().replace("Message", "");
 
     public ActionMessage(String username) {
         super();

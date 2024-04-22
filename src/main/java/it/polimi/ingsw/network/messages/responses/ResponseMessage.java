@@ -7,6 +7,7 @@ import it.polimi.ingsw.network.messages.Message;
  */
 public class ResponseMessage extends Message {
     public String username;
+    public String response = this.getClass().getSimpleName().replace("Message", "");
 
     public ResponseMessage(String username) {
         this.username = username;
