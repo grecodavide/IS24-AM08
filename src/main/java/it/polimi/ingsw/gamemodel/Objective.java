@@ -8,6 +8,8 @@ package it.polimi.ingsw.gamemodel;
 public class Objective {
     private int points;
     private Requirement req;
+    private static Integer lastID = 0;
+    private Integer id;
 
     /**
     * Class constructor. It is composed only of a requirement (using polymorphism) and the points it gives
@@ -15,6 +17,8 @@ public class Objective {
     * @param req the requirement to satisfy in order to receive the points
     */
     public Objective(int points, Requirement req) {
+        Objective.lastID ++;
+        this.id = Objective.lastID;
         this.points = points; this.req = req;
     }
 
@@ -32,6 +36,10 @@ public class Objective {
     */
     public Requirement getReq() {
         return this.req;
+    }
+
+    public Integer getID() {
+        return this.id;
     }
 }
 

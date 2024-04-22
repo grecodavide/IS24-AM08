@@ -10,8 +10,8 @@ import it.polimi.ingsw.gamemodel.Side;
 import it.polimi.ingsw.utils.Pair;
 
 public abstract class PlayerController implements MatchObserver {
-    private Player player;
-    private Match match;
+    protected Player player;
+    protected Match match;
     public PlayerController(String nickname, Match match) {
         this.player = new Player(nickname, match);
         this.match = match;
