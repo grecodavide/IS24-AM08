@@ -1,7 +1,7 @@
 package it.polimi.ingsw.exceptions;
 
-public class NonexistendMatchException extends Exception {
-    public NonexistendMatchException(String message) {
+public class ChosenMatchException extends Exception {
+    public ChosenMatchException(String message) {
         super(message);
     }
 }

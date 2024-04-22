@@ -1,2 +1,137 @@
-package it.polimi.ingsw.controllers;public class PlayerControllerRMI {
+package it.polimi.ingsw.controllers;
+
+import it.polimi.ingsw.client.ViewInterface;
+import it.polimi.ingsw.exceptions.*;
+import it.polimi.ingsw.gamemodel.*;
+import it.polimi.ingsw.utils.Pair;
+
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
+
+// TODO: Manages all RuntimeException caused by RemoteException
+public final class PlayerControllerRMI extends PlayerController implements PlayerControllerRMIInterface {
+    public PlayerControllerRMI(String nickname, Match match, int port) throws AlreadyUsedNicknameException, RemoteException {
+        super(nickname, match);
+
+        UnicastRemoteObject.exportObject(this, port);
+    }
+
+    @Override
+    public void registerView(ViewInterface view) {
+        this.view = view;
+    }
+
+    @Override
+    public void drawInitialCard() throws WrongStateException, WrongTurnException, RemoteException {
+        InitialCard initialCard = player.drawInitialCard();
+
+        try {
+            view.giveInitialCard(initialCard);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void chooseInitialCardSide(Side side) throws WrongStateException, WrongTurnException, RemoteException {
+        player.chooseInitialCardSide(side);
+    }
+
+    @Override
+    public void drawSecretObjectives() throws WrongStateException, WrongTurnException, RemoteException {
+        Pair<Objective, Objective> secretObjectives = player.drawSecretObjectives();
+
+        try {
+            view.giveSecretObjectives(secretObjectives);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void chooseSecretObjective(Objective objective) throws RemoteException, WrongStateException, WrongTurnException, WrongChoiceException {
+        player.chooseSecretObjective(objective);
+    }
+
+    @Override
+    public void playCard(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws RemoteException, WrongStateException, WrongTurnException, WrongChoiceException {
+        player.playCard(coords, card, side);
+    }
+
+    @Override
+    public void drawCard(DrawSource source) throws RemoteException, HandException, WrongStateException, WrongTurnException, WrongChoiceException {
+        player.drawCard(source);
+    }
+
+    @Override
+    public void matchStarted() {
+        try {
+            view.matchStarted();
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void someoneDrewInitialCard(Player someone, InitialCard card) {
+        try {
+            view.someoneDrewInitialCard(someone, card);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void someoneSetInitialSide(Player someone, Side side) {
+        try {
+            view.someoneSetInitialSide(someone, side);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void someoneDrewSecretObjective(Player someone, Pair<Objective, Objective> objectives) {
+        try {
+            view.someoneDrewSecretObjective(someone, objectives);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void someoneChoseSecretObjective(Player someone, Objective objective) {
+        try {
+            view.someoneChoseSecretObjective(someone, objective);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void someonePlayedCard(Player someone, Pair<Integer, Integer> coords, PlayableCard card, Side side) {
+        try {
+            view.someonePlayedCard(someone, coords, card, side);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void someoneDrewCard(Player someone, DrawSource source, Card card) {
+        try {
+            view.someoneDrewCard(someone, source, card);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void matchFinished() {
+        try {
+            view.matchFinished();
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

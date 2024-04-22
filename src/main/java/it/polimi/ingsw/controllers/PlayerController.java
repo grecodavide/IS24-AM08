@@ -1,23 +1,39 @@
 package it.polimi.ingsw.controllers;
 
+import it.polimi.ingsw.client.ViewInterface;
 import it.polimi.ingsw.exceptions.*;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.Pair;
 
+import java.rmi.RemoteException;
 import java.util.List;
 
-public abstract class PlayerController implements MatchObserver {
+public abstract sealed class PlayerController implements MatchObserver permits PlayerControllerRMI {
+    protected Match match;
+    protected Player player;
+    protected ViewInterface view;
 
-    public abstract void drawInitialCard();
+    public PlayerController(String nickname, Match match) throws AlreadyUsedNicknameException {
+        List<String> playersNicknames = match.getPlayers().stream().map(Player::getNickname).toList();
 
-    public abstract void chooseInitialCardSide(Side side);
+        if (playersNicknames.contains(nickname))
+            throw new AlreadyUsedNicknameException("The chosen nickname is already in use");
 
-    public abstract void drawSecretObjectives();
+        this.match = match;
+
+        match.subscribeObserver(this);
+    }
+
+    public abstract void drawInitialCard() throws WrongStateException, WrongTurnException, RemoteException, PlayerQuitException;
+
+    public abstract void chooseInitialCardSide(Side side) throws WrongStateException, WrongTurnException, RemoteException;
+
+    public abstract void drawSecretObjectives() throws WrongStateException, WrongTurnException, RemoteException, PlayerQuitException;
     
-    public abstract void chooseSecretObjective(Objective objective);
+    public abstract void chooseSecretObjective(Objective objective) throws RemoteException, WrongStateException, WrongTurnException, WrongChoiceException;
 
-    public abstract void playCard(Pair<Integer, Integer> coords, PlayableCard card, Side side);
+    public abstract void playCard(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws RemoteException, WrongStateException, WrongTurnException, WrongChoiceException;
 
-    public abstract void drawCard(DrawSource source);
+    public abstract void drawCard(DrawSource source) throws RemoteException, HandException, WrongStateException, WrongTurnException, WrongChoiceException;
 
 }
