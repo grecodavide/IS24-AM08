@@ -23,8 +23,8 @@ public class PlayerControllerTCP extends PlayerController {
     private Socket socket;
     private ObjectOutputStream outputStream;
 
-    public PlayerControllerTCP(Player player, Match match, Socket socket) {
-        super(player, match);
+    public PlayerControllerTCP(String nickname, Match match, Socket socket) {
+        super(nickname, match);
         try {
             this.socket = socket;
             this.outputStream = new ObjectOutputStream(this.socket.getOutputStream());
