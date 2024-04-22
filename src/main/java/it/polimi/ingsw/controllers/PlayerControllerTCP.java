@@ -5,10 +5,7 @@ import java.net.Socket;
 
 import com.google.gson.Gson;
 
-import it.polimi.ingsw.exceptions.HandException;
-import it.polimi.ingsw.exceptions.WrongChoiceException;
-import it.polimi.ingsw.exceptions.WrongStateException;
-import it.polimi.ingsw.exceptions.WrongTurnException;
+import it.polimi.ingsw.exceptions.*;
 import it.polimi.ingsw.gamemodel.Card;
 import it.polimi.ingsw.gamemodel.DrawSource;
 import it.polimi.ingsw.gamemodel.InitialCard;
@@ -27,13 +24,14 @@ import it.polimi.ingsw.network.messages.responses.SomeoneDrewInitialCardMessage;
 import it.polimi.ingsw.network.messages.responses.SomeoneDrewSecretObjectivesMessage;
 import it.polimi.ingsw.network.messages.responses.SomeonePlayedCardMessage;
 import it.polimi.ingsw.network.messages.responses.SomeoneSetInitialSideMessage;
+import it.polimi.ingsw.utils.MessageJsonParser;
 import it.polimi.ingsw.utils.Pair;
 
 public class PlayerControllerTCP extends PlayerController {
     private Socket socket;
     private ObjectOutputStream outputStream;
 
-    public PlayerControllerTCP(String nickname, Match match, Socket socket) {
+    public PlayerControllerTCP(String nickname, Match match, Socket socket) throws AlreadyUsedNicknameException{
         super(nickname, match);
         try {
             this.socket = socket;
@@ -46,11 +44,18 @@ public class PlayerControllerTCP extends PlayerController {
 
     private void sendMessage(Message msg) {
         try {
-            Gson gson = new Gson();
-            this.outputStream.writeObject(gson.toJson(msg));
+            MessageJsonParser parser = new MessageJsonParser();
+            this.outputStream.writeObject(parser.toJson(msg));
         } catch (Exception e) {
-            e.printStackTrace();
-            // match.removePlayer(player);
+            this.connectionError();
+        }
+    }
+
+    private void connectionError() {
+        try {
+            match.removePlayer(player);
+        } catch (PlayerQuitException e) {
+
         }
     }
 
