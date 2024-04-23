@@ -9,10 +9,13 @@ public class SomeoneDrewCardMessage extends ResponseMessage {
 
     DrawSource source;
     Integer cardID;
+    Integer replacementCardID;
 
-    public SomeoneDrewCardMessage(String username, DrawSource source, Integer cardID) {
+    // TODO: update table
+    public SomeoneDrewCardMessage(String username, DrawSource source, Integer cardID, Integer replacementCardID) {
         super(username);
         this.source = source;
         this.cardID = cardID;
+        this.replacementCardID = replacementCardID;
     }
 }

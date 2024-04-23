@@ -65,7 +65,7 @@ public class PlayerControllerTCP extends PlayerController {
 
     @Override
     public void matchStarted() {
-        this.sendMessage(new MatchStartedMessage());
+        this.sendMessage(new MatchStartedMessage(match.getVisibleObjectives(), match.getVisiblePlayableCards(), match.getDeckVisibleCards()));
     }
 
     @Override
@@ -87,22 +87,25 @@ public class PlayerControllerTCP extends PlayerController {
 
     @Override
     public void someoneChoseSecretObjective(Player someone, Objective objective) {
-        this.sendMessage(new SomeoneChoseSecretObjectiveMessage(someone.getNickname(), objective.getID()));
+        Integer objectiveID = null;
+        if (someone.equals(player))
+            objectiveID = objective.getID();
+        this.sendMessage(new SomeoneChoseSecretObjectiveMessage(someone.getNickname(), objectiveID));
     }
 
     @Override
     public void someonePlayedCard(Player someone, Pair<Integer, Integer> coords, PlayableCard card, Side side) {
-        this.sendMessage(new SomeonePlayedCardMessage(someone.getNickname(), coords, card.getId(), side));
+        this.sendMessage(new SomeonePlayedCardMessage(someone.getNickname(), coords, card.getId(), side, someone.getPoints()));
     }
 
     @Override
-    public void someoneDrewCard(Player someone, DrawSource source, Card card) {
-        this.sendMessage(new SomeoneDrewCardMessage(someone.getNickname(), source, card.getId()));
+    public void someoneDrewCard(Player someone, DrawSource source, Card card, Card replacementCard) {
+        this.sendMessage(new SomeoneDrewCardMessage(someone.getNickname(), source, card.getId(), replacementCard.getId()));
     }
 
     @Override
     public void matchFinished() {
-        this.sendMessage(new MatchFinishedMessage());
+        this.sendMessage(new MatchFinishedMessage(match.getPlayersFinalRanking()));
     }
 
     @Override
