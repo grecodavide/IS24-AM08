@@ -15,7 +15,7 @@ public interface MatchObserver {
 
     void someonePlayedCard(Player p, Pair<Integer, Integer> coords, PlayableCard card, Side side);
 
-    void someoneDrewCard(Player p, DrawSource source, Card card);
+    void someoneDrewCard(Player p, DrawSource source, Card card, Card replacementCard);
 
     void matchFinished();
 

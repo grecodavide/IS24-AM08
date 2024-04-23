@@ -437,6 +437,7 @@ public class Match {
      */
     protected PlayableCard drawCard(DrawSource source) throws WrongStateException, WrongChoiceException {
         PlayableCard card;
+        PlayableCard replacementCard = null;
 
         currentState.drawCard();
 
@@ -444,6 +445,7 @@ public class Match {
             case GOLDS_DECK -> {
                 try {
                     card = goldsDeck.pop();
+                    replacementCard = goldsDeck.peek();
                 } catch (DeckException e) {
                     throw new WrongChoiceException("The gold cards deck is empty!");
                 }
@@ -452,6 +454,7 @@ public class Match {
             case RESOURCES_DECK -> {
                 try {
                     card = resourcesDeck.pop();
+                    replacementCard = resourcesDeck.peek();
                 } catch (DeckException e) {
                     throw new WrongChoiceException("The resource cards deck is empty!");
                 }
@@ -467,14 +470,18 @@ public class Match {
 
                 // If the golds deck is NOT empty, substitute the first/second visible
                 // card with a new gold
-                if(!goldsDeck.isEmpty())
-                    visiblePlayableCards.put(source, goldsDeck.poll());
+                if(!goldsDeck.isEmpty()) {
+                    replacementCard = goldsDeck.poll();
+                    visiblePlayableCards.put(source, replacementCard);
+                }
                 // If the golds deck is empty, substitute the first/second visible
                 // card with a resource
-                else
-                    visiblePlayableCards.put(source, resourcesDeck.poll());
-                // If the resources deck is empty too, the GameDeck.poll() method returns null,
-                // then the corresponding visible card will be null
+                else {
+                    replacementCard = resourcesDeck.poll();
+                    visiblePlayableCards.put(source, replacementCard);
+                    // If the resources deck is empty too, the GameDeck.poll() method returns null,
+                    // then the corresponding visible card will be null
+                }
             }
 
             case THIRD_VISIBLE, FOURTH_VISIBLE -> {
@@ -487,12 +494,16 @@ public class Match {
 
                 // If the resources deck is NOT empty, substitute the third/fourth visible
                 // card with a new resource
-                if(!resourcesDeck.isEmpty())
-                    visiblePlayableCards.put(source, resourcesDeck.poll());
+                if(!resourcesDeck.isEmpty()) {
+                    replacementCard = resourcesDeck.poll();
+                    visiblePlayableCards.put(source, replacementCard);
+                }
                 // If the resources deck is empty, substitute the third/fourth visible
                 // card with a gold
-                else
-                    visiblePlayableCards.put(source, goldsDeck.poll());
+                else {
+                    replacementCard = goldsDeck.poll();
+                    visiblePlayableCards.put(source, replacementCard);
+                }
                 // If the golds deck is empty too, the GameDeck.poll() method returns null,
                 // then the corresponding visible card will be null
             }
@@ -507,9 +518,9 @@ public class Match {
         // AND the current turn is the last one the match is now finished
         if (currentPlayer.equals(players.getLast()) && lastTurn)
             finished = true;
-
         // Notify observers and trigger state transition
-        observers.forEach(observer -> observer.someoneDrewCard(currentPlayer, source, card));
+        final PlayableCard replacementCardFinal = replacementCard;
+        observers.forEach(observer -> observer.someoneDrewCard(currentPlayer, source, card, replacementCardFinal));
         currentState.transition();
 
         return card;
@@ -659,6 +670,12 @@ public class Match {
             resource = resourceCard.getSide(Side.BACK);
 
         return new Pair<>(gold, resource);
+    }
+
+    public Pair<PlayableCard, PlayableCard> getDeckVisibleCards() {
+        PlayableCard goldCard = goldsDeck.peek();
+        PlayableCard resourceCard = resourcesDeck.peek();
+        return new Pair<>(goldCard, resourceCard);
     }
 
     public int getMaxPlayers() {
