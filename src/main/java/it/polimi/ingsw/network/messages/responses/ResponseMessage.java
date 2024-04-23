@@ -5,7 +5,9 @@ import it.polimi.ingsw.network.messages.Message;
 /**
  * ResponseMessage
  */
-public class ResponseMessage extends Message {
+public sealed class ResponseMessage extends Message permits
+    MatchFinishedMessage, MatchStartedMessage, SomeoneDrewCardMessage, SomeoneDrewSecretObjectivesMessage,
+    SomeoneChoseSecretObjectiveMessage, SomeoneSetInitialSideMessage, SomeonePlayedCardMessage, SomeoneDrewInitialCardMessage{
     public String username;
     public String response = this.getClass().getSimpleName().replace("Message", "");
 

@@ -3,7 +3,7 @@ package it.polimi.ingsw.network.messages.responses;
 /**
  * SomeoneDrewInitialCardMessage
  */
-public class SomeoneDrewInitialCardMessage extends ResponseMessage {
+public final class SomeoneDrewInitialCardMessage extends ResponseMessage {
     public Integer initialCardID;
 
     public SomeoneDrewInitialCardMessage(String username, Integer initialCardID) {

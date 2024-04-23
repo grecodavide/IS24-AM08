@@ -5,7 +5,7 @@ import it.polimi.ingsw.gamemodel.Side;
 /**
  * SomeoneSetInitialSideMessage
  */
-public class SomeoneSetInitialSideMessage extends ResponseMessage {
+public final class SomeoneSetInitialSideMessage extends ResponseMessage {
 
     public Side side;
     public SomeoneSetInitialSideMessage(String username, Side side) {

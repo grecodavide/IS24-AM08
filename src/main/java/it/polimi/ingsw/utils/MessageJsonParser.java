@@ -4,16 +4,11 @@ import com.google.gson.*;
 import it.polimi.ingsw.network.messages.Message;
 import it.polimi.ingsw.network.messages.actions.*;
 import it.polimi.ingsw.network.messages.errors.ErrorMessage;
-import it.polimi.ingsw.network.messages.responses.MatchFinishedMessage;
-import it.polimi.ingsw.network.messages.responses.MatchStartedMessage;
-import it.polimi.ingsw.network.messages.responses.SomeoneChoseSecretObjectiveMessage;
-import it.polimi.ingsw.network.messages.responses.SomeoneDrewCardMessage;
-import it.polimi.ingsw.network.messages.responses.SomeoneDrewInitialCardMessage;
-import it.polimi.ingsw.network.messages.responses.SomeoneDrewSecretObjectivesMessage;
-import it.polimi.ingsw.network.messages.responses.SomeonePlayedCardMessage;
-import it.polimi.ingsw.network.messages.responses.SomeoneSetInitialSideMessage;
+import it.polimi.ingsw.network.messages.responses.*;
 
 import java.lang.reflect.Type;
+import java.util.Arrays;
+import java.util.Optional;
 
 public class MessageJsonParser {
 
@@ -47,9 +42,9 @@ public class MessageJsonParser {
             JsonObject messageObject = json.getAsJsonObject();
 
             if (messageObject.has("action")) {
-                return convertAction(messageObject.get("action").getAsString(), messageObject, context);
+                return convertClass(ActionMessage.class, messageObject.get("action").getAsString(), messageObject, context);
             } else if (messageObject.has("response")) {
-                return convertResponse(messageObject.get("response").getAsString(), messageObject, context);
+                return convertClass(ResponseMessage.class, messageObject.get("response").getAsString(), messageObject, context);
             } else if (messageObject.has("error")) {
                 return convertError(messageObject.get("error").getAsString(), messageObject, context);
             } else {
@@ -62,61 +57,15 @@ public class MessageJsonParser {
             return context.deserialize(messageObject, ErrorMessage.class);
         }
 
-        private Message convertAction(String type, JsonObject messageObject, JsonDeserializationContext context) {
-            switch (type) {
-                case "DrawInitialCard" -> {
-                    return context.deserialize(messageObject, DrawInitialCardMessage.class);
-                }
-                case "ChooseInitialCardSide" -> {
-                    return context.deserialize(messageObject, ChooseInitialCardSideMessage.class);
-                }
-                case "DrawSecretObjectives" -> {
-                    return context.deserialize(messageObject, DrawSecretObjectivesMessage.class);
-                }
-                case "ChooseSecretObjective" -> {
-                    return context.deserialize(messageObject, ChooseSecretObjectiveMessage.class);
-                }
-                case "PlayCard" -> {
-                    return context.deserialize(messageObject, PlayCardMessage.class);
-                }
-                case "DrawCard" -> {
-                    return context.deserialize(messageObject, DrawCardMessage.class);
-                }
-                default -> {
-                    throw new JsonParseException("Wrong message action");
-                }
-            }
-        }
-    }
-
-    private Message convertResponse(String type, JsonObject messageObject, JsonDeserializationContext context) {
-        switch (type) {
-            case "MatchFinished" -> {
-                return context.deserialize(messageObject, MatchFinishedMessage.class);
-            }
-            case "MatchStarted" -> {
-                return context.deserialize(messageObject, MatchStartedMessage.class);
-            }
-            case "SomeoneChoseSecretObjective" -> {
-                return context.deserialize(messageObject, SomeoneChoseSecretObjectiveMessage.class);
-            }
-            case "SomeoneDrewCardMessage" -> {
-                return context.deserialize(messageObject, SomeoneDrewCardMessage.class);
-            }
-            case "SomeoneDrewInitialCard" -> {
-                return context.deserialize(messageObject, SomeoneDrewInitialCardMessage.class);
-            }
-            case "SomeoneSetInitialSide" -> {
-                return context.deserialize(messageObject, SomeoneSetInitialSideMessage.class);
-            }
-            case "SomeoneDrewSecretObjectives" -> {
-                return context.deserialize(messageObject, SomeoneDrewSecretObjectivesMessage.class);
-            }
-            case "SomeonePlayedCard" -> {
-                return context.deserialize(messageObject, SomeonePlayedCardMessage.class);
-            } 
-            default -> {
-                throw new JsonParseException("Wrong message response");
+        private Message convertClass(Class<?> mainClass, String type, JsonObject messageObject, JsonDeserializationContext context) {
+            Class<?>[] classes = mainClass.getPermittedSubclasses();
+            Optional<Class<?>> resultClass = Arrays.stream(classes)
+                    .filter(a -> type.equals(a.getSimpleName().replace("Message", "")))
+                    .findFirst();
+            if (resultClass.isEmpty()) {
+                throw new JsonParseException("Value is not found");
+            } else {
+                return context.deserialize(messageObject, resultClass.get());
             }
         }
     }

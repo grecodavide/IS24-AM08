@@ -1,6 +1,6 @@
-package it.polimi.ingsw.network;
+package it.polimi.ingsw.network.tcp;
 
-public class IOTCP {
+public class IO {
 
   
 }

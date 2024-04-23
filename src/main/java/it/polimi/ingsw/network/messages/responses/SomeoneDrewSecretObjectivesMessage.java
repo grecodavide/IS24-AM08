@@ -5,7 +5,7 @@ import it.polimi.ingsw.utils.Pair;
 /**
  * SomeoneDrewSecretObjectivesMessage
  */
-public class SomeoneDrewSecretObjectivesMessage extends ResponseMessage {
+public final class SomeoneDrewSecretObjectivesMessage extends ResponseMessage {
     public Integer firstID, secondID;
 
     public SomeoneDrewSecretObjectivesMessage(String username, Pair<Integer, Integer> IDs) {
