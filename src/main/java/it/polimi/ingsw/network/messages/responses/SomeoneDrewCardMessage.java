@@ -5,7 +5,7 @@ import it.polimi.ingsw.gamemodel.DrawSource;
 /**
  * SomeoneDrewCard
  */
-public class SomeoneDrewCardMessage extends ResponseMessage {
+public final class SomeoneDrewCardMessage extends ResponseMessage {
 
     DrawSource source;
     Integer cardID;

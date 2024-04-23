@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 /**
  * MatchFinishedMessage
  */
-public class MatchFinishedMessage extends ResponseMessage {
+public final class MatchFinishedMessage extends ResponseMessage {
     public List<JsonObject> ranking;
     public MatchFinishedMessage(List<Pair<Player, Boolean>> finalRanking) {
         super("");

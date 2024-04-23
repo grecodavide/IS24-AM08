@@ -6,7 +6,7 @@ import it.polimi.ingsw.utils.Pair;
 /**
  * SomeonePlayedCardMessage
  */
-public class SomeonePlayedCardMessage extends ResponseMessage {
+public final class SomeonePlayedCardMessage extends ResponseMessage {
 
     public Integer x, y;
     public Integer cardID;

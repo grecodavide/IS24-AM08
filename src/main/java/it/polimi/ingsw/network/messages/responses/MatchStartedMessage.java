@@ -11,7 +11,7 @@ import java.util.Map;
 /**
  * MatchStartedMessage
  */
-public class MatchStartedMessage extends ResponseMessage {
+public final class MatchStartedMessage extends ResponseMessage {
     public Integer[] visibleObjectives;
     public Map<DrawSource, Integer> visibleCards;
     public Integer[] visibleDeckCards;
