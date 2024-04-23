@@ -6,7 +6,7 @@ import it.polimi.ingsw.utils.Pair;
 /**
  * PlayCardMessage
  */
-public class PlayCardMessage extends ActionMessage {
+public final class PlayCardMessage extends ActionMessage {
     public Integer x, y;
     public Integer cardID;
     public Side side;

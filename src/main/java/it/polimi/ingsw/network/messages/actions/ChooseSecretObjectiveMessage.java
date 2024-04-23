@@ -3,7 +3,7 @@ package it.polimi.ingsw.network.messages.actions;
 /**
  * ChooseSecretObjectiveMessage
  */
-public class ChooseSecretObjectiveMessage extends ActionMessage {
+public final class ChooseSecretObjectiveMessage extends ActionMessage {
     public Integer objectiveID;
 
     public ChooseSecretObjectiveMessage(String username, Integer objectiveID) {

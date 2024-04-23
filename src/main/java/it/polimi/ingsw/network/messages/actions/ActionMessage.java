@@ -5,9 +5,11 @@ import it.polimi.ingsw.network.messages.Message;
 /**
  * ActionMessage
  */
-public class ActionMessage extends Message {
+public sealed class ActionMessage extends Message permits 
+ChooseInitialCardSideMessage, ChooseSecretObjectiveMessage, DrawCardMessage, DrawInitialCardMessage, DrawSecretObjectivesMessage, PlayCardMessage {
     public String username;
     public String action = this.getClass().getSimpleName().replace("Message", "");
+
 
     public ActionMessage(String username) {
         super();
