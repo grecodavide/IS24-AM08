@@ -9,6 +9,7 @@ import java.util.*;
 import it.polimi.ingsw.controllers.PlayerControllerRMI;
 import it.polimi.ingsw.exceptions.AlreadyUsedNicknameException;
 import it.polimi.ingsw.exceptions.ChosenMatchException;
+import it.polimi.ingsw.exceptions.WrongStateException;
 import it.polimi.ingsw.gamemodel.*;
 
 public class Server extends UnicastRemoteObject implements RMIServerInterface {
@@ -27,22 +28,14 @@ public class Server extends UnicastRemoteObject implements RMIServerInterface {
 
     @Override
     public List<String> getJoinableMatches() {
-        List<String> joinableMatchesNames = new ArrayList<>();
-
-        for (String matchName : matches.keySet()) {
-            if (!matches.get(matchName).isFull())
-                joinableMatchesNames.add(matchName);
-        }
-
-        return joinableMatchesNames;
+        return matches.keySet().stream().filter(name -> !matches.get(name).isFull()).toList();
     }
 
     @Override
-    public PlayerControllerRMI joinMatch(String matchName, String nickname) throws RemoteException, ChosenMatchException, AlreadyUsedNicknameException {
+    public PlayerControllerRMI joinMatch(String matchName, String nickname) throws RemoteException, ChosenMatchException, AlreadyUsedNicknameException, WrongStateException {
         if (!matches.containsKey(matchName))
             throw new ChosenMatchException("The chosen match doesn't exist");
-
-        if (!getJoinableMatches().contains(matchName))
+        if (matches.get(matchName).isFull())
             throw new ChosenMatchException("The chosen match is already full");
 
         Match chosenMatch = matches.get(matchName);

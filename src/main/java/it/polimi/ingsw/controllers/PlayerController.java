@@ -22,11 +22,11 @@ public abstract sealed class PlayerController implements MatchObserver permits P
         match.subscribeObserver(this);
     }
 
-    public abstract void drawInitialCard() throws WrongStateException, WrongTurnException, RemoteException, PlayerQuitException;
+    public abstract void drawInitialCard() throws WrongStateException, WrongTurnException, RemoteException;
 
     public abstract void chooseInitialCardSide(Side side) throws WrongStateException, WrongTurnException, RemoteException;
 
-    public abstract void drawSecretObjectives() throws WrongStateException, WrongTurnException, RemoteException, PlayerQuitException;
+    public abstract void drawSecretObjectives() throws WrongStateException, WrongTurnException, RemoteException;
     
     public abstract void chooseSecretObjective(Objective objective) throws RemoteException, WrongStateException, WrongTurnException, WrongChoiceException;
 

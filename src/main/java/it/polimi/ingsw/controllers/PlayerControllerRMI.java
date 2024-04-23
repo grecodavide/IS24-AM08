@@ -7,10 +7,13 @@ import it.polimi.ingsw.utils.Pair;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.HashMap;
+import java.util.Map;
 
 // TODO: Manages all RuntimeException caused by RemoteException
 public final class PlayerControllerRMI extends PlayerController implements PlayerControllerRMIInterface {
-    public PlayerControllerRMI(String nickname, Match match, int port) throws AlreadyUsedNicknameException, RemoteException {
+
+    public PlayerControllerRMI(String nickname, Match match, int port) throws AlreadyUsedNicknameException, RemoteException, WrongStateException {
         super(nickname, match);
 
         UnicastRemoteObject.exportObject(this, port);
@@ -28,7 +31,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
         try {
             view.giveInitialCard(initialCard);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            onConnectionError();
         }
     }
 
@@ -44,7 +47,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
         try {
             view.giveSecretObjectives(secretObjectives);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            onConnectionError();
         }
     }
 
@@ -65,10 +68,22 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
 
     @Override
     public void matchStarted() {
+        Pair<Objective, Objective> visibleObjectives = match.getVisibleObjectives();
+        Map<DrawSource, PlayableCard> visiblePlayableCards = match.getVisiblePlayableCards();
+
+        Symbol firstDeckCardBack = match.getVisibleCardsBack().first().getCenter().stream().toList().getFirst();
+        Symbol secondDeckCardBack = match.getVisibleCardsBack().second().getCenter().stream().toList().getFirst();
+        Pair<Symbol, Symbol> decksCardsBacks = new Pair<>(firstDeckCardBack, secondDeckCardBack);
+
+        Map<Color, String> playersNicknamesAndPawns = new HashMap<>();
+
+        for (Player p : match.getPlayers())
+            playersNicknamesAndPawns.put(p.getPawnColor(), p.getNickname());
+
         try {
-            view.matchStarted();
+            view.matchStarted(playersNicknamesAndPawns, visibleObjectives, visiblePlayableCards, decksCardsBacks);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            onConnectionError();
         }
     }
 
@@ -77,7 +92,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
         try {
             view.someoneDrewInitialCard(someone, card);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            onConnectionError();
         }
     }
 
@@ -86,7 +101,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
         try {
             view.someoneSetInitialSide(someone, side);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            onConnectionError();
         }
     }
 
@@ -95,7 +110,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
         try {
             view.someoneDrewSecretObjective(someone, objectives);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            onConnectionError();
         }
     }
 
@@ -104,7 +119,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
         try {
             view.someoneChoseSecretObjective(someone, objective);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            onConnectionError();
         }
     }
 
@@ -113,16 +128,16 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
         try {
             view.someonePlayedCard(someone, coords, card, side);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            onConnectionError();
         }
     }
 
     @Override
-    public void someoneDrewCard(Player someone, DrawSource source, Card card) {
+    public void someoneDrewCard(Player someone, DrawSource source, Card card, Card replacementCard) {
         try {
             view.someoneDrewCard(someone, source, card);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            onConnectionError();
         }
     }
 
@@ -131,7 +146,11 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
         try {
             view.matchFinished();
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            onConnectionError();
         }
+    }
+
+    private void onConnectionError() {
+        match.removePlayer(player);
     }
 }
