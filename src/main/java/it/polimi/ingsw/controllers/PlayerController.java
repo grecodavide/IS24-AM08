@@ -13,14 +13,12 @@ public abstract sealed class PlayerController implements MatchObserver permits P
     protected Player player;
     protected ViewInterface view;
 
-    public PlayerController(String nickname, Match match) throws AlreadyUsedNicknameException {
-        List<String> playersNicknames = match.getPlayers().stream().map(Player::getNickname).toList();
-
-        if (playersNicknames.contains(nickname))
-            throw new AlreadyUsedNicknameException("The chosen nickname is already in use");
-
+    public PlayerController(String nickname, Match match) throws AlreadyUsedNicknameException, WrongStateException {
         this.match = match;
 
+        player = new Player(nickname, match);
+
+        match.addPlayer(player);
         match.subscribeObserver(this);
     }
 
