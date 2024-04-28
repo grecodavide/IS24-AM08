@@ -5,6 +5,9 @@ import java.util.*;
 import javax.management.RuntimeErrorException;
 
 import it.polimi.ingsw.exceptions.*;
+import it.polimi.ingsw.network.messages.Message;
+import it.polimi.ingsw.network.messages.responses.MatchStartedMessage;
+import it.polimi.ingsw.utils.MessageJsonParser;
 import it.polimi.ingsw.utils.Pair;
 import org.junit.Test;
 
@@ -680,8 +683,16 @@ public class MatchTest {
         assertEquals(player1, ranking.get(1).first());
         assertTrue("Player is not marked as winner", ranking.get(0).second());
         assertFalse("Player is marked as winner", ranking.get(1).second());
+        MessageJsonParser parser = new MessageJsonParser();
     }
 
+    @Test
+    public void generateJson() {
+        initializeBlankStartedMatch(3);
+        Message m = new MatchStartedMessage(match.getVisibleObjectives(), match.getVisiblePlayableCards(), match.getDeckVisibleCards(), match.getPlayers());
+        MessageJsonParser parser = new MessageJsonParser();
+        System.out.println(parser.toJson(m));
+    }
     // Private helper Methods
     private DrawSource decideDrawSource() {
         Map<DrawSource, PlayableCard> visible = match.getVisiblePlayableCards();

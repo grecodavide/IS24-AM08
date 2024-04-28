@@ -2,6 +2,7 @@ package it.polimi.ingsw.controllers;
 
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.HashMap;
 
 import it.polimi.ingsw.exceptions.AlreadyUsedNicknameException;
 import it.polimi.ingsw.exceptions.HandException;
@@ -68,7 +69,7 @@ public class PlayerControllerTCP extends PlayerController {
 
     @Override
     public void matchStarted() {
-        this.sendMessage(new MatchStartedMessage(match.getVisibleObjectives(), match.getVisiblePlayableCards(), match.getDeckVisibleCards()));
+        this.sendMessage(new MatchStartedMessage(match.getVisibleObjectives(), match.getVisiblePlayableCards(), match.getDeckVisibleCards(), match.getPlayers()));
     }
 
     @Override
@@ -102,8 +103,8 @@ public class PlayerControllerTCP extends PlayerController {
     }
 
     @Override
-    public void someoneDrewCard(Player someone, DrawSource source, Card card, Card replacementCard) {
-        this.sendMessage(new SomeoneDrewCardMessage(someone.getNickname(), source, card.getId(), replacementCard.getId()));
+    public void someoneDrewCard(Player someone, DrawSource source, PlayableCard card, PlayableCard replacementCard) {
+        this.sendMessage(new SomeoneDrewCardMessage(someone.getNickname(), source, card.getId(), replacementCard.getId(), replacementCard.getReign()));
     }
 
     @Override

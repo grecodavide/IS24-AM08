@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 public final class MatchFinishedMessage extends ResponseMessage {
     public List<JsonObject> ranking;
     public MatchFinishedMessage(List<Pair<Player, Boolean>> finalRanking) {
-        super("");
+        super(null);
         ranking = finalRanking.stream().map(p -> createJsonObject(p.first(), p.second())).collect(Collectors.toList());
     }
 
