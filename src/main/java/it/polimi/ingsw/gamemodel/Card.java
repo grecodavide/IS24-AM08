@@ -5,7 +5,6 @@ package it.polimi.ingsw.gamemodel;
  * the game (except objectives).
  */
 public abstract class Card {
-    protected static Integer lastID = 0;
     protected CardFace front;
     protected CardFace back;
     protected Integer id;
@@ -17,10 +16,6 @@ public abstract class Card {
      * @return the structure of the specified side
      * @see CardFace
      */
-    public Card() {
-        Card.lastID++;
-        this.id = Card.lastID;
-    }
 
     public CardFace getSide(Side side) {
         return switch (side) {

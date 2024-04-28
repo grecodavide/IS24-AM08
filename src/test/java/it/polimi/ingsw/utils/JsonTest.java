@@ -1,18 +1,20 @@
 package it.polimi.ingsw.utils;
 
-import com.google.gson.Gson;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import org.junit.Test;
+
 import com.google.gson.JsonParseException;
+
 import it.polimi.ingsw.gamemodel.DrawSource;
 import it.polimi.ingsw.gamemodel.Side;
 import it.polimi.ingsw.network.messages.Message;
 import it.polimi.ingsw.network.messages.actions.DrawCardMessage;
 import it.polimi.ingsw.network.messages.actions.DrawInitialCardMessage;
 import it.polimi.ingsw.network.messages.actions.PlayCardMessage;
-import it.polimi.ingsw.network.messages.responses.SomeoneDrewCardMessage;
 import it.polimi.ingsw.network.messages.responses.SomeoneDrewSecretObjectivesMessage;
-import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 public class JsonTest {
     @Test
@@ -25,7 +27,7 @@ public class JsonTest {
         // Deserialize
         Message convertedMessage = parser.toMessage(m1json);
         assertTrue(convertedMessage instanceof DrawInitialCardMessage);
-        assertEquals("Oingo", ((DrawInitialCardMessage) convertedMessage).username);
+        assertEquals("Oingo", ((DrawInitialCardMessage) convertedMessage).getUsername());
     }
 
     @Test
@@ -38,11 +40,11 @@ public class JsonTest {
         Message convertedMessage = parser.toMessage(m1json);
         assertTrue(convertedMessage instanceof PlayCardMessage);
         PlayCardMessage pm = (PlayCardMessage) convertedMessage;
-        assertEquals("Oingo",  pm.username);
-        assertEquals(Side.FRONT, pm.side);
-        assertEquals(Integer.valueOf(0), pm.x);
-        assertEquals(Integer.valueOf(0), pm.y);
-        assertEquals(Integer.valueOf(12), pm.cardID);
+        assertEquals("Oingo",  pm.getUsername());
+        assertEquals(Side.FRONT, pm.getSide());
+        assertEquals(Integer.valueOf(0), pm.getX());
+        assertEquals(Integer.valueOf(0), pm.getY());
+        assertEquals(Integer.valueOf(12), pm.getCardID());
     }
 
     @Test
@@ -55,7 +57,7 @@ public class JsonTest {
         // Deserialize
         Message convertedMessage = parser.toMessage(m1json);
         assertTrue(convertedMessage instanceof DrawCardMessage);
-        assertEquals(DrawSource.GOLDS_DECK, ((DrawCardMessage) convertedMessage).source);
+        assertEquals(DrawSource.GOLDS_DECK, ((DrawCardMessage) convertedMessage).getSource());
     }
 
     @Test

@@ -7,9 +7,25 @@ import it.polimi.ingsw.utils.Pair;
  * PlayCardMessage
  */
 public final class PlayCardMessage extends ActionMessage {
-    public Integer x, y;
-    public Integer cardID;
-    public Side side;
+    private Integer x, y;
+    private Integer cardID;
+    private Side side;
+
+    public Integer getX() {
+        return x;
+    }
+
+    public Integer getY() {
+        return y;
+    }
+
+    public Integer getCardID() {
+        return cardID;
+    }
+
+    public Side getSide() {
+        return side;
+    }
 
     public PlayCardMessage(String username, Pair<Integer, Integer> coords, Integer cardID, Side side) {
         super(username);
@@ -18,5 +34,5 @@ public final class PlayCardMessage extends ActionMessage {
         this.cardID = cardID;
         this.side = side;
     }
-    
+
 }
