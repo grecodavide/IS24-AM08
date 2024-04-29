@@ -660,28 +660,31 @@ public class Match {
     }
 
     /**
-     * Getter of the visible cards back on the top of the decks
-     * @return Pair of two CardFace, the first one is the CardFace at the
-     * top of golds deck, the second one is the CardFace at the top of resources deck
+     * Getter for the cards back on the top of the decks (i.e. those visible top cards).
+     * Both of them always contain just a reign.
+     * @return Pair of two reign Symbol (see {@link Symbol}.getReigns()), the first one regards the
+     * top card of gold cards deck, the second one regards the top card of resource cards deck
      */
-    public Pair<CardFace, CardFace> getVisibleCardsBack() {
-        Card goldCard = goldsDeck.peek();
-        Card resourceCard = resourcesDeck.peek();
-        CardFace gold = null;
-        CardFace resource = null;
-
-        if (goldCard != null)
-            gold = goldCard.getSide(Side.BACK);
-        if (resourceCard != null)
-            resource = resourceCard.getSide(Side.BACK);
-
-        return new Pair<>(gold, resource);
-    }
-
-    public Pair<PlayableCard, PlayableCard> getDeckVisibleCards() {
+    public Pair<Symbol, Symbol> getDecksTopReigns() {
         PlayableCard goldCard = goldsDeck.peek();
         PlayableCard resourceCard = resourcesDeck.peek();
-        return new Pair<>(goldCard, resourceCard);
+
+        Symbol goldReign;
+        Symbol resourceReign;
+
+        if(goldCard == null) {
+            goldReign = null;
+        } else {
+            goldReign = goldCard.getReign();
+        }
+
+        if(resourceCard == null) {
+            resourceReign = null;
+        } else {
+            resourceReign = resourceCard.getReign();
+        }
+
+        return new Pair<>(goldReign, resourceReign);
     }
 
     /**
