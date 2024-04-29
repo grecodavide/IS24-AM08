@@ -3,6 +3,8 @@ title: Model diagram
 ---
 
 classDiagram
+    Match --> MatchObserver
+    Match --> MatchObserverCallable
     Match --> GameDeck
     Match --> MatchState
     Match --> DrawSource
@@ -245,7 +247,7 @@ classDiagram
         + getMaxPlayers() int
         + getVisiblePlayableCards Map~DrawSource, PlayableCard~
         + getVisibleObjectives() Pair~Objective, Objective~
-        + getVisibleCardsBack() Pair~CardFace, CardFace~
+        + getDeckVisibleReign() Pair~Symbol, Symbol~
         + getPlayersFinalRanking() List~Pair~Player, Boolean~~
         # getPoints() int
         # addPoints() void
@@ -264,8 +266,26 @@ classDiagram
         # setupBoards() void
         # nextPlayer() void
         # decideWinner() void
-        - checkObjectivesAchievement() Map~Player, Integer~
-        
+        - checkObjectivesAchievement() Map~Player, Integer~      
+        - notifyObservers(MatchObserverCallable matchObserver) void
+    }
+      class MatchObserver{
+        <<Interface>>
+      +playerQuit(Player p) void
+      +playerJoined(Player p) void
+      +matchStarted() void
+      +someoneDrewInitialCard(Player someone, InitialCard card) void
+      +someoneSetInitialSide(Player someone, Side side) void
+      +someoneDrewSecretObjectives(Player someone, Pair~Objective, Objective~) void
+      +someoneChoseSecretObjective(Player someone, Objective objective) void
+      +someonePlayedCard(Player someone, Pair~Integer, Integer~ coords, PlayableCard card, Side side) void
+      +someoneDrewCard(Player someone, DrawSource source, PlayableCard card, PlayebleCard replacementCard) void
+      +matchFinished() void
+    }
+
+    class MatchObserverCallable {
+      <<FunctionalInterface>>
+      +call(MatchObserver matchObserver) void
     }
     class DrawSource {
         <<Enumeration>>
