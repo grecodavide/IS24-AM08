@@ -9,11 +9,11 @@ import java.util.List;
 import java.util.Map;
 
 public interface ViewInterface extends Remote {
+    void matchStarted(Map<Color, String> playersNicknamesAndPawns, Map<String, List<PlayableCard>> playersHands, Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards, Pair<Symbol, Symbol> decksTopReigns) throws RemoteException;
+
     void giveInitialCard(InitialCard initialCard) throws RemoteException;
 
     void giveSecretObjectives(Pair<Objective, Objective> secretObjectives) throws RemoteException;
-
-    void matchStarted(Map<Color, String> playersNicknamesAndPawns,  Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards, Pair<Symbol, Symbol> decksCardsBacks) throws RemoteException;
 
     void someoneDrewInitialCard(Player someone, InitialCard card) throws RemoteException;
 

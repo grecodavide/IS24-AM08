@@ -8,6 +8,7 @@ import it.polimi.ingsw.utils.Pair;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public final class PlayerControllerRMI extends PlayerController implements PlayerControllerRMIInterface {
@@ -72,13 +73,20 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
         Map<DrawSource, PlayableCard> visiblePlayableCards = match.getVisiblePlayableCards();
         Pair<Symbol, Symbol> decksTopReigns = match.getDecksTopReigns();
 
-        // Create a map that matches each player to its pawn colour
+        // Create a map that matches each pawn colour to the corresponding player's nickname
         Map<Color, String> playersNicknamesAndPawns = new HashMap<>();
-        for (Player p : match.getPlayers())
+
+        // Create a map that matches each player's nickname to the corresponding list of cards in the hand
+        Map<String, List<PlayableCard>> playersHands = new HashMap<>();
+
+        // Fill the maps with proper values
+        for (Player p : match.getPlayers()) {
             playersNicknamesAndPawns.put(p.getPawnColor(), p.getNickname());
+            playersHands.put(player.getNickname(), p.getBoard().getCurrentHand());
+        }
 
         try {
-            view.matchStarted(playersNicknamesAndPawns, visibleObjectives, visiblePlayableCards, decksTopReigns);
+            view.matchStarted(playersNicknamesAndPawns, playersHands, visibleObjectives, visiblePlayableCards, decksTopReigns);
         } catch (RemoteException e) {
             onConnectionError();
         }
