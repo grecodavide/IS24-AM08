@@ -164,7 +164,7 @@ Sent when the required amount of players is reached and the match is about to st
 | Parameter         |             Type              | Description                                                                                                                                                                                                       |
 | :---------------- | :---------------------------: | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `visibleObjectives` |       Array of Integers       | IDs of the visible objectives |
-| `visibleCards`      | [VisibleCards](#VisibleCards)            | A JSON Object rapresenting the visible cards (see ref.) |
+| `visibleCards`      |       VisibleCards            | A JSON Object rapresenting the visible cards (see ref.) |
 | `visibleDeckReigns` |       Array of Strings        | The array contains the reign of top-card of both the gold and the resource deck, in the first and second slot respectively |
 | `playerHands`       |            Object             | The JSON Object contains the player's username (as a property) and the cards ids (an array of integer) |
 | `playerPawnColors`  |            Object             | The JSON Object contains the player's username (as a property) and player's color (as a String, containing either `RED`, `BLUE`, `GREEN`, `YELLOW`. Note: the order turn always follows RED -> BLUE -> GREEN -> YELLOW) |
