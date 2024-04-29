@@ -2,6 +2,7 @@ package it.polimi.ingsw.gamemodel;
 
 import it.polimi.ingsw.utils.Pair;
 import it.polimi.ingsw.exceptions.*;
+
 import java.util.*;
 
 /**
@@ -109,8 +110,7 @@ public class Match {
      * Note: Called by the Controller when a player quits the match.
      * @param player player to be removed from the match
      */
-    // TODO: Change Javadoc
-    public void removePlayer(Player player) throws PlayerQuitException {
+    public void removePlayer(Player player) {
         currentState.removePlayer();
         players.remove(player);
         currentState.transition();
@@ -233,7 +233,7 @@ public class Match {
         }
 
         // Notify observers and trigger state transition
-        observers.forEach(observer -> observer.someoneDrewInitialCard(currentPlayer, currentGivenInitialCard));
+        notifyObservers(observer -> observer.someoneDrewInitialCard(currentPlayer, currentGivenInitialCard));
         currentState.transition();
 
         return currentGivenInitialCard;
@@ -253,7 +253,7 @@ public class Match {
             currentProposedObjectives = new Pair<>(obj1, obj2);
 
             // Notify observers and trigger state transition
-            observers.forEach(observer -> observer.someoneDrewSecretObjective(currentPlayer, currentProposedObjectives));
+            notifyObservers(observer -> observer.someoneDrewSecretObjective(currentPlayer, currentProposedObjectives));
             currentState.transition();
 
             return currentProposedObjectives;
@@ -285,7 +285,7 @@ public class Match {
             throw new WrongChoiceException("The chosen objective is not one of the proposed ones");
 
         // Notify observers and trigger state transition
-        observers.forEach(observer -> observer.someoneChoseSecretObjective(currentPlayer, objective));
+        notifyObservers(observer -> observer.someoneChoseSecretObjective(currentPlayer, objective));
         currentState.transition();
     }
 
@@ -416,8 +416,9 @@ public class Match {
                     lastTurn = true;
 
                 // Notify observers and trigger state transition
-                observers.forEach(observer -> observer.someonePlayedCard(currentPlayer, coords, card, side));
+                notifyObservers(observer -> observer.someonePlayedCard(currentPlayer, coords, card, side));
                 currentState.transition();
+
                 break;
             case INVALID_COORDS:
                 throw new WrongChoiceException("Invalid coordinates!");
@@ -521,9 +522,10 @@ public class Match {
         // AND the current turn is the last one the match is now finished
         if (currentPlayer.equals(players.getLast()) && lastTurn)
             finished = true;
+
         // Notify observers and trigger state transition
         final PlayableCard replacementCardFinal = replacementCard;
-        observers.forEach(observer -> observer.someoneDrewCard(currentPlayer, source, card, replacementCardFinal));
+        notifyObservers(observer -> observer.someoneDrewCard(currentPlayer, source, card, replacementCardFinal));
         currentState.transition();
 
         return card;
@@ -544,8 +546,9 @@ public class Match {
         }
 
         currentGivenInitialCard = null;
+
         // Notify observers and trigger state transition
-        observers.forEach(observer -> observer.someoneSetInitialSide(currentPlayer, side));
+        notifyObservers(observer -> observer.someoneSetInitialSide(currentPlayer, side));
         currentState.transition();
     }
 
@@ -602,7 +605,7 @@ public class Match {
                 )
                 .toList();
 
-        Player bestPlayer = sortedPlayers.get(0);
+        Player bestPlayer = sortedPlayers.getFirst();
         int bestAchievedObjectives = achievedObjectives.get(bestPlayer);
         int bestPoints = bestPlayer.getPoints();
         boolean isWinner;
@@ -681,18 +684,56 @@ public class Match {
         return new Pair<>(goldCard, resourceCard);
     }
 
+    /**
+     * Getter for the maximum number of player for the match
+     * @return The maximum number of player
+     */
     public int getMaxPlayers() {
         return maxPlayers;
     }
 
+    /**
+     * Adds the given MatchObserver to those observers notified on match events.
+     * @param observer The observer to be notified from now on when an event occurs
+     */
     public void subscribeObserver(MatchObserver observer) {
         observers.add(observer);
     }
 
     /**
-     * Notify observers when the match is started, called by WaitState after match setup
+     * Notifies all match observers that the match has started.
+     * It's called by WaitState methods after the match setup, that's why it needs to be protected.
      */
     protected void notifyMatchStart() {
-        observers.forEach(MatchObserver::matchStarted);
+        notifyObservers(MatchObserver::matchStarted);
+    }
+
+    /**
+     * Notifies asynchronously all match observers, calling the passed MatchObserverCallable on each of them.
+     * To be more specific: creates a thread for each match observer, each thread is appointed to call the passed callable
+     * on a MatchObserver instance; then runs all of them; finally joins on them (waiting each of them to return and exit).
+     * @param observerCallable The "method" to be called on each observer of the match
+     */
+    private void notifyObservers(MatchObserverCallable observerCallable) {
+        List<Thread> threads = new ArrayList<>();
+
+        // Add a Thread for each MatchObserver in observers
+        for (MatchObserver observer : observers)  {
+            threads.add(new Thread(() -> {
+                // Each thread calls the passed MatchObserverCallable on the current observer
+                observerCallable.call(observer);
+            }));
+        }
+
+        threads.forEach(Thread::run);
+
+        // Wait for each thread to return and exit
+        for (Thread thread : threads) {
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }
