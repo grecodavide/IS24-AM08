@@ -1,0 +1,19 @@
+sequenceDiagram
+    Actor Oingo
+    Participant ViewTCP A
+    Participant PlayerController A
+    Participant Match
+    Participant PlayerController B
+    Participant ViewRMI B
+    Actor Boingo
+
+
+    Oingo ->> ViewTCP A: "Play Card"
+    ViewTCP A->>PlayerController A: PlayCard
+    PlayerController A ->> Match: player.playCard
+    Match ->> PlayerController B: observer.someonePlayedCard
+    PlayerController B ->> ViewRMI B: view.someonePlayedCard
+    ViewRMI B ->> Boingo: "Show changes"
+    Match ->> PlayerController A: observer.someonePlayedCard
+    PlayerController A ->> ViewTCP A: SomeonePlayedCard
+    ViewTCP A ->> Oingo: "Show changes"
