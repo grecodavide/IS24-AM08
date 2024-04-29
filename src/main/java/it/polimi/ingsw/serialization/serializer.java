@@ -890,15 +890,3 @@ public static void main(String[] args) {
     }
 
 }
-
-
-/*
-    reign = Symbol.;
-    topLeft = Symbol.;
-    topRight = Symbol.;
-    bottomLeft = Symbol.;
-    bottomRight = Symbol.;
-    requirements = new QuantityRequirement(Map.of(Symbol., 5));
-    goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
-    goldCardMap.put(goldCard.getId(), goldCard);
- */
