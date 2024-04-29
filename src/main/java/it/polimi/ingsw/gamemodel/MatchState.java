@@ -37,9 +37,9 @@ public abstract class MatchState {
 
     /**
      * Checks dynamically if a player can be removed in the current state, otherwise it forces the Match to go to the
-     * FinalState and throws an exception.
+     * FinalState.
      * The check is performed implicitly, since this version of the method is called if and only if it hasn't been
-     * overridden by the MatchState object from which it's called (just WaitState overrides it).
+     * overridden by the MatchState instance from which it's called (just WaitState overrides it).
      */
     public void removePlayer() {
         // Exceptionally force the match to go to FinalState
