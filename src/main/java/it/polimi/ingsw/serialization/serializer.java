@@ -7,20 +7,21 @@ import java.util.*;
 
 public static void main(String[] args) {
     // cards
-    InitialCard initialCard;        //Set<Symbol> center = new HashSet<>(Set.of(Symbol.FUNGUS));
+    InitialCard initialCard;
     Objective objectiveCard;
     ResourceCard resourceCard;
     GoldCard goldCard;
 
     //placeholders
-    Symbol topLeft, topRight, bottomLeft, bottomRight, reign;
+    Symbol topLeft, topRight, bottomLeft, bottomRight, reign, multiplier;
     int points;
+    QuantityRequirement requirements;
 
     // maps
     Map<Integer, InitialCard> initialCardMap = new HashMap<>();
     Map<Integer, Objective> objectiveMap = new HashMap<>();
-    Map<Integer, GoldCard> goldCardMap = new HashMap<>();
     Map<Integer, ResourceCard> resourceCardMap = new HashMap<>();
+    Map<Integer, GoldCard> goldCardMap = new HashMap<>();
 
     //1) initial cards map----------------------------------------------------------------------------------------------
     initialCard = new InitialCard(
@@ -470,9 +471,421 @@ public static void main(String[] args) {
     }
 
     //4) gold cards map-------------------------------------------------------------------------------------------------
+    //4.1) with object multiplier (1pt)
+    points = 1;
 
+    try {
+        reign = Symbol.INSECT;
+        topLeft = Symbol.FULL_CORNER;
+        topRight = Symbol.EMPTY_CORNER;
+        bottomLeft = Symbol.PARCHMENT;
+        bottomRight = Symbol.FULL_CORNER;
+        multiplier = Symbol.PARCHMENT;
+        requirements = new QuantityRequirement(Map.of(Symbol.INSECT, 2, Symbol.ANIMAL, 1,));
+        goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
+        goldCardMap.put(goldCard.getId(), goldCard);
+
+        reign = Symbol.FUNGUS;
+        topLeft = Symbol.PARCHMENT;
+        topRight = Symbol.FULL_CORNER;
+        bottomLeft = Symbol.FULL_CORNER;
+        bottomRight = Symbol.EMPTY_CORNER;
+        multiplier = Symbol.PARCHMENT;
+        requirements = new QuantityRequirement(Map.of(Symbol.FUNGUS, 2, Symbol.INSECT, 1));
+        goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
+        goldCardMap.put(goldCard.getId(), goldCard);
+
+        reign = Symbol.PLANT;
+        topLeft = Symbol.FULL_CORNER;
+        topRight = Symbol.PARCHMENT;
+        bottomLeft = Symbol.EMPTY_CORNER;
+        bottomRight = Symbol.FULL_CORNER;
+        multiplier = Symbol.PARCHMENT;
+        requirements = new QuantityRequirement(Map.of(Symbol.PLANT, 2, Symbol.FUNGUS, 1));
+        goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
+        goldCardMap.put(goldCard.getId(), goldCard);
+
+        reign = Symbol.ANIMAL;
+        topLeft = Symbol.EMPTY_CORNER;
+        topRight = Symbol.FULL_CORNER;
+        bottomLeft = Symbol.FULL_CORNER;
+        bottomRight = Symbol.PARCHMENT;
+        multiplier = Symbol.PARCHMENT;
+        requirements = new QuantityRequirement(Map.of(Symbol.ANIMAL, 2, Symbol.PLANT, 1));
+        goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
+        goldCardMap.put(goldCard.getId(), goldCard);
+
+        reign = Symbol.FUNGUS;
+        topLeft = Symbol.EMPTY_CORNER;
+        topRight = Symbol.FULL_CORNER;
+        bottomLeft = Symbol.FULL_CORNER;
+        bottomRight = Symbol.FEATHER;
+        multiplier = Symbol.FEATHER;
+        requirements = new QuantityRequirement(Map.of(Symbol.FUNGUS, 2, Symbol.ANIMAL, 1));
+        goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
+        goldCardMap.put(goldCard.getId(), goldCard);
+
+        reign = Symbol.ANIMAL;
+        topLeft = Symbol.FULL_CORNER;
+        topRight = Symbol.EMPTY_CORNER;
+        bottomLeft = Symbol.FEATHER;
+        bottomRight = Symbol.FULL_CORNER;
+        multiplier = Symbol.FEATHER;
+        requirements = new QuantityRequirement(Map.of(Symbol.ANIMAL, 2, Symbol.FUNGUS, 1));
+        goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
+        goldCardMap.put(goldCard.getId(), goldCard);
+
+        reign = Symbol.PLANT;
+        topLeft = Symbol.FEATHER;
+        topRight = Symbol.FULL_CORNER;
+        bottomLeft = Symbol.FULL_CORNER;
+        bottomRight = Symbol.EMPTY_CORNER;
+        multiplier = Symbol.FEATHER;
+        requirements = new QuantityRequirement(Map.of(Symbol.PLANT, 2, Symbol.INSECT, 1));
+        goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
+        goldCardMap.put(goldCard.getId(), goldCard);
+
+        reign = Symbol.INSECT;
+        topLeft = Symbol.FULL_CORNER;
+        topRight = Symbol.FEATHER;
+        bottomLeft = Symbol.EMPTY_CORNER;
+        bottomRight = Symbol.FULL_CORNER;
+        multiplier = Symbol.FEATHER;
+        requirements = new QuantityRequirement(Map.of(Symbol.INSECT, 2, Symbol.PLANT, 1));
+        goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
+        goldCardMap.put(goldCard.getId(), goldCard);
+
+        reign = Symbol.PLANT;
+        topLeft = Symbol.FULL_CORNER;
+        topRight = Symbol.EMPTY_CORNER;
+        bottomLeft = Symbol.INKWELL;
+        bottomRight = Symbol.FULL_CORNER;
+        multiplier = Symbol.INKWELL;
+        requirements = new QuantityRequirement(Map.of(Symbol.PLANT, 2, Symbol.ANIMAL, 1));
+        goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
+        goldCardMap.put(goldCard.getId(), goldCard);
+
+        reign = Symbol.INSECT;
+        topLeft = Symbol.EMPTY_CORNER;
+        topRight = Symbol.FULL_CORNER;
+        bottomLeft = Symbol.FULL_CORNER;
+        bottomRight = Symbol.INKWELL;
+        multiplier = Symbol.INKWELL;
+        requirements = new QuantityRequirement(Map.of(Symbol.INSECT, 2, Symbol.FUNGUS, 1));
+        goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
+        goldCardMap.put(goldCard.getId(), goldCard);
+
+        reign = Symbol.ANIMAL;
+        topLeft = Symbol.INKWELL;
+        topRight = Symbol.FULL_CORNER;
+        bottomLeft = Symbol.FULL_CORNER;
+        bottomRight = Symbol.EMPTY_CORNER;
+        multiplier = Symbol.INKWELL;
+        requirements = new QuantityRequirement(Map.of(Symbol.ANIMAL, 2, Symbol.INSECT, 1));
+        goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
+        goldCardMap.put(goldCard.getId(), goldCard);
+
+        reign = Symbol.FUNGUS;
+        topLeft = Symbol.FULL_CORNER;
+        topRight = Symbol.INKWELL;
+        bottomLeft = Symbol.EMPTY_CORNER;
+        bottomRight = Symbol.FULL_CORNER;
+        multiplier = Symbol.INKWELL;
+        requirements = new QuantityRequirement(Map.of(Symbol.FUNGUS, 2, Symbol.PLANT, 1));
+        goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
+        goldCardMap.put(goldCard.getId(), goldCard);
+    } catch (InvalidResourceException e) {
+        throw new RuntimeException(e);
+    }
+
+    //4.2) with corner multiplier (2pt)
+    points = 2;
+    multiplier = Symbol.CORNER_OBJ;
+
+    try {
+        reign = Symbol.ANIMAL;
+        topLeft = Symbol.EMPTY_CORNER;
+        topRight = Symbol.FULL_CORNER;
+        bottomLeft = Symbol.FULL_CORNER;
+        bottomRight = Symbol.FULL_CORNER;
+        requirements = new QuantityRequirement(Map.of(Symbol.ANIMAL, 3, Symbol.PLANT, 1));
+        goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
+        goldCardMap.put(goldCard.getId(), goldCard);
+
+        reign = Symbol.ANIMAL;
+        topLeft = Symbol.FULL_CORNER;
+        topRight = Symbol.FULL_CORNER;
+        bottomLeft = Symbol.EMPTY_CORNER;
+        bottomRight = Symbol.FULL_CORNER;
+        requirements = new QuantityRequirement(Map.of(Symbol.ANIMAL, 3, Symbol.INSECT, 1));
+        goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
+        goldCardMap.put(goldCard.getId(), goldCard);
+
+        reign = Symbol.ANIMAL;
+        topLeft = Symbol.FULL_CORNER;
+        topRight = Symbol.EMPTY_CORNER;
+        bottomLeft = Symbol.FULL_CORNER;
+        bottomRight = Symbol.FULL_CORNER;
+        requirements = new QuantityRequirement(Map.of(Symbol.ANIMAL, 3, Symbol.FUNGUS, 1));
+        goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
+        goldCardMap.put(goldCard.getId(), goldCard);
+
+        reign = Symbol.FUNGUS;
+        topLeft = Symbol.FULL_CORNER;
+        topRight = Symbol.FULL_CORNER;
+        bottomLeft = Symbol.EMPTY_CORNER;
+        bottomRight = Symbol.FULL_CORNER;
+        requirements = new QuantityRequirement(Map.of(Symbol.FUNGUS, 3, Symbol.ANIMAL, 1));
+        goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
+        goldCardMap.put(goldCard.getId(), goldCard);
+
+        reign = Symbol.FUNGUS;
+        topLeft = Symbol.FULL_CORNER;
+        topRight = Symbol.FULL_CORNER;
+        bottomLeft = Symbol.FULL_CORNER;
+        bottomRight = Symbol.EMPTY_CORNER;
+        requirements = new QuantityRequirement(Map.of(Symbol.FUNGUS, 3, Symbol.PLANT, 1));
+        goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
+        goldCardMap.put(goldCard.getId(), goldCard);
+
+        reign = Symbol.FUNGUS;
+        topLeft = Symbol.FULL_CORNER;
+        topRight = Symbol.EMPTY_CORNER;
+        bottomLeft = Symbol.FULL_CORNER;
+        bottomRight = Symbol.FULL_CORNER;
+        requirements = new QuantityRequirement(Map.of(Symbol.FUNGUS, 3, Symbol.INSECT, 1));
+        goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
+        goldCardMap.put(goldCard.getId(), goldCard);
+
+        reign = Symbol.INSECT;
+        topLeft = Symbol.FULL_CORNER;
+        topRight = Symbol.FULL_CORNER;
+        bottomLeft = Symbol.EMPTY_CORNER;
+        bottomRight = Symbol.FULL_CORNER;
+        requirements = new QuantityRequirement(Map.of(Symbol.INSECT, 3, Symbol.ANIMAL, 1));
+        goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
+        goldCardMap.put(goldCard.getId(), goldCard);
+
+        reign = Symbol.INSECT;
+        topLeft = Symbol.FULL_CORNER;
+        topRight = Symbol.FULL_CORNER;
+        bottomLeft = Symbol.FULL_CORNER;
+        bottomRight = Symbol.EMPTY_CORNER;
+        requirements = new QuantityRequirement(Map.of(Symbol.INSECT, 3, Symbol.PLANT, 1));
+        goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
+        goldCardMap.put(goldCard.getId(), goldCard);
+
+        reign = Symbol.INSECT;
+        topLeft = Symbol.FULL_CORNER;
+        topRight = Symbol.EMPTY_CORNER;
+        bottomLeft = Symbol.FULL_CORNER;
+        bottomRight = Symbol.FULL_CORNER;
+        requirements = new QuantityRequirement(Map.of(Symbol.INSECT, 3, Symbol.FUNGUS, 1));
+        goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
+        goldCardMap.put(goldCard.getId(), goldCard);
+
+        reign = Symbol.PLANT;
+        topLeft = Symbol.EMPTY_CORNER;
+        topRight = Symbol.FULL_CORNER;
+        bottomLeft = Symbol.FULL_CORNER;
+        bottomRight = Symbol.FULL_CORNER;
+        requirements = new QuantityRequirement(Map.of(Symbol.PLANT, 3, Symbol.INSECT, 1));
+        goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
+        goldCardMap.put(goldCard.getId(), goldCard);
+
+        reign = Symbol.PLANT;
+        topLeft = Symbol.FULL_CORNER;
+        topRight = Symbol.EMPTY_CORNER;
+        bottomLeft = Symbol.FULL_CORNER;
+        bottomRight = Symbol.FULL_CORNER;
+        requirements = new QuantityRequirement(Map.of(Symbol.PLANT, 3, Symbol.FUNGUS, 1));
+        goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
+        goldCardMap.put(goldCard.getId(), goldCard);
+
+        reign = Symbol.PLANT;
+        topLeft = Symbol.FULL_CORNER;
+        topRight = Symbol.FULL_CORNER;
+        bottomLeft = Symbol.FULL_CORNER;
+        bottomRight = Symbol.EMPTY_CORNER;
+        requirements = new QuantityRequirement(Map.of(Symbol.PLANT, 3, Symbol.ANIMAL, 1));
+        goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
+        goldCardMap.put(goldCard.getId(), goldCard);
+    } catch (InvalidResourceException e) {
+        throw new RuntimeException(e);
+    }
+
+    //4.3) with no multiplier (3/5pt)
+    points = 3;
+    multiplier = Symbol.NO_MULT;
+
+    try {
+        reign = Symbol.ANIMAL;
+        topLeft = Symbol.EMPTY_CORNER;
+        topRight = Symbol.FULL_CORNER;
+        bottomLeft = Symbol.EMPTY_CORNER;
+        bottomRight = Symbol.FEATHER;
+        requirements = new QuantityRequirement(Map.of(Symbol.ANIMAL, 3));
+        goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
+        goldCardMap.put(goldCard.getId(), goldCard);
+
+        reign = Symbol.ANIMAL;
+        topLeft = Symbol.FULL_CORNER;
+        topRight = Symbol.EMPTY_CORNER;
+        bottomLeft = Symbol.PARCHMENT;
+        bottomRight = Symbol.EMPTY_CORNER;
+        requirements = new QuantityRequirement(Map.of(Symbol.ANIMAL, 3));
+        goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
+        goldCardMap.put(goldCard.getId(), goldCard);
+
+        reign = Symbol.ANIMAL;
+        topLeft = Symbol.FULL_CORNER;
+        topRight = Symbol.INKWELL;
+        bottomLeft = Symbol.EMPTY_CORNER;
+        bottomRight = Symbol.EMPTY_CORNER;
+        requirements = new QuantityRequirement(Map.of(Symbol.ANIMAL, 3));
+        goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
+        goldCardMap.put(goldCard.getId(), goldCard);
+
+        reign = Symbol.FUNGUS;
+        topLeft = Symbol.FULL_CORNER;
+        topRight = Symbol.EMPTY_CORNER;
+        bottomLeft = Symbol.INKWELL;
+        bottomRight = Symbol.EMPTY_CORNER;
+        requirements = new QuantityRequirement(Map.of(Symbol.FUNGUS, 3));
+        goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
+        goldCardMap.put(goldCard.getId(), goldCard);
+
+        reign = Symbol.FUNGUS;
+        topLeft = Symbol.FEATHER;
+        topRight = Symbol.FULL_CORNER;
+        bottomLeft = Symbol.EMPTY_CORNER;
+        bottomRight = Symbol.EMPTY_CORNER;
+        requirements = new QuantityRequirement(Map.of(Symbol.FUNGUS, 3));
+        goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
+        goldCardMap.put(goldCard.getId(), goldCard);
+
+        reign = Symbol.FUNGUS;
+        topLeft = Symbol.EMPTY_CORNER;
+        topRight = Symbol.PARCHMENT;
+        bottomLeft = Symbol.EMPTY_CORNER;
+        bottomRight = Symbol.FULL_CORNER;
+        requirements = new QuantityRequirement(Map.of(Symbol.FUNGUS, 3));
+        goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
+        goldCardMap.put(goldCard.getId(), goldCard);
+
+        reign = Symbol.INSECT;
+        topLeft = Symbol.INKWELL;
+        topRight = Symbol.EMPTY_CORNER;
+        bottomLeft = Symbol.FULL_CORNER;
+        bottomRight = Symbol.EMPTY_CORNER;
+        requirements = new QuantityRequirement(Map.of(Symbol.INSECT, 3));
+        goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
+        goldCardMap.put(goldCard.getId(), goldCard);
+
+        reign = Symbol.INSECT;
+        topLeft = Symbol.FULL_CORNER;
+        topRight = Symbol.PARCHMENT;
+        bottomLeft = Symbol.EMPTY_CORNER;
+        bottomRight = Symbol.EMPTY_CORNER;
+        requirements = new QuantityRequirement(Map.of(Symbol.INSECT, 3));
+        goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
+        goldCardMap.put(goldCard.getId(), goldCard);
+
+        reign = Symbol.INSECT;
+        topLeft = Symbol.EMPTY_CORNER;
+        topRight = Symbol.EMPTY_CORNER;
+        bottomLeft = Symbol.FEATHER;
+        bottomRight = Symbol.FULL_CORNER;
+        requirements = new QuantityRequirement(Map.of(Symbol.INSECT, 3));
+        goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
+        goldCardMap.put(goldCard.getId(), goldCard);
+
+        reign = Symbol.PLANT;
+        topLeft = Symbol.PARCHMENT;
+        topRight = Symbol.FULL_CORNER;
+        bottomLeft = Symbol.EMPTY_CORNER;
+        bottomRight = Symbol.EMPTY_CORNER;
+        requirements = new QuantityRequirement(Map.of(Symbol.PLANT, 3));
+        goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
+        goldCardMap.put(goldCard.getId(), goldCard);
+
+        reign = Symbol.PLANT;
+        topLeft = Symbol.FULL_CORNER;
+        topRight = Symbol.EMPTY_CORNER;
+        bottomLeft = Symbol.FEATHER;
+        bottomRight = Symbol.EMPTY_CORNER;
+        requirements = new QuantityRequirement(Map.of(Symbol.PLANT, 3));
+        goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
+        goldCardMap.put(goldCard.getId(), goldCard);
+
+        reign = Symbol.PLANT;
+        topLeft = Symbol.EMPTY_CORNER;
+        topRight = Symbol.INKWELL;
+        bottomLeft = Symbol.EMPTY_CORNER;
+        bottomRight = Symbol.FULL_CORNER;
+        requirements = new QuantityRequirement(Map.of(Symbol.PLANT, 3));
+        goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
+        goldCardMap.put(goldCard.getId(), goldCard);
+    } catch (InvalidResourceException e) {
+        throw new RuntimeException(e);
+    }
+
+    points = 5;
+    multiplier = Symbol.NO_MULT;
+
+    try {
+        reign = Symbol.ANIMAL;
+        topLeft = Symbol.EMPTY_CORNER;
+        topRight = Symbol.FULL_CORNER;
+        bottomLeft = Symbol.EMPTY_CORNER;
+        bottomRight = Symbol.FULL_CORNER;
+        requirements = new QuantityRequirement(Map.of(Symbol.ANIMAL, 5));
+        goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
+        goldCardMap.put(goldCard.getId(), goldCard);
+
+        reign = Symbol.FUNGUS;
+        topLeft = Symbol.FULL_CORNER;
+        topRight = Symbol.EMPTY_CORNER;
+        bottomLeft = Symbol.FULL_CORNER;
+        bottomRight = Symbol.EMPTY_CORNER;
+        requirements = new QuantityRequirement(Map.of(Symbol.FUNGUS, 5));
+        goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
+        goldCardMap.put(goldCard.getId(), goldCard);
+
+        reign = Symbol.INSECT;
+        topLeft = Symbol.FULL_CORNER;
+        topRight = Symbol.FULL_CORNER;
+        bottomLeft = Symbol.EMPTY_CORNER;
+        bottomRight = Symbol.EMPTY_CORNER;
+        requirements = new QuantityRequirement(Map.of(Symbol.INSECT, 5));
+        goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
+        goldCardMap.put(goldCard.getId(), goldCard);
+
+        reign = Symbol.PLANT;
+        topLeft = Symbol.FULL_CORNER;
+        topRight = Symbol.FULL_CORNER;
+        bottomLeft = Symbol.EMPTY_CORNER;
+        bottomRight = Symbol.EMPTY_CORNER;
+        requirements = new QuantityRequirement(Map.of(Symbol.PLANT, 5));
+        goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
+        goldCardMap.put(goldCard.getId(), goldCard);
+    } catch (InvalidResourceException e) {
+        throw new RuntimeException(e);
+    }
 
     //5) to json--------------------------------------------------------------------------------------------------------
-
+        
 
 }
+
+
+/*
+    reign = Symbol.;
+    topLeft = Symbol.;
+    topRight = Symbol.;
+    bottomLeft = Symbol.;
+    bottomRight = Symbol.;
+    requirements = new QuantityRequirement(Map.of(Symbol., 5));
+    goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
+    goldCardMap.put(goldCard.getId(), goldCard);
+ */
