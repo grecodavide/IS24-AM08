@@ -67,20 +67,18 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
 
     @Override
     public void matchStarted() {
+        // Get visible objectives, visible playable cards and visible decks top reigns
         Pair<Objective, Objective> visibleObjectives = match.getVisibleObjectives();
         Map<DrawSource, PlayableCard> visiblePlayableCards = match.getVisiblePlayableCards();
+        Pair<Symbol, Symbol> decksTopReigns = match.getDecksTopReigns();
 
-        Symbol firstDeckCardBack = match.getVisibleCardsBack().first().getCenter().stream().toList().getFirst();
-        Symbol secondDeckCardBack = match.getVisibleCardsBack().second().getCenter().stream().toList().getFirst();
-        Pair<Symbol, Symbol> decksCardsBacks = new Pair<>(firstDeckCardBack, secondDeckCardBack);
-
+        // Create a map that matches each player to its pawn colour
         Map<Color, String> playersNicknamesAndPawns = new HashMap<>();
-
         for (Player p : match.getPlayers())
             playersNicknamesAndPawns.put(p.getPawnColor(), p.getNickname());
 
         try {
-            view.matchStarted(playersNicknamesAndPawns, visibleObjectives, visiblePlayableCards, decksCardsBacks);
+            view.matchStarted(playersNicknamesAndPawns, visibleObjectives, visiblePlayableCards, decksTopReigns);
         } catch (RemoteException e) {
             onConnectionError();
         }
