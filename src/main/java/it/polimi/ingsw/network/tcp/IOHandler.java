@@ -34,8 +34,6 @@ public class IOHandler {
         this.outputStream.writeObject(this.msgToString(msg));
     }
 
-
-
     public String msgToString(Message msg) {
         return this.parser.toJson(msg);
     }
