@@ -4,15 +4,16 @@ Messages exchanged between clients and servers in TCP protocols are of three cat
 - [Responses](#Responses): messages sent from the server to the clients to update them about another user's move or to the consequence of their action
 - [Errors](#Errors): messages sent form the server to the user in case a previous action was not possible
 Every message is a JSON file with some properties.
+
 ## Actions
-Actions always have these parameters:
+Actions always have the following parameters:
 
 | Parameter |  Type  | Description |
 | :-------- | :----: | :------------------------------------------ |
-| action    | String |    String that shows the type of the action |
-| player    | String | Nickname of the player that does the action |
+| action    | String |    String showing the action types          |
+| player    | String | Nickname of the player performing the action |
 
-action can be:
+Implemented actions:
 - [GetAvailableMatches](#GetAvailableMatches)
 - [CreateMatch](#CreateMatch)
 - [JoinMatch](#JoinMatch)
@@ -25,147 +26,157 @@ action can be:
 - [DrawCard](#DrawCard)
 
 ### GetAvailableMatches
-This action does not have additional parameters. Requests an updated version of the lobby. The server returns an [AvailableMatches](#AvailableMatches) response.
+The action does not need additional parameters. 
+- The client asks for an updated version of the lobby; 
+- The server returns an [AvailableMatches](#AvailableMatches) response.
 
 ### CreateMatch
-This action communicates the intention of a player to create a match.
+The action communicates (to the server) the intention of a client to create a new match.
 
 | Parameter  |  Type   | Description                                  |
 | :--------- | :-----: | :------------------------------------------- |
-| matchName  | String  | Name of the match                            |
-| maxPlayers | integer | Number of maximum players, must be 2, 3 or 4 |
+| `matchName`  | String  | Name of the match                            |
+| `maxPlayers` | Integer | Number of maximum players (must be between 2 and 4) |
 
 ### JoinMatch
-This action communicates the intention of a player to join a match.
+The action communicates the intention of a client to join a match.
 
 | Parameter |  Type  | Description               |
 | :-------- | :----: | :------------------------ |
-| matchName | String | Name of the match to join |
+| `matchName` | String | Name of the match to join |
 
 ### SendText
-This action sends a text message in the chat.
+The action sends a text message in the chat.
 
 | Parameter |        Type         | Description                                                                       |
 | :-------- | :-----------------: | :-------------------------------------------------------------------------------- |
-| text      |       String        | Content of the message                                                            |
-| username  | String (*optional*) | Username of the player the private message is sent to. If ometted then is public. |
+| `text`      |       String        | Content of the message                                                            |
+| `username`  | String (*optional*) | Recipient's name of the private message. Otherwise, messages are public by default. |
 
 ### DrawInitialCard
-This action does not have additional parameters. Communicates the intention of the player to draw the initial card before the first turn of the game.
+The action does not need additional parameters.
+- It communicates the intention of a player to draw the initial card. It can only happen before the first turn of the game.
+- If the action is successful, a [SomeoneDrewInitialCard](#SomeoneDrewInitialCard) response is sent to every client.
 
-After this action, if it is successful, a [SomeoneDrewInitialCard](#SomeoneDrewInitialCard) response is sent to each user in the game.
 ### ChooseInitialCardSide
-Communicates the intention of the player to choose the side of its initial card before the first turn of the game.
+The action communicates the player's choice of the initial card's side. It can only happen before the first turn of the game.
 
 | Parameter |  Type  |                           Description |
-| :-------- | :----: | ------------------------------------: |
-| side      | String | Side chosen, can be "FRONT" or "BACK" |
+| :-------- | :----: | :------------------------------------ |
+| `side`      | String | SSide chosen. Must be either `FRONT` or `BACK`ide chosen. Must be either `FRONT` or `BACK` |
 
-After this action, if it is successful, a [SomeoneSetInitialSide](#SomeoneSetInitialSide) response is sent to each user in the game.
+If the action is successful, a [SomeoneSetInitialSide](#SomeoneSetInitialSide) response is sent to every client.
+
 ### DrawSecretObjectives
-This action does not have additional parameters. Communicates the intention of the player to draw the two secret objectives before the first turn of the game.
+The action does not need additional parameters. 
+- It communicates the intention of a player to draw the (2) secret objectives. It can only happen before the first turn of the game.
 
-After this action, if it is successful, a [SomeoneDrewInitialCard](#SomeoneDrewSecretObjectives) response is sent to each user in the game.
+If the action is successful, a [SomeoneDrewInitialCard](#SomeoneDrewSecretObjectives) response is sent to every client.
+
 ### ChooseSecretObjective
-Communicates the intention of the player to choose his secret objective before the first turn of the game.
+The action communicates the intention of a player to choose his secret objective. It can only happen before the first turn of the game.
 
 | Parameter   |  Type   |                Description |
-| :---------- | :-----: | -------------------------: |
-| objectiveID | Integer | ID of the objective chosen |
+| :---------- | :-----: | :------------------------- |
+| `objectiveID` | Integer | ID of the chosen objective |
 
-After this action, if it is successful, a [SomeoneChoseSecretObjective](#SomeoneChoseSecretObjective) response is sent to each user in the game.
+If the action is successful, a [SomeoneChoseSecretObjective](#SomeoneChoseSecretObjective) response is sent to every client.
+
 ### PlayCard
-Communicates the intention of the player to place a card on its board when it is its turn.
+The action communicates the intention of the player to place a card on its board. It can only happen during the player's own turn.
 
 | Parameter |  Type   | Description                                     |
 | :-------- | :-----: | :---------------------------------------------- |
-| x         | Integer | x coordinate where to play the card             |
-| y         | Integer | y coordinate where to play the card             |
-| cardID    | Integer | ID of the playableCard chosen                   |
-| side      | String  | Side to play the card, can be "FRONT" of "BACK" |
+| `x`         | Integer | x coordinate where to play the card             |
+| `y`         | Integer | y coordinate where to play the card             |
+| `cardID`    | Integer | ID of the playableCard chosen                   |
+| `side`      | String  | Side chosen. Must be either `FRONT` or `BACK` |
 
-After this action, if it is successful, a [SomeonePlayedCard](#SomeonePlayedCard) response is sent to each user in the game.
+If the action is successful, a [SomeonePlayedCard](#SomeonePlayedCard) response is sent to every client.
+
 ### DrawCard
-Communicates the intention of the player to draw a card when it is its turn.
+The action communicates the intention of a player to draw a card. It can only happen during the player's own turn.
+
 
 | Parameter  |  Type  | Description                                                                                                                                                            |
 | :--------- | :----: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| drawSource | String | Source from which the card is drawn. It can be "FIRST_VISIBLE_CARD", "SECOND_VISIBLE_CARD", THIRD_VISIBLE_CARD", "FOURTH_VISIBLE_CARD", "GOLDS_DECK", "RESOURCES_DECK" |
+| `drawSource` | String | Source from which drawing the card. It can be `FIRST_VISIBLE_CARD`, `SECOND_VISIBLE_CARD`, `THIRD_VISIBLE_CARD`, `FOURTH_VISIBLE_CARD`, `GOLDS_DECK`, `RESOURCES_DECK` |
 
-After this action, if it is successful, a [SomeonePlayedCard](#SomeonePlayedCard) response is sent to each user in the game.
+If the action is successful, a [SomeonePlayedCard](#SomeonePlayedCard) response is sent to every client.
+
 ## Responses
-Responses always have this parameter:
+Responses always have the following parameter:
 
 | Parameter |  Type  | Description                                |
 | :-------- | :----: | :----------------------------------------- |
-| response  | String | String that shows the type of the response |
+| `response`  | String | String that shows the type of the response |
 
-response can be:
+Response can either be:
 - [MatchStarted](#MatchStarted)
 - [SomeoneDrewInitialCard](#SomeoneDrewInitialCard)
+
 ### AvailableMatches
 This response is sent when a user is connected to the server.
 
 | Parameter |           Type           | Description                           |
 | :-------- | :----------------------: | :------------------------------------ |
-| matches   | Array of [Match](#Match) | List of all matches a player can join |
+| `matches`   | Array of [Match](#Match) | List of all matches a player can join |
 
 #### Match
-Match is a Json object with these parameters:
+Match is a Json object the following parameters:
 
 | Parameter     |  Type   | Description                                       |
 | :------------ | :-----: | :------------------------------------------------ |
-| name          | String  | Name of the match, is unique for each match       |
-| joinedPlayers | Integer | Number of players that currently joined the match |
-| maxPlayers    | Integer | Maximum amount of players that can join the match |
+| `name`          | String  | Name of the match. It is unique for each match       |
+| `joinedPlayers` | Integer | Number of players that currently joined the match |
+| `maxPlayers`    | Integer | Maximum amount of players that can join the match |
 
 ### PlayerJoined
-This response is sent when a player joined the current match.
+This response is sent when a player joins the current match.
 
 | Parameter     |  Type   | Description                                       |
 | :------------ | :-----: | :------------------------------------------------ |
-| name          | String  | Name of the match the player has joined to        |
-| username      | String  | Username of the player that just joined the match |
-| joinedPlayers | Integer | Number of players that currently joined the match |
-| maxPlayers    | Integer | Maximum amount of players that can join the match |
+| `name`          | String  | Name of the match joined by the player         |
+| `username`      | String  | Username of the player that just joined the match |
+| `joinedPlayers` | Integer | Number of players currently in the match |
+| `maxPlayers`    | Integer | Maximum amount of players the match can hold |
 
 ### PlayerQuit
 This response is sent when a player quits the current match.
 
 | Parameter     |  Type   | Description                                       |
 | :------------ | :-----: | :------------------------------------------------ |
-| username      | String  | Username of the player that just quit the match   |
-| joinedPlayers | Integer | Number of players that currently joined the match |
+| `username`      | String  | Username of the player that just quit the match   |
+| `joinedPlayers` | Integer | Number of players that currently joined the match |
 
 ### SomeoneSentText
-This response is sent when another player sends a message in the chat. If the message is private, then this is sent only to the interested user.
+This response is sent when another player sends a message in the chat. If the message is set to be private, the response is only sent to the interested user.
 
 | Parameter |  Type  | Description                                            |
 | :-------- | :----: | :----------------------------------------------------- |
-| username  | String | Username of the player that sent the message           |
-| text      | String | Text of the message sent                               |
-| private   |  bool  | If the message is private to the user that receives it |
+| `username`  | String | Username of the player that sent the message           |
+| `text`      | String | Text of the message sent                               |
+| `private`   |  bool  | If the message is private to the user that receives it |
 
 ### MatchStarted
 Sent when the required amount of players is reached and the match is about to start.
 
 | Parameter         |             Type              | Description                                                                                                                                                                                                       |
 | :---------------- | :---------------------------: | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| visibleObjectives |       Array of Integers       | IDs of the visible objectives                                                                                                                                                                                     |
-| visibleCards      | [VisibleCards](#VisibleCards) | A JSON Object rapresenting the visible cards                                                                                                                                                                      |
-| visibleDeckReigns |       Array of Strings        | An array containing at the first position the reign of the card on top of the golds deck, at the second position the reign at the top of resources deck                                                           |
-| playerHands       |            Object             | A JSON Object containing the player's username as property and an array of integer containing the cards ids.                                                                                                      |
-| playerPawnColors  |            Object             | A JSON Object containing the player's username ad property and a String indicating player's color. It can be "RED", "BLUE", "GREEN", "YELLOW". Note: the order turn always follows RED -> BLUE -> GREEN -> YELLOW |
+| `visibleObjectives` |       Array of Integers       | IDs of the visible objectives |
+| `visibleCards`      | [VisibleCards](#VisibleCards)            | A JSON Object rapresenting the visible cards (see ref.) |
+| `visibleDeckReigns` |       Array of Strings        | The array contains the reign of top-card of both the gold and the resource deck, in the first and second slot respectively |
+| `playerHands`       |            Object             | The JSON Object contains the player's username (as a property) and the cards ids (an array of integer) |
+| `playerPawnColors`  |            Object             | The JSON Object contains the player's username (as a property) and player's color (as a String, containing either `RED`, `BLUE`, `GREEN`, `YELLOW`. Note: the order turn always follows RED -> BLUE -> GREEN -> YELLOW) |
 
-Following, the specification of the declared types: 
-#### VisibleCards
+To further specify the idea behind the `VisibleCards` type:
 
 | Parameter           |  Type   | Description                   |
 | :------------------ | :-----: | :---------------------------- |
-| FIRST_VISIBLE_CARD  | Integer | ID of the first visible card  |
-| SECOND_VISIBLE_CARD | Integer | ID of the second visible card |
-| THIRD_VISIBLE_CARD  | Integer | ID of the third visible card  |
-| FOURTH_VISIBLE_CARD | Integer | ID of the fourth visible card |
+| `FIRST_VISIBLE_CARD`  | Integer | ID of the first visible card  |
+| `SECOND_VISIBLE_CARD` | Integer | ID of the second visible card |
+| `THIRD_VISIBLE_CARD`  | Integer | ID of the third visible card  |
+| `FOURTH_VISIBLE_CARD` | Integer | ID of the fourth visible card |
 
 #### Example
 ```json
@@ -209,73 +220,74 @@ Following, the specification of the declared types:
   "response": "MatchStarted"
 }
 ```
+
 ### SomeoneDrewInitialCard
 This response is sent to each user in the match when a user draws an initial card.
 
 | Parameter     |  Type   | Description                                |
 | :------------ | :-----: | :----------------------------------------- |
-| player        | String  | Username of the player that did the action |
-| initialCardID | Integer | ID of the given initial card               |
+| `player`        | String  | Username of the player who performed the action |
+| `initialCardID` | Integer | ID of the given initial card               |
 
 ### SomeoneSetInitialSide
 This response is sent to each user in the match when a user chosees the initial side of a card.
 
 | Parameter |  Type  | Description                                        |
 | :-------- | :----: | :------------------------------------------------- |
-| player    | String | Username of the player that did the action         |
-| side      | String | Side of the initial card, can be "FRONT" or "BACK" |
+| `player`    | String | Username of the player who performed the action         |
+| `side`      | String | Side of the initial card. It can be either `FRONT` or `BACK` |
 
 ### SomeoneDrewSecretObjectives
 This response is sent to each user in the match when a user draws the two secret objectives.
 
 | Parameter |         Type         | Description                                                                                    |
 | :-------- | :------------------: | :--------------------------------------------------------------------------------------------- |
-| player    |        String        | Username of the player that did the action                                                     |
-| firstID   | Integer (*optional*) | ID of the first objective card drawn, null if the player it is sent to not the current player  |
-| secondID  | Integer (*optional*) | ID of the second objective card drawn, null if the player it is sent to not the current player |
+| `player`    |        String        | Username of the player who performed the action                                                     |
+| `firstID`   | Integer (*optional*) | ID of the first objective card drawn. Is `null` if the player it is sent to not the current player  |
+| `secondID`  | Integer (*optional*) | ID of the second objective card drawn. Is `null` if the player it is sent to not the current player |
 
 ### SomeoneChoseSecretObjective
 This response is sent to each user in the match when a user chooses his secret objective.
 
 | Parameter   |         Type         | Description                                                                         |
 | :---------- | :------------------: | :---------------------------------------------------------------------------------- |
-| player      |        String        | Username of the player that did the action                                          |
-| objectiveID | Integer (*optional*) | ID of the chosen objective, null if the player it is sent to not the current player |
+| `player`      |        String        | Username of the player who performed the action                                          |
+| `objectiveID` | Integer (*optional*) | ID of the chosen objective. Is `null` if the player it is sent to not the current player |
 
 ### SomeonePlayedCardMessage
 This response is sent to each user in the match when a user plays a card.
 
 | Parameter |  Type   | Description                                                  |
 | :-------- | :-----: | :----------------------------------------------------------- |
-| player    | String  | Username of the player that did the action                   |
-| x         | Integer | x coordinate of the player card                              |
-| y         | Integer | y coordinate of the played card                              |
-| cardID    | Integer | ID of the played card                                        |
-| side      | String  | Side in which the card has been played. Can be FRONT or BACK |
-| points    | Integer | Amount of points earned from the move                        |
+| `player`    | String  | Username of the player who performed the action                   |
+| `x`         | Integer | x coordinate of the player card                              |
+| `y`         | Integer | y coordinate of the played card                              |
+| `cardID`    | Integer | ID of the played card                                        |
+| `side`      | String  | Side in which the card has been played. It can be either `FRONT` or `BACK` |
+| `points`    | Integer | Amount of points earned from the move                        |
 
 ### SomeoneDrewCard
 | Parameter            |        Type        | Description                                                                                                                                                            |
 | :------------------- | :----------------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| player               |       String       | Username of the player that did the action                                                                                                                             |
-| drawSource           |       String       | Source from which the card is drawn. It can be "FIRST_VISIBLE_CARD", "SECOND_VISIBLE_CARD", THIRD_VISIBLE_CARD", "FOURTH_VISIBLE_CARD", "GOLDS_DECK", "RESOURCES_DECK" |
-| cardID               |      Integer       | ID of the card drawn by the player                                                                                                                                     |
-| raplacementCardID    | Integer (Optional) | ID of the card that replaced the drawn card, not available if the source is "GOLDS_DECK" or "RESOURCES_DECK"                                                           |
-| replacementCardReign |       String       | Reign of the replaced card.                                                                                                                                            |
+| `player`               |       String       | Username of the player who performed the action |
+| `drawSource`           |       String       | Source from which the card is drawn. It can be `FIRST_VISIBLE_CARD`, `SECOND_VISIBLE_CARD`, `THIRD_VISIBLE_CARD`, `FOURTH_VISIBLE_CARD`, `GOLDS_DECK`, `RESOURCES_DECK` |
+| `cardID`               |      Integer       | ID of the card drawn by the player |
+| `raplacementCardID`    | Integer (Optional) | ID of the card that replaced the drawn card. Not available if the source is `GOLDS_DECK` or `RESOURCES_DECK` |
+| `replacementCardReign` |       String       | Reign of the replaced card |
 
 ### MatchFinishedMessage
 | Parameter |     Type      | Description                                |
 | :-------- | :-----------: | :----------------------------------------- |
-| ranking   | array of Rank | Ordered array containing the final ranking |
+| `ranking`   | array of Rank | Ordered array containing the final ranking |
 
-#### Rank
+### Rank
 Rank is a JSON object containing the results of a single player.
 
 | Parameter |  Type   | Description                    |
 | :-------- | :-----: | :----------------------------- |
-| username  | String  | Username of the player         |
-| points    | Integer | Amount of points gained        |
-| winner    |  bool   | If the player has won the game |
+| `username`  | String  | Username of the current player         |
+| `points`    | Integer | Amount of the final points (after post-match objective counting)        |
+| `winner`    |  bool   | If the current player is also the winner of the game |
 
 #### Example
 ```JSON
@@ -283,7 +295,7 @@ Rank is a JSON object containing the results of a single player.
   "ranking": [
     {
       "username": "Boingo",
-      "points": 12,
+      "points": 25,
       "winner": true
     },
     {
@@ -297,9 +309,9 @@ Rank is a JSON object containing the results of a single player.
 ```
 
 ## Errors
-An error has these parameters:
+An error always contains these parameters:
 
 | Parameter |  Type  |                                        Description |
 | :-------- | :----: | :------------------------------------------------- |
-| error     | String |                                  Code of the error |
-| message   | String | A message explaining the error in natural language |
+| `error`     | String |                                  Code of the error |
+| `message`   | String | A message explaining the error in natural language |
