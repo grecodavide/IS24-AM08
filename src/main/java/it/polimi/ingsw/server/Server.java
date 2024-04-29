@@ -12,9 +12,21 @@ import it.polimi.ingsw.gamemodel.PlayableCard;
 
 public class Server {
     private List<Match> matches;
-    public static final Map<Integer, Objective> objectives = new HashMap<>();
-    public static final Map<Integer, PlayableCard> playableCards = new HashMap<>();
-    public static final Map<Integer, InitialCard> initialCards = new HashMap<>();
+    private static final Map<Integer, Objective> objectives = new HashMap<>();
+    private static final Map<Integer, PlayableCard> playableCards = new HashMap<>();
+    private static final Map<Integer, InitialCard> initialCards = new HashMap<>();
+
+    public static Objective getObjective(Integer id) {
+        return Server.objectives.get(id);
+    }
+
+    public static PlayableCard getPlayableCard(Integer id) {
+        return Server.playableCards.get(id);
+    }
+
+    public static InitialCard getiInitialCard(Integer id) {
+        return Server.initialCards.get(id);
+    }
 
     public Server() {
         matches = new ArrayList<>();
@@ -32,4 +44,5 @@ public class Server {
     public static void main(String[] args) {
         
     }    
+
 }

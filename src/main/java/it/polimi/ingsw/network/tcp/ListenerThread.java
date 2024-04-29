@@ -1,8 +1,5 @@
 package it.polimi.ingsw.network.tcp;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 import it.polimi.ingsw.controllers.PlayerControllerTCP;
@@ -30,9 +27,8 @@ import it.polimi.ingsw.utils.Pair;
 public class ListenerThread implements Runnable {
     private Socket socket;
     private PlayerControllerTCP playerController;
-    private ObjectInputStream inputStream;
-    private ObjectOutputStream outputStream;
     private MessageJsonParser parser;
+    private IOHandler io;
 
     public ListenerThread(Socket socket) {
         try {
@@ -44,31 +40,23 @@ public class ListenerThread implements Runnable {
             Match match = new Match(4, initial, resource, gold, objective);
             String username = "PLACEHOLDER";
             // END OF PLACEHOLDERS
-      
+
             this.socket = socket;
-            this.playerController = new PlayerControllerTCP(username, match, socket);
-            this.inputStream = new ObjectInputStream(this.socket.getInputStream());
-            this.outputStream = new ObjectOutputStream(this.socket.getOutputStream());
+            this.io = new IOHandler(this.socket);
+            this.playerController = new PlayerControllerTCP(username, match, this.io);
             this.parser = new MessageJsonParser();
         } catch (Exception e) {
             System.out.println("Failed to create Listener thread");
         }
     }
 
-    private Objective getObjective(Integer cardID) {
-        return Server.objectives.get(cardID);
-    }
-
-    private PlayableCard getPlayableCard(Integer cardID) {
-        return Server.playableCards.get(cardID);
-    }
 
     private void executeRequest(String msg) {
         try {
             ActionMessage message = (ActionMessage) parser.toMessage(msg);
             switch (message) {
                 case ChooseSecretObjectiveMessage actionMsg:
-                    this.playerController.chooseSecretObjective(this.getObjective(actionMsg.getObjectiveID()));
+                    this.playerController.chooseSecretObjective(Server.getObjective(actionMsg.getObjectiveID()));
                     break;
                 case ChooseInitialCardSideMessage actionMsg:
                     this.playerController.chooseInitialCardSide(actionMsg.getSide());
@@ -84,27 +72,22 @@ public class ListenerThread implements Runnable {
                     break;
                 case PlayCardMessage actionMsg:
                     Pair<Integer, Integer> coords = new Pair<Integer, Integer>(actionMsg.getX(), actionMsg.getY());
-                    PlayableCard card = this.getPlayableCard(actionMsg.getCardID());
+                    PlayableCard card = Server.getPlayableCard(actionMsg.getCardID());
                     this.playerController.playCard(coords, card, actionMsg.getSide());
                     break;
                 default:
                     break;
             }
-
         } catch (Exception e) {
             System.out.println("The parsing failed. Check format");
             System.out.println("Msg: " + msg);
         }
     }
 
-    private String readMsg() throws IOException, ClassNotFoundException {
-        return this.inputStream.readObject().toString();
-    }
-
     private void listen() {
         try {
             while (this.socket.isConnected()) {
-                String msg = this.readMsg();
+                String msg = this.io.readMsg();
                 this.executeRequest(msg);
             }
         } catch (Exception e) {
@@ -117,12 +100,7 @@ public class ListenerThread implements Runnable {
             if (this.socket != null) {
                 this.socket.close();
             }
-            if (this.inputStream != null) {
-                this.inputStream.close();
-            }
-            if (this.outputStream != null) {
-                this.outputStream.close();
-            }
+            this.io.close();
         } catch (Exception e) {
             e.printStackTrace();
         }

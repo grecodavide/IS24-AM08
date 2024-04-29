@@ -1,15 +1,11 @@
 package it.polimi.ingsw.controllers;
 
-import java.io.ObjectOutputStream;
-import java.net.Socket;
-
 import it.polimi.ingsw.exceptions.AlreadyUsedNicknameException;
 import it.polimi.ingsw.exceptions.HandException;
 import it.polimi.ingsw.exceptions.PlayerQuitException;
 import it.polimi.ingsw.exceptions.WrongChoiceException;
 import it.polimi.ingsw.exceptions.WrongStateException;
 import it.polimi.ingsw.exceptions.WrongTurnException;
-import it.polimi.ingsw.gamemodel.Card;
 import it.polimi.ingsw.gamemodel.DrawSource;
 import it.polimi.ingsw.gamemodel.InitialCard;
 import it.polimi.ingsw.gamemodel.Match;
@@ -27,18 +23,16 @@ import it.polimi.ingsw.network.messages.responses.SomeoneDrewInitialCardMessage;
 import it.polimi.ingsw.network.messages.responses.SomeoneDrewSecretObjectivesMessage;
 import it.polimi.ingsw.network.messages.responses.SomeonePlayedCardMessage;
 import it.polimi.ingsw.network.messages.responses.SomeoneSetInitialSideMessage;
-import it.polimi.ingsw.utils.MessageJsonParser;
+import it.polimi.ingsw.network.tcp.IOHandler;
 import it.polimi.ingsw.utils.Pair;
 
 public class PlayerControllerTCP extends PlayerController {
-    private Socket socket;
-    private ObjectOutputStream outputStream;
+    private IOHandler io;
 
-    public PlayerControllerTCP(String nickname, Match match, Socket socket) throws AlreadyUsedNicknameException{
+    public PlayerControllerTCP(String nickname, Match match, IOHandler io) throws AlreadyUsedNicknameException {
         super(nickname, match);
         try {
-            this.socket = socket;
-            this.outputStream = new ObjectOutputStream(this.socket.getOutputStream());
+            this.io = io;
         } catch (Exception e) {
             e.printStackTrace();
             // match.removePlayer(player);
@@ -47,8 +41,7 @@ public class PlayerControllerTCP extends PlayerController {
 
     private void sendMessage(Message msg) {
         try {
-            MessageJsonParser parser = new MessageJsonParser();
-            this.outputStream.writeObject(parser.toJson(msg));
+            this.io.writeMsg(msg);
         } catch (Exception e) {
             this.connectionError();
         }
@@ -68,7 +61,8 @@ public class PlayerControllerTCP extends PlayerController {
 
     @Override
     public void matchStarted() {
-        this.sendMessage(new MatchStartedMessage(match.getVisibleObjectives(), match.getVisiblePlayableCards(), match.getDeckVisibleCards()));
+        this.sendMessage(new MatchStartedMessage(match.getVisibleObjectives(), match.getVisiblePlayableCards(),
+                match.getDeckVisibleCards(), match.getPlayers()));
     }
 
     @Override
@@ -98,12 +92,14 @@ public class PlayerControllerTCP extends PlayerController {
 
     @Override
     public void someonePlayedCard(Player someone, Pair<Integer, Integer> coords, PlayableCard card, Side side) {
-        this.sendMessage(new SomeonePlayedCardMessage(someone.getNickname(), coords, card.getId(), side, someone.getPoints()));
+        this.sendMessage(
+                new SomeonePlayedCardMessage(someone.getNickname(), coords, card.getId(), side, someone.getPoints()));
     }
 
     @Override
-    public void someoneDrewCard(Player someone, DrawSource source, Card card, Card replacementCard) {
-        this.sendMessage(new SomeoneDrewCardMessage(someone.getNickname(), source, card.getId(), replacementCard.getId()));
+    public void someoneDrewCard(Player someone, DrawSource source, PlayableCard card, PlayableCard replacementCard) {
+        this.sendMessage(new SomeoneDrewCardMessage(someone.getNickname(), source, card.getId(),
+                replacementCard.getId(), replacementCard.getReign()));
     }
 
     @Override
