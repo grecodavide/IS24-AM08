@@ -47,7 +47,7 @@ public class GameDeck<T> {
     }
 
     /**
-     * Retruns a card from the deck's top without removing it (returns null if empty)
+     * Returns a card from the deck's top without removing it (returns null if empty)
      * @return the card
      */
     public T peek() {

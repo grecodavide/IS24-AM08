@@ -10,7 +10,6 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.Map;
 
-// TODO: Manages all RuntimeException caused by RemoteException
 public final class PlayerControllerRMI extends PlayerController implements PlayerControllerRMIInterface {
 
     public PlayerControllerRMI(String nickname, Match match, int port) throws AlreadyUsedNicknameException, RemoteException, WrongStateException {
