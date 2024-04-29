@@ -12,11 +12,11 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 public interface PlayerControllerRMIInterface extends Remote {
-    void drawInitialCard() throws RemoteException, WrongStateException, WrongTurnException, PlayerQuitException;
+    void drawInitialCard() throws RemoteException, WrongStateException, WrongTurnException;
 
     void chooseInitialCardSide(Side side) throws RemoteException, WrongStateException, WrongTurnException;
 
-    void drawSecretObjectives() throws RemoteException, WrongStateException, WrongTurnException, PlayerQuitException;
+    void drawSecretObjectives() throws RemoteException, WrongStateException, WrongTurnException;
 
     void chooseSecretObjective(Objective objective) throws RemoteException, WrongStateException, WrongTurnException, WrongChoiceException;
 
