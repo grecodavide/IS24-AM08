@@ -1,7 +1,11 @@
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import it.polimi.ingsw.exceptions.InvalidResourceException;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.Pair;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 
 
@@ -19,7 +23,7 @@ public static void main(String[] args) {
 
     // maps
     Map<Integer, InitialCard> initialCardMap = new HashMap<>();
-    Map<Integer, Objective> objectiveMap = new HashMap<>();
+    Map<Integer, Objective> objectiveCardMap = new HashMap<>();
     Map<Integer, ResourceCard> resourceCardMap = new HashMap<>();
     Map<Integer, GoldCard> goldCardMap = new HashMap<>();
 
@@ -71,29 +75,29 @@ public static void main(String[] args) {
 
     try {
         objectiveCard = new Objective(2, new QuantityRequirement(Map.of(Symbol.INSECT, 3)));
-        objectiveMap.put(objectiveCard.getID(), objectiveCard);
+        objectiveCardMap.put(objectiveCard.getID(), objectiveCard);
 
         objectiveCard = new Objective(2, new QuantityRequirement(Map.of(Symbol.FUNGUS, 3)));
-        objectiveMap.put(objectiveCard.getID(), objectiveCard);
+        objectiveCardMap.put(objectiveCard.getID(), objectiveCard);
 
         objectiveCard = new Objective(2, new QuantityRequirement(Map.of(Symbol.ANIMAL, 3)));
-        objectiveMap.put(objectiveCard.getID(), objectiveCard);
+        objectiveCardMap.put(objectiveCard.getID(), objectiveCard);
 
         objectiveCard = new Objective(2, new QuantityRequirement(Map.of(Symbol.PLANT, 3)));
-        objectiveMap.put(objectiveCard.getID(), objectiveCard);
+        objectiveCardMap.put(objectiveCard.getID(), objectiveCard);
 
         objectiveCard = new Objective(3, new QuantityRequirement(
                                         Map.of(Symbol.FEATHER, 1, Symbol.INKWELL, 1, Symbol.PARCHMENT, 1)));
-        objectiveMap.put(objectiveCard.getID(), objectiveCard);
+        objectiveCardMap.put(objectiveCard.getID(), objectiveCard);
 
         objectiveCard = new Objective(2, new QuantityRequirement(Map.of(Symbol.FEATHER, 2)));
-        objectiveMap.put(objectiveCard.getID(), objectiveCard);
+        objectiveCardMap.put(objectiveCard.getID(), objectiveCard);
 
         objectiveCard = new Objective(2, new QuantityRequirement(Map.of(Symbol.INKWELL, 2)));
-        objectiveMap.put(objectiveCard.getID(), objectiveCard);
+        objectiveCardMap.put(objectiveCard.getID(), objectiveCard);
 
         objectiveCard = new Objective(2, new QuantityRequirement(Map.of(Symbol.PARCHMENT, 2)));
-        objectiveMap.put(objectiveCard.getID(), objectiveCard);
+        objectiveCardMap.put(objectiveCard.getID(), objectiveCard);
     } catch (InvalidResourceException e) {
         throw new RuntimeException(e);
     }
@@ -102,35 +106,35 @@ public static void main(String[] args) {
     try {
         objectiveCard = new Objective(2, new PositionRequirement(Map.of(
                 new Pair<>(0,0), Symbol.FUNGUS, new Pair<>(1,1), Symbol.FUNGUS, new Pair<>(2,2), Symbol.FUNGUS)));
-        objectiveMap.put(objectiveCard.getID(), objectiveCard);
+        objectiveCardMap.put(objectiveCard.getID(), objectiveCard);
 
         objectiveCard = new Objective(2, new PositionRequirement(Map.of(
                 new Pair<>(0,0), Symbol.ANIMAL, new Pair<>(1,1), Symbol.ANIMAL, new Pair<>(2,2), Symbol.ANIMAL)));
-        objectiveMap.put(objectiveCard.getID(), objectiveCard);
+        objectiveCardMap.put(objectiveCard.getID(), objectiveCard);
 
         objectiveCard = new Objective(2, new PositionRequirement(Map.of(
                 new Pair<>(0,0), Symbol.PLANT, new Pair<>(1,-1), Symbol.PLANT, new Pair<>(2,-2), Symbol.PLANT)));
-        objectiveMap.put(objectiveCard.getID(), objectiveCard);
+        objectiveCardMap.put(objectiveCard.getID(), objectiveCard);
 
         objectiveCard = new Objective(2, new PositionRequirement(Map.of(
                 new Pair<>(0,0), Symbol.INSECT, new Pair<>(1,-1), Symbol.INSECT, new Pair<>(2,-2), Symbol.INSECT)));
-        objectiveMap.put(objectiveCard.getID(), objectiveCard);
+        objectiveCardMap.put(objectiveCard.getID(), objectiveCard);
 
         objectiveCard = new Objective(3, new PositionRequirement(Map.of(
                 new Pair<>(0,0), Symbol.ANIMAL, new Pair<>(1,-1), Symbol.INSECT, new Pair<>(1,-2), Symbol.INSECT)));
-        objectiveMap.put(objectiveCard.getID(), objectiveCard);
+        objectiveCardMap.put(objectiveCard.getID(), objectiveCard);
 
         objectiveCard = new Objective(3, new PositionRequirement(Map.of(
                 new Pair<>(0,0), Symbol.FUNGUS, new Pair<>(-1,-1), Symbol.ANIMAL, new Pair<>(-1,-2), Symbol.ANIMAL)));
-        objectiveMap.put(objectiveCard.getID(), objectiveCard);
+        objectiveCardMap.put(objectiveCard.getID(), objectiveCard);
 
         objectiveCard = new Objective(3, new PositionRequirement(Map.of(
                 new Pair<>(0,0), Symbol.FUNGUS, new Pair<>(0,-1), Symbol.FUNGUS, new Pair<>(1,-2), Symbol.PLANT)));
-        objectiveMap.put(objectiveCard.getID(), objectiveCard);
+        objectiveCardMap.put(objectiveCard.getID(), objectiveCard);
 
         objectiveCard = new Objective(3, new PositionRequirement(Map.of(
                 new Pair<>(0,0), Symbol.PLANT, new Pair<>(0,-1), Symbol.PLANT, new Pair<>(-1,-2), Symbol.INSECT)));
-        objectiveMap.put(objectiveCard.getID(), objectiveCard);
+        objectiveCardMap.put(objectiveCard.getID(), objectiveCard);
     } catch (InvalidResourceException e) {
         throw new RuntimeException(e);
     }
@@ -481,7 +485,7 @@ public static void main(String[] args) {
         bottomLeft = Symbol.PARCHMENT;
         bottomRight = Symbol.FULL_CORNER;
         multiplier = Symbol.PARCHMENT;
-        requirements = new QuantityRequirement(Map.of(Symbol.INSECT, 2, Symbol.ANIMAL, 1,));
+        requirements = new QuantityRequirement(Map.of(Symbol.INSECT, 2, Symbol.ANIMAL, 1));
         goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
         goldCardMap.put(goldCard.getId(), goldCard);
 
@@ -874,7 +878,16 @@ public static void main(String[] args) {
     }
 
     //5) to json--------------------------------------------------------------------------------------------------------
-        
+    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    try {
+        String path = "";
+        gson.toJson(initialCardMap, new FileWriter(path + "initial_card_json"));
+        gson.toJson(objectiveCardMap, new FileWriter(path + "objective_card_json"));
+        gson.toJson(resourceCardMap, new FileWriter(path + "resource_card_json"));
+        gson.toJson(goldCardMap, new FileWriter(path + "gold_card_json"));
+    } catch (IOException e) {
+        throw new RuntimeException(e);
+    }
 
 }
 
