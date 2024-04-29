@@ -15,17 +15,17 @@ public interface ViewInterface extends Remote {
 
     void giveSecretObjectives(Pair<Objective, Objective> secretObjectives) throws RemoteException;
 
-    void someoneDrewInitialCard(Player someone, InitialCard card) throws RemoteException;
+    void someoneDrewInitialCard(String someoneNickname, InitialCard card) throws RemoteException;
 
-    void someoneSetInitialSide(Player someone, Side side) throws RemoteException;
+    void someoneSetInitialSide(String someoneNickname, Side side) throws RemoteException;
 
-    void someoneDrewSecretObjective(Player someone, Pair<Objective, Objective> objectives) throws RemoteException;
+    void someoneDrewSecretObjective(String someoneNickname) throws RemoteException;
 
-    void someoneChoseSecretObjective(Player someone, Objective objective) throws RemoteException;
+    void someoneChoseSecretObjective(String someoneNickname, Objective objective) throws RemoteException;
 
-    void someonePlayedCard(Player someone, Pair<Integer, Integer> coords, PlayableCard card, Side side) throws RemoteException;
+    void someonePlayedCard(String someoneNickname, Pair<Integer, Integer> coords, PlayableCard card, Side side) throws RemoteException;
 
-    void someoneDrewCard(Player someone, DrawSource source, Card card) throws RemoteException;
+    void someoneDrewCard(String someoneNickname, DrawSource source, Card card) throws RemoteException;
 
     void matchFinished() throws RemoteException;
 }

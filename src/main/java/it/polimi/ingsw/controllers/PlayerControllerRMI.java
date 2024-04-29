@@ -25,44 +25,32 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
     }
 
     @Override
-    public void drawInitialCard() throws WrongStateException, WrongTurnException, RemoteException {
-        InitialCard initialCard = player.drawInitialCard();
-
-        try {
-            view.giveInitialCard(initialCard);
-        } catch (RemoteException e) {
-            onConnectionError();
-        }
+    public void drawInitialCard() throws WrongStateException, WrongTurnException {
+        player.drawInitialCard();
     }
 
     @Override
-    public void chooseInitialCardSide(Side side) throws WrongStateException, WrongTurnException, RemoteException {
+    public void chooseInitialCardSide(Side side) throws WrongStateException, WrongTurnException {
         player.chooseInitialCardSide(side);
     }
 
     @Override
-    public void drawSecretObjectives() throws WrongStateException, WrongTurnException, RemoteException {
-        Pair<Objective, Objective> secretObjectives = player.drawSecretObjectives();
-
-        try {
-            view.giveSecretObjectives(secretObjectives);
-        } catch (RemoteException e) {
-            onConnectionError();
-        }
+    public void drawSecretObjectives() throws WrongStateException, WrongTurnException {
+        player.drawSecretObjectives();
     }
 
     @Override
-    public void chooseSecretObjective(Objective objective) throws RemoteException, WrongStateException, WrongTurnException, WrongChoiceException {
+    public void chooseSecretObjective(Objective objective) throws WrongStateException, WrongTurnException, WrongChoiceException {
         player.chooseSecretObjective(objective);
     }
 
     @Override
-    public void playCard(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws RemoteException, WrongStateException, WrongTurnException, WrongChoiceException {
+    public void playCard(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws WrongStateException, WrongTurnException, WrongChoiceException {
         player.playCard(coords, card, side);
     }
 
     @Override
-    public void drawCard(DrawSource source) throws RemoteException, HandException, WrongStateException, WrongTurnException, WrongChoiceException {
+    public void drawCard(DrawSource source) throws HandException, WrongStateException, WrongTurnException, WrongChoiceException {
         player.drawCard(source);
     }
 
@@ -95,7 +83,12 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
     @Override
     public void someoneDrewInitialCard(Player someone, InitialCard card) {
         try {
-            view.someoneDrewInitialCard(someone, card);
+            if (player.equals(someone)) {
+                view.giveInitialCard(card);
+            }
+            else {
+                view.someoneDrewInitialCard(someone.getNickname(), card);
+            }
         } catch (RemoteException e) {
             onConnectionError();
         }
@@ -104,7 +97,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
     @Override
     public void someoneSetInitialSide(Player someone, Side side) {
         try {
-            view.someoneSetInitialSide(someone, side);
+            view.someoneSetInitialSide(someone.getNickname(), side);
         } catch (RemoteException e) {
             onConnectionError();
         }
@@ -113,7 +106,12 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
     @Override
     public void someoneDrewSecretObjective(Player someone, Pair<Objective, Objective> objectives) {
         try {
-            view.someoneDrewSecretObjective(someone, objectives);
+            if (player.equals(someone)) {
+                view.giveSecretObjectives(objectives);
+            }
+            else {
+                view.someoneDrewSecretObjective(someone.getNickname());
+            }
         } catch (RemoteException e) {
             onConnectionError();
         }
@@ -122,7 +120,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
     @Override
     public void someoneChoseSecretObjective(Player someone, Objective objective) {
         try {
-            view.someoneChoseSecretObjective(someone, objective);
+            view.someoneChoseSecretObjective(someone.getNickname(), objective);
         } catch (RemoteException e) {
             onConnectionError();
         }
@@ -131,7 +129,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
     @Override
     public void someonePlayedCard(Player someone, Pair<Integer, Integer> coords, PlayableCard card, Side side) {
         try {
-            view.someonePlayedCard(someone, coords, card, side);
+            view.someonePlayedCard(someone.getNickname(), coords, card, side);
         } catch (RemoteException e) {
             onConnectionError();
         }
@@ -140,7 +138,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
     @Override
     public void someoneDrewCard(Player someone, DrawSource source, Card card, Card replacementCard) {
         try {
-            view.someoneDrewCard(someone, source, card);
+            view.someoneDrewCard(someone.getNickname(), source, card);
         } catch (RemoteException e) {
             onConnectionError();
         }
