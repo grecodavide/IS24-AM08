@@ -9,11 +9,17 @@ import it.polimi.ingsw.gamemodel.Player;
 import it.polimi.ingsw.utils.Pair;
 
 /**
- * MatchFinishedMessage
+ * This response is sent to each player when the match is finished
  */
 public final class MatchFinishedMessage extends ResponseMessage {
     private final List<JsonObject> ranking;
 
+    /**
+     * @return a list of JSONObject with properties
+     * username (String) - username of the current player
+     * points (Integer) - total number of points gained during the match
+     * winner (boolean) - if the current player is also the winner of the game
+     */
     public List<JsonObject> getRanking() {
         return ranking;
     }

@@ -11,23 +11,38 @@ public final class SomeonePlayedCardMessage extends ResponseMessage {
     private final Integer cardID;
     private final Side side;
     private final Integer points;
-    
+
+    /**
+     * @return x coordinate of the played card
+     */
     public Integer getX() {
         return x;
     }
 
+    /**
+     * @return y coordinate of the played card
+     */
     public Integer getY() {
         return y;
     }
 
+    /**
+     * @return ID of the played card
+     */
     public Integer getCardID() {
         return cardID;
     }
 
+    /**
+     * @return Side in which the card has been played. It can be either FRONT or BACK
+     */
     public Side getSide() {
         return side;
     }
 
+    /**
+     * @return Amount of points earned from the move
+     */
     public Integer getPoints() {
         return points;
     }

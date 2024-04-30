@@ -14,7 +14,7 @@ import it.polimi.ingsw.gamemodel.Symbol;
 import it.polimi.ingsw.utils.Pair;
 
 /**
- * MatchStartedMessage
+ * Sent when the required amount of players is reached and the match is about to start.
  */
 public final class MatchStartedMessage extends ResponseMessage {
     private final Integer[] visibleObjectives;
@@ -23,28 +23,51 @@ public final class MatchStartedMessage extends ResponseMessage {
     private final Map<String, Integer[]> playerHands;
     private final Map<String, Color> playerPawnColors;
 
+    /**
+     * @return IDs of the visible objectives
+     */
     public Integer[] getVisibleObjectives() {
         return visibleObjectives;
     }
 
+    /**
+     * @return a Map that maps to each visible draw source the ID of the card
+     */
     public Map<DrawSource, Integer> getVisibleCards() {
         return visibleCards;
     }
 
+    /**
+     * @return Array of Symbol that contains the reign of top-card
+     * of both the gold and the resource deck, in the first and second slot respectively
+     */
     public Symbol[] getVisibleDeckReigns() {
         return visibleDeckReigns;
     }
 
+    /**
+     * @return Map mapping to each player username, the list of the cards they have in the hand
+     */
     public Map<String, Integer[]> getPlayerHands() {
         return playerHands;
     }
 
+    /**
+     * @return Map containing for each palyer username, the Color of their pawn
+     */
     public Map<String, Color> getPlayerPawnColors() {
         return playerPawnColors;
     }
 
 
-    // TODO decide if sending the card id is the case
+    /**
+     * Calculates the needed parameters given some information from the match
+     * @param objectives Pair containing the two visible objectives
+     * @param cards Map that for each visible draw source maps the visible card
+     * @param deckReigns Pair containing the reign of the two visible cards on top of the deck.
+     *                   The first is for the Golds deck, while the second for the resources deck.
+     * @param players List of the players in the match
+     */
     public MatchStartedMessage(Pair<Objective, Objective> objectives, Map<DrawSource, PlayableCard> cards, Pair<Symbol, Symbol> deckReigns, List<Player> players) {
         super(null);
         this.visibleObjectives = new Integer[]{null, null};

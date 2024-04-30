@@ -1,7 +1,7 @@
 package it.polimi.ingsw.network.messages.responses;
 
 /**
- * SomeoneDrewInitialCardMessage
+ * This response is sent to each user in the match when a user draws an initial card.
  */
 public final class SomeoneDrewInitialCardMessage extends ResponseMessage {
     private final Integer initialCardID;
@@ -10,7 +10,7 @@ public final class SomeoneDrewInitialCardMessage extends ResponseMessage {
         super(username);
         this.initialCardID = initialCardID;
     }
-
+    /* ID of the given initial card */
     public Integer getInitialCardID() {
         return initialCardID;
     }

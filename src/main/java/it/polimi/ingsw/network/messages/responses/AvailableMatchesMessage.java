@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This response is sent when a user is connected to the server.
+ */
 public final class AvailableMatchesMessage extends ResponseMessage{
 
     private final List<JsonObject> matches;
@@ -16,6 +19,13 @@ public final class AvailableMatchesMessage extends ResponseMessage{
         availableMatches.forEach((n, m) -> matches.add(encodeMatch(n, m)));
     }
 
+    /**
+     *
+     * @return a list containing a JsonObject for each match with properties:
+     * name - name of the match
+     * maxPlayers - maximum number of players
+     * joinedPlayers - number of players in the match
+     */
     public List<JsonObject> getMatches() {
         return matches;
     }
