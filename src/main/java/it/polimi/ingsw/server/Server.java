@@ -1,21 +1,36 @@
 package it.polimi.ingsw.server;
 
-import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import it.polimi.ingsw.controllers.PlayerControllerRMI;
-import it.polimi.ingsw.exceptions.AlreadyUsedNicknameException;
-import it.polimi.ingsw.exceptions.ChosenMatchException;
-import it.polimi.ingsw.exceptions.WrongStateException;
-import it.polimi.ingsw.gamemodel.*;
+import it.polimi.ingsw.gamemodel.InitialCard;
+import it.polimi.ingsw.gamemodel.Match;
+import it.polimi.ingsw.gamemodel.Objective;
+import it.polimi.ingsw.gamemodel.PlayableCard;
 
-public class Server extends UnicastRemoteObject implements ServerRMIInterface {
+public class Server {
     private final Map<String, Match> matches;
+
     private final int portRMI;
     private final int portTCP;
+
+    // Cards to be used in matches
+    private static final Map<Integer, Objective> objectives = new HashMap<>();
+    private static final Map<Integer, PlayableCard> playableCards = new HashMap<>();
+    private static final Map<Integer, InitialCard> initialCards = new HashMap<>();
+
+    public static Objective getObjective(Integer id) {
+        return Server.objectives.get(id);
+    }
+
+    public static PlayableCard getPlayableCard(Integer id) {
+        return Server.playableCards.get(id);
+    }
+
+    public static InitialCard getiInitialCard(Integer id) {
+        return Server.initialCards.get(id);
+    }
 
     public Server(int portRMI, int portTCP) throws RemoteException {
         super();
@@ -103,4 +118,5 @@ public class Server extends UnicastRemoteObject implements ServerRMIInterface {
             }
         } while (!choice.equals("0"));
     }    
+
 }
