@@ -53,8 +53,8 @@
       "bottomLeft": "FULL_CORNER",
       "bottomRight": "FULL_CORNER",
       "center": [
-        "PLANT",
-        "FUNGUS"
+        "FUNGUS",
+        "PLANT"
       ]
     },
     "id": 3
@@ -102,4 +102,21 @@
     "front": {
       "topLeft": "FUNGUS",
       "topRight": "ANIMAL",
-      
+      "bottomLeft": "PLANT",
+      "bottomRight": "INSECT",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "EMPTY_CORNER",
+      "bottomRight": "EMPTY_CORNER",
+      "center": [
+        "FUNGUS",
+        "PLANT",
+        "ANIMAL"
+      ]
+    },
+    "id": 6
+  }
+}

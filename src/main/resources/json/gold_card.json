@@ -1,0 +1,1106 @@
+{
+  "64": {
+    "multiplier": "CORNER_OBJ",
+    "req": {
+      "reqs": {
+        "ANIMAL": 1,
+        "PLANT": 3
+      }
+    },
+    "points": 2,
+    "reign": "PLANT",
+    "front": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "EMPTY_CORNER",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "PLANT"
+      ]
+    },
+    "id": 64
+  },
+  "65": {
+    "multiplier": "NO_MULT",
+    "req": {
+      "reqs": {
+        "ANIMAL": 3
+      }
+    },
+    "points": 3,
+    "reign": "ANIMAL",
+    "front": {
+      "topLeft": "EMPTY_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "EMPTY_CORNER",
+      "bottomRight": "FEATHER",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "ANIMAL"
+      ]
+    },
+    "id": 65
+  },
+  "66": {
+    "multiplier": "NO_MULT",
+    "req": {
+      "reqs": {
+        "ANIMAL": 3
+      }
+    },
+    "points": 3,
+    "reign": "ANIMAL",
+    "front": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "EMPTY_CORNER",
+      "bottomLeft": "PARCHMENT",
+      "bottomRight": "EMPTY_CORNER",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "ANIMAL"
+      ]
+    },
+    "id": 66
+  },
+  "67": {
+    "multiplier": "NO_MULT",
+    "req": {
+      "reqs": {
+        "ANIMAL": 3
+      }
+    },
+    "points": 3,
+    "reign": "ANIMAL",
+    "front": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "INKWELL",
+      "bottomLeft": "EMPTY_CORNER",
+      "bottomRight": "EMPTY_CORNER",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "ANIMAL"
+      ]
+    },
+    "id": 67
+  },
+  "68": {
+    "multiplier": "NO_MULT",
+    "req": {
+      "reqs": {
+        "FUNGUS": 3
+      }
+    },
+    "points": 3,
+    "reign": "FUNGUS",
+    "front": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "EMPTY_CORNER",
+      "bottomLeft": "INKWELL",
+      "bottomRight": "EMPTY_CORNER",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "FUNGUS"
+      ]
+    },
+    "id": 68
+  },
+  "69": {
+    "multiplier": "NO_MULT",
+    "req": {
+      "reqs": {
+        "FUNGUS": 3
+      }
+    },
+    "points": 3,
+    "reign": "FUNGUS",
+    "front": {
+      "topLeft": "FEATHER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "EMPTY_CORNER",
+      "bottomRight": "EMPTY_CORNER",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "FUNGUS"
+      ]
+    },
+    "id": 69
+  },
+  "70": {
+    "multiplier": "NO_MULT",
+    "req": {
+      "reqs": {
+        "FUNGUS": 3
+      }
+    },
+    "points": 3,
+    "reign": "FUNGUS",
+    "front": {
+      "topLeft": "EMPTY_CORNER",
+      "topRight": "PARCHMENT",
+      "bottomLeft": "EMPTY_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "FUNGUS"
+      ]
+    },
+    "id": 70
+  },
+  "71": {
+    "multiplier": "NO_MULT",
+    "req": {
+      "reqs": {
+        "INSECT": 3
+      }
+    },
+    "points": 3,
+    "reign": "INSECT",
+    "front": {
+      "topLeft": "INKWELL",
+      "topRight": "EMPTY_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "EMPTY_CORNER",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "INSECT"
+      ]
+    },
+    "id": 71
+  },
+  "72": {
+    "multiplier": "NO_MULT",
+    "req": {
+      "reqs": {
+        "INSECT": 3
+      }
+    },
+    "points": 3,
+    "reign": "INSECT",
+    "front": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "PARCHMENT",
+      "bottomLeft": "EMPTY_CORNER",
+      "bottomRight": "EMPTY_CORNER",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "INSECT"
+      ]
+    },
+    "id": 72
+  },
+  "73": {
+    "multiplier": "NO_MULT",
+    "req": {
+      "reqs": {
+        "INSECT": 3
+      }
+    },
+    "points": 3,
+    "reign": "INSECT",
+    "front": {
+      "topLeft": "EMPTY_CORNER",
+      "topRight": "EMPTY_CORNER",
+      "bottomLeft": "FEATHER",
+      "bottomRight": "FULL_CORNER",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "INSECT"
+      ]
+    },
+    "id": 73
+  },
+  "74": {
+    "multiplier": "NO_MULT",
+    "req": {
+      "reqs": {
+        "PLANT": 3
+      }
+    },
+    "points": 3,
+    "reign": "PLANT",
+    "front": {
+      "topLeft": "PARCHMENT",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "EMPTY_CORNER",
+      "bottomRight": "EMPTY_CORNER",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "PLANT"
+      ]
+    },
+    "id": 74
+  },
+  "75": {
+    "multiplier": "NO_MULT",
+    "req": {
+      "reqs": {
+        "PLANT": 3
+      }
+    },
+    "points": 3,
+    "reign": "PLANT",
+    "front": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "EMPTY_CORNER",
+      "bottomLeft": "FEATHER",
+      "bottomRight": "EMPTY_CORNER",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "PLANT"
+      ]
+    },
+    "id": 75
+  },
+  "76": {
+    "multiplier": "NO_MULT",
+    "req": {
+      "reqs": {
+        "PLANT": 3
+      }
+    },
+    "points": 3,
+    "reign": "PLANT",
+    "front": {
+      "topLeft": "EMPTY_CORNER",
+      "topRight": "INKWELL",
+      "bottomLeft": "EMPTY_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "PLANT"
+      ]
+    },
+    "id": 76
+  },
+  "77": {
+    "multiplier": "NO_MULT",
+    "req": {
+      "reqs": {
+        "ANIMAL": 5
+      }
+    },
+    "points": 5,
+    "reign": "ANIMAL",
+    "front": {
+      "topLeft": "EMPTY_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "EMPTY_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "ANIMAL"
+      ]
+    },
+    "id": 77
+  },
+  "78": {
+    "multiplier": "NO_MULT",
+    "req": {
+      "reqs": {
+        "FUNGUS": 5
+      }
+    },
+    "points": 5,
+    "reign": "FUNGUS",
+    "front": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "EMPTY_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "EMPTY_CORNER",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "FUNGUS"
+      ]
+    },
+    "id": 78
+  },
+  "79": {
+    "multiplier": "NO_MULT",
+    "req": {
+      "reqs": {
+        "INSECT": 5
+      }
+    },
+    "points": 5,
+    "reign": "INSECT",
+    "front": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "EMPTY_CORNER",
+      "bottomRight": "EMPTY_CORNER",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "INSECT"
+      ]
+    },
+    "id": 79
+  },
+  "80": {
+    "multiplier": "NO_MULT",
+    "req": {
+      "reqs": {
+        "PLANT": 5
+      }
+    },
+    "points": 5,
+    "reign": "PLANT",
+    "front": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "EMPTY_CORNER",
+      "bottomRight": "EMPTY_CORNER",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "PLANT"
+      ]
+    },
+    "id": 80
+  },
+  "41": {
+    "multiplier": "PARCHMENT",
+    "req": {
+      "reqs": {
+        "ANIMAL": 1,
+        "INSECT": 2
+      }
+    },
+    "points": 1,
+    "reign": "INSECT",
+    "front": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "EMPTY_CORNER",
+      "bottomLeft": "PARCHMENT",
+      "bottomRight": "FULL_CORNER",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "INSECT"
+      ]
+    },
+    "id": 41
+  },
+  "42": {
+    "multiplier": "PARCHMENT",
+    "req": {
+      "reqs": {
+        "FUNGUS": 2,
+        "INSECT": 1
+      }
+    },
+    "points": 1,
+    "reign": "FUNGUS",
+    "front": {
+      "topLeft": "PARCHMENT",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "EMPTY_CORNER",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "FUNGUS"
+      ]
+    },
+    "id": 42
+  },
+  "43": {
+    "multiplier": "PARCHMENT",
+    "req": {
+      "reqs": {
+        "FUNGUS": 1,
+        "PLANT": 2
+      }
+    },
+    "points": 1,
+    "reign": "PLANT",
+    "front": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "PARCHMENT",
+      "bottomLeft": "EMPTY_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "PLANT"
+      ]
+    },
+    "id": 43
+  },
+  "44": {
+    "multiplier": "PARCHMENT",
+    "req": {
+      "reqs": {
+        "ANIMAL": 2,
+        "PLANT": 1
+      }
+    },
+    "points": 1,
+    "reign": "ANIMAL",
+    "front": {
+      "topLeft": "EMPTY_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "PARCHMENT",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "ANIMAL"
+      ]
+    },
+    "id": 44
+  },
+  "45": {
+    "multiplier": "FEATHER",
+    "req": {
+      "reqs": {
+        "ANIMAL": 1,
+        "FUNGUS": 2
+      }
+    },
+    "points": 1,
+    "reign": "FUNGUS",
+    "front": {
+      "topLeft": "EMPTY_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FEATHER",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "FUNGUS"
+      ]
+    },
+    "id": 45
+  },
+  "46": {
+    "multiplier": "FEATHER",
+    "req": {
+      "reqs": {
+        "FUNGUS": 1,
+        "ANIMAL": 2
+      }
+    },
+    "points": 1,
+    "reign": "ANIMAL",
+    "front": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "EMPTY_CORNER",
+      "bottomLeft": "FEATHER",
+      "bottomRight": "FULL_CORNER",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "ANIMAL"
+      ]
+    },
+    "id": 46
+  },
+  "47": {
+    "multiplier": "FEATHER",
+    "req": {
+      "reqs": {
+        "INSECT": 1,
+        "PLANT": 2
+      }
+    },
+    "points": 1,
+    "reign": "PLANT",
+    "front": {
+      "topLeft": "FEATHER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "EMPTY_CORNER",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "PLANT"
+      ]
+    },
+    "id": 47
+  },
+  "48": {
+    "multiplier": "FEATHER",
+    "req": {
+      "reqs": {
+        "PLANT": 1,
+        "INSECT": 2
+      }
+    },
+    "points": 1,
+    "reign": "INSECT",
+    "front": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FEATHER",
+      "bottomLeft": "EMPTY_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "INSECT"
+      ]
+    },
+    "id": 48
+  },
+  "49": {
+    "multiplier": "INKWELL",
+    "req": {
+      "reqs": {
+        "ANIMAL": 1,
+        "PLANT": 2
+      }
+    },
+    "points": 1,
+    "reign": "PLANT",
+    "front": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "EMPTY_CORNER",
+      "bottomLeft": "INKWELL",
+      "bottomRight": "FULL_CORNER",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "PLANT"
+      ]
+    },
+    "id": 49
+  },
+  "50": {
+    "multiplier": "INKWELL",
+    "req": {
+      "reqs": {
+        "FUNGUS": 1,
+        "INSECT": 2
+      }
+    },
+    "points": 1,
+    "reign": "INSECT",
+    "front": {
+      "topLeft": "EMPTY_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "INKWELL",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "INSECT"
+      ]
+    },
+    "id": 50
+  },
+  "51": {
+    "multiplier": "INKWELL",
+    "req": {
+      "reqs": {
+        "ANIMAL": 2,
+        "INSECT": 1
+      }
+    },
+    "points": 1,
+    "reign": "ANIMAL",
+    "front": {
+      "topLeft": "INKWELL",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "EMPTY_CORNER",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "ANIMAL"
+      ]
+    },
+    "id": 51
+  },
+  "52": {
+    "multiplier": "INKWELL",
+    "req": {
+      "reqs": {
+        "FUNGUS": 2,
+        "PLANT": 1
+      }
+    },
+    "points": 1,
+    "reign": "FUNGUS",
+    "front": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "INKWELL",
+      "bottomLeft": "EMPTY_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "FUNGUS"
+      ]
+    },
+    "id": 52
+  },
+  "53": {
+    "multiplier": "CORNER_OBJ",
+    "req": {
+      "reqs": {
+        "ANIMAL": 3,
+        "PLANT": 1
+      }
+    },
+    "points": 2,
+    "reign": "ANIMAL",
+    "front": {
+      "topLeft": "EMPTY_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "ANIMAL"
+      ]
+    },
+    "id": 53
+  },
+  "54": {
+    "multiplier": "CORNER_OBJ",
+    "req": {
+      "reqs": {
+        "ANIMAL": 3,
+        "INSECT": 1
+      }
+    },
+    "points": 2,
+    "reign": "ANIMAL",
+    "front": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "EMPTY_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "ANIMAL"
+      ]
+    },
+    "id": 54
+  },
+  "55": {
+    "multiplier": "CORNER_OBJ",
+    "req": {
+      "reqs": {
+        "FUNGUS": 1,
+        "ANIMAL": 3
+      }
+    },
+    "points": 2,
+    "reign": "ANIMAL",
+    "front": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "EMPTY_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "ANIMAL"
+      ]
+    },
+    "id": 55
+  },
+  "56": {
+    "multiplier": "CORNER_OBJ",
+    "req": {
+      "reqs": {
+        "ANIMAL": 1,
+        "FUNGUS": 3
+      }
+    },
+    "points": 2,
+    "reign": "FUNGUS",
+    "front": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "EMPTY_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "FUNGUS"
+      ]
+    },
+    "id": 56
+  },
+  "57": {
+    "multiplier": "CORNER_OBJ",
+    "req": {
+      "reqs": {
+        "FUNGUS": 3,
+        "PLANT": 1
+      }
+    },
+    "points": 2,
+    "reign": "FUNGUS",
+    "front": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "EMPTY_CORNER",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "FUNGUS"
+      ]
+    },
+    "id": 57
+  },
+  "58": {
+    "multiplier": "CORNER_OBJ",
+    "req": {
+      "reqs": {
+        "FUNGUS": 3,
+        "INSECT": 1
+      }
+    },
+    "points": 2,
+    "reign": "FUNGUS",
+    "front": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "EMPTY_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "FUNGUS"
+      ]
+    },
+    "id": 58
+  },
+  "59": {
+    "multiplier": "CORNER_OBJ",
+    "req": {
+      "reqs": {
+        "ANIMAL": 1,
+        "INSECT": 3
+      }
+    },
+    "points": 2,
+    "reign": "INSECT",
+    "front": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "EMPTY_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "INSECT"
+      ]
+    },
+    "id": 59
+  },
+  "60": {
+    "multiplier": "CORNER_OBJ",
+    "req": {
+      "reqs": {
+        "PLANT": 1,
+        "INSECT": 3
+      }
+    },
+    "points": 2,
+    "reign": "INSECT",
+    "front": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "EMPTY_CORNER",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "INSECT"
+      ]
+    },
+    "id": 60
+  },
+  "61": {
+    "multiplier": "CORNER_OBJ",
+    "req": {
+      "reqs": {
+        "FUNGUS": 1,
+        "INSECT": 3
+      }
+    },
+    "points": 2,
+    "reign": "INSECT",
+    "front": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "EMPTY_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "INSECT"
+      ]
+    },
+    "id": 61
+  },
+  "62": {
+    "multiplier": "CORNER_OBJ",
+    "req": {
+      "reqs": {
+        "INSECT": 1,
+        "PLANT": 3
+      }
+    },
+    "points": 2,
+    "reign": "PLANT",
+    "front": {
+      "topLeft": "EMPTY_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "PLANT"
+      ]
+    },
+    "id": 62
+  },
+  "63": {
+    "multiplier": "CORNER_OBJ",
+    "req": {
+      "reqs": {
+        "FUNGUS": 1,
+        "PLANT": 3
+      }
+    },
+    "points": 2,
+    "reign": "PLANT",
+    "front": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "EMPTY_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "PLANT"
+      ]
+    },
+    "id": 63
+  }
+}
