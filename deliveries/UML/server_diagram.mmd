@@ -8,9 +8,9 @@ classDiagram
     
     class MatchObserver{
         <<Interface>>
-      +playerQuit(Player player) void
-      +playerJoined(Player player) void
       +matchStarted() void
+      +someoneJoined(Player someone)
+      +someoneQuit(Player someone)
       +someoneDrewInitialCard(Player someone, InitialCard card) void
       +someoneSetInitialSide(Player someone, Side side) void
       +someoneDrewSecretObjectives(Player someone, Pair~Objective, Objective~) void
@@ -36,8 +36,8 @@ classDiagram
     class PlayerControllerTCP{
       - IOHandler io
       +PlayerControllerTCP(String nickname, Match match, IOHandler io)
-      +playerQuit(Player player) void
-      +playerJoined(Player player) void
+      +someoneJoined(Player someone)
+      +someoneQuit(Player someone) 
       +matchStarted() void
       +someoneDrewInitialCard(Player someone, InitialCard card) void
       +someoneSetInitialSide(Player someone, Side side) void
@@ -61,8 +61,8 @@ classDiagram
     class PlayerControllerRMI {
       - ViewInterface view
       +PlayerControllerRMI(String nickname, Match match, int port)
-      +playerQuit(Player player) void
-      +playerJoined(Player player) void
+      +someoneJoined(Player someone) void
+      +someoneQuit(Player someone) void
       +matchStarted() void
       +someoneDrewInitialCard(Player someone, InitialCard card) void
       +someoneSetInitialSide(Player someone, Side side) void
@@ -89,7 +89,7 @@ classDiagram
         - int portRMI
         - int portTCP
         + Server(int portRMI, int portTCP)
-        + main()$ void
+        + main() void
         + joinMatch(String matchName, String nickname) PlayerControllerRMI
         + createMatch(String matchName, int maxPlayers) void
         + getNewMatch(int maxPlayers) Match

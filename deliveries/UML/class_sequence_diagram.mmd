@@ -17,14 +17,14 @@ sequenceDiagram
     PlayerControllerRMI B ->> ViewRMI B: view.someonePlayedCard()
     ViewRMI B ->> B: "Show changes"
     Match ->> PlayerControllerTCP A: observer.someonePlayedCard()
-    PlayerControllerTCP A ->> ViewTCP A: action: SomeonePlayedCard
+    PlayerControllerTCP A ->> ViewTCP A: response: SomeonePlayedCard
     ViewTCP A ->> A: "Show changes"
     B ->> ViewRMI B: "draw secret objectives"
     ViewRMI B ->> PlayerControllerRMI B: playerController.drawSecretObjective()
     PlayerControllerRMI B ->> Player B: player.drawSecretObjective()
     Player B ->> Match: match.drawSecretObjective()
     Match ->> PlayerControllerTCP A: observer.someoneDrewSecretObjective()
-    PlayerControllerTCP A ->> ViewTCP A: action: SomeoneDrewSecretObjective
+    PlayerControllerTCP A ->> ViewTCP A: response: SomeoneDrewSecretObjective
     ViewTCP A ->> A: "Show changes"
     Match ->> PlayerControllerRMI B: observer.someoneDrewSecretObjective()
     PlayerControllerRMI B ->> ViewRMI B: view.giveSecretObjective()
