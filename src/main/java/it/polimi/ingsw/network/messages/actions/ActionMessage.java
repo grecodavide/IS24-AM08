@@ -5,9 +5,7 @@ import it.polimi.ingsw.network.messages.Message;
 /**
  * ActionMessage
  */
-public sealed abstract class ActionMessage extends Message permits
-        ChooseInitialCardSideMessage, ChooseSecretObjectiveMessage, DrawCardMessage, DrawInitialCardMessage,
-        DrawSecretObjectivesMessage, PlayCardMessage {
+public sealed abstract class ActionMessage extends Message permits ChooseInitialCardSideMessage, ChooseSecretObjectiveMessage, CreateMatchMessage, DrawCardMessage, DrawInitialCardMessage, DrawSecretObjectivesMessage, GetAvailableMatchesMessage, JoinMatchMessage, PlayCardMessage, SendTextMessage {
     private String action;
     private String username;
 

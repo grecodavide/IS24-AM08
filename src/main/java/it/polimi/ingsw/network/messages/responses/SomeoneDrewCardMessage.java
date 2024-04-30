@@ -13,7 +13,6 @@ public final class SomeoneDrewCardMessage extends ResponseMessage {
     Integer replacementCardID;
     Symbol replacementCardReign;
 
-    // TODO: update table
     public SomeoneDrewCardMessage(String username, DrawSource source, Integer cardID, Integer replacementCardID, Symbol replacementCardSymbol) {
         super(username);
         this.drawSource = source;
