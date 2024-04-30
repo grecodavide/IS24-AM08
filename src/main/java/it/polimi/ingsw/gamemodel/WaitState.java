@@ -23,11 +23,9 @@ public class WaitState extends MatchState{
 
     @Override
     public void removePlayer() {
-        //TBD
     }
 
     @Override
     public void addPlayer() {
-        //TBD
     }
 }

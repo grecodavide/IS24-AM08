@@ -1,23 +1,36 @@
 package it.polimi.ingsw.controllers;
 
+import it.polimi.ingsw.client.ViewRMIInterface;
 import it.polimi.ingsw.exceptions.*;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.Pair;
 
-import java.util.List;
+import java.rmi.RemoteException;
 
-public abstract class PlayerController implements MatchObserver {
+public abstract sealed class PlayerController implements MatchObserver permits PlayerControllerRMI {
+    protected Match match;
+    protected Player player;
+    protected ViewRMIInterface view;
 
-    public abstract void drawInitialCard();
+    public PlayerController(String nickname, Match match) throws AlreadyUsedNicknameException, WrongStateException {
+        this.match = match;
 
-    public abstract void chooseInitialCardSide(Side side);
+        player = new Player(nickname, match);
 
-    public abstract void drawSecretObjectives();
+        match.addPlayer(player);
+        match.subscribeObserver(this);
+    }
+
+    public abstract void drawInitialCard() throws WrongStateException, WrongTurnException, RemoteException;
+
+    public abstract void chooseInitialCardSide(Side side) throws WrongStateException, WrongTurnException, RemoteException;
+
+    public abstract void drawSecretObjectives() throws WrongStateException, WrongTurnException, RemoteException;
     
-    public abstract void chooseSecretObjective(Objective objective);
+    public abstract void chooseSecretObjective(Objective objective) throws RemoteException, WrongStateException, WrongTurnException, WrongChoiceException;
 
-    public abstract void playCard(Pair<Integer, Integer> coords, PlayableCard card, Side side);
+    public abstract void playCard(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws RemoteException, WrongStateException, WrongTurnException, WrongChoiceException;
 
-    public abstract void drawCard(DrawSource source);
+    public abstract void drawCard(DrawSource source) throws RemoteException, HandException, WrongStateException, WrongTurnException, WrongChoiceException;
 
 }
