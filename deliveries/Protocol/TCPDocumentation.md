@@ -113,8 +113,8 @@ Responses always have the following parameter:
 
 Response can either be:
 - [AvailableMatches](#AvailableMatches)
-- [PlayerJoined](#PlayerJoined)
-- [PlayerQuit](#PlayerQuit)
+- [SomeoneJoined](#SomeoneJoined)
+- [SomeoneQuit](#SomeoneQuit)
 - [SomeoneSentText](#SomeoneSentText)
 - [MatchStarted](#MatchStarted)
 - [SomeoneDrewInitialCard](#SomeoneDrewInitialCard)
