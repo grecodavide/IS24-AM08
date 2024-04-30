@@ -8,6 +8,10 @@ import it.polimi.ingsw.utils.*;
 public interface MatchObserver {
     void matchStarted();
 
+    void someoneJoined(Player someone);
+
+    void someoneQuit(Player someone);
+
     void someoneDrewInitialCard(Player someone, InitialCard card);
 
     void someoneSetInitialSide(Player someone, Side side);

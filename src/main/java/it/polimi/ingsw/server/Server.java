@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 import it.polimi.ingsw.controllers.PlayerControllerRMI;
 import it.polimi.ingsw.exceptions.AlreadyUsedNicknameException;
@@ -17,6 +18,7 @@ import it.polimi.ingsw.gamemodel.InitialCard;
 import it.polimi.ingsw.gamemodel.Match;
 import it.polimi.ingsw.gamemodel.Objective;
 import it.polimi.ingsw.gamemodel.PlayableCard;
+import org.w3c.dom.html.HTMLMapElement;
 
 public class Server extends UnicastRemoteObject implements ServerRMIInterface {
     private final Map<String, Match> matches;
@@ -68,14 +70,26 @@ public class Server extends UnicastRemoteObject implements ServerRMIInterface {
     }
 
     @Override
-    // TODO: Implement this method
+    // TODO: Implement this method, synchronize it
     public void createMatch(String matchName, int maxPlayers) throws RemoteException, ChosenMatchException {
         if (matches.containsKey(matchName))
             throw new ChosenMatchException("A match with the chosen name already exists");
 
-        Match newMatch = null;
+        Match newMatch = getNewMatch(maxPlayers);
 
         matches.put(matchName, newMatch);
+    }
+
+    public Map<String, Match> getJoinableMatchesMap() {
+        HashMap<String, Match> result = new HashMap<>();
+        for (String name : matches.keySet()) {
+            result.put(name, matches.get(name));
+        }
+        return result;
+    }
+
+    public Match getMatch(String name) {
+        return matches.get(name);
     }
 
     // TODO: Implement this method

@@ -82,6 +82,16 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
     }
 
     @Override
+    public void someoneJoined(Player someone) {
+        // TODO
+    }
+
+    @Override
+    public void someoneQuit(Player someone) {
+        // TODO
+    }
+
+    @Override
     public void someoneDrewInitialCard(Player someone, InitialCard card) {
         try {
             if (player.equals(someone)) {

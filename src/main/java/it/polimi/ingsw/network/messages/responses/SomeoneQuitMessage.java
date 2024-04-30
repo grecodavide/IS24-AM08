@@ -3,10 +3,10 @@ package it.polimi.ingsw.network.messages.responses;
 /**
  * This response is sent when a player quits the current match.
  */
-public final class PlayerQuitMessage extends ResponseMessage{
+public final class SomeoneQuitMessage extends ResponseMessage{
     private final int joinedPlayers;
     private final boolean endMatch;
-    public PlayerQuitMessage(String username, int joinedPlayers, boolean endMatch) {
+    public SomeoneQuitMessage(String username, int joinedPlayers, boolean endMatch) {
         super(username);
         this.joinedPlayers = joinedPlayers;
         this.endMatch = endMatch;
