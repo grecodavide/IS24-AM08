@@ -3,6 +3,7 @@ package it.polimi.ingsw.network.tcp;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.rmi.RemoteException;
 
 import it.polimi.ingsw.server.Server;
 
@@ -33,23 +34,18 @@ public class TCPServer {
         }
     }
 
-    public static void main(String[] args) throws Exception {
-        // ##################
-        // ## if using cli ##
-        // ##################
-        Integer port = Integer.valueOf(args[0]);
+    public static void main(String[] args) {
+        Integer port = 9999;
 
+        Server server = null;
+        try {
+            server = new Server(1234, port);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
 
-        // // ##########
-        // // ## else ##
-        // // ##########
-        // Scanner scanner = new Scanner(System.in);
-        // Integer port = Integer.valueOf(scanner.nextLine());
+        TCPServer tcpServer = new TCPServer(port, server);
+        tcpServer.listen();
 
-        Server tmp = new Server();
-        TCPServer server = new TCPServer(port, tmp);
-
-        server.listen();
     }
-
 }

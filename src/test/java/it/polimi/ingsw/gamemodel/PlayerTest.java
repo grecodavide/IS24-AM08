@@ -1,10 +1,13 @@
 package it.polimi.ingsw.gamemodel;
 
+import static org.junit.Assert.fail;
+
+import org.junit.Test;
+
+import it.polimi.ingsw.exceptions.AlreadyUsedNicknameException;
 import it.polimi.ingsw.exceptions.WrongStateException;
 import it.polimi.ingsw.exceptions.WrongTurnException;
 import it.polimi.ingsw.utils.Pair;
-import org.junit.Test;
-import static org.junit.Assert.fail;
 
 public class PlayerTest {
     // No Player method is specifically tested since the only actual action carried out by all of them is to check
@@ -32,7 +35,7 @@ public class PlayerTest {
             match.addPlayer(player2);
             match.addPlayer(player3);
             match.addPlayer(player4);
-        } catch (WrongStateException e) {
+        } catch (WrongStateException | AlreadyUsedNicknameException e) {
             throw new RuntimeException(e);
         }
 

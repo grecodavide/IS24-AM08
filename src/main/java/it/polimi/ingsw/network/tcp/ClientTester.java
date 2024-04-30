@@ -4,9 +4,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-import it.polimi.ingsw.gamemodel.DrawSource;
 import it.polimi.ingsw.network.messages.actions.ActionMessage;
-import it.polimi.ingsw.network.messages.actions.DrawCardMessage;
+import it.polimi.ingsw.network.messages.actions.CreateMatchMessage;
 import it.polimi.ingsw.utils.MessageJsonParser;
 
 /**
@@ -15,6 +14,8 @@ import it.polimi.ingsw.utils.MessageJsonParser;
 public class ClientTester {
 
     public static void main(String[] args) throws Exception {
+
+        MessageJsonParser parser = new MessageJsonParser();
 
         // ##################
         // ## if using cli ##
@@ -34,19 +35,10 @@ public class ClientTester {
         ObjectOutputStream out = new ObjectOutputStream(client.getOutputStream());
         ObjectInputStream in = new ObjectInputStream(client.getInputStream());
 
-        ActionMessage draw = new DrawCardMessage(username, DrawSource.GOLDS_DECK);
-        MessageJsonParser parser = new MessageJsonParser();
-
-        out.writeObject(username);
-
-        out.writeObject(parser.toJson(draw).toString());
-
-        while (client.isConnected()) {
-            Object msg = in.readObject();
-            System.out.println(msg);
-        }
+        ActionMessage createMatch = new CreateMatchMessage(username, "pippo", 2);
+        out.writeObject(parser.toJson(createMatch));
+        System.out.println(in.readObject());
 
         client.close();
-
     }
 }
