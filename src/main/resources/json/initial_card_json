@@ -1,0 +1,105 @@
+{
+  "1": {
+    "front": {
+      "topLeft": "INSECT",
+      "topRight": "FUNGUS",
+      "bottomLeft": "PLANT",
+      "bottomRight": "ANIMAL",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "EMPTY_CORNER",
+      "bottomRight": "EMPTY_CORNER",
+      "center": [
+        "INSECT",
+        "PLANT",
+        "ANIMAL"
+      ]
+    },
+    "id": 1
+  },
+  "2": {
+    "front": {
+      "topLeft": "PLANT",
+      "topRight": "ANIMAL",
+      "bottomLeft": "FUNGUS",
+      "bottomRight": "INSECT",
+      "center": []
+    },
+    "back": {
+      "topLeft": "ANIMAL",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FUNGUS",
+      "center": [
+        "FUNGUS"
+      ]
+    },
+    "id": 2
+  },
+  "3": {
+    "front": {
+      "topLeft": "INSECT",
+      "topRight": "ANIMAL",
+      "bottomLeft": "FUNGUS",
+      "bottomRight": "PLANT",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "PLANT",
+        "FUNGUS"
+      ]
+    },
+    "id": 3
+  },
+  "4": {
+    "front": {
+      "topLeft": "FUNGUS",
+      "topRight": "PLANT",
+      "bottomLeft": "INSECT",
+      "bottomRight": "ANIMAL",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "PLANT",
+      "bottomLeft": "INSECT",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "INSECT"
+      ]
+    },
+    "id": 4
+  },
+  "5": {
+    "front": {
+      "topLeft": "PLANT",
+      "topRight": "INSECT",
+      "bottomLeft": "ANIMAL",
+      "bottomRight": "FUNGUS",
+      "center": []
+    },
+    "back": {
+      "topLeft": "FULL_CORNER",
+      "topRight": "FULL_CORNER",
+      "bottomLeft": "FULL_CORNER",
+      "bottomRight": "FULL_CORNER",
+      "center": [
+        "INSECT",
+        "ANIMAL"
+      ]
+    },
+    "id": 5
+  },
+  "6": {
+    "front": {
+      "topLeft": "FUNGUS",
+      "topRight": "ANIMAL",
+      
