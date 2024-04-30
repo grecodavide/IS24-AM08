@@ -12,7 +12,7 @@ import it.polimi.ingsw.exceptions.ChosenMatchException;
 import it.polimi.ingsw.exceptions.WrongStateException;
 import it.polimi.ingsw.gamemodel.*;
 
-public class Server extends UnicastRemoteObject implements RMIServerInterface {
+public class Server extends UnicastRemoteObject implements ServerRMIInterface {
     private final Map<String, Match> matches;
     private final int portRMI;
     private final int portTCP;
