@@ -11,7 +11,7 @@ Actions always have the following parameters:
 | Parameter |  Type  | Description |
 | :-------- | :----: | :------------------------------------------ |
 | action    | String |    String showing the action types          |
-| player    | String | Nickname of the player performing the action |
+| username    | String | Nickname of the player performing the action |
 
 Implemented actions:
 - [GetAvailableMatches](#GetAvailableMatches)
@@ -51,7 +51,7 @@ The action sends a text message in the chat.
 | Parameter |        Type         | Description                                                                       |
 | :-------- | :-----------------: | :-------------------------------------------------------------------------------- |
 | `text`      |       String        | Content of the message                                                            |
-| `username`  | String (*optional*) | Recipient's name of the private message. Otherwise, messages are public by default. |
+| `recipient`  | String (*optional*) | Recipient's name of the private message. Otherwise, messages are public by default. |
 
 ### DrawInitialCard
 The action does not need additional parameters.
@@ -102,7 +102,7 @@ The action communicates the intention of a player to draw a card. It can only ha
 | :--------- | :----: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `drawSource` | String | Source from which drawing the card. It can be `FIRST_VISIBLE_CARD`, `SECOND_VISIBLE_CARD`, `THIRD_VISIBLE_CARD`, `FOURTH_VISIBLE_CARD`, `GOLDS_DECK`, `RESOURCES_DECK` |
 
-If the action is successful, a [SomeonePlayedCard](#SomeonePlayedCard) response is sent to every client.
+If the action is successful, a [SomeoneDrewInitialCard](#SomeoneDrewInitialCard) response is sent to every client.
 
 ## Responses
 Responses always have the following parameter:
@@ -235,7 +235,7 @@ This response is sent to each user in the match when a user draws an initial car
 
 | Parameter     |  Type   | Description                                |
 | :------------ | :-----: | :----------------------------------------- |
-| `player`        | String  | Username of the player who performed the action |
+| `username`        | String  | Username of the player who performed the action |
 | `initialCardID` | Integer | ID of the given initial card               |
 
 ### SomeoneSetInitialSide
@@ -243,7 +243,7 @@ This response is sent to each user in the match when a user chosees the initial 
 
 | Parameter |  Type  | Description                                        |
 | :-------- | :----: | :------------------------------------------------- |
-| `player`    | String | Username of the player who performed the action         |
+| `username`    | String | Username of the player who performed the action         |
 | `side`      | String | Side of the initial card. It can be either `FRONT` or `BACK` |
 
 ### SomeoneDrewSecretObjectives
@@ -251,7 +251,7 @@ This response is sent to each user in the match when a user draws the two secret
 
 | Parameter |         Type         | Description                                                                                    |
 | :-------- | :------------------: | :--------------------------------------------------------------------------------------------- |
-| `player`    |        String        | Username of the player who performed the action                                                     |
+| `username`    |        String        | Username of the player who performed the action                                                     |
 | `firstID`   | Integer (*optional*) | ID of the first objective card drawn. Is `null` if the player it is sent to not the current player  |
 | `secondID`  | Integer (*optional*) | ID of the second objective card drawn. Is `null` if the player it is sent to not the current player |
 
@@ -260,15 +260,15 @@ This response is sent to each user in the match when a user chooses his secret o
 
 | Parameter   |         Type         | Description                                                                         |
 | :---------- | :------------------: | :---------------------------------------------------------------------------------- |
-| `player`      |        String        | Username of the player who performed the action                                          |
+| `username`      |        String        | Username of the player who performed the action                                          |
 | `objectiveID` | Integer (*optional*) | ID of the chosen objective. Is `null` if the player it is sent to not the current player |
 
-### SomeonePlayedCardMessage
+### SomeonePlayedCard
 This response is sent to each user in the match when a user plays a card.
 
 | Parameter |  Type   | Description                                                  |
 | :-------- | :-----: | :----------------------------------------------------------- |
-| `player`    | String  | Username of the player who performed the action                   |
+| `username`    | String  | Username of the player who performed the action                   |
 | `x`         | Integer | x coordinate of the player card                              |
 | `y`         | Integer | y coordinate of the played card                              |
 | `cardID`    | Integer | ID of the played card                                        |
@@ -276,9 +276,11 @@ This response is sent to each user in the match when a user plays a card.
 | `points`    | Integer | Amount of points earned from the move                        |
 
 ### SomeoneDrewCard
+This response is sent to each user in the match when a user plays a card.
+
 | Parameter            |        Type        | Description                                                                                                                                                            |
 | :------------------- | :----------------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `player`               |       String       | Username of the player who performed the action |
+| `username`               |       String       | Username of the player who performed the action |
 | `drawSource`           |       String       | Source from which the card is drawn. It can be `FIRST_VISIBLE_CARD`, `SECOND_VISIBLE_CARD`, `THIRD_VISIBLE_CARD`, `FOURTH_VISIBLE_CARD`, `GOLDS_DECK`, `RESOURCES_DECK` |
 | `cardID`               |      Integer       | ID of the card drawn by the player |
 | `raplacementCardID`    | Integer (Optional) | ID of the card that replaced the drawn card. Not available if the source is `GOLDS_DECK` or `RESOURCES_DECK` |
