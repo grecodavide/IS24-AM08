@@ -522,7 +522,7 @@ public class Match {
         // AND the current turn is the last one the match is now finished
         if (currentPlayer.equals(players.getLast()) && lastTurn)
             finished = true;
-        
+
         // Notify observers and trigger state transition
         PlayableCard replacementCardFinal = replacementCard;
         notifyObservers(observer -> observer.someoneDrewCard(currentPlayer, source, card, replacementCardFinal));

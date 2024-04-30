@@ -14,10 +14,10 @@ public interface MatchObserver {
 
     void someoneDrewSecretObjective(Player someone, Pair<Objective, Objective> objectives);
 
-    void someoneChoseSecretObjective(Player someone);
+    void someoneChoseSecretObjective(Player someone, Objective objective);
 
     void someonePlayedCard(Player someone, Pair<Integer, Integer> coords, PlayableCard card, Side side);
-    
+
     void someoneDrewCard(Player someone, DrawSource source, PlayableCard card, PlayableCard replacementCard);
 
     void matchFinished();

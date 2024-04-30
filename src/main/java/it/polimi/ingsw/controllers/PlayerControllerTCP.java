@@ -2,7 +2,6 @@ package it.polimi.ingsw.controllers;
 
 import it.polimi.ingsw.exceptions.AlreadyUsedNicknameException;
 import it.polimi.ingsw.exceptions.HandException;
-import it.polimi.ingsw.exceptions.PlayerQuitException;
 import it.polimi.ingsw.exceptions.WrongChoiceException;
 import it.polimi.ingsw.exceptions.WrongStateException;
 import it.polimi.ingsw.exceptions.WrongTurnException;
@@ -26,11 +25,12 @@ import it.polimi.ingsw.network.messages.responses.SomeoneSetInitialSideMessage;
 import it.polimi.ingsw.network.tcp.IOHandler;
 import it.polimi.ingsw.utils.Pair;
 
-public class PlayerControllerTCP extends PlayerController {
+public final class PlayerControllerTCP extends PlayerController {
     private IOHandler io;
 
-    public PlayerControllerTCP(String nickname, Match match, IOHandler io) throws AlreadyUsedNicknameException {
+    public PlayerControllerTCP(String nickname, Match match, IOHandler io) throws AlreadyUsedNicknameException, WrongStateException {
         super(nickname, match);
+
         try {
             this.io = io;
         } catch (Exception e) {
@@ -48,11 +48,7 @@ public class PlayerControllerTCP extends PlayerController {
     }
 
     private void connectionError() {
-        try {
-            match.removePlayer(player);
-        } catch (PlayerQuitException e) {
-
-        }
+        match.removePlayer(player);
     }
 
     private ErrorMessage createErrorMessage(Exception e) {

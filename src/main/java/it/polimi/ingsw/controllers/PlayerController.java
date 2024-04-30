@@ -1,8 +1,9 @@
 package it.polimi.ingsw.controllers;
 
+import java.rmi.RemoteException;
 import java.util.List;
 
-import it.polimi.ingsw.exceptions.AlreadyUsedNicknameException;
+import it.polimi.ingsw.exceptions.*;
 import it.polimi.ingsw.gamemodel.DrawSource;
 import it.polimi.ingsw.gamemodel.Match;
 import it.polimi.ingsw.gamemodel.MatchObserver;
@@ -16,7 +17,7 @@ public abstract sealed class PlayerController implements MatchObserver permits P
     protected Player player;
     protected Match match;
 
-    public PlayerController(String nickname, Match match) throws AlreadyUsedNicknameException {
+    public PlayerController(String nickname, Match match) throws AlreadyUsedNicknameException, WrongStateException {
         List<String> playersNicknames = match.getPlayers().stream().map(Player::getNickname).toList();
 
         if (playersNicknames.contains(nickname))
@@ -25,15 +26,9 @@ public abstract sealed class PlayerController implements MatchObserver permits P
         this.player = new Player(nickname, match);
         this.match = match;
 
-        match.subscribeObserver(this);
-    }
-
-    public PlayerController(String nickname, Match match) throws AlreadyUsedNicknameException, WrongStateException {
-        this.match = match;
-
-        player = new Player(nickname, match);
-
         match.addPlayer(player);
+
+        // Subscribe to match this PlayerController as a MatchObserver
         match.subscribeObserver(this);
     }
 

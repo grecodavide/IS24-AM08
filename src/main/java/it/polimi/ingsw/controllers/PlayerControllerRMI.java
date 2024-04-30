@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 public final class PlayerControllerRMI extends PlayerController implements PlayerControllerRMIInterface {
+    private ViewRMIInterface view;
 
     public PlayerControllerRMI(String nickname, Match match, int port) throws AlreadyUsedNicknameException, RemoteException, WrongStateException {
         super(nickname, match);
@@ -118,7 +119,8 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
     }
 
     @Override
-    public void someoneChoseSecretObjective(Player someone) {
+    // TODO: Specify why objective not used
+    public void someoneChoseSecretObjective(Player someone, Objective objective) {
         try {
             view.someoneChoseSecretObjective(someone.getNickname());
         } catch (RemoteException e) {
@@ -136,7 +138,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
     }
 
     @Override
-    public void someoneDrewCard(Player someone, DrawSource source, Card card, Card replacementCard) {
+    public void someoneDrewCard(Player someone, DrawSource source, PlayableCard card, PlayableCard replacementCard) {
         try {
             view.someoneDrewCard(someone.getNickname(), source, card);
         } catch (RemoteException e) {
