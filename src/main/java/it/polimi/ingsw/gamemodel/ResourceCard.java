@@ -5,7 +5,7 @@ import it.polimi.ingsw.exceptions.InvalidResourceException;
 /*
 * Card that does not require any conditions to be played
 */
-public final class ResourceCard extends PlayableCard {
+public class ResourceCard extends PlayableCard {
     /**
     * Class constructor. It needs to only take the front as an argument, since the back is handled by its superclass {@link PlayableCard}
     * @param front the front side of the card

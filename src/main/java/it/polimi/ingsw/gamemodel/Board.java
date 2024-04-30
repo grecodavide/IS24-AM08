@@ -13,9 +13,9 @@ import it.polimi.ingsw.utils.Pair;
 * Board is the class that contains all the information relative to a {@link Player}'s status
 */
 public class Board {
-    private final List<PlayableCard> currentHand;
-    private final Map<Pair<Integer, Integer>, PlacedCard> placed;
-    private final Map<Symbol, Integer> availableResources;
+    private List<PlayableCard> currentHand;
+    private Map<Pair<Integer, Integer>, PlacedCard> placed;
+    private Map<Symbol, Integer> availableResources;
 
     private static final Map<Pair<Integer, Integer>, Corner> diagonalOffsets = Map.of(
         new Pair<>(-1, +1), Corner.BOTTOM_RIGHT,
@@ -97,7 +97,13 @@ public class Board {
         }
         placed.put(new Pair<>(0, 0), new PlacedCard(card, side, 0));
 
-        increaseResources(card, side);
+        Symbol cornerSymbol;
+        for (Corner c : Corner.values()) {
+            cornerSymbol = card.getSide(side).getCorner(c);
+            if (Symbol.getBasicResources().contains(cornerSymbol)) {
+                availableResources.put(cornerSymbol, availableResources.get(cornerSymbol)+1);
+            }
+        }
 
         for (Symbol s : card.getSide(side).getCenter()) {
             if (Symbol.getBasicResources().contains(s)) {
@@ -137,7 +143,12 @@ public class Board {
             }
         }
 
-        increaseResources(card, side);
+        for (Corner c : Corner.values()) {
+            cornerSymbol = card.getSide(side).getCorner(c);
+            if (Symbol.getBasicResources().contains(cornerSymbol)) {
+                availableResources.put(cornerSymbol, availableResources.get(cornerSymbol)+1);
+            }
+        }
 
         for (Symbol s : card.getSide(side).getCenter()) {
             if (Symbol.getBasicResources().contains(s)) {
@@ -145,13 +156,12 @@ public class Board {
             }
         }
 
-        switch (card) {
-            case GoldCard gold ->
-                points = gold.calculatePoints(this, coord);
-            case ResourceCard resource ->
-                points = resource.getPoints();
-            default ->
-                throw new CardException("Unknown card type: " + card.getClass() + "!");
+        if (card instanceof GoldCard) {
+            points = ((GoldCard)card).calculatePoints(this, coord);
+        } else if (card instanceof ResourceCard) {
+            points = ((ResourceCard)card).getPoints();
+        } else {
+            throw new CardException("Unknown card type: " + card.getClass().toString() + "!");
         }
 
         return points;
@@ -181,13 +191,11 @@ public class Board {
         if (!currentHand.contains(card)) {
             throw new CardException("The card is not in the player's hand!");
         }
-        if (placed.containsKey(coord)) {
+        if (placed.keySet().contains(coord)) {
             return PlacementOutcome.INVALID_COORDS;
         }
-        // TODO: To test again
-        if (card instanceof GoldCard gold && side == Side.FRONT) {
-            if (gold.getRequirement().timesMet(this) == 0)
-                return PlacementOutcome.INVALID_ENOUGH_RESOURCES;
+        if (card instanceof GoldCard && ((GoldCard)card).getRequirement().timesMet(this) == 0) {
+            return PlacementOutcome.INVALID_ENOUGH_RESOURCES;
         }
 
 
@@ -198,12 +206,12 @@ public class Board {
         // cross-check: none exists
         for (Integer offset : offsets) {
             cmp = new Pair<>(coord.first()+offset, coord.second());
-            if (placed.containsKey(cmp)) {
+            if (placed.keySet().contains(cmp)) {
                 return PlacementOutcome.INVALID_COORDS;
             }
 
             cmp = new Pair<>(coord.first(), coord.second()+offset);
-            if (placed.containsKey(cmp)) {
+            if (placed.keySet().contains(cmp)) {
                 return PlacementOutcome.INVALID_COORDS;
             }
         }
@@ -214,7 +222,7 @@ public class Board {
         Integer y = coord.second();
 
         for (Pair<Integer, Integer> diagOffset : Board.diagonalOffsets.keySet()) {
-            cmp = new Pair<>(x+diagOffset.first(), y+diagOffset.second());
+            cmp = new Pair<Integer, Integer>(x+diagOffset.first(), y+diagOffset.second());
 
             if (placed.get(cmp) != null ) {
                 hasAdjacent = true;
@@ -223,22 +231,11 @@ public class Board {
                 }
             }
         }
-
         if (!hasAdjacent) {
             return PlacementOutcome.INVALID_COORDS;
         }
 
         return PlacementOutcome.VALID;
-    }
-
-    private void increaseResources(Card card, Side side) throws CardException {
-        Symbol cornerSymbol;
-        for (Corner c : Corner.values()) {
-            cornerSymbol = card.getSide(side).getCorner(c);
-            if (Symbol.getBasicResources().contains(cornerSymbol)) {
-                availableResources.put(cornerSymbol, availableResources.get(cornerSymbol)+1);
-            }
-        }
     }
 
 }

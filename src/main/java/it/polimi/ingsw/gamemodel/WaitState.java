@@ -15,17 +15,16 @@ public class WaitState extends MatchState{
             
             MatchState nextState = new NextTurnState(match);
             match.setState(nextState);
-
-            // Notify observers
-            match.notifyMatchStart();
         }
     }
 
     @Override
     public void removePlayer() {
+        //TBD
     }
 
     @Override
     public void addPlayer() {
+        //TBD
     }
 }

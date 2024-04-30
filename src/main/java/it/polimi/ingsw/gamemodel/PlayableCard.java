@@ -8,7 +8,8 @@ import it.polimi.ingsw.exceptions.InvalidResourceException;
 * All these cards have at least a side (the back) that does not require any resouce to be played.
 * @see CardFace
 */
-public abstract sealed class PlayableCard extends Card permits GoldCard, ResourceCard {
+
+public abstract class PlayableCard extends Card {
     protected int points;
     protected Symbol reign;
 
@@ -24,7 +25,7 @@ public abstract sealed class PlayableCard extends Card permits GoldCard, Resourc
             this.reign = reign;
             this.back = new CardFace(Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.FULL_CORNER, Set.of(reign));
         } else {
-            throw new InvalidResourceException("Resource " + reign.toString() + " is not valid for a " + this.getClass());
+            throw new InvalidResourceException("Resource " + reign.toString() + " is not valid for a " + this.getClass().toString());
         }
     }
 

@@ -13,9 +13,9 @@ import it.polimi.ingsw.utils.Pair;
 * The front side of these cards always gives points, but needs a certain requirement to be met in order to be played
 * @see CardFace
 */
-public final class GoldCard extends PlayableCard{
-    private final Symbol multiplier;
-    private final QuantityRequirement req;
+public class GoldCard extends PlayableCard{
+    private Symbol multiplier;
+    private QuantityRequirement req;
 
     /**
     * Class constructor. It needs to only take the front as an argument, since the back is handled by its superclass {@link PlayableCard}
@@ -35,7 +35,7 @@ public final class GoldCard extends PlayableCard{
         // integrity check for allowed multipliers
         EnumSet<Symbol> validMultiplier = Symbol.getValidMultiplier();
         if(!validMultiplier.contains(multiplier)){
-            throw new InvalidResourceException("Resource " + multiplier.toString() + " is not valid for a " + this.getClass());
+            throw new InvalidResourceException("Resource " + multiplier.toString() + " is not valid for a " + this.getClass().toString());
         }
         this.multiplier = multiplier;
     }
