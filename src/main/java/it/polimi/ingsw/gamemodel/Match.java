@@ -102,6 +102,7 @@ public class Match {
 
         currentState.addPlayer();
         players.add(player);
+        notifyObservers(observer -> observer.someoneJoined(player));
         currentState.transition();
     }
 
@@ -113,6 +114,7 @@ public class Match {
     public void removePlayer(Player player) {
         currentState.removePlayer();
         players.remove(player);
+        notifyObservers(observer -> observer.someoneQuit(player));
         currentState.transition();
     }
 
@@ -122,7 +124,7 @@ public class Match {
      * @return true if the match is full, false otherwise
      */
     public boolean isFull() {
-        return players.size() == maxPlayers;
+        return !finished && players.size() == maxPlayers;
     }
 
     /**
@@ -590,6 +592,7 @@ public class Match {
      * Calculates the winner (or winners)
      */
     protected void decideWinner() {
+        finished = true;
         playersFinalRanking = new ArrayList<>();
         Map<Player, Integer> achievedObjectives = checkObjectivesAchievement();
 

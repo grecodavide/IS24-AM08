@@ -5,7 +5,7 @@ import it.polimi.ingsw.network.messages.Message;
 /**
  * Messages sent from the server to the clients to update them about another user's move or to the consequence of their action
  */
-public sealed class ResponseMessage extends Message permits AvailableMatchesMessage, MatchFinishedMessage, MatchStartedMessage, PlayerJoinedMessage, PlayerQuitMessage, SomeoneChoseSecretObjectiveMessage, SomeoneDrewCardMessage, SomeoneDrewInitialCardMessage, SomeoneDrewSecretObjectivesMessage, SomeonePlayedCardMessage, SomeoneSentTextMessage, SomeoneSetInitialSideMessage {
+public sealed class ResponseMessage extends Message permits AvailableMatchesMessage, MatchFinishedMessage, MatchStartedMessage, SomeoneJoinedMessage, SomeoneQuitMessage, SomeoneChoseSecretObjectiveMessage, SomeoneDrewCardMessage, SomeoneDrewInitialCardMessage, SomeoneDrewSecretObjectivesMessage, SomeonePlayedCardMessage, SomeoneSentTextMessage, SomeoneSetInitialSideMessage {
     private final String username;
     private final String response = this.getClass().getSimpleName().replace("Message", "");
 

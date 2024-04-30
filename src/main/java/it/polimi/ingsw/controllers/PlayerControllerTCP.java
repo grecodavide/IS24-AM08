@@ -14,14 +14,7 @@ import it.polimi.ingsw.gamemodel.Player;
 import it.polimi.ingsw.gamemodel.Side;
 import it.polimi.ingsw.network.messages.Message;
 import it.polimi.ingsw.network.messages.errors.ErrorMessage;
-import it.polimi.ingsw.network.messages.responses.MatchFinishedMessage;
-import it.polimi.ingsw.network.messages.responses.MatchStartedMessage;
-import it.polimi.ingsw.network.messages.responses.SomeoneChoseSecretObjectiveMessage;
-import it.polimi.ingsw.network.messages.responses.SomeoneDrewCardMessage;
-import it.polimi.ingsw.network.messages.responses.SomeoneDrewInitialCardMessage;
-import it.polimi.ingsw.network.messages.responses.SomeoneDrewSecretObjectivesMessage;
-import it.polimi.ingsw.network.messages.responses.SomeonePlayedCardMessage;
-import it.polimi.ingsw.network.messages.responses.SomeoneSetInitialSideMessage;
+import it.polimi.ingsw.network.messages.responses.*;
 import it.polimi.ingsw.network.tcp.IOHandler;
 import it.polimi.ingsw.utils.Pair;
 
@@ -59,6 +52,16 @@ public final class PlayerControllerTCP extends PlayerController {
     public void matchStarted() {
         this.sendMessage(new MatchStartedMessage(match.getVisibleObjectives(), match.getVisiblePlayableCards(),
                 match.getDecksTopReigns(), match.getPlayers()));
+    }
+
+    @Override
+    public void someoneJoined(Player someone) {
+        this.sendMessage(new SomeoneJoinedMessage(someone.getNickname(), match.getPlayers().size(), match.getMaxPlayers()));
+    }
+
+    @Override
+    public void someoneQuit(Player someone) {
+        this.sendMessage(new SomeoneQuitMessage(someone.getNickname(), match.getPlayers().size(), match.isFinished()));
     }
 
     @Override
@@ -156,5 +159,7 @@ public final class PlayerControllerTCP extends PlayerController {
             this.sendMessage(this.createErrorMessage(e));
         }
     }
+
+
 
 }
