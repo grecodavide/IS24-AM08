@@ -20,7 +20,7 @@ public final class AvailableMatchesMessage extends ResponseMessage{
         return matches;
     }
 
-    private JsonObject encodeMatch(String name, Match match) {
+    private final JsonObject encodeMatch(String name, Match match) {
         JsonObject result = new JsonObject();
         result.addProperty("name", name);
         result.addProperty("maxPlayers", match.getMaxPlayers());

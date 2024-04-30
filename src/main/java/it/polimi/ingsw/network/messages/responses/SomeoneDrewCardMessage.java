@@ -7,11 +7,26 @@ import it.polimi.ingsw.gamemodel.Symbol;
  * SomeoneDrewCard
  */
 public final class SomeoneDrewCardMessage extends ResponseMessage {
+    private final DrawSource drawSource;
+    private final Integer cardID;
+    private final Integer replacementCardID;
+    private final Symbol replacementCardReign;
 
-    DrawSource drawSource;
-    Integer cardID;
-    Integer replacementCardID;
-    Symbol replacementCardReign;
+    public DrawSource getDrawSource() {
+        return drawSource;
+    }
+
+    public Integer getCardID() {
+        return cardID;
+    }
+
+    public Integer getReplacementCardID() {
+        return replacementCardID;
+    }
+
+    public Symbol getReplacementCardReign() {
+        return replacementCardReign;
+    }
 
     public SomeoneDrewCardMessage(String username, DrawSource source, Integer cardID, Integer replacementCardID, Symbol replacementCardSymbol) {
         super(username);
@@ -23,4 +38,5 @@ public final class SomeoneDrewCardMessage extends ResponseMessage {
             this.replacementCardID = replacementCardID;
         }
     }
+
 }

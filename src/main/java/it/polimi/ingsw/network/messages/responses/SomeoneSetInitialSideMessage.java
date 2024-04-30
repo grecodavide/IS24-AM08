@@ -7,7 +7,12 @@ import it.polimi.ingsw.gamemodel.Side;
  */
 public final class SomeoneSetInitialSideMessage extends ResponseMessage {
 
-    public Side side;
+    private final Side side;
+
+    public Side getSide() {
+        return side;
+    }
+
     public SomeoneSetInitialSideMessage(String username, Side side) {
         super(username);
         this.side = side;

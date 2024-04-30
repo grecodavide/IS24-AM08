@@ -7,12 +7,31 @@ import it.polimi.ingsw.utils.Pair;
  * SomeonePlayedCardMessage
  */
 public final class SomeonePlayedCardMessage extends ResponseMessage {
-
-    public Integer x, y;
-    public Integer cardID;
-    public Side side;
-    public Integer points;
+    private final Integer x, y;
+    private final Integer cardID;
+    private final Side side;
+    private final Integer points;
     
+    public Integer getX() {
+        return x;
+    }
+
+    public Integer getY() {
+        return y;
+    }
+
+    public Integer getCardID() {
+        return cardID;
+    }
+
+    public Side getSide() {
+        return side;
+    }
+
+    public Integer getPoints() {
+        return points;
+    }
+
     public SomeonePlayedCardMessage(String username, Pair<Integer, Integer> coords, Integer cardID, Side side, int points) {
         super(username);
         this.x = coords.first();
@@ -21,4 +40,5 @@ public final class SomeonePlayedCardMessage extends ResponseMessage {
         this.side = side;
         this.points = points;
     }
+
 }

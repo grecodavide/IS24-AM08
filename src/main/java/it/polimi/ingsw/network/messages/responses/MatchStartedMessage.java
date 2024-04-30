@@ -1,22 +1,48 @@
 package it.polimi.ingsw.network.messages.responses;
 
-import it.polimi.ingsw.gamemodel.*;
-import it.polimi.ingsw.utils.Pair;
-
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import it.polimi.ingsw.gamemodel.Card;
+import it.polimi.ingsw.gamemodel.Color;
+import it.polimi.ingsw.gamemodel.DrawSource;
+import it.polimi.ingsw.gamemodel.Objective;
+import it.polimi.ingsw.gamemodel.PlayableCard;
+import it.polimi.ingsw.gamemodel.Player;
+import it.polimi.ingsw.gamemodel.Symbol;
+import it.polimi.ingsw.utils.Pair;
 
 /**
  * MatchStartedMessage
  */
 public final class MatchStartedMessage extends ResponseMessage {
-    public Integer[] visibleObjectives;
-    public Map<DrawSource, Integer> visibleCards;
-    public Symbol[] visibleDeckReigns;
-    public Map<String, Integer[]> playerHands;
-    public Map<String, Color> playerPawnColors;
+    private final Integer[] visibleObjectives;
+    private final Map<DrawSource, Integer> visibleCards;
+    private final Symbol[] visibleDeckReigns;
+    private final Map<String, Integer[]> playerHands;
+    private final Map<String, Color> playerPawnColors;
+
+    public Integer[] getVisibleObjectives() {
+        return visibleObjectives;
+    }
+
+    public Map<DrawSource, Integer> getVisibleCards() {
+        return visibleCards;
+    }
+
+    public Symbol[] getVisibleDeckReigns() {
+        return visibleDeckReigns;
+    }
+
+    public Map<String, Integer[]> getPlayerHands() {
+        return playerHands;
+    }
+
+    public Map<String, Color> getPlayerPawnColors() {
+        return playerPawnColors;
+    }
+
 
     // TODO decide if sending the card id is the case
     public MatchStartedMessage(Pair<Objective, Objective> objectives, Map<DrawSource, PlayableCard> cards, Pair<Symbol, Symbol> deckReigns, List<Player> players) {
