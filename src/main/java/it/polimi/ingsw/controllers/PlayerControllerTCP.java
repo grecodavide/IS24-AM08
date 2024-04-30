@@ -62,7 +62,7 @@ public class PlayerControllerTCP extends PlayerController {
     @Override
     public void matchStarted() {
         this.sendMessage(new MatchStartedMessage(match.getVisibleObjectives(), match.getVisiblePlayableCards(),
-                match.getDeckVisibleCards(), match.getPlayers()));
+                match.getDecksTopReigns(), match.getPlayers()));
     }
 
     @Override

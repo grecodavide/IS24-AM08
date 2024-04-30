@@ -689,7 +689,7 @@ public class MatchTest {
     @Test
     public void generateJson() {
         initializeBlankStartedMatch(3);
-        Message m = new MatchStartedMessage(match.getVisibleObjectives(), match.getVisiblePlayableCards(), match.getDeckVisibleCards(), match.getPlayers());
+        Message m = new MatchStartedMessage(match.getVisibleObjectives(), match.getVisiblePlayableCards(), match.getDecksTopReigns(), match.getPlayers());
         MessageJsonParser parser = new MessageJsonParser();
         System.out.println(parser.toJson(m));
     }

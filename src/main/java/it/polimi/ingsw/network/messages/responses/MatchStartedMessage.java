@@ -19,7 +19,7 @@ public final class MatchStartedMessage extends ResponseMessage {
     public Map<String, Color> playerPawnColors;
 
     // TODO decide if sending the card id is the case
-    public MatchStartedMessage(Pair<Objective, Objective> objectives, Map<DrawSource, PlayableCard> cards, Pair<PlayableCard, PlayableCard> deckCards, List<Player> players) {
+    public MatchStartedMessage(Pair<Objective, Objective> objectives, Map<DrawSource, PlayableCard> cards, Pair<Symbol, Symbol> deckReigns, List<Player> players) {
         super(null);
         this.visibleObjectives = new Integer[]{null, null};
         this.visibleDeckReigns = new Symbol[]{null, null};
@@ -27,8 +27,8 @@ public final class MatchStartedMessage extends ResponseMessage {
         visibleObjectives[1] = objectives.second().getID();
         visibleCards = new HashMap<>();
         cards.forEach((d, c) -> visibleCards.put(d, c.getId()));
-        visibleDeckReigns[0] = deckCards.first().getReign();
-        visibleDeckReigns[1] = deckCards.second().getReign();
+        visibleDeckReigns[0] = deckReigns.first();
+        visibleDeckReigns[1] = deckReigns.second();
         // Calculate player hands and colors
         playerHands = new HashMap<String, Integer[]>();
         playerPawnColors = new HashMap<String, Color>();
