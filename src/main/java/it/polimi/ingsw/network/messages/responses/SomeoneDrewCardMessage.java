@@ -32,10 +32,11 @@ public final class SomeoneDrewCardMessage extends ResponseMessage {
         super(username);
         this.drawSource = source;
         this.cardID = cardID;
-        this.replacementCardID = null;
         this.replacementCardReign = replacementCardSymbol;
         if (!source.equals(DrawSource.GOLDS_DECK) && !source.equals(DrawSource.RESOURCES_DECK)) {
             this.replacementCardID = replacementCardID;
+        } else {
+            this.replacementCardID = null;
         }
     }
 
