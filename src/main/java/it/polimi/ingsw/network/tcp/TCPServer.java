@@ -25,12 +25,31 @@ public class TCPServer {
     public void listen() {
         while (!this.serverSocketTCP.isClosed()) {
             try (Socket socket = this.serverSocketTCP.accept()) {
-                new ListenerThread(socket);
+                new ListenerThread(socket, this.server).start();
             } catch (IOException e) {
                 System.out.println("Failed to accept socket");
                 e.printStackTrace();
             }
         }
+    }
+
+    public static void main(String[] args) throws Exception {
+        // ##################
+        // ## if using cli ##
+        // ##################
+        Integer port = Integer.valueOf(args[0]);
+
+
+        // // ##########
+        // // ## else ##
+        // // ##########
+        // Scanner scanner = new Scanner(System.in);
+        // Integer port = Integer.valueOf(scanner.nextLine());
+
+        Server tmp = new Server();
+        TCPServer server = new TCPServer(port, tmp);
+
+        server.listen();
     }
 
 }

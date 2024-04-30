@@ -17,8 +17,8 @@ public class IOHandler {
     private MessageJsonParser parser;
 
     public IOHandler(Socket socket) throws IOException {
-        this.inputStream = new ObjectInputStream(socket.getInputStream());
         this.outputStream = new ObjectOutputStream(socket.getOutputStream());
+        this.inputStream = new ObjectInputStream(socket.getInputStream());
         this.parser = new MessageJsonParser();
     }
 

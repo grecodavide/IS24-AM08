@@ -1,5 +1,7 @@
 package it.polimi.ingsw.controllers;
 
+import java.util.List;
+
 import it.polimi.ingsw.exceptions.AlreadyUsedNicknameException;
 import it.polimi.ingsw.gamemodel.DrawSource;
 import it.polimi.ingsw.gamemodel.Match;
@@ -10,8 +12,6 @@ import it.polimi.ingsw.gamemodel.Player;
 import it.polimi.ingsw.gamemodel.Side;
 import it.polimi.ingsw.utils.Pair;
 
-import java.util.List;
-
 public abstract class PlayerController implements MatchObserver {
     protected Player player;
     protected Match match;
@@ -21,6 +21,7 @@ public abstract class PlayerController implements MatchObserver {
         if (playersNicknames.contains(nickname))
             throw new AlreadyUsedNicknameException("The chosen nickname is already in use");
 
+        this.player = new Player(nickname, match);
         this.match = match;
 
         match.subscribeObserver(this);
