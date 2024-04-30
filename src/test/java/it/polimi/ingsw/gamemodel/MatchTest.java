@@ -151,7 +151,7 @@ public class MatchTest {
             match.addPlayer(player2);
             // a third player is not added, otherwise Match would be full and go to NextTurnState, then call nextTurn
             // automatically
-        } catch (WrongStateException e) {
+        } catch (WrongStateException|AlreadyUsedNicknameException e) {
             throw new RuntimeException(e);
         }
 
@@ -205,15 +205,27 @@ public class MatchTest {
             // Verify that Match throws an exception when the method is called while being in the wrong state
             match.removePlayer(player1);
             // An exception is supposed to be thrown here
-            fail("match.removePlayer called in wrong state and an exception hasn't been thrown");
-        } catch (PlayerQuitException e) {
-
         } catch (Exception e) {
             fail("Wrong exception: " + e.getMessage());
         }
-
         // Verify that Match, after a player quit in the wrong state, is in FinalState
         assertTrue("Match is not in FinalState even if a player quit in the wrong state", match.getCurrentState() instanceof FinalState);
+
+        match = new Match(4, initialsDeck, resourcesDeck, goldsDeck, objectivesDeck);
+
+        // Verify that players with the same nickname can't join
+        player1 = new Player("Doppio", match);
+        player2 = new Player("Doppio", match);
+        try {
+            match.addPlayer(player1);
+            match.addPlayer(player2);
+            fail("AlreadyUsedNicknameException not thrown");
+        } catch (AlreadyUsedNicknameException e) {
+            // Good
+        } catch (Exception e) {
+            fail("Wrong exception returned: " + e.getMessage());
+        }
+
     }
 
     @Test
