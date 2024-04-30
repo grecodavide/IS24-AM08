@@ -1,5 +1,4 @@
 package it.polimi.ingsw.gamemodel;
-import it.polimi.ingsw.exceptions.PlayerQuitException;
 import it.polimi.ingsw.exceptions.WrongStateException;
 
 /**

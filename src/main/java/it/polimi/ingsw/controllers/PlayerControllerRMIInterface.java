@@ -1,6 +1,6 @@
 package it.polimi.ingsw.controllers;
 
-import it.polimi.ingsw.client.ViewInterface;
+import it.polimi.ingsw.client.ViewRMIInterface;
 import it.polimi.ingsw.exceptions.*;
 import it.polimi.ingsw.gamemodel.DrawSource;
 import it.polimi.ingsw.gamemodel.Objective;
@@ -24,5 +24,5 @@ public interface PlayerControllerRMIInterface extends Remote {
 
     void drawCard(DrawSource source) throws RemoteException, HandException, WrongStateException, WrongTurnException, WrongChoiceException;
 
-    void registerView(ViewInterface view) throws RemoteException;
+    void registerView(ViewRMIInterface view) throws RemoteException;
 }

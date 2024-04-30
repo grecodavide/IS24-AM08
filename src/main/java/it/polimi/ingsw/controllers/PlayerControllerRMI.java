@@ -1,6 +1,6 @@
 package it.polimi.ingsw.controllers;
 
-import it.polimi.ingsw.client.ViewInterface;
+import it.polimi.ingsw.client.ViewRMIInterface;
 import it.polimi.ingsw.exceptions.*;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.Pair;
@@ -20,7 +20,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
     }
 
     @Override
-    public void registerView(ViewInterface view) {
+    public void registerView(ViewRMIInterface view) {
         this.view = view;
     }
 
@@ -118,9 +118,9 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
     }
 
     @Override
-    public void someoneChoseSecretObjective(Player someone, Objective objective) {
+    public void someoneChoseSecretObjective(Player someone) {
         try {
-            view.someoneChoseSecretObjective(someone.getNickname(), objective);
+            view.someoneChoseSecretObjective(someone.getNickname());
         } catch (RemoteException e) {
             onConnectionError();
         }
