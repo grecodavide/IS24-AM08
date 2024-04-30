@@ -112,9 +112,18 @@ Responses always have the following parameter:
 | `response`  | String | String that shows the type of the response |
 
 Response can either be:
+- [AvailableMatches](#AvailableMatches)
+- [PlayerJoined](#PlayerJoined)
+- [PlayerQuit](#PlayerQuit)
+- [SomeoneSentText](#SomeoneSentText)
 - [MatchStarted](#MatchStarted)
 - [SomeoneDrewInitialCard](#SomeoneDrewInitialCard)
-
+- [SomeoneSetInitialSide](#SomeoneSetInitialSide)
+- [SomeoneDrewSecretObjectives](#SomeoneDrewSecretObjectives)
+- [SomeoneChoseSecretObjective](#SomeoneChoseSecretObjective)
+- [SomeonePlayedCardMessage](#SomeonePlayedCardMessage)
+- [SomeoneDrewCard](#SomeoneDrewCard)
+- [MatchFinishedMessage](#MatchFinishedMessage)
 ### AvailableMatches
 This response is sent when a user is connected to the server.
 
@@ -136,7 +145,6 @@ This response is sent when a player joins the current match.
 
 | Parameter     |  Type   | Description                                       |
 | :------------ | :-----: | :------------------------------------------------ |
-| `name`          | String  | Name of the match joined by the player         |
 | `username`      | String  | Username of the player that just joined the match |
 | `joinedPlayers` | Integer | Number of players currently in the match |
 | `maxPlayers`    | Integer | Maximum amount of players the match can hold |
@@ -148,6 +156,7 @@ This response is sent when a player quits the current match.
 | :------------ | :-----: | :------------------------------------------------ |
 | `username`      | String  | Username of the player that just quit the match   |
 | `joinedPlayers` | Integer | Number of players that currently joined the match |
+| `endMatch`     | bool     | true if the quit caused the match to interrupt, false otherwise|
 
 ### SomeoneSentText
 This response is sent when another player sends a message in the chat. If the message is set to be private, the response is only sent to the interested user.
@@ -156,7 +165,7 @@ This response is sent when another player sends a message in the chat. If the me
 | :-------- | :----: | :----------------------------------------------------- |
 | `username`  | String | Username of the player that sent the message           |
 | `text`      | String | Text of the message sent                               |
-| `private`   |  bool  | If the message is private to the user that receives it |
+| `isPrivate`   |  bool  | If the message is private to the user that receives it |
 
 ### MatchStarted
 Sent when the required amount of players is reached and the match is about to start.
