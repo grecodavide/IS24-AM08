@@ -70,7 +70,7 @@ public class JsonTest {
         // Deserialize
         Message convertedMessage = parser.toMessage(m1json);
         assertTrue(convertedMessage instanceof SomeoneDrewSecretObjectivesMessage);
-        assertEquals(Integer.valueOf(12), ((SomeoneDrewSecretObjectivesMessage) convertedMessage).firstID);
+        assertEquals(Integer.valueOf(12), ((SomeoneDrewSecretObjectivesMessage) convertedMessage).getFirstID());
     }
 
     @Test
