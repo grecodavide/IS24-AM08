@@ -11,7 +11,7 @@ import java.util.Map;
 /**
  * RMI interface used to declare all and only the methods callable on a remote view instance implementing this interface.
  * Since it's a remote interface, all the methods here defined are meant to notify the occurrence of an event to the remote
- * object. Being so, all methods also contain some parameters specific to the happened event.
+ * object. Given this, all methods also contain some parameters specific to the happened event.
  * For security reasons, each method doesn't expose to the receiving view important objects (e.g. Player), but
  * rather values representing them (e.g. Player's nickname).
  */
