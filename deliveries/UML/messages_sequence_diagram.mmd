@@ -1,0 +1,47 @@
+sequenceDiagram
+    actor A;
+    participant PlayerControllerRMI
+    participant Server;
+    participant PlayerControllerTCP
+    actor B;
+    %% Start connection
+    A ->> Server: connect
+    Server -->> A: connection enstablished
+    B ->> Server: connect
+    Server -->> B: connection enstabilished
+    %% Choose match
+    A ->> Server: createMatch()
+    Server -->> A: PlayerControllerRMI A
+    B ->> Server: action: GetAvailableMatches
+    Server -->> B: response: AvailableMatches
+    B ->> Server: action: JoinMatch
+    Server -->> B: repsonse: SomeoneJoined
+    Server -->> PlayerControllerRMI: someoneJoined()
+    %% MatchStarted
+    Server -->> PlayerControllerRMI: matchStated()
+    Server -->> PlayerControllerTCP: matchStared()
+    PlayerControllerTCP -->> B: response: MatchStarted
+
+    PlayerControllerRMI ->> Server: drawInitialCard()
+    Server -->> PlayerControllerRMI: someoneDrewInitialcard()
+    Server -->> PlayerControllerTCP: someoneDrewInitialcard()
+    PlayerControllerRMI ->> Server: chooseInitialSide()
+    Server -->> PlayerControllerRMI: someoneSetInitialSide()
+    Server -->> PlayerControllerTCP: someoneSetInitialSide()
+    %% Repeat the thing for PlayerControllerTCP
+    PlayerControllerRMI ->> Server: drawSecretObjectives()
+    Server -->> PlayerControllerRMI: someoneDrewSecretObjectives()
+    Server -->> PlayerControllerTCP: someoneDrewSecretObjectives()
+    PlayerControllerRMI ->> Server: chooseSecretObjective()
+    Server --> PlayerControllerRMI: someoneChoseSecretObjective()
+    Server --> PlayerControllerTCP: someoneChoseSecretObjective()
+    %% Repeat for PlayerControllerTCP
+    PlayerControllerRMI ->> Server: playCard()
+    Server -->> PlayerControllerRMI: someonePlayedCard()
+    Server -->> PlayerControllerTCP: someonePlayedCard()
+    PlayerControllerRMI ->> Server: drawCard()
+    Server -->> PlayerControllerRMI: someoneDrewCard()
+    Server -->> PlayerControllerTCP: someoneDrewCard()
+    %% FinishRanking
+    Server -->> PlayerControllerRMI: matchFinished()
+    Server -->> PlayerControllerTCP: matchFinished()

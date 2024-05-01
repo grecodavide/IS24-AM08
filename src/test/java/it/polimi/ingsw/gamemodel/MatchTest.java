@@ -5,6 +5,9 @@ import java.util.*;
 import javax.management.RuntimeErrorException;
 
 import it.polimi.ingsw.exceptions.*;
+import it.polimi.ingsw.network.messages.Message;
+import it.polimi.ingsw.network.messages.responses.MatchStartedMessage;
+import it.polimi.ingsw.utils.MessageJsonParser;
 import it.polimi.ingsw.utils.Pair;
 import org.junit.Test;
 
@@ -148,7 +151,7 @@ public class MatchTest {
             match.addPlayer(player2);
             // a third player is not added, otherwise Match would be full and go to NextTurnState, then call nextTurn
             // automatically
-        } catch (WrongStateException e) {
+        } catch (WrongStateException|AlreadyUsedNicknameException e) {
             throw new RuntimeException(e);
         }
 
@@ -202,15 +205,27 @@ public class MatchTest {
             // Verify that Match throws an exception when the method is called while being in the wrong state
             match.removePlayer(player1);
             // An exception is supposed to be thrown here
-            fail("match.removePlayer called in wrong state and an exception hasn't been thrown");
-        } catch (PlayerQuitException e) {
-
         } catch (Exception e) {
             fail("Wrong exception: " + e.getMessage());
         }
-
         // Verify that Match, after a player quit in the wrong state, is in FinalState
         assertTrue("Match is not in FinalState even if a player quit in the wrong state", match.getCurrentState() instanceof FinalState);
+
+        match = new Match(4, initialsDeck, resourcesDeck, goldsDeck, objectivesDeck);
+
+        // Verify that players with the same nickname can't join
+        player1 = new Player("Doppio", match);
+        player2 = new Player("Doppio", match);
+        try {
+            match.addPlayer(player1);
+            match.addPlayer(player2);
+            fail("AlreadyUsedNicknameException not thrown");
+        } catch (AlreadyUsedNicknameException e) {
+            // Good
+        } catch (Exception e) {
+            fail("Wrong exception returned: " + e.getMessage());
+        }
+
     }
 
     @Test
@@ -680,8 +695,16 @@ public class MatchTest {
         assertEquals(player1, ranking.get(1).first());
         assertTrue("Player is not marked as winner", ranking.get(0).second());
         assertFalse("Player is marked as winner", ranking.get(1).second());
+        MessageJsonParser parser = new MessageJsonParser();
     }
 
+    @Test
+    public void generateJson() {
+        initializeBlankStartedMatch(3);
+        Message m = new MatchStartedMessage(match.getVisibleObjectives(), match.getVisiblePlayableCards(), match.getDecksTopReigns(), match.getPlayers());
+        MessageJsonParser parser = new MessageJsonParser();
+        System.out.println(parser.toJson(m));
+    }
     // Private helper Methods
     private DrawSource decideDrawSource() {
         Map<DrawSource, PlayableCard> visible = match.getVisiblePlayableCards();

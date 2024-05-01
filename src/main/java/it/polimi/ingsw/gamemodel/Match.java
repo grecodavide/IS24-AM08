@@ -2,6 +2,7 @@ package it.polimi.ingsw.gamemodel;
 
 import it.polimi.ingsw.utils.Pair;
 import it.polimi.ingsw.exceptions.*;
+
 import java.util.*;
 
 /**
@@ -48,6 +49,9 @@ public class Match {
     // True flag.
     private List<Pair<Player, Boolean>> playersFinalRanking;
 
+    // List of observers
+    private final List<MatchObserver> observers;
+
     /**
      * Initializes main Match attributes and allocate the attribute players List, assuming no parameter is null.
      * @param maxPlayers maximum number of players to be added to the match, chosen by the first player joining the match
@@ -64,6 +68,7 @@ public class Match {
         this.goldsDeck = goldsDeck;
         this.objectivesDeck = objectivesDeck;
         this.currentState = new WaitState(this);
+        this.observers = new ArrayList<>();
 
         if (goldsDeck.getSize() < maxPlayers + 2)
             throw new IllegalArgumentException("goldsDeck does not have enough cards");
@@ -87,14 +92,18 @@ public class Match {
      * @throws IllegalArgumentException if the player is already in the match or too many players would be in the match
      * @throws WrongStateException if called while in a state that doesn't allow adding players
      */
-    public void addPlayer(Player player) throws IllegalArgumentException, WrongStateException {
-        if(!players.contains(player)) {
-            currentState.addPlayer();
-            players.add(player);
-            currentState.transition();
-        } else {
+    public void addPlayer(Player player) throws IllegalArgumentException, WrongStateException, AlreadyUsedNicknameException {
+        List<String> playersNicknames = getPlayers().stream().map(Player::getNickname).toList();
+
+        if(players.contains(player))
             throw new IllegalArgumentException("Duplicated player in a match");
-        }
+        if (playersNicknames.contains(player.getNickname()))
+            throw new AlreadyUsedNicknameException("The chosen nickname is already in use");
+
+        currentState.addPlayer();
+        players.add(player);
+        notifyObservers(observer -> observer.someoneJoined(player));
+        currentState.transition();
     }
 
     /**
@@ -102,10 +111,10 @@ public class Match {
      * Note: Called by the Controller when a player quits the match.
      * @param player player to be removed from the match
      */
-    // TODO: Change Javadoc
-    public void removePlayer(Player player) throws PlayerQuitException {
+    public void removePlayer(Player player) {
         currentState.removePlayer();
         players.remove(player);
+        notifyObservers(observer -> observer.someoneQuit(player));
         currentState.transition();
     }
 
@@ -115,7 +124,7 @@ public class Match {
      * @return true if the match is full, false otherwise
      */
     public boolean isFull() {
-        return players.size() == maxPlayers;
+        return !finished && players.size() == maxPlayers;
     }
 
     /**
@@ -225,6 +234,8 @@ public class Match {
             throw new RuntimeException(e);
         }
 
+        // Notify observers and trigger state transition
+        notifyObservers(observer -> observer.someoneDrewInitialCard(currentPlayer, currentGivenInitialCard));
         currentState.transition();
 
         return currentGivenInitialCard;
@@ -243,6 +254,8 @@ public class Match {
 
             currentProposedObjectives = new Pair<>(obj1, obj2);
 
+            // Notify observers and trigger state transition
+            notifyObservers(observer -> observer.someoneDrewSecretObjective(currentPlayer, currentProposedObjectives));
             currentState.transition();
 
             return currentProposedObjectives;
@@ -273,6 +286,8 @@ public class Match {
             // If the objective is not one of the proposed ones, throw an exception
             throw new WrongChoiceException("The chosen objective is not one of the proposed ones");
 
+        // Notify observers and trigger state transition
+        notifyObservers(observer -> observer.someoneChoseSecretObjective(currentPlayer, objective));
         currentState.transition();
     }
 
@@ -402,7 +417,10 @@ public class Match {
                 if (currentPlayer.getPoints() >= 20)
                     lastTurn = true;
 
+                // Notify observers and trigger state transition
+                notifyObservers(observer -> observer.someonePlayedCard(currentPlayer, coords, card, side));
                 currentState.transition();
+
                 break;
             case INVALID_COORDS:
                 throw new WrongChoiceException("Invalid coordinates!");
@@ -425,6 +443,7 @@ public class Match {
      */
     protected PlayableCard drawCard(DrawSource source) throws WrongStateException, WrongChoiceException {
         PlayableCard card;
+        PlayableCard replacementCard = null;
 
         currentState.drawCard();
 
@@ -432,6 +451,7 @@ public class Match {
             case GOLDS_DECK -> {
                 try {
                     card = goldsDeck.pop();
+                    replacementCard = goldsDeck.peek();
                 } catch (DeckException e) {
                     throw new WrongChoiceException("The gold cards deck is empty!");
                 }
@@ -440,6 +460,7 @@ public class Match {
             case RESOURCES_DECK -> {
                 try {
                     card = resourcesDeck.pop();
+                    replacementCard = resourcesDeck.peek();
                 } catch (DeckException e) {
                     throw new WrongChoiceException("The resource cards deck is empty!");
                 }
@@ -455,14 +476,18 @@ public class Match {
 
                 // If the golds deck is NOT empty, substitute the first/second visible
                 // card with a new gold
-                if(!goldsDeck.isEmpty())
-                    visiblePlayableCards.put(source, goldsDeck.poll());
+                if(!goldsDeck.isEmpty()) {
+                    replacementCard = goldsDeck.poll();
+                    visiblePlayableCards.put(source, replacementCard);
+                }
                 // If the golds deck is empty, substitute the first/second visible
                 // card with a resource
-                else
-                    visiblePlayableCards.put(source, resourcesDeck.poll());
-                // If the resources deck is empty too, the GameDeck.poll() method returns null,
-                // then the corresponding visible card will be null
+                else {
+                    replacementCard = resourcesDeck.poll();
+                    visiblePlayableCards.put(source, replacementCard);
+                    // If the resources deck is empty too, the GameDeck.poll() method returns null,
+                    // then the corresponding visible card will be null
+                }
             }
 
             case THIRD_VISIBLE, FOURTH_VISIBLE -> {
@@ -475,12 +500,16 @@ public class Match {
 
                 // If the resources deck is NOT empty, substitute the third/fourth visible
                 // card with a new resource
-                if(!resourcesDeck.isEmpty())
-                    visiblePlayableCards.put(source, resourcesDeck.poll());
+                if(!resourcesDeck.isEmpty()) {
+                    replacementCard = resourcesDeck.poll();
+                    visiblePlayableCards.put(source, replacementCard);
+                }
                 // If the resources deck is empty, substitute the third/fourth visible
                 // card with a gold
-                else
-                    visiblePlayableCards.put(source, goldsDeck.poll());
+                else {
+                    replacementCard = goldsDeck.poll();
+                    visiblePlayableCards.put(source, replacementCard);
+                }
                 // If the golds deck is empty too, the GameDeck.poll() method returns null,
                 // then the corresponding visible card will be null
             }
@@ -496,6 +525,9 @@ public class Match {
         if (currentPlayer.equals(players.getLast()) && lastTurn)
             finished = true;
 
+        // Notify observers and trigger state transition
+        PlayableCard replacementCardFinal = replacementCard;
+        notifyObservers(observer -> observer.someoneDrewCard(currentPlayer, source, card, replacementCardFinal));
         currentState.transition();
 
         return card;
@@ -517,6 +549,8 @@ public class Match {
 
         currentGivenInitialCard = null;
 
+        // Notify observers and trigger state transition
+        notifyObservers(observer -> observer.someoneSetInitialSide(currentPlayer, side));
         currentState.transition();
     }
 
@@ -558,6 +592,7 @@ public class Match {
      * Calculates the winner (or winners)
      */
     protected void decideWinner() {
+        finished = true;
         playersFinalRanking = new ArrayList<>();
         Map<Player, Integer> achievedObjectives = checkObjectivesAchievement();
 
@@ -573,7 +608,7 @@ public class Match {
                 )
                 .toList();
 
-        Player bestPlayer = sortedPlayers.get(0);
+        Player bestPlayer = sortedPlayers.getFirst();
         int bestAchievedObjectives = achievedObjectives.get(bestPlayer);
         int bestPoints = bestPlayer.getPoints();
         boolean isWinner;
@@ -585,6 +620,9 @@ public class Match {
 
             playersFinalRanking.add(new Pair<>(p, isWinner));
         }
+
+        // Notify observers
+        observers.forEach(MatchObserver::matchFinished);
     }
 
     /**
@@ -625,25 +663,83 @@ public class Match {
     }
 
     /**
-     * Getter of the visible cards back on the top of the decks
-     * @return Pair of two CardFace, the first one is the CardFace at the
-     * top of golds deck, the second one is the CardFace at the top of resources deck
+     * Getter for the cards back on the top of the decks (i.e. those visible top cards).
+     * Both of them always contain just a reign.
+     * @return Pair of two reign Symbol (see {@link Symbol}.getReigns()), the first one regards the
+     * top card of gold cards deck, the second one regards the top card of resource cards deck
      */
-    public Pair<CardFace, CardFace> getVisibleCardsBack() {
-        Card goldCard = goldsDeck.peek();
-        Card resourceCard = resourcesDeck.peek();
-        CardFace gold = null;
-        CardFace resource = null;
+    public Pair<Symbol, Symbol> getDecksTopReigns() {
+        PlayableCard goldCard = goldsDeck.peek();
+        PlayableCard resourceCard = resourcesDeck.peek();
 
-        if (goldCard != null)
-            gold = goldCard.getSide(Side.BACK);
-        if (resourceCard != null)
-            resource = resourceCard.getSide(Side.BACK);
+        Symbol goldReign;
+        Symbol resourceReign;
 
-        return new Pair<>(gold, resource);
+        if(goldCard == null) {
+            goldReign = null;
+        } else {
+            goldReign = goldCard.getReign();
+        }
+
+        if(resourceCard == null) {
+            resourceReign = null;
+        } else {
+            resourceReign = resourceCard.getReign();
+        }
+
+        return new Pair<>(goldReign, resourceReign);
     }
 
+    /**
+     * Getter for the maximum number of player for the match
+     * @return The maximum number of player
+     */
     public int getMaxPlayers() {
         return maxPlayers;
+    }
+
+    /**
+     * Adds the given MatchObserver to those observers notified on match events.
+     * @param observer The observer to be notified from now on when an event occurs
+     */
+    public void subscribeObserver(MatchObserver observer) {
+        observers.add(observer);
+    }
+
+    /**
+     * Notifies all match observers that the match has started.
+     * It's called by WaitState methods after the match setup, that's why it needs to be protected.
+     */
+    protected void notifyMatchStart() {
+        notifyObservers(MatchObserver::matchStarted);
+    }
+
+    /**
+     * Notifies asynchronously all match observers, calling the passed MatchObserverCallable on each of them.
+     * To be more specific: creates a thread for each match observer, each thread is appointed to call the passed callable
+     * on a MatchObserver instance; then runs all of them; finally joins on them (waiting each of them to return and exit).
+     * @param observerCallable The "method" to be called on each observer of the match
+     */
+    private void notifyObservers(MatchObserverCallable observerCallable) {
+        List<Thread> threads = new ArrayList<>();
+
+        // Add a Thread for each MatchObserver in observers
+        for (MatchObserver observer : observers)  {
+            threads.add(new Thread(() -> {
+                // Each thread calls the passed MatchObserverCallable on the current observer
+                observerCallable.call(observer);
+            }));
+        }
+
+        threads.forEach(Thread::run);
+
+        // Wait for each thread to return and exit
+        for (Thread thread : threads) {
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }
