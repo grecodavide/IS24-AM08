@@ -17,6 +17,9 @@ import it.polimi.ingsw.utils.Pair;
  * This class subclasses instances are given (in RMI case) / reachable (in TCP case) on the network and collected
  * by a corresponding view (RMI view or TCP view); then this class commits its two subclasses {@link PlayerControllerRMI}
  * and {@link PlayerControllerTCP} to implement all the methods needed by a generic view to play in a match.
+ * This class implements {@link MatchObserver} since its instances subscribe themselves to a Match, as mentioned in
+ * {@link #PlayerController(String, Match)}; this is needed to allow this class to behave as a bridge between a view
+ * and a match.
  */
 public abstract sealed class PlayerController implements MatchObserver permits PlayerControllerRMI, PlayerControllerTCP {
     protected Player player;
