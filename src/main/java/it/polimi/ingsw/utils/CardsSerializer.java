@@ -1,16 +1,15 @@
+package it.polimi.ingsw.utils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import it.polimi.ingsw.exceptions.InvalidResourceException;
 import it.polimi.ingsw.gamemodel.*;
-import it.polimi.ingsw.utils.Pair;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
-public class serializer {
+public class CardsSerializer {
     public static void main(String[] args) {
         // cards
         InitialCard initialCard;
@@ -905,16 +904,4 @@ public class serializer {
         }
 
     }
-
-
-/*
-    reign = Symbol.;
-    topLeft = Symbol.;
-    topRight = Symbol.;
-    bottomLeft = Symbol.;
-    bottomRight = Symbol.;
-    requirements = new QuantityRequirement(Map.of(Symbol., 5));
-    goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);
-    goldCardMap.put(goldCard.getId(), goldCard);
- */
 }
