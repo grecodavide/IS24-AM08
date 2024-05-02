@@ -34,7 +34,8 @@ public final class CardsManager {
      */
     // TODO: Implement Requirement deserializer
     private CardsManager() {
-        Gson gson = new Gson();
+        CardJsonParser parser = new CardJsonParser();
+        Gson gson = parser.getCardBuilder();
 
         Type initialCardsType = new TypeToken<Map<Integer, InitialCard>>(){}.getType();
         Type goldCardsType = new TypeToken<Map<Integer, GoldCard>>(){}.getType();

@@ -879,24 +879,25 @@ public class CardsSerializer {
         }
 
         //5) to json--------------------------------------------------------------------------------------------------------
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        CardJsonParser parser = new CardJsonParser();
+        Gson gson = parser.getCardBuilder();
         try {
-            String path = "";
+            String path = "src/main/resources/json/";
             System.out.println(gson.toJson(initialCardMap));
             FileWriter file;
-            file = new FileWriter("initial_card.json");
+            file = new FileWriter(path + "initial_card.json");
             file.write(gson.toJson(initialCardMap));
             file.close();
 
-            file = new FileWriter("objective_card.json");
+            file = new FileWriter(path + "objective_card.json");
             file.write(gson.toJson(objectiveCardMap));
             file.close();
 
-            file = new FileWriter("resource_card.json");
+            file = new FileWriter(path + "resource_card.json");
             file.write(gson.toJson(resourceCardMap));
             file.close();
 
-            file = new FileWriter("gold_card.json");
+            file = new FileWriter(path + "gold_card.json");
             file.write(gson.toJson(goldCardMap));
             file.close();
         } catch (IOException e) {
