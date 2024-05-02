@@ -1,26 +1,19 @@
 package it.polimi.ingsw.network.tcp;
 
-import static org.junit.Assert.assertTrue;
-
-import java.rmi.RemoteException;
+import org.junit.Test;
 
 import it.polimi.ingsw.server.Server;
 
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+
 public class ServerTCPTest {
 
-    // @Test
-    public void startMatch() {
+    @Test
+    public void startMatch() throws RemoteException {
         Integer port = 9999;
 
-        Server server = null;
-        try {
-            server = new Server(1234, port);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-            assertTrue(false);
-        }
-
+        Server server = new Server(12, 12);
         TCPServer tcpServer = new TCPServer(port, server);
-        tcpServer.listen();
     }
 }

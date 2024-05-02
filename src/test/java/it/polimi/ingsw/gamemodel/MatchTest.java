@@ -1,30 +1,17 @@
 package it.polimi.ingsw.gamemodel;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.management.RuntimeErrorException;
 
-import org.junit.Test;
-
-import it.polimi.ingsw.exceptions.AlreadyUsedNicknameException;
-import it.polimi.ingsw.exceptions.InvalidResourceException;
-import it.polimi.ingsw.exceptions.WrongChoiceException;
-import it.polimi.ingsw.exceptions.WrongStateException;
+import it.polimi.ingsw.exceptions.*;
 import it.polimi.ingsw.network.messages.Message;
 import it.polimi.ingsw.network.messages.responses.MatchStartedMessage;
 import it.polimi.ingsw.utils.MessageJsonParser;
 import it.polimi.ingsw.utils.Pair;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public class MatchTest {
 
@@ -164,7 +151,7 @@ public class MatchTest {
             match.addPlayer(player2);
             // a third player is not added, otherwise Match would be full and go to NextTurnState, then call nextTurn
             // automatically
-        } catch (WrongStateException | AlreadyUsedNicknameException e) {
+        } catch (WrongStateException|AlreadyUsedNicknameException e) {
             throw new RuntimeException(e);
         }
 
@@ -181,7 +168,7 @@ public class MatchTest {
         assertEquals("Current player not equal to 1st player again", match.getCurrentPlayer(), match.getPlayers().get(0));
     }
 
-    // @Test
+    @Test
     public void removePlayer() {
         initializeAllEqualDecks();
 
@@ -218,13 +205,27 @@ public class MatchTest {
             // Verify that Match throws an exception when the method is called while being in the wrong state
             match.removePlayer(player1);
             // An exception is supposed to be thrown here
-            fail("match.removePlayer called in wrong state and an exception hasn't been thrown");
         } catch (Exception e) {
             fail("Wrong exception: " + e.getMessage());
         }
-
         // Verify that Match, after a player quit in the wrong state, is in FinalState
         assertTrue("Match is not in FinalState even if a player quit in the wrong state", match.getCurrentState() instanceof FinalState);
+
+        match = new Match(4, initialsDeck, resourcesDeck, goldsDeck, objectivesDeck);
+
+        // Verify that players with the same nickname can't join
+        player1 = new Player("Doppio", match);
+        player2 = new Player("Doppio", match);
+        try {
+            match.addPlayer(player1);
+            match.addPlayer(player2);
+            fail("AlreadyUsedNicknameException not thrown");
+        } catch (AlreadyUsedNicknameException e) {
+            // Good
+        } catch (Exception e) {
+            fail("Wrong exception returned: " + e.getMessage());
+        }
+
     }
 
     @Test

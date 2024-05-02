@@ -39,9 +39,9 @@
     "points": 3,
     "req": {
       "reqs": {
-        "INKWELL": 1,
+        "FEATHER": 1,
         "PARCHMENT": 1,
-        "FEATHER": 1
+        "INKWELL": 1
       }
     },
     "id": 5
@@ -77,9 +77,9 @@
     "points": 2,
     "req": {
       "reqs": {
-        "Pair[first\u003d1, second\u003d1]": "FUNGUS",
+        "Pair[first\u003d2, second\u003d2]": "FUNGUS",
         "Pair[first\u003d0, second\u003d0]": "FUNGUS",
-        "Pair[first\u003d2, second\u003d2]": "FUNGUS"
+        "Pair[first\u003d1, second\u003d1]": "FUNGUS"
       }
     },
     "id": 9
@@ -88,9 +88,9 @@
     "points": 2,
     "req": {
       "reqs": {
-        "Pair[first\u003d1, second\u003d1]": "ANIMAL",
+        "Pair[first\u003d2, second\u003d2]": "ANIMAL",
         "Pair[first\u003d0, second\u003d0]": "ANIMAL",
-        "Pair[first\u003d2, second\u003d2]": "ANIMAL"
+        "Pair[first\u003d1, second\u003d1]": "ANIMAL"
       }
     },
     "id": 10
@@ -99,9 +99,9 @@
     "points": 2,
     "req": {
       "reqs": {
-        "Pair[first\u003d2, second\u003d-2]": "PLANT",
+        "Pair[first\u003d0, second\u003d0]": "PLANT",
         "Pair[first\u003d1, second\u003d-1]": "PLANT",
-        "Pair[first\u003d0, second\u003d0]": "PLANT"
+        "Pair[first\u003d2, second\u003d-2]": "PLANT"
       }
     },
     "id": 11
@@ -110,9 +110,9 @@
     "points": 2,
     "req": {
       "reqs": {
-        "Pair[first\u003d2, second\u003d-2]": "INSECT",
+        "Pair[first\u003d0, second\u003d0]": "INSECT",
         "Pair[first\u003d1, second\u003d-1]": "INSECT",
-        "Pair[first\u003d0, second\u003d0]": "INSECT"
+        "Pair[first\u003d2, second\u003d-2]": "INSECT"
       }
     },
     "id": 12
@@ -121,9 +121,9 @@
     "points": 3,
     "req": {
       "reqs": {
-        "Pair[first\u003d1, second\u003d-1]": "INSECT",
+        "Pair[first\u003d1, second\u003d-2]": "INSECT",
         "Pair[first\u003d0, second\u003d0]": "ANIMAL",
-        "Pair[first\u003d1, second\u003d-2]": "INSECT"
+        "Pair[first\u003d1, second\u003d-1]": "INSECT"
       }
     },
     "id": 13
@@ -133,8 +133,8 @@
     "req": {
       "reqs": {
         "Pair[first\u003d-1, second\u003d-2]": "ANIMAL",
-        "Pair[first\u003d0, second\u003d0]": "FUNGUS",
-        "Pair[first\u003d-1, second\u003d-1]": "ANIMAL"
+        "Pair[first\u003d-1, second\u003d-1]": "ANIMAL",
+        "Pair[first\u003d0, second\u003d0]": "FUNGUS"
       }
     },
     "id": 14
@@ -143,9 +143,9 @@
     "points": 3,
     "req": {
       "reqs": {
-        "Pair[first\u003d1, second\u003d-2]": "PLANT",
+        "Pair[first\u003d0, second\u003d-1]": "FUNGUS",
         "Pair[first\u003d0, second\u003d0]": "FUNGUS",
-        "Pair[first\u003d0, second\u003d-1]": "FUNGUS"
+        "Pair[first\u003d1, second\u003d-2]": "PLANT"
       }
     },
     "id": 15
@@ -155,8 +155,8 @@
     "req": {
       "reqs": {
         "Pair[first\u003d-1, second\u003d-2]": "INSECT",
-        "Pair[first\u003d0, second\u003d0]": "PLANT",
-        "Pair[first\u003d0, second\u003d-1]": "PLANT"
+        "Pair[first\u003d0, second\u003d-1]": "PLANT",
+        "Pair[first\u003d0, second\u003d0]": "PLANT"
       }
     },
     "id": 16
