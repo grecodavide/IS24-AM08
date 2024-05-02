@@ -1,7 +1,10 @@
 package it.polimi.ingsw.gamemodel;
 
+import it.polimi.ingsw.exceptions.HandException;
+import it.polimi.ingsw.exceptions.WrongChoiceException;
+import it.polimi.ingsw.exceptions.WrongStateException;
+import it.polimi.ingsw.exceptions.WrongTurnException;
 import it.polimi.ingsw.utils.Pair;
-import it.polimi.ingsw.exceptions.*;
 
 /**
  * Represents each in-game user, so acts also as a gateway receiving input by the Controller.
