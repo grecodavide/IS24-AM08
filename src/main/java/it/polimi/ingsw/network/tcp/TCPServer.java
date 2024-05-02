@@ -39,8 +39,10 @@ public class TCPServer {
      */
     public void listen() {
         while (!this.serverSocketTCP.isClosed()) {
-            try (Socket socket = this.serverSocketTCP.accept()) {
-                new ListenerThread(socket, this.server).start();
+            try {
+                Socket socket = this.serverSocketTCP.accept();
+                Thread t = new ListenerThread(socket, this.server);
+                t.start(); //FIXME: blocking???
             } catch (IOException e) {
                 System.out.println("Failed to accept socket");
                 e.printStackTrace();
@@ -54,12 +56,10 @@ public class TCPServer {
         Server server = null;
         try {
             server = new Server(1234, port);
+            TCPServer tcpServer = new TCPServer(port, server);
+            tcpServer.listen();
         } catch (RemoteException e) {
             e.printStackTrace();
         }
-
-        TCPServer tcpServer = new TCPServer(port, server);
-        tcpServer.listen();
-
     }
 }

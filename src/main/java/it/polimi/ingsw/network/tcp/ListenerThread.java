@@ -12,6 +12,7 @@ import it.polimi.ingsw.exceptions.WrongStateException;
 import it.polimi.ingsw.gamemodel.Match;
 import it.polimi.ingsw.gamemodel.PlayableCard;
 import it.polimi.ingsw.gamemodel.Player;
+import it.polimi.ingsw.network.messages.Message;
 import it.polimi.ingsw.network.messages.actions.ActionMessage;
 import it.polimi.ingsw.network.messages.actions.ChooseInitialCardSideMessage;
 import it.polimi.ingsw.network.messages.actions.ChooseSecretObjectiveMessage;
@@ -25,6 +26,7 @@ import it.polimi.ingsw.network.messages.actions.PlayCardMessage;
 import it.polimi.ingsw.network.messages.errors.ErrorMessage;
 import it.polimi.ingsw.network.messages.responses.AvailableMatchesMessage;
 import it.polimi.ingsw.network.messages.responses.ResponseMessage;
+import it.polimi.ingsw.network.messages.responses.SomeoneJoinedMessage;
 import it.polimi.ingsw.server.Server;
 import it.polimi.ingsw.utils.MessageJsonParser;
 import it.polimi.ingsw.utils.Pair;
@@ -39,19 +41,19 @@ import it.polimi.ingsw.utils.Pair;
  */
 
 /**
-* Every time a socket gets accepted by the TCP server, a new ListenerThread
-* will be created with it, and it will:
-* - Acquire the client's username
-* - Make the client (which is still not a {@link Player}) choose/create a
-* {@link Match} to join
-* - Create its {@link PlayerControllerTCP}, which will also make him join such
-* {@link Match}
-* - Listen for any message received and, execute the corresponding action
-*
-* Note that this will just require the action to be executed, but its
-* {@link PlayerControllerTCP}
-* that actually calls the {@link Player} methods
-*/
+ * Every time a socket gets accepted by the TCP server, a new ListenerThread
+ * will be created with it, and it will:
+ * - Acquire the client's username
+ * - Make the client (which is still not a {@link Player}) choose/create a
+ * {@link Match} to join
+ * - Create its {@link PlayerControllerTCP}, which will also make him join such
+ * {@link Match}
+ * - Listen for any message received and, execute the corresponding action
+ *
+ * Note that this will just require the action to be executed, but its
+ * {@link PlayerControllerTCP}
+ * that actually calls the {@link Player} methods
+ */
 public class ListenerThread extends Thread {
     private Socket socket;
     private PlayerControllerTCP playerController;
@@ -60,13 +62,13 @@ public class ListenerThread extends Thread {
     private Server server;
 
     /**
-    * Class constructor. Needs to have a reference to the server instance since it
-    * needs to
-    * handle the match assignment
-    * 
-    * @param socket the socket that required a connection
-    * @param server the instance of {@link Server} that's running
-    */
+     * Class constructor. Needs to have a reference to the server instance since it
+     * needs to
+     * handle the match assignment
+     * 
+     * @param socket the socket that required a connection
+     * @param server the instance of {@link Server} that's running
+     */
     public ListenerThread(Socket socket, Server server) {
         try {
             this.socket = socket;
@@ -82,23 +84,24 @@ public class ListenerThread extends Thread {
     }
 
     /**
-    * Used to acquire the {@link Player}'s username and the {@link Match} he wants
-    * to join.
-    * If this throws an exception, it means something went wrong with the remote
-    * communication,
-    * and so the ListenerThread should not be created. All other cases are handled
-    * internally
-    * 
-    * @throws IOException            if the socket's input stream cannot be read
-    * @throws ClassNotFoundException if the class of the received object (from the
-    *                                socket's input stream) could not be found
-    */
+     * Used to acquire the {@link Player}'s username and the {@link Match} he wants
+     * to join.
+     * If this throws an exception, it means something went wrong with the remote
+     * communication,
+     * and so the ListenerThread should not be created. All other cases are handled
+     * internally
+     * 
+     * @throws IOException            if the socket's input stream cannot be read
+     * @throws ClassNotFoundException if the class of the received object (from the
+     *                                socket's input stream) could not be found
+     */
     private void clientInteraction() throws IOException, ClassNotFoundException {
         ActionMessage msg;
         String username = null;
         Match match = null;
         ResponseMessage availableMatches;
         boolean shouldLoop = true;
+
         while (shouldLoop) {
             try {
                 msg = (ActionMessage) this.parser.toMessage(this.io.readMsg());
@@ -114,6 +117,9 @@ public class ListenerThread extends Thread {
                         username = createMatchMessage.getUsername();
                         this.server.createMatch(createMatchMessage.getMatchName(), createMatchMessage.getMaxPlayers());
                         match = this.server.getMatch(createMatchMessage.getMatchName());
+
+                        Message joined = new SomeoneJoinedMessage(username, match.getPlayers().size(), match.getMaxPlayers());
+                        this.io.writeMsg(joined);
 
                         shouldLoop = false;
                         break;
@@ -132,7 +138,6 @@ public class ListenerThread extends Thread {
                 ErrorMessage error = new ErrorMessage(e.getMessage(), e.getClass().getName());
                 this.io.writeMsg(error);
             }
-
         }
         // if we reached this point, everything went smooth and the client asked to
         // either join or create a match
@@ -140,16 +145,16 @@ public class ListenerThread extends Thread {
     }
 
     /**
-    * Once everything went smoothly, we try to actually create the
-    * {@link PlayerControllerTCP}. If this
-    * throws {@link AlreadyUsedNicknameException} or {@link WrongStateException}
-    * the acquisition procedure is restarted
-    * after sending an {@link ErrorMessage} back to the client
-    * 
-    * @throws IOException            if the socket's input stream cannot be read
-    * @throws ClassNotFoundException if the class of the received object (from the
-    *                                socket's input stream) could not be found
-    */
+     * Once everything went smoothly, we try to actually create the
+     * {@link PlayerControllerTCP}. If this
+     * throws {@link AlreadyUsedNicknameException} or {@link WrongStateException}
+     * the acquisition procedure is restarted
+     * after sending an {@link ErrorMessage} back to the client
+     * 
+     * @throws IOException            if the socket's input stream cannot be read
+     * @throws ClassNotFoundException if the class of the received object (from the
+     *                                socket's input stream) could not be found
+     */
     private void createPlayerController(String username, Match match) throws IOException, ClassNotFoundException {
         try {
             this.playerController = new PlayerControllerTCP(username, match, this.io);
@@ -162,10 +167,10 @@ public class ListenerThread extends Thread {
     }
 
     /**
-    * This parses the message received from socket's input stream and executes the
-    * request such message carried.
-    * If the message is not one of the expected types, it will just be ignored
-    */
+     * This parses the message received from socket's input stream and executes the
+     * request such message carried.
+     * If the message is not one of the expected types, it will just be ignored
+     */
     private void executeRequest(String msg) {
         ActionMessage message = (ActionMessage) parser.toMessage(msg);
         switch (message) {
@@ -195,9 +200,9 @@ public class ListenerThread extends Thread {
     }
 
     /**
-    * Main loop. This will just wait for anything to be put on the input stream and
-    * then call {@link ListenerThread#executeRequest(String)}
-    */
+     * Main loop. This will just wait for anything to be put on the input stream and
+     * then call {@link ListenerThread#executeRequest(String)}
+     */
     private void listen() {
         try {
             while (this.socket.isConnected()) {
@@ -210,8 +215,8 @@ public class ListenerThread extends Thread {
     }
 
     /**
-    * Will close socket and input/output handlers, if not null
-    */
+     * Will close socket and input/output handlers, if not null
+     */
     private void close() {
         try {
             if (this.socket != null) {
@@ -224,10 +229,10 @@ public class ListenerThread extends Thread {
     }
 
     /**
-    * This class extends {@link Thread}, so it needs to override the
-    * {@link Thread#start()} method.
-    * Specifically, it will just call the {@link ListenerThread#listen()} method
-    */
+     * This class extends {@link Thread}, so it needs to override the
+     * {@link Thread#start()} method.
+     * Specifically, it will just call the {@link ListenerThread#listen()} method
+     */
     @Override
     public void start() {
         this.listen();

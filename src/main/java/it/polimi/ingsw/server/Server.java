@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.stream.Collectors;
 
 import it.polimi.ingsw.controllers.PlayerControllerRMI;
 import it.polimi.ingsw.exceptions.AlreadyUsedNicknameException;
@@ -18,7 +17,7 @@ import it.polimi.ingsw.gamemodel.InitialCard;
 import it.polimi.ingsw.gamemodel.Match;
 import it.polimi.ingsw.gamemodel.Objective;
 import it.polimi.ingsw.gamemodel.PlayableCard;
-import org.w3c.dom.html.HTMLMapElement;
+import it.polimi.ingsw.utils.DeckCreator;
 
 public class Server extends UnicastRemoteObject implements ServerRMIInterface {
     private final Map<String, Match> matches;
@@ -94,7 +93,8 @@ public class Server extends UnicastRemoteObject implements ServerRMIInterface {
 
     // TODO: Implement this method
     public static Match getNewMatch(int maxPlayers) {
-        return new Match(maxPlayers, null, null, null, null);
+        DeckCreator creator = new DeckCreator();
+        return new Match(maxPlayers, creator.createInitialDeck(), creator.createResourceDeck(), creator.createGoldDeck(), creator.createObjectiveDeck());
     }
 
     public void startRMIServer() throws RemoteException {
