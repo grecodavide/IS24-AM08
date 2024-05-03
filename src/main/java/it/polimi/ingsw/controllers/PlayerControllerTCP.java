@@ -14,18 +14,29 @@ import it.polimi.ingsw.gamemodel.Player;
 import it.polimi.ingsw.gamemodel.Side;
 import it.polimi.ingsw.network.messages.Message;
 import it.polimi.ingsw.network.messages.errors.ErrorMessage;
-import it.polimi.ingsw.network.messages.responses.*;
+import it.polimi.ingsw.network.messages.responses.MatchFinishedMessage;
+import it.polimi.ingsw.network.messages.responses.MatchStartedMessage;
+import it.polimi.ingsw.network.messages.responses.SomeoneChoseSecretObjectiveMessage;
+import it.polimi.ingsw.network.messages.responses.SomeoneDrewCardMessage;
+import it.polimi.ingsw.network.messages.responses.SomeoneDrewInitialCardMessage;
+import it.polimi.ingsw.network.messages.responses.SomeoneDrewSecretObjectivesMessage;
+import it.polimi.ingsw.network.messages.responses.SomeoneJoinedMessage;
+import it.polimi.ingsw.network.messages.responses.SomeonePlayedCardMessage;
+import it.polimi.ingsw.network.messages.responses.SomeoneQuitMessage;
+import it.polimi.ingsw.network.messages.responses.SomeoneSetInitialSideMessage;
 import it.polimi.ingsw.network.tcp.IOHandler;
 import it.polimi.ingsw.utils.Pair;
 
 public final class PlayerControllerTCP extends PlayerController {
     private IOHandler io;
 
-    public PlayerControllerTCP(String nickname, Match match, IOHandler io) throws AlreadyUsedNicknameException, WrongStateException {
-        super(nickname, match);
+    public PlayerControllerTCP(String username, Match match, IOHandler io) throws AlreadyUsedNicknameException, WrongStateException {
+        super(username, match);
 
         try {
             this.io = io;
+            Message joined = new SomeoneJoinedMessage(username, match.getPlayers().size(), match.getMaxPlayers());
+            this.io.writeMsg(joined);
         } catch (Exception e) {
             e.printStackTrace();
             // match.removePlayer(player);
@@ -159,7 +170,5 @@ public final class PlayerControllerTCP extends PlayerController {
             this.sendMessage(this.createErrorMessage(e));
         }
     }
-
-
 
 }

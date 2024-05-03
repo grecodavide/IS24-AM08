@@ -12,7 +12,6 @@ import it.polimi.ingsw.exceptions.WrongStateException;
 import it.polimi.ingsw.gamemodel.Match;
 import it.polimi.ingsw.gamemodel.PlayableCard;
 import it.polimi.ingsw.gamemodel.Player;
-import it.polimi.ingsw.network.messages.Message;
 import it.polimi.ingsw.network.messages.actions.ActionMessage;
 import it.polimi.ingsw.network.messages.actions.ChooseInitialCardSideMessage;
 import it.polimi.ingsw.network.messages.actions.ChooseSecretObjectiveMessage;
@@ -26,7 +25,6 @@ import it.polimi.ingsw.network.messages.actions.PlayCardMessage;
 import it.polimi.ingsw.network.messages.errors.ErrorMessage;
 import it.polimi.ingsw.network.messages.responses.AvailableMatchesMessage;
 import it.polimi.ingsw.network.messages.responses.ResponseMessage;
-import it.polimi.ingsw.network.messages.responses.SomeoneJoinedMessage;
 import it.polimi.ingsw.server.Server;
 import it.polimi.ingsw.utils.MessageJsonParser;
 import it.polimi.ingsw.utils.Pair;
@@ -54,7 +52,7 @@ import it.polimi.ingsw.utils.Pair;
  * {@link PlayerControllerTCP}
  * that actually calls the {@link Player} methods
  */
-public class ClientListener {
+public class ClientListener extends Thread {
     private Socket socket;
     private PlayerControllerTCP playerController;
     private MessageJsonParser parser;
@@ -120,12 +118,11 @@ public class ClientListener {
 
                         shouldLoop = false;
                         break;
-
                     case JoinMatchMessage joinMatchMessage:
                         match = this.server.getMatch(joinMatchMessage.getMatchName());
+
                         shouldLoop = false;
                         break;
-
                     default:
                         break;
                 }
@@ -167,6 +164,7 @@ public class ClientListener {
      * This parses the message received from socket's input stream and executes the
      * request such message carried.
      * If the message is not one of the expected types, it will just be ignored
+     * @see ActionMessage
      */
     private void executeRequest(String msg) {
         ActionMessage message = (ActionMessage) parser.toMessage(msg);
@@ -212,7 +210,7 @@ public class ClientListener {
     }
 
     /**
-     * Will close socket and input/output handlers, if not null
+     * This will close socket and input/output handlers, if not null
      */
     private void close() {
         try {
@@ -225,4 +223,13 @@ public class ClientListener {
         }
     }
 
+    /**
+     * Since the class extends {@link Thread} it needs to implement
+     * {@link Thread#run()}. Specifically, this will just run
+     * {@link ClientListener#listen()}
+     */
+    @Override
+    public void run() {
+        this.listen();
+    }
 }

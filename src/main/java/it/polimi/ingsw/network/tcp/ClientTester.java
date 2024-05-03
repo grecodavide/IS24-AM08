@@ -38,6 +38,7 @@ public class ClientTester {
         ActionMessage createMatch = new CreateMatchMessage(username, "pippo", 2);
         out.writeObject(parser.toJson(createMatch));
 
+        System.out.println(in.readObject().toString());
 
         while (client.isConnected()) {
             try {
@@ -46,7 +47,7 @@ public class ClientTester {
                     System.out.println(next);
                 }
             } catch (Exception e) {
-                System.out.println("bbboh");
+                
             }
         }
 

@@ -41,10 +41,7 @@ public class TCPServer {
         while (!this.serverSocketTCP.isClosed()) {
             try {
                 Socket socket = this.serverSocketTCP.accept();
-                new Thread(() -> {
-                    ClientListener listener = new ClientListener(socket, this.server);
-                    listener.listen();
-                }).start();
+                new ClientListener(socket, server).start();
             } catch (IOException e) {
                 System.out.println("Failed to accept socket");
                 e.printStackTrace();
@@ -52,7 +49,6 @@ public class TCPServer {
         }
     }
 
-    // here for testing, won't be present in the final version, as the TCPServer will be started by Server
     public static void main(String[] args) {
         Integer port = 9999;
 
@@ -65,4 +61,5 @@ public class TCPServer {
             e.printStackTrace();
         }
     }
+
 }
