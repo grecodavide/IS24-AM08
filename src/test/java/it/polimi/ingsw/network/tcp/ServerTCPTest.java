@@ -10,10 +10,12 @@ import java.util.List;
 
 import org.junit.Test;
 
+import it.polimi.ingsw.exceptions.ChosenMatchException;
 import it.polimi.ingsw.network.messages.Message;
 import it.polimi.ingsw.network.messages.actions.CreateMatchMessage;
 import it.polimi.ingsw.network.messages.actions.GetAvailableMatchesMessage;
 import it.polimi.ingsw.network.messages.actions.JoinMatchMessage;
+import it.polimi.ingsw.network.messages.errors.ErrorMessage;
 import it.polimi.ingsw.network.messages.responses.AvailableMatchesMessage;
 import it.polimi.ingsw.network.messages.responses.SomeoneJoinedMessage;
 import it.polimi.ingsw.server.Server;
@@ -44,14 +46,17 @@ public class ServerTCPTest {
             tcpServer.listen();
         }).start();
 
-        this.testCreation(port, matchCreatorUsername, matchName, maxPlayers);
+        String expected = messageParser.toJson(new SomeoneJoinedMessage(matchCreatorUsername, 1, maxPlayers));
+        this.testCreation(port, matchCreatorUsername, matchName, maxPlayers, expected);
         this.testJoin(port, matchJoineeUsername, matchName, maxPlayers);
-        this.testCreation(port, matchCreatorUsername + "v2", matchName, maxPlayers);
+        
+        expected = messageParser.toJson(new ErrorMessage("A match with the chosen name already exists", ChosenMatchException.class.getName()));
+        this.testCreation(port, matchCreatorUsername + "v2", matchName, maxPlayers, expected);
 
         this.close();
     }
 
-    public void testCreation(Integer port, String matchCreatorUsername, String matchName, Integer maxPlayers)
+    public void testCreation(Integer port, String matchCreatorUsername, String matchName, Integer maxPlayers, String expected)
             throws IOException, ClassNotFoundException {
         Socket matchCreator = new Socket("localhost", port);
         IOHandler io = new IOHandler(matchCreator);
@@ -59,7 +64,6 @@ public class ServerTCPTest {
 
         Message createMatch = new CreateMatchMessage(matchCreatorUsername, matchName, maxPlayers);
         io.writeMsg(createMatch);
-        String expected = messageParser.toJson(new SomeoneJoinedMessage(matchCreatorUsername, 1, maxPlayers));
 
         String response = io.readMsg();
 
