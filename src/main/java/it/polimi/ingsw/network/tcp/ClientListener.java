@@ -41,7 +41,7 @@ import it.polimi.ingsw.utils.Pair;
  */
 
 /**
- * Every time a socket gets accepted by the TCP server, a new ListenerThread
+ * Every time a socket gets accepted by the TCP server, a new ClientListener
  * will be created with it, and it will:
  * - Acquire the client's username
  * - Make the client (which is still not a {@link Player}) choose/create a
@@ -54,7 +54,7 @@ import it.polimi.ingsw.utils.Pair;
  * {@link PlayerControllerTCP}
  * that actually calls the {@link Player} methods
  */
-public class ListenerThread extends Thread {
+public class ClientListener {
     private Socket socket;
     private PlayerControllerTCP playerController;
     private MessageJsonParser parser;
@@ -69,7 +69,7 @@ public class ListenerThread extends Thread {
      * @param socket the socket that required a connection
      * @param server the instance of {@link Server} that's running
      */
-    public ListenerThread(Socket socket, Server server) {
+    public ClientListener(Socket socket, Server server) {
         try {
             this.socket = socket;
             this.io = new IOHandler(this.socket);
@@ -117,9 +117,6 @@ public class ListenerThread extends Thread {
                         username = createMatchMessage.getUsername();
                         this.server.createMatch(createMatchMessage.getMatchName(), createMatchMessage.getMaxPlayers());
                         match = this.server.getMatch(createMatchMessage.getMatchName());
-
-                        Message joined = new SomeoneJoinedMessage(username, match.getPlayers().size(), match.getMaxPlayers());
-                        this.io.writeMsg(joined);
 
                         shouldLoop = false;
                         break;
@@ -201,9 +198,9 @@ public class ListenerThread extends Thread {
 
     /**
      * Main loop. This will just wait for anything to be put on the input stream and
-     * then call {@link ListenerThread#executeRequest(String)}
+     * then call {@link ClientListener#executeRequest(String)}
      */
-    private void listen() {
+    public void listen() {
         try {
             while (this.socket.isConnected()) {
                 String msg = this.io.readMsg();
@@ -226,16 +223,6 @@ public class ListenerThread extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    /**
-     * This class extends {@link Thread}, so it needs to override the
-     * {@link Thread#start()} method.
-     * Specifically, it will just call the {@link ListenerThread#listen()} method
-     */
-    @Override
-    public void start() {
-        this.listen();
     }
 
 }

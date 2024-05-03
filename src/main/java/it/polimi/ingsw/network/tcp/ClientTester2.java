@@ -37,12 +37,10 @@ public class ClientTester2 {
         ObjectOutputStream out = new ObjectOutputStream(client.getOutputStream());
         ObjectInputStream in = new ObjectInputStream(client.getInputStream());
 
-        System.out.println("sjdslds");
-
         ActionMessage getAvailable = new GetAvailableMatchesMessage(username);
         out.writeObject(parser.toJson(getAvailable));
 
-        AvailableMatchesMessage received = (AvailableMatchesMessage) parser.toMessage(in.readUTF());
+        AvailableMatchesMessage received = (AvailableMatchesMessage) parser.toMessage(in.readObject().toString());
 
         ActionMessage join = new JoinMatchMessage(username, received.getMatches().get(0).get("name").getAsString());
         System.out.println(parser.toJson(join));

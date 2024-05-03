@@ -10,7 +10,7 @@ import it.polimi.ingsw.server.Server;
 
 /**
  * Class containing the {@link ServerSocket}. This will just accept sockets and
- * start the {@link ListenerThread} with it
+ * start the {@link ClientListener} with it
  */
 public class TCPServer {
     private ServerSocket serverSocketTCP;
@@ -35,14 +35,16 @@ public class TCPServer {
     /**
      * Main loop. Until the {@link ServerSocket} is not closed, it will listen for
      * any {@link Socket} that tries to connect and accept them. Finally, it will
-     * start a new {@link ListenerThread} with it
+     * start a new {@link ClientListener} with it
      */
     public void listen() {
         while (!this.serverSocketTCP.isClosed()) {
             try {
                 Socket socket = this.serverSocketTCP.accept();
-                Thread t = new ListenerThread(socket, this.server);
-                t.start(); //FIXME: blocking???
+                new Thread(() -> {
+                    ClientListener listener = new ClientListener(socket, this.server);
+                    listener.listen();
+                }).start();
             } catch (IOException e) {
                 System.out.println("Failed to accept socket");
                 e.printStackTrace();
@@ -50,6 +52,7 @@ public class TCPServer {
         }
     }
 
+    // here for testing, won't be present in the final version, as the TCPServer will be started by Server
     public static void main(String[] args) {
         Integer port = 9999;
 
