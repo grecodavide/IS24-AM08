@@ -22,6 +22,7 @@ import it.polimi.ingsw.network.messages.actions.DrawSecretObjectivesMessage;
 import it.polimi.ingsw.network.messages.actions.GetAvailableMatchesMessage;
 import it.polimi.ingsw.network.messages.actions.JoinMatchMessage;
 import it.polimi.ingsw.network.messages.actions.PlayCardMessage;
+import it.polimi.ingsw.network.messages.actions.SendTextMessage;
 import it.polimi.ingsw.network.messages.errors.ErrorMessage;
 import it.polimi.ingsw.network.messages.responses.AvailableMatchesMessage;
 import it.polimi.ingsw.network.messages.responses.ResponseMessage;
@@ -183,6 +184,8 @@ public class ClientListener extends Thread {
                 break;
             case DrawSecretObjectivesMessage actionMsg:
                 this.playerController.drawSecretObjectives();
+                break;
+            case SendTextMessage actionMsg:
                 break;
             case PlayCardMessage actionMsg:
                 Pair<Integer, Integer> coords = new Pair<Integer, Integer>(actionMsg.getX(), actionMsg.getY());

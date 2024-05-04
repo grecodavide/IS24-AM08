@@ -30,12 +30,12 @@ import it.polimi.ingsw.utils.Pair;
 public final class PlayerControllerTCP extends PlayerController {
     private IOHandler io;
 
-    public PlayerControllerTCP(String username, Match match, IOHandler io) throws AlreadyUsedNicknameException, WrongStateException {
-        super(username, match);
+    public PlayerControllerTCP(String nickname, Match match, IOHandler io) throws AlreadyUsedNicknameException, WrongStateException {
+        super(nickname, match);
 
         try {
             this.io = io;
-            Message joined = new SomeoneJoinedMessage(username, match.getPlayers().size(), match.getMaxPlayers());
+            Message joined = new SomeoneJoinedMessage(nickname, match.getPlayers().size(), match.getMaxPlayers());
             this.io.writeMsg(joined);
         } catch (Exception e) {
             e.printStackTrace();
