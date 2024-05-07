@@ -56,7 +56,140 @@ public class TUICardPrinter {
             if(filePath.contains("initial")) {
                 // recupero le informazioni della card
                 Map<String, List<Symbol>> map = initialJsonExtractor(filePath, cardID, isFacingUp);
-                // ...
+                List<Symbol> symbolList;
+
+                if(isFacingUp) {
+                    // converto gli elementi in una stringa da stampare (la carta)
+                    printableCard.append("\033[2J\n"); // clear tui
+                    printableCard.append("\033[0m\n"); // color reset
+
+                    printableCard.append("\033[").append(String.valueOf(rows)).append(";"); // rows coordinates
+                    printableCard.append(String.valueOf(cols)).append("H");                 // columns coordinates
+                    printableCard.append("┌───┬────────┬───┐");
+                    printableCard.append("\n");
+                    rows++;
+
+                    printableCard.append("\033[").append(String.valueOf(rows)).append(";"); // rows coordinates
+                    printableCard.append(String.valueOf(cols)).append("H");                 // columns coordinates
+                    printableCard.append("│ ");
+                    symbolList = map.get("topLeft");
+                    for (Symbol symbol : symbolList) {
+                        switch (symbol) {
+                            case FUNGUS:
+                                printableCard.append("\033[31m■\033[0m");
+                                break;
+                            case ANIMAL:
+                                printableCard.append("\036[31m■\033[0m");
+                                break;
+                            case PLANT:
+                                printableCard.append("\032[31m■\033[0m");
+                                break;
+                            case INSECT:
+                                printableCard.append("\035[31m■\033[0m");
+                                break;
+                            default:
+                                printableCard.append("■");
+                                break;
+                        }
+                    }
+                    printableCard.append(" │        │ ");
+                    symbolList = map.get("topRight");
+                    for (Symbol symbol : symbolList) {
+                        switch (symbol) {
+                            case FUNGUS:
+                                printableCard.append("\033[31m■\033[0m");
+                                break;
+                            case ANIMAL:
+                                printableCard.append("\036[31m■\033[0m");
+                                break;
+                            case PLANT:
+                                printableCard.append("\032[31m■\033[0m");
+                                break;
+                            case INSECT:
+                                printableCard.append("\035[31m■\033[0m");
+                                break;
+                            default:
+                                printableCard.append("■");
+                                break;
+                        }
+                    }
+                    printableCard.append(" │");
+                    printableCard.append("\n");
+                    rows++;
+
+                    printableCard.append("\033[").append(String.valueOf(rows)).append(";"); // rows coordinates
+                    printableCard.append(String.valueOf(cols)).append("H");                 // columns coordinates
+                    printableCard.append("├───┘   ╔╗   └───┤");
+                    printableCard.append("\n");
+                    rows++;
+
+                    printableCard.append("\033[").append(String.valueOf(rows)).append(";"); // rows coordinates
+                    printableCard.append(String.valueOf(cols)).append("H");                 // columns coordinates
+                    printableCard.append("├───┐   ╚╝   ┌───┤");
+                    printableCard.append("\n");
+                    rows++;
+
+                    printableCard.append("\033[").append(String.valueOf(rows)).append(";"); // rows coordinates
+                    printableCard.append(String.valueOf(cols)).append("H");                 // columns coordinates
+                    printableCard.append("│ ");
+                    symbolList = map.get("bottomLeft");
+                    for (Symbol symbol : symbolList) {
+                        switch (symbol) {
+                            case FUNGUS:
+                                printableCard.append("\033[31m■\033[0m");
+                                break;
+                            case ANIMAL:
+                                printableCard.append("\036[31m■\033[0m");
+                                break;
+                            case PLANT:
+                                printableCard.append("\032[31m■\033[0m");
+                                break;
+                            case INSECT:
+                                printableCard.append("\035[31m■\033[0m");
+                                break;
+                            default:
+                                printableCard.append("■");
+                                break;
+                        }
+                    }
+                    printableCard.append(" │        │ ");
+                    symbolList = map.get("bottomRight");
+                    for (Symbol symbol : symbolList) {
+                        switch (symbol) {
+                            case FUNGUS:
+                                printableCard.append("\033[31m■\033[0m");
+                                break;
+                            case ANIMAL:
+                                printableCard.append("\036[31m■\033[0m");
+                                break;
+                            case PLANT:
+                                printableCard.append("\032[31m■\033[0m");
+                                break;
+                            case INSECT:
+                                printableCard.append("\035[31m■\033[0m");
+                                break;
+                            default:
+                                printableCard.append("■");
+                                break;
+                        }
+                    }
+                    printableCard.append(" │");
+                    printableCard.append("\n");
+                    rows++;
+
+                    printableCard.append("\033[").append(String.valueOf(rows)).append(";"); // rows coordinates
+                    printableCard.append(String.valueOf(cols)).append("H");                 // columns coordinates
+                    printableCard.append("└───┴────────┴───┘");
+                    printableCard.append("\n");
+                    printableCard.append("\"\"\"");
+
+                } else {
+
+                    // TBA back of initial card
+
+                }
+
+
             }
             else if (filePath.contains("gold")) {
                 goldJsonExtractor(filePath, cardID, isFacingUp);
@@ -79,7 +212,7 @@ public class TUICardPrinter {
     }
 
     /**
-     * It processes (from the JsonObject) the corners and the center of the given side of the card.
+     * It processes (from the JsonObject) the coners and the center of the given side of the card.
      * @param sideObject the card's side to convert
      * @param elements the map containing the association JsonKey-Symbols
      */
@@ -109,7 +242,7 @@ public class TUICardPrinter {
     /**
      * The method looks in the Json file of initial cards for the wanted side of the card, and processes it.
      * @param filePath path of the json file (of initial cards) to process
-     * @param id ID of the initial card to process
+     * @param id ID of the inital card to process
      * @param isFrontWanted is it requiring the face of the card? If not, then it is the back
      * @return the map containing the association JsonKey-Symbols
      * @throws IOException if needed
