@@ -117,6 +117,14 @@ public class Player {
             throw new WrongTurnException("Only the current player can choose an objective");
         }
     }
+
+    public void sendBroadcastText(String text) {
+        this.match.sendBroadcastText(this, text);
+    }
+
+    public void sendPrivateText(Player recipient, String text) {
+        this.match.sendPrivateText(this, recipient, text);
+    }
     
     /**
      * Getter for the player's board.

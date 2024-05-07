@@ -1,5 +1,6 @@
 package it.polimi.ingsw.network.tcp;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.net.Socket;
 
@@ -22,7 +23,8 @@ import it.polimi.ingsw.network.messages.actions.DrawSecretObjectivesMessage;
 import it.polimi.ingsw.network.messages.actions.GetAvailableMatchesMessage;
 import it.polimi.ingsw.network.messages.actions.JoinMatchMessage;
 import it.polimi.ingsw.network.messages.actions.PlayCardMessage;
-import it.polimi.ingsw.network.messages.actions.SendTextMessage;
+import it.polimi.ingsw.network.messages.actions.SendBroadcastTextMessage;
+import it.polimi.ingsw.network.messages.actions.SendPrivateTextMessage;
 import it.polimi.ingsw.network.messages.errors.ErrorMessage;
 import it.polimi.ingsw.network.messages.responses.AvailableMatchesMessage;
 import it.polimi.ingsw.network.messages.responses.ResponseMessage;
@@ -78,7 +80,7 @@ public class ClientListener extends Thread {
             this.clientInteraction(); // init player controller
         } catch (Exception e) {
             System.out.println("Failed to create Listener thread");
-            e.printStackTrace();
+            // e.printStackTrace();
         }
     }
 
@@ -93,8 +95,10 @@ public class ClientListener extends Thread {
      * @throws IOException            if the socket's input stream cannot be read
      * @throws ClassNotFoundException if the class of the received object (from the
      *                                socket's input stream) could not be found
+     * @throws EOFException           if the stream gets shut down while it was
+     *                                still waiting for something
      */
-    private void clientInteraction() throws IOException, ClassNotFoundException {
+    private void clientInteraction() throws IOException, ClassNotFoundException, EOFException {
         ActionMessage msg;
         String username = null;
         Match match = null;
@@ -104,28 +108,32 @@ public class ClientListener extends Thread {
         while (shouldLoop) {
             try {
                 msg = (ActionMessage) this.parser.toMessage(this.io.readMsg());
-                switch (msg) {
-                    case GetAvailableMatchesMessage getAvailableMatchesMessage:
-                        username = getAvailableMatchesMessage.getUsername();
+                if (msg == null) {
+                    shouldLoop = false;
+                } else {
+                    switch (msg) {
+                        case GetAvailableMatchesMessage getAvailableMatchesMessage:
+                            username = getAvailableMatchesMessage.getUsername();
 
-                        availableMatches = new AvailableMatchesMessage(this.server.getJoinableMatchesMap());
-                        this.io.writeMsg(availableMatches);
-                        break;
+                            availableMatches = new AvailableMatchesMessage(this.server.getJoinableMatchesMap());
+                            this.io.writeMsg(availableMatches);
+                            break;
 
-                    case CreateMatchMessage createMatchMessage:
-                        username = createMatchMessage.getUsername();
-                        this.server.createMatch(createMatchMessage.getMatchName(), createMatchMessage.getMaxPlayers());
-                        match = this.server.getMatch(createMatchMessage.getMatchName());
+                        case CreateMatchMessage createMatchMessage:
+                            username = createMatchMessage.getUsername();
+                            this.server.createMatch(createMatchMessage.getMatchName(), createMatchMessage.getMaxPlayers());
+                            match = this.server.getMatch(createMatchMessage.getMatchName());
 
-                        shouldLoop = false;
-                        break;
-                    case JoinMatchMessage joinMatchMessage:
-                        match = this.server.getMatch(joinMatchMessage.getMatchName());
+                            shouldLoop = false;
+                            break;
+                        case JoinMatchMessage joinMatchMessage:
+                            match = this.server.getMatch(joinMatchMessage.getMatchName());
 
-                        shouldLoop = false;
-                        break;
-                    default:
-                        break;
+                            shouldLoop = false;
+                            break;
+                        default:
+                            break;
+                    }
                 }
             } catch (JsonParseException e) {
                 // message is not correctly formatted, ignore
@@ -134,6 +142,7 @@ public class ClientListener extends Thread {
                 this.io.writeMsg(error);
             }
         }
+
         // if we reached this point, everything went smooth and the client asked to
         // either join or create a match
         this.createPlayerController(username, match);
@@ -148,9 +157,10 @@ public class ClientListener extends Thread {
      * 
      * @throws IOException            if the socket's input stream cannot be read
      * @throws ClassNotFoundException if the class of the received object (from the
-     *                                socket's input stream) could not be found
+     * @throws EOFException           if the stream gets shut down while it was
+     *                                still waiting for something
      */
-    private void createPlayerController(String username, Match match) throws IOException, ClassNotFoundException {
+    private void createPlayerController(String username, Match match) throws IOException, ClassNotFoundException, EOFException {
         try {
             this.playerController = new PlayerControllerTCP(username, match, this.io);
         } catch (AlreadyUsedNicknameException | WrongStateException e) {
@@ -165,36 +175,44 @@ public class ClientListener extends Thread {
      * This parses the message received from socket's input stream and executes the
      * request such message carried.
      * If the message is not one of the expected types, it will just be ignored
+     * 
      * @see ActionMessage
      */
     private void executeRequest(String msg) {
         ActionMessage message = (ActionMessage) parser.toMessage(msg);
-        switch (message) {
-            case ChooseSecretObjectiveMessage actionMsg:
-                this.playerController.chooseSecretObjective(Server.getObjective(actionMsg.getObjectiveID()));
-                break;
-            case ChooseInitialCardSideMessage actionMsg:
-                this.playerController.chooseInitialCardSide(actionMsg.getSide());
-                break;
-            case DrawCardMessage actionMsg:
-                this.playerController.drawCard(actionMsg.getSource());
-                break;
-            case DrawInitialCardMessage actionMsg:
-                this.playerController.drawInitialCard();
-                break;
-            case DrawSecretObjectivesMessage actionMsg:
-                this.playerController.drawSecretObjectives();
-                break;
-            case SendTextMessage actionMsg:
-                break;
-            case PlayCardMessage actionMsg:
-                Pair<Integer, Integer> coords = new Pair<Integer, Integer>(actionMsg.getX(), actionMsg.getY());
-                PlayableCard card = Server.getPlayableCard(actionMsg.getCardID());
-                this.playerController.playCard(coords, card, actionMsg.getSide());
-                break;
-            default:
-                break;
+        if (msg != null) {
+            switch (message) {
+                case ChooseSecretObjectiveMessage actionMsg:
+                    this.playerController.chooseSecretObjective(Server.getObjective(actionMsg.getObjectiveID()));
+                    break;
+                case ChooseInitialCardSideMessage actionMsg:
+                    this.playerController.chooseInitialCardSide(actionMsg.getSide());
+                    break;
+                case DrawCardMessage actionMsg:
+                    this.playerController.drawCard(actionMsg.getSource());
+                    break;
+                case DrawInitialCardMessage actionMsg:
+                    this.playerController.drawInitialCard();
+                    break;
+                case DrawSecretObjectivesMessage actionMsg:
+                    this.playerController.drawSecretObjectives();
+                    break;
+                case SendBroadcastTextMessage actionMsg:
+                    this.playerController.sendBroadcastText(actionMsg.getText());
+                    break;
+                case SendPrivateTextMessage actionMsg:
+                    this.playerController.sendPrivateText(actionMsg.getRecpient(), actionMsg.getText());
+                    break;
+                case PlayCardMessage actionMsg:
+                    Pair<Integer, Integer> coords = new Pair<Integer, Integer>(actionMsg.getX(), actionMsg.getY());
+                    PlayableCard card = Server.getPlayableCard(actionMsg.getCardID());
+                    this.playerController.playCard(coords, card, actionMsg.getSide());
+                    break;
+                default:
+                    break;
+            }
         }
+
     }
 
     /**

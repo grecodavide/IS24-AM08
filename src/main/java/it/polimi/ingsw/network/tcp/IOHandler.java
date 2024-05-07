@@ -1,8 +1,12 @@
 package it.polimi.ingsw.network.tcp;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStreamWriter;
 import java.net.Socket;
 
 import it.polimi.ingsw.network.messages.Message;
@@ -10,22 +14,29 @@ import it.polimi.ingsw.utils.MessageJsonParser;
 
 /**
  * This class will handle all the IO operations for a certain socket
+<<<<<<< HEAD
+=======
+ * 
+>>>>>>> bb0bc2c (Merge branch '9-tcp-server' into development)
  * @see ObjectInputStream
  * @see ObjectOutputStream
  * @see MessageJsonParser
  */
 public class IOHandler {
-    private ObjectInputStream inputStream;
-    private ObjectOutputStream outputStream;
-    private MessageJsonParser parser;
+    private final BufferedReader inputReader;
+    private final BufferedWriter outputWriter;
+
+    private final MessageJsonParser parser;
 
     /**
      * Class constructor. It takes a {@link Socket} as a parameter to open its
      * {@link ObjectOutputStream} and {@link ObjectInputStream}
      */
     public IOHandler(Socket socket) throws IOException {
-        this.outputStream = new ObjectOutputStream(socket.getOutputStream());
-        this.inputStream = new ObjectInputStream(socket.getInputStream());
+
+        this.outputWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+        this.inputReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+
         this.parser = new MessageJsonParser();
     }
 
@@ -38,7 +49,7 @@ public class IOHandler {
      *                                be found
      */
     public String readMsg() throws IOException, ClassNotFoundException {
-        return this.inputStream.readObject().toString();
+        return this.inputReader.readLine();
     }
 
     /**
@@ -48,7 +59,9 @@ public class IOHandler {
      * @throws IOException if the remote communication failed
      */
     public void writeMsg(String msg) throws IOException {
-        this.outputStream.writeObject(msg);
+        this.outputWriter.write(msg);
+        this.outputWriter.newLine();
+        this.outputWriter.flush();
     }
 
     /**
@@ -58,7 +71,9 @@ public class IOHandler {
      * @throws IOException if the remote communication failed
      */
     public void writeMsg(Message msg) throws IOException {
-        this.outputStream.writeObject(this.msgToString(msg));
+        this.outputWriter.write(this.msgToString(msg));
+        this.outputWriter.newLine();
+        this.outputWriter.flush();
     }
 
     /**
@@ -83,14 +98,15 @@ public class IOHandler {
 
     /**
      * Closes the input and output streams, if not null
+     * 
      * @throws IOException if the streams could not be accessed
      */
     public void close() throws IOException {
-        if (this.inputStream != null) {
-            this.inputStream.close();
+        if (this.inputReader != null) {
+            this.inputReader.close();
         }
-        if (this.outputStream != null) {
-            this.outputStream.close();
+        if (this.outputWriter != null) {
+            this.outputWriter.close();
         }
     }
 }

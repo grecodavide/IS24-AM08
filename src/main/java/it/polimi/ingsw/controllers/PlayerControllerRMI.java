@@ -1,15 +1,27 @@
 package it.polimi.ingsw.controllers;
 
-import it.polimi.ingsw.client.ViewRMIInterface;
-import it.polimi.ingsw.exceptions.*;
-import it.polimi.ingsw.gamemodel.*;
-import it.polimi.ingsw.utils.Pair;
-
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import it.polimi.ingsw.client.ViewRMIInterface;
+import it.polimi.ingsw.exceptions.AlreadyUsedNicknameException;
+import it.polimi.ingsw.exceptions.HandException;
+import it.polimi.ingsw.exceptions.WrongChoiceException;
+import it.polimi.ingsw.exceptions.WrongStateException;
+import it.polimi.ingsw.exceptions.WrongTurnException;
+import it.polimi.ingsw.gamemodel.Color;
+import it.polimi.ingsw.gamemodel.DrawSource;
+import it.polimi.ingsw.gamemodel.InitialCard;
+import it.polimi.ingsw.gamemodel.Match;
+import it.polimi.ingsw.gamemodel.Objective;
+import it.polimi.ingsw.gamemodel.PlayableCard;
+import it.polimi.ingsw.gamemodel.Player;
+import it.polimi.ingsw.gamemodel.Side;
+import it.polimi.ingsw.gamemodel.Symbol;
+import it.polimi.ingsw.utils.Pair;
 
 public final class PlayerControllerRMI extends PlayerController implements PlayerControllerRMIInterface {
     private ViewRMIInterface view;
@@ -167,5 +179,29 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
 
     private void onConnectionError() {
         match.removePlayer(player);
+    }
+
+    @Override
+    public void someoneSentBroadcastText(Player someone, String text) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'someoneSentBroadcastText'");
+    }
+
+    @Override
+    public void someoneSentPrivateText(Player someone, Player recipient, String text) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'someoneSentPrivateText'");
+    }
+
+    @Override
+    public void sendBroadcastText(String text) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'sendBroadcastText'");
+    }
+
+    @Override
+    public void sendPrivateText(String recipient, String text) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'sendPrivateText'");
     }
 }

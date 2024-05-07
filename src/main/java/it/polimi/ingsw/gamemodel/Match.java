@@ -1,9 +1,19 @@
 package it.polimi.ingsw.gamemodel;
 
-import it.polimi.ingsw.utils.Pair;
-import it.polimi.ingsw.exceptions.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import java.util.*;
+import it.polimi.ingsw.exceptions.AlreadyUsedNicknameException;
+import it.polimi.ingsw.exceptions.CardException;
+import it.polimi.ingsw.exceptions.DeckException;
+import it.polimi.ingsw.exceptions.HandException;
+import it.polimi.ingsw.exceptions.WrongChoiceException;
+import it.polimi.ingsw.exceptions.WrongStateException;
+import it.polimi.ingsw.utils.Pair;
 
 /**
  * Represents the match played by {@link Player} instances, therefore implements a slice of game logic
@@ -712,6 +722,14 @@ public class Match {
      */
     protected void notifyMatchStart() {
         notifyObservers(MatchObserver::matchStarted);
+    }
+
+    protected void sendBroadcastText(Player sender, String text) {
+        notifyObservers(observer -> observer.someoneSentBroadcastText(sender, text));
+    }
+
+    protected void sendPrivateText(Player sender, Player recipient, String text) {
+        notifyObservers(observer -> observer.someoneSentPrivateText(sender, recipient, text));
     }
 
     /**

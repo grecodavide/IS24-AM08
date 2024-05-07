@@ -1,13 +1,27 @@
 package it.polimi.ingsw.utils;
 
-import it.polimi.ingsw.exceptions.CardException;
-import it.polimi.ingsw.exceptions.InvalidResourceException;
-import it.polimi.ingsw.gamemodel.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+
 import org.junit.Test;
 
-import java.util.*;
-
-import static org.junit.Assert.*;
+import it.polimi.ingsw.exceptions.CardException;
+import it.polimi.ingsw.exceptions.InvalidResourceException;
+import it.polimi.ingsw.gamemodel.CardFace;
+import it.polimi.ingsw.gamemodel.Corner;
+import it.polimi.ingsw.gamemodel.GoldCard;
+import it.polimi.ingsw.gamemodel.InitialCard;
+import it.polimi.ingsw.gamemodel.Objective;
+import it.polimi.ingsw.gamemodel.PositionRequirement;
+import it.polimi.ingsw.gamemodel.QuantityRequirement;
+import it.polimi.ingsw.gamemodel.ResourceCard;
+import it.polimi.ingsw.gamemodel.Side;
+import it.polimi.ingsw.gamemodel.Symbol;
 
 public class CardsManagerTest {
     CardsManager cardsManager = CardsManager.getInstance();

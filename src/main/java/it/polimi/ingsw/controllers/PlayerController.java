@@ -48,4 +48,9 @@ public abstract sealed class PlayerController implements MatchObserver permits P
 
     public abstract void drawCard(DrawSource source) throws RemoteException, HandException, WrongStateException, WrongTurnException, WrongChoiceException;
 
+
+    public abstract void sendBroadcastText(String text);
+
+    public abstract void sendPrivateText(String recipient, String text);
+
 }
