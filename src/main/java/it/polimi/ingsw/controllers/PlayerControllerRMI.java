@@ -355,7 +355,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
     @Override
     public void someoneSentBroadcastText(Player someone, String text) {
         try {
-            view.someoneSentBoradcastText(someone.getNickname(), text);
+            view.someoneSentBroadcastText(someone.getNickname(), text);
         } catch (RemoteException e) {
             onConnectionError();
         }

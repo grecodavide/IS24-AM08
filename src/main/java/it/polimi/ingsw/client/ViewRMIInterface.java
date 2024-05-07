@@ -127,7 +127,7 @@ public interface ViewRMIInterface extends Remote {
      * @param someoneNickname Nickname of the user that sent the message
      * @param text Content of the message
      */
-    void someoneSentBoradcastText(String someoneNickname, String text) throws RemoteException;
+    void someoneSentBroadcastText(String someoneNickname, String text) throws RemoteException;
 
     /**
      * Notifies that a new private message is sent in private chat to the current user
