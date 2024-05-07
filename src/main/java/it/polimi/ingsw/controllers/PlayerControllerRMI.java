@@ -136,6 +136,33 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
     }
 
     /**
+     * Sends a broadcast in the chat. Since this is done through RMI, it just involves a call to
+     * {@link Player#sendBroadcastText(String)}.
+     * Note that this method is supposed to be called by a view.
+     * @param text thext of the message
+     */
+    @Override
+    public void sendBroadcastText(String text) {
+        player.sendBroadcastText(text);
+    }
+
+    /**
+     * Sends a private message in the chat. Since this is done through RMI, it just involves a call to
+     * {@link Player#sendPrivateText(Player, String)} )}.
+     * Note that this method is supposed to be called by a view.
+     * @param recipient nickname of the recipient
+     * @param text text of the message
+     */
+    @Override
+    public void sendPrivateText(String recipient, String text) {
+        if (match.getPlayers().stream().anyMatch(p -> p.getNickname().equals(recipient))) {
+            Player p = match.getPlayers().stream().filter(pl -> pl.getNickname().equals(recipient))
+                            .toList().getFirst();
+            player.sendPrivateText(p, text);
+        }
+    }
+
+    /**
      * Notifies that the match has just started.
      * Note that is supposed to be called by the match.
      */
@@ -316,6 +343,40 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
             view.someoneDrewCard(someone.getNickname(), source, card);
         } catch (RemoteException e) {
             onConnectionError();
+        }
+    }
+
+    /**
+     * Notifies that someone sent a message in the public chat.
+     *
+     * @param someone The player that send the message
+     * @param text Content of the message
+     */
+    @Override
+    public void someoneSentBroadcastText(Player someone, String text) {
+        try {
+            view.someoneSentBoradcastText(someone.getNickname(), text);
+        } catch (RemoteException e) {
+            onConnectionError();
+        }
+    }
+
+    /**
+     * Notifies that someone sent a private message to another user.
+     * If the recipient is the current player, then the view is notified,
+     * otherwise the message is ignored.
+     * @param someone The player that sent the message
+     * @param recipient The recipient of the message
+     * @param text Content of the message
+     */
+    @Override
+    public void someoneSentPrivateText(Player someone, Player recipient, String text) {
+        if (recipient.equals(this.player)) {
+            try {
+                view.someoneSentPrivateText(someone.getNickname(), text);
+            } catch (RemoteException e) {
+                onConnectionError();
+            }
         }
     }
 

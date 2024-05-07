@@ -121,4 +121,18 @@ public interface ViewRMIInterface extends Remote {
      * @throws RemoteException If the remote object is considered not to be reachable any more and cannot return as usual
      */
     void matchFinished() throws RemoteException;
+
+    /**
+     * Notifies that a new message in the global chat is sent
+     * @param someoneNickname Nickname of the user that sent the message
+     * @param text Content of the message
+     */
+    void someoneSentBoradcastText(String someoneNickname, String text) throws RemoteException;
+
+    /**
+     * Notifies that a new private message is sent in private chat to the current user
+     * @param someoneNickname Nickname of the user that sent the message
+     * @param text Content of the message
+     */
+    void someoneSentPrivateText(String someoneNickname, String text) throws RemoteException;
 }
