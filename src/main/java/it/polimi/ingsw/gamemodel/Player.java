@@ -118,10 +118,19 @@ public class Player {
         }
     }
 
+    /**
+     * Sends a message in public chat
+     * @param text content of the message
+     */
     public void sendBroadcastText(String text) {
         this.match.sendBroadcastText(this, text);
     }
 
+    /**
+     * Sends a private message to the specified recipient
+     * @param recipient recipient of the message
+     * @param text content of the message
+     */
     public void sendPrivateText(Player recipient, String text) {
         this.match.sendPrivateText(this, recipient, text);
     }

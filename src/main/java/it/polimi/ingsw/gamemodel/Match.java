@@ -724,10 +724,23 @@ public class Match {
         notifyObservers(MatchObserver::matchStarted);
     }
 
+    /**
+     * Sends a broadcast message in the chat. Notifies all observers of the event.
+     * Called by Player
+     * @param sender player that sends the message
+     * @param text content of the message
+     */
     protected void sendBroadcastText(Player sender, String text) {
         notifyObservers(observer -> observer.someoneSentBroadcastText(sender, text));
     }
 
+    /**
+     * Sends a private message to the recipient chat. Notifies all observers of the event.
+     * Called by Player
+     * @param sender player that sends the message
+     * @param recipient player that receives the message
+     * @param text content of the message
+     */
     protected void sendPrivateText(Player sender, Player recipient, String text) {
         notifyObservers(observer -> observer.someoneSentPrivateText(sender, recipient, text));
     }
