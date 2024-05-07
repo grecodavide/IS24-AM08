@@ -17,7 +17,8 @@ Implemented actions:
 - [GetAvailableMatches](#GetAvailableMatches)
 - [CreateMatch](#CreateMatch)
 - [JoinMatch](#JoinMatch)
-- [SendText](#SendText)
+- [SendBroadcastText](#SendBroadcastText)
+- [SendPrivateText](#SendText)
 - [DrawInitialCard](#DrawInitialCard)
 - [ChooseInitialCardSide](#ChooseInitialCardSide)
 - [DrawSecretObjectives](#DrawSecretObjectives)
@@ -45,13 +46,20 @@ The action communicates the intention of a client to join a match.
 | :-------- | :----: | :------------------------ |
 | `matchName` | String | Name of the match to join |
 
-### SendText
-The action sends a text message in the chat.
+### SendBroadcastText
+The action sends a public text message in the chat.
 
 | Parameter |        Type         | Description                                                                       |
 | :-------- | :-----------------: | :-------------------------------------------------------------------------------- |
 | `text`      |       String        | Content of the message                                                            |
-| `recipient`  | String (*optional*) | Recipient's name of the private message. Otherwise, messages are public by default. |
+
+### SendPrivateText
+The action sends a private text message in the chat to the specified recipient.
+
+| Parameter |        Type         | Description                                                                       |
+| :-------- | :-----------------: | :-------------------------------------------------------------------------------- |
+| `text`      |       String        | Content of the message                                                            |
+| `recipient`  | String | Recipient's name of the private message. |
 
 ### DrawInitialCard
 The action does not need additional parameters.
@@ -115,7 +123,8 @@ Response can either be:
 - [AvailableMatches](#AvailableMatches)
 - [SomeoneJoined](#SomeoneJoined)
 - [SomeoneQuit](#SomeoneQuit)
-- [SomeoneSentText](#SomeoneSentText)
+- [SomeoneSentPrivateText](#SomeoneSentPrivateText)
+- [SomeoneSentBroadcastText](#SomeoneSentBroadcastText)
 - [MatchStarted](#MatchStarted)
 - [SomeoneDrewInitialCard](#SomeoneDrewInitialCard)
 - [SomeoneSetInitialSide](#SomeoneSetInitialSide)
@@ -146,7 +155,7 @@ This response is sent when a player joins the current match.
 | Parameter     |  Type   | Description                                       |
 | :------------ | :-----: | :------------------------------------------------ |
 | `username`      | String  | Username of the player that just joined the match |
-| `joinedPlayers` | Integer | Number of players currently in the match |
+| `joinedPlayers` | Array of Strings | Nicknames of the players currently in the match |
 | `maxPlayers`    | Integer | Maximum amount of players the match can hold |
 
 ### SomeoneQuit
@@ -158,14 +167,22 @@ This response is sent when a player quits the current match.
 | `joinedPlayers` | Integer | Number of players that currently joined the match |
 | `endMatch`     | bool     | true if the quit caused the match to interrupt, false otherwise|
 
-### SomeoneSentText
-This response is sent when another player sends a message in the chat. If the message is set to be private, the response is only sent to the interested user.
+### SomeoneSentBroadcastText
+This response is sent when another player sends a message in the chat.
 
 | Parameter |  Type  | Description                                            |
 | :-------- | :----: | :----------------------------------------------------- |
 | `username`  | String | Username of the player that sent the message           |
 | `text`      | String | Text of the message sent                               |
-| `isPrivate`   |  bool  | If the message is private to the user that receives it |
+
+### SomeoneSentPrivateText
+This response is sent when another player sends a private message to another player.
+
+| Parameter |  Type  | Description                                            |
+| :-------- | :----: | :----------------------------------------------------- |
+| `username`  | String | Username of the player that sent the message           |
+| `recipient`  | String | Username of the player that sent the message           |
+| `text`      | String | Text of the message sent                               |
 
 ### MatchStarted
 Sent when the required amount of players is reached and the match is about to start.
