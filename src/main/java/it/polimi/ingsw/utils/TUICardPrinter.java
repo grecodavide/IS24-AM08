@@ -78,9 +78,32 @@ public class TUICardPrinter {
         return "TBA";
     }
 
-
+    /**
+     * It processes (from the JsonObject) the corners and the center of the given side of the card.
+     * @param sideObject the card's side to convert
+     * @param elements the map containing the association JsonKey-Symbols
+     */
     private static void processCornersAndCenter(JsonObject sideObject, Map<String, List<Symbol>> elements) {
-        // TBA
+
+        for (String jsonKey : sideObject.keySet()) {
+
+            if(jsonKey.equals("center")){
+                JsonArray symbols = sideObject.getAsJsonArray("center");
+                List<Symbol> centerSymbols = new ArrayList<>();
+                for (JsonElement symbol : symbols) {
+                    centerSymbols.add(Symbol.valueOf(symbol.getAsString().toUpperCase()));
+                }
+                elements.put("center", centerSymbols);
+
+            }else{
+                // lista di simboli per ogni chiave del json a cui aggiungo tutti i vari simboli (più per il centro, uno per angolo)
+                List<Symbol> symbols = new ArrayList<>();
+
+                symbols.add(Symbol.valueOf(sideObject.get(jsonKey).getAsString().toUpperCase()));
+                elements.put(jsonKey, symbols);
+            }
+
+        }
     }
 
 
