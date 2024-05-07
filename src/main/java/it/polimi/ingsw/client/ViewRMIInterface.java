@@ -17,6 +17,12 @@ import java.util.Map;
  */
 public interface ViewRMIInterface extends Remote {
     /**
+     *
+     * @param playersNicknames
+     */
+    void giveLobbyInfo(List<String> playersNicknames);
+
+    /**
      * Notifies that the match has just started.
      * Furthermore, gives to the receiving object all the information (parameters) needed to show to the current match
      * state.
@@ -95,6 +101,20 @@ public interface ViewRMIInterface extends Remote {
      * @throws RemoteException If the remote object is considered not to be reachable any more and cannot return as usual
      */
     void someoneDrewCard(String someoneNickname, DrawSource source, Card card) throws RemoteException;
+
+    /**
+     *
+     * @param someoneNickname
+     * @throws RemoteException
+     */
+    void someoneJoined(String someoneNickname) throws RemoteException;
+
+    /**
+     *
+     * @param someoneNickname
+     * @throws RemoteException
+     */
+    void someoneQuit(String someoneNickname) throws RemoteException;
 
     /**
      * Notifies that the match has just started.

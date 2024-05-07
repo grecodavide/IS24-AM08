@@ -169,11 +169,22 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
      * Notifies that someone has joined the match.
      * Note that this method is supposed to be called by a match, moreover the match calls this method on all the
      * MatchObservers instance subscribed to itself, then even the MatchObserver causing this event gets notified.
+     * If and only if the PlayerController receiving this method call is the one linked to given `someone`, it notifies
+     * the view about the current lobby information.
      * @param someone The Player instance that has joined
      */
     @Override
     public void someoneJoined(Player someone) {
-        // TODO
+        try {
+            if(player.equals(someone)) {
+                List<String> playersNicknames = match.getPlayers().stream().map(Player::getNickname).toList();
+                view.giveLobbyInfo(playersNicknames);
+            } else {
+                view.someoneJoined(someone.getNickname());
+            }
+        } catch (RemoteException e) {
+            onConnectionError();
+        }
     }
 
     /**
@@ -184,7 +195,11 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
      */
     @Override
     public void someoneQuit(Player someone) {
-        // TODO
+        try {
+            view.someoneQuit(someone.getNickname());
+        } catch (RemoteException e) {
+            onConnectionError();
+        }
     }
 
     /**
