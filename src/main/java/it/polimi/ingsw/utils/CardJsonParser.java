@@ -1,16 +1,23 @@
 package it.polimi.ingsw.utils;
 
-import com.google.gson.*;
-import com.google.gson.reflect.TypeToken;
-import it.polimi.ingsw.exceptions.InvalidResourceException;
-import it.polimi.ingsw.gamemodel.*;
-import it.polimi.ingsw.network.messages.Message;
-import it.polimi.ingsw.network.messages.actions.ActionMessage;
-import it.polimi.ingsw.network.messages.errors.ErrorMessage;
-import it.polimi.ingsw.network.messages.responses.ResponseMessage;
-
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+
+import it.polimi.ingsw.exceptions.InvalidResourceException;
+import it.polimi.ingsw.gamemodel.PositionRequirement;
+import it.polimi.ingsw.gamemodel.QuantityRequirement;
+import it.polimi.ingsw.gamemodel.Requirement;
+import it.polimi.ingsw.gamemodel.Symbol;
 
 /**
  * Parser of Cards, implements a custom parser for Requirement

@@ -8,21 +8,40 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.stream.Collectors;
 
 import it.polimi.ingsw.controllers.PlayerControllerRMI;
 import it.polimi.ingsw.exceptions.AlreadyUsedNicknameException;
 import it.polimi.ingsw.exceptions.ChosenMatchException;
 import it.polimi.ingsw.exceptions.WrongStateException;
-import it.polimi.ingsw.gamemodel.*;
-import it.polimi.ingsw.utils.CardsManager;
-import org.w3c.dom.html.HTMLMapElement;
+import it.polimi.ingsw.gamemodel.InitialCard;
+import it.polimi.ingsw.gamemodel.Match;
+import it.polimi.ingsw.gamemodel.Objective;
+import it.polimi.ingsw.gamemodel.PlayableCard;
+import it.polimi.ingsw.network.tcp.TCPServer;
+import it.polimi.ingsw.utils.DeckCreator;
 
 public class Server extends UnicastRemoteObject implements ServerRMIInterface {
     private final Map<String, Match> matches;
 
     private final int portRMI;
     private final int portTCP;
+
+    // Cards to be used in matches
+    private static final Map<Integer, Objective> objectives = new HashMap<>();
+    private static final Map<Integer, PlayableCard> playableCards = new HashMap<>();
+    private static final Map<Integer, InitialCard> initialCards = new HashMap<>();
+
+    public static Objective getObjective(Integer id) {
+        return Server.objectives.get(id);
+    }
+
+    public static PlayableCard getPlayableCard(Integer id) {
+        return Server.playableCards.get(id);
+    }
+
+    public static InitialCard getiInitialCard(Integer id) {
+        return Server.initialCards.get(id);
+    }
 
     public Server(int portRMI, int portTCP) throws RemoteException {
         super();
@@ -31,7 +50,6 @@ public class Server extends UnicastRemoteObject implements ServerRMIInterface {
         this.portTCP = portTCP;
 
         matches = new HashMap<>();
-
     }
 
     @Override
@@ -40,7 +58,8 @@ public class Server extends UnicastRemoteObject implements ServerRMIInterface {
     }
 
     @Override
-    public PlayerControllerRMI joinMatch(String matchName, String nickname) throws RemoteException, ChosenMatchException, AlreadyUsedNicknameException, WrongStateException, WrongStateException, AlreadyUsedNicknameException {
+    public PlayerControllerRMI joinMatch(String matchName, String nickname) throws RemoteException, ChosenMatchException,
+            AlreadyUsedNicknameException, WrongStateException, WrongStateException, AlreadyUsedNicknameException {
         if (!matches.containsKey(matchName))
             throw new ChosenMatchException("The chosen match doesn't exist");
         if (matches.get(matchName).isFull())
@@ -74,19 +93,10 @@ public class Server extends UnicastRemoteObject implements ServerRMIInterface {
         return matches.get(name);
     }
 
-    // TODO: Implement this method
     public static Match getNewMatch(int maxPlayers) {
-        GameDeck<Objective> objectivesDeck = new GameDeck<>();
-        GameDeck<InitialCard> initialsDeck = new GameDeck<>();
-        GameDeck<GoldCard> goldsDeck = new GameDeck<>();
-        GameDeck<ResourceCard> resourcesDeck = new GameDeck<>();
-
-        CardsManager.getInstance().getObjectives().forEach((id, card) -> objectivesDeck.add(card));
-        CardsManager.getInstance().getInitialCards().forEach((id, card) -> initialsDeck.add(card));
-        CardsManager.getInstance().getGoldCards().forEach((id, card) -> goldsDeck.add(card));
-        CardsManager.getInstance().getResourceCards().forEach((id, card) -> resourcesDeck.add(card));
-
-        return new Match(maxPlayers, initialsDeck, resourcesDeck, goldsDeck, objectivesDeck);
+        DeckCreator creator = new DeckCreator();
+        return new Match(maxPlayers, creator.createInitialDeck(), creator.createResourceDeck(), creator.createGoldDeck(),
+                creator.createObjectiveDeck());
     }
 
     public void startRMIServer() throws RemoteException {
@@ -94,8 +104,11 @@ public class Server extends UnicastRemoteObject implements ServerRMIInterface {
         registry.rebind("CodexNaturalisRMIServer", this);
     }
 
-    // TODO: Implement this method
     public void startTCPServer() {
+        TCPServer tcpServer = new TCPServer(portTCP, this);
+        new Thread(() -> {
+            tcpServer.listen();
+        }).start();
     }
 
     public static String promptAndInput(String message, Scanner scanner) {
@@ -132,6 +145,6 @@ public class Server extends UnicastRemoteObject implements ServerRMIInterface {
                 case "2" -> server.matches.keySet().forEach(System.out::println);
             }
         } while (!choice.equals("0"));
-    }    
+    }
 
 }

@@ -14,7 +14,18 @@ import it.polimi.ingsw.gamemodel.Player;
 import it.polimi.ingsw.gamemodel.Side;
 import it.polimi.ingsw.network.messages.Message;
 import it.polimi.ingsw.network.messages.errors.ErrorMessage;
-import it.polimi.ingsw.network.messages.responses.*;
+import it.polimi.ingsw.network.messages.responses.MatchFinishedMessage;
+import it.polimi.ingsw.network.messages.responses.MatchStartedMessage;
+import it.polimi.ingsw.network.messages.responses.SomeoneChoseSecretObjectiveMessage;
+import it.polimi.ingsw.network.messages.responses.SomeoneDrewCardMessage;
+import it.polimi.ingsw.network.messages.responses.SomeoneDrewInitialCardMessage;
+import it.polimi.ingsw.network.messages.responses.SomeoneDrewSecretObjectivesMessage;
+import it.polimi.ingsw.network.messages.responses.SomeoneJoinedMessage;
+import it.polimi.ingsw.network.messages.responses.SomeonePlayedCardMessage;
+import it.polimi.ingsw.network.messages.responses.SomeoneQuitMessage;
+import it.polimi.ingsw.network.messages.responses.SomeoneSentBroadcastTextMessage;
+import it.polimi.ingsw.network.messages.responses.SomeoneSentPrivateTextMessage;
+import it.polimi.ingsw.network.messages.responses.SomeoneSetInitialSideMessage;
 import it.polimi.ingsw.network.tcp.IOHandler;
 import it.polimi.ingsw.utils.Pair;
 
@@ -26,6 +37,8 @@ public final class PlayerControllerTCP extends PlayerController {
 
         try {
             this.io = io;
+            Message joined = new SomeoneJoinedMessage(nickname, match.getPlayers(), match.getMaxPlayers());
+            this.io.writeMsg(joined);
         } catch (Exception e) {
             e.printStackTrace();
             // match.removePlayer(player);
@@ -56,7 +69,7 @@ public final class PlayerControllerTCP extends PlayerController {
 
     @Override
     public void someoneJoined(Player someone) {
-        this.sendMessage(new SomeoneJoinedMessage(someone.getNickname(), match.getPlayers().size(), match.getMaxPlayers()));
+        this.sendMessage(new SomeoneJoinedMessage(someone.getNickname(), match.getPlayers(), match.getMaxPlayers()));
     }
 
     @Override
@@ -160,6 +173,39 @@ public final class PlayerControllerTCP extends PlayerController {
         }
     }
 
+    @Override
+    public void someoneSentBroadcastText(Player someone, String text) {
+        Message msg = new SomeoneSentBroadcastTextMessage(someone.getNickname(), text);
+        this.sendMessage(msg);
+    }
 
+    @Override
+    public void someoneSentPrivateText(Player someone, Player recipient, String text) {
+        if (recipient.getNickname().equals(this.player.getNickname())) {
+            Message msg = new SomeoneSentPrivateTextMessage(someone.getNickname(), recipient.getNickname(), text);
+            this.sendMessage(msg);
+        }
+    }
+
+    @Override
+    public void sendBroadcastText(String text) {
+        this.player.sendBroadcastText(text);
+    }
+
+    @Override
+    public void sendPrivateText(String recipientUsername, String text) {
+        Player recipient = null;
+        for (Player player : this.match.getPlayers()) {
+            if (player.getNickname().equals(recipientUsername)) {
+                recipient = player;
+                break;
+            }
+        }
+
+        // if you want to send error if recipient does not exist, change here
+        if (recipient != null) {
+            this.player.sendPrivateText(recipient, text);
+        }
+    }
 
 }

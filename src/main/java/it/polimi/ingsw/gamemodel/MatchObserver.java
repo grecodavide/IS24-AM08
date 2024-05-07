@@ -1,6 +1,6 @@
 package it.polimi.ingsw.gamemodel;
 
-import it.polimi.ingsw.utils.*;
+import it.polimi.ingsw.utils.Pair;
 
 /**
  * Interface to be implemented by any class that wants to be an observer of {@link Match}, so wants to be able to
@@ -87,6 +87,10 @@ public interface MatchObserver {
      * @param replacementCard The card that has replaced the drawn card
      */
     void someoneDrewCard(Player someone, DrawSource source, PlayableCard card, PlayableCard replacementCard);
+
+    void someoneSentBroadcastText(Player someone, String text);
+
+    void someoneSentPrivateText(Player someone, Player recipient, String text);
 
     /**
      * Notifies that the match has just finished.

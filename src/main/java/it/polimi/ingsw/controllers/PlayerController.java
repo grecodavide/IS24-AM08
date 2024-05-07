@@ -2,7 +2,11 @@ package it.polimi.ingsw.controllers;
 
 import java.util.List;
 
-import it.polimi.ingsw.exceptions.*;
+import it.polimi.ingsw.exceptions.AlreadyUsedNicknameException;
+import it.polimi.ingsw.exceptions.HandException;
+import it.polimi.ingsw.exceptions.WrongChoiceException;
+import it.polimi.ingsw.exceptions.WrongStateException;
+import it.polimi.ingsw.exceptions.WrongTurnException;
 import it.polimi.ingsw.gamemodel.DrawSource;
 import it.polimi.ingsw.gamemodel.Match;
 import it.polimi.ingsw.gamemodel.MatchObserver;
@@ -99,5 +103,10 @@ public abstract sealed class PlayerController implements MatchObserver permits P
      * @throws WrongChoiceException If the chosen DrawSource doesn't have any card left (i.e. it's empty)
      */
     public abstract void drawCard(DrawSource source) throws HandException, WrongStateException, WrongTurnException, WrongChoiceException;
+
+
+    public abstract void sendBroadcastText(String text);
+
+    public abstract void sendPrivateText(String recipient, String text);
 
 }
