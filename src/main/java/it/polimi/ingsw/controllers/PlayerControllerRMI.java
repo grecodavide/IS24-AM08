@@ -11,50 +11,134 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Subclass of {@link PlayerController} that implements its abstract methods through RMI interactions.
+ * Each instance of this class is supposed to be sent through {@link it.polimi.ingsw.server.Server#joinMatch(String, String)})
+ * to an RMI View, this latter will then send its View instance to the PlayerController object, calling
+ * {@link #registerView(ViewRMIInterface)} on it.
+ */
 public final class PlayerControllerRMI extends PlayerController implements PlayerControllerRMIInterface {
+    // The remote View instance
     private ViewRMIInterface view;
 
-    public PlayerControllerRMI(String nickname, Match match, int port) throws AlreadyUsedNicknameException, RemoteException, WrongStateException {
+    /**
+     * Instantiates the internal Player with the given nickname and sets the internal Match reference to the given one,
+     * add the new Player instance to the match and subscribe this class instance to the match observers.
+     * Moreover, this specific subclass exports the just instantiated object on the RMI registry listening on the given
+     * port.
+     * @param nickname The nickname of the new player of the Match
+     * @param match The match to which this PlayerClass must pertain
+     * @param port The port on which the RMI Registry listens for requests
+     * @throws AlreadyUsedNicknameException If the nickname is already taken by another player of the same match
+     * @throws WrongStateException If a new player cannot be added on the current state of the Match
+     * @throws RemoteException If the exportation process on the RMI registry fails due to network errors
+     */
+    public PlayerControllerRMI(String nickname, Match match, int port) throws AlreadyUsedNicknameException, WrongStateException, RemoteException {
         super(nickname, match);
 
         UnicastRemoteObject.exportObject(this, port);
     }
 
+    /**
+     * Sets the internal View attribute to the given argument; if it has already been called, it won't
+     * do anything, since it's call is allowed once per PlayerController object.
+     * It's used by a remote View having this class object to send itself over RMI to the PlayerControllerRMI
+     * instance.
+     * Note that this method is supposed to be called by a view.
+     * @param view The View to save in the PlayerController internal state
+     */
     @Override
     public void registerView(ViewRMIInterface view) {
-        this.view = view;
+        if (this.view == null)
+            this.view = view;
     }
 
+    /**
+     * Draws an initial card for the player. Since this is done through RMI, it just involves a call to
+     * {@link Player#drawInitialCard()}.
+     * Note that this method is supposed to be called by a view.
+     * @throws WrongStateException If the current match state doesn't allow drawing an initial card
+     * @throws WrongTurnException If the current turn it's not the one of this player
+     */
     @Override
     public void drawInitialCard() throws WrongStateException, WrongTurnException {
         player.drawInitialCard();
     }
 
+    /**
+     * Communicates the chosen initial card side. Since this is done through RMI, it just involves a call to
+     * {@link Player#chooseInitialCardSide(Side)}.
+     * Note that this method is supposed to be called by a view.
+     * @param side The side on which play the initial card drawn using {@link #drawInitialCard()}
+     * @throws WrongStateException If the current match state doesn't allow setting the initial card side
+     * @throws WrongTurnException If the current turn it's not the one of this player
+     */
     @Override
     public void chooseInitialCardSide(Side side) throws WrongStateException, WrongTurnException {
         player.chooseInitialCardSide(side);
     }
 
+    /**
+     * Draws two secret objectives. Since this is done through RMI, it just involves a call to
+     * {@link Player#drawSecretObjectives()}.
+     * Note that this method is supposed to be called by a view.
+     * @throws WrongStateException If the current match state doesn't allow drawing secret objectives
+     * @throws WrongTurnException If the current turn it's not the one of this player
+     */
     @Override
     public void drawSecretObjectives() throws WrongStateException, WrongTurnException {
         player.drawSecretObjectives();
     }
 
+    /**
+     * Communicates the chosen secret objective. Since this is done through RMI, it just involves a call to
+     * {@link Player#chooseSecretObjective(Objective)}.
+     * Note that this method is supposed to be called by a view.
+     * @param objective The chosen objective
+     * @throws WrongStateException If the current match state doesn't allow choosing a secret objective
+     * @throws WrongTurnException If the current turn it's not the one of this player
+     * @throws WrongChoiceException If the chosen objective is not one of the two drawn ones using {@link #drawSecretObjectives()}
+     */
     @Override
     public void chooseSecretObjective(Objective objective) throws WrongStateException, WrongTurnException, WrongChoiceException {
         player.chooseSecretObjective(objective);
     }
 
+    /**
+     * Plays a card. Since this is done through RMI, it just involves a call to
+     * {@link Player#playCard(Pair, PlayableCard, Side)}.
+     * Note that this method is supposed to be called by a view.
+     * @param coords The coordinates on which to place the card
+     * @param card The PlayableCard to play
+     * @param side The side on which to play the chosen card
+     * @throws WrongStateException If the current match state doesn't allow playing cards
+     * @throws WrongTurnException If the current turn it's not the one of this player
+     * @throws WrongChoiceException If the chosen card is not one of those in the player's current hand
+     */
     @Override
     public void playCard(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws WrongStateException, WrongTurnException, WrongChoiceException {
         player.playCard(coords, card, side);
     }
 
+    /**
+     * Draws a card. Since this is done through RMI, it just involves a call to
+     * {@link Player#drawCard(DrawSource)}.
+     * Note that this method is supposed to be called by a view.
+     * @param source The drawing source to draw the card from
+     * @throws HandException If the player already has a full hand of cards (three cards)
+     * @throws WrongStateException If the current match state doesn't allow drawing cards
+     * @throws WrongTurnException If the current turn it's not the one of this player
+     * @throws WrongChoiceException If the chosen DrawSource doesn't have any card left (i.e. it's empty)
+     */
     @Override
     public void drawCard(DrawSource source) throws HandException, WrongStateException, WrongTurnException, WrongChoiceException {
         player.drawCard(source);
     }
 
+    /**
+     * Notifies that the match has just started.
+     * Note that is supposed to be called by the match.
+     */
     @Override
     public void matchStarted() {
         // Get visible objectives, visible playable cards and visible decks top reigns
@@ -81,16 +165,37 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
         }
     }
 
+    /**
+     * Notifies that someone has joined the match.
+     * Note that this method is supposed to be called by a match, moreover the match calls this method on all the
+     * MatchObservers instance subscribed to itself, then even the MatchObserver causing this event gets notified.
+     * @param someone The Player instance that has joined
+     */
     @Override
     public void someoneJoined(Player someone) {
         // TODO
     }
 
+    /**
+     * Notifies that someone has quit from the match.
+     * Note that Match calls this method on all MatchObservers instance subscribed to itself, then
+     * even the MatchObserver causing this event gets notified.
+     * @param someone The Player instance that has quit
+     */
     @Override
     public void someoneQuit(Player someone) {
         // TODO
     }
 
+    /**
+     * Notifies that someone has drawn its initial card.
+     * Note that this method is supposed to be called by a match, moreover the match calls this method on all the
+     * MatchObservers instance subscribed to itself, then even the MatchObserver causing this event gets notified.
+     * If and only if the PlayerController receiving this method call is the one linked to given `someone`, it notifies
+     * the view that it received an initial card.
+     * @param someone The player instance that has drawn the card
+     * @param card The initial card that has been drawn
+     */
     @Override
     public void someoneDrewInitialCard(Player someone, InitialCard card) {
         try {
@@ -105,6 +210,13 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
         }
     }
 
+    /**
+     * Notifies that someone has chosen its initial card side.
+     * Note that this method is supposed to be called by a match, moreover the match calls this method on all the
+     * MatchObservers instance subscribed to itself, then even the MatchObserver causing this event gets notified.
+     * @param someone The player instance that has chosen the side
+     * @param side The chosen initial card side
+     */
     @Override
     public void someoneSetInitialSide(Player someone, Side side) {
         try {
@@ -114,6 +226,15 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
         }
     }
 
+    /**
+     * Notifies that someone has drawn two secret objectives.
+     * Note that this method is supposed to be called by a match, moreover the match calls this method on all the
+     * MatchObservers instance subscribed to itself, then even the MatchObserver causing this event gets notified.
+     * If and only if the PlayerController receiving this method call is the one linked to given `someone`, it notifies
+     * the view about the proposed objectives, the other views will just receive a notification about the player's nickname.
+     * @param someone The player instance that has drawn the objectives
+     * @param objectives The two proposed objectives
+     */
     @Override
     public void someoneDrewSecretObjective(Player someone, Pair<Objective, Objective> objectives) {
         try {
@@ -128,8 +249,15 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
         }
     }
 
+    /**
+     * Notifies that someone has chosen the secret objective.
+     * Note that this method is supposed to be called by a match, moreover the match calls this method on all the
+     * MatchObservers instance subscribed to itself, then even the MatchObserver causing this event gets notified.
+     * The view will just receive `someone` nickname, no the objective.
+     * @param someone The player instance that has chosen the secret objective
+     * @param objective The chosen secret objective
+     */
     @Override
-    // TODO: Specify why objective not used
     public void someoneChoseSecretObjective(Player someone, Objective objective) {
         try {
             view.someoneChoseSecretObjective(someone.getNickname());
@@ -138,6 +266,15 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
         }
     }
 
+    /**
+     * Notifies that someone has played a card.
+     * Note that this method is supposed to be called by a match, moreover the match calls this method on all the
+     * MatchObservers instance subscribed to itself, then even the MatchObserver causing this event gets notified.
+     * @param someone The Player instance that has played a card
+     * @param coords The coordinates on which the card has been placed
+     * @param card The PlayableCard that has been played
+     * @param side The side on which the card has been placed
+     */
     @Override
     public void someonePlayedCard(Player someone, Pair<Integer, Integer> coords, PlayableCard card, Side side) {
         try {
@@ -147,6 +284,17 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
         }
     }
 
+    /**
+     * Notifies that someone has drawn a card.
+     * The replacement card is the one that has taken the place of the drawn one, it's needed since observers have to
+     * know the reign of the new card on top of the decks.
+     * Note that this method is supposed to be called by a match, moreover the match calls this method on all the
+     * MatchObservers instance subscribed to itself, then even the MatchObserver causing this event gets notified.
+     * @param someone The Player instance that has drawn a card
+     * @param source The drawing source from which the card has been drawn
+     * @param card The card that has been drawn
+     * @param replacementCard The card that has replaced the drawn card
+     */
     @Override
     public void someoneDrewCard(Player someone, DrawSource source, PlayableCard card, PlayableCard replacementCard) {
         try {
@@ -156,6 +304,9 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
         }
     }
 
+    /**
+     * Notifies that the match has just finished.
+     */
     @Override
     public void matchFinished() {
         try {
@@ -165,6 +316,9 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
         }
     }
 
+    /**
+     * Removes the player linked to this PlayerControllerRMI instance when there's a connection error.
+     */
     private void onConnectionError() {
         match.removePlayer(player);
     }
