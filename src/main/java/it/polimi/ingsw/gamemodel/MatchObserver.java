@@ -1,6 +1,6 @@
 package it.polimi.ingsw.gamemodel;
 
-import it.polimi.ingsw.utils.*;
+import it.polimi.ingsw.utils.Pair;
 
 /**
  * 
@@ -23,6 +23,11 @@ public interface MatchObserver {
     void someonePlayedCard(Player someone, Pair<Integer, Integer> coords, PlayableCard card, Side side);
 
     void someoneDrewCard(Player someone, DrawSource source, PlayableCard card, PlayableCard replacementCard);
+
+
+    void someoneSentBroadcastText(Player someone, String text);
+
+    void someoneSentPrivateText(Player someone, Player recipient, String text);
 
     void matchFinished();
 
