@@ -212,7 +212,7 @@ public class TUICardPrinter {
     }
 
     /**
-     * It processes (from the JsonObject) the coners and the center of the given side of the card.
+     * It processes (from the JsonObject) the corners and the center of the given side of the card.
      * @param sideObject the card's side to convert
      * @param elements the map containing the association JsonKey-Symbols
      */
@@ -242,7 +242,7 @@ public class TUICardPrinter {
     /**
      * The method looks in the Json file of initial cards for the wanted side of the card, and processes it.
      * @param filePath path of the json file (of initial cards) to process
-     * @param id ID of the inital card to process
+     * @param id ID of the initial card to process
      * @param isFrontWanted is it requiring the face of the card? If not, then it is the back
      * @return the map containing the association JsonKey-Symbols
      * @throws IOException if needed
