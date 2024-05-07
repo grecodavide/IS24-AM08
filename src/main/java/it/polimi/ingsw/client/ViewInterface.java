@@ -15,7 +15,7 @@ import java.util.Map;
  * For security reasons, each method doesn't expose to the receiving view important objects (e.g. Player), but
  * rather values representing them (e.g. Player's nickname).
  */
-public interface ViewRMIInterface extends Remote {
+public interface ViewInterface extends Remote {
     /**
      *
      * @param playersNicknames

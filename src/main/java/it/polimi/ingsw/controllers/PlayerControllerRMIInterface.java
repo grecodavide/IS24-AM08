@@ -1,6 +1,6 @@
 package it.polimi.ingsw.controllers;
 
-import it.polimi.ingsw.client.ViewRMIInterface;
+import it.polimi.ingsw.client.ViewInterface;
 import it.polimi.ingsw.exceptions.*;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.Pair;
@@ -22,7 +22,7 @@ public interface PlayerControllerRMIInterface extends Remote {
      * instance.
      * @param view The View to save in the PlayerController internal state
      */
-    void registerView(ViewRMIInterface view) throws RemoteException;
+    void registerView(ViewInterface view) throws RemoteException;
 
     /**
      * Draws an initial card for the player.
