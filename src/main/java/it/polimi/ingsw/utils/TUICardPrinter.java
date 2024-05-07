@@ -106,9 +106,36 @@ public class TUICardPrinter {
         }
     }
 
+    /**
+     * The method looks in the Json file of initial cards for the wanted side of the card, and processes it.
+     * @param filePath path of the json file (of initial cards) to process
+     * @param id ID of the initial card to process
+     * @param isFrontWanted is it requiring the face of the card? If not, then it is the back
+     * @return the map containing the association JsonKey-Symbols
+     * @throws IOException if needed
+     */
+    private static Map<String, List<Symbol>> initialJsonExtractor(String filePath, int id, boolean isFrontWanted) throws IOException {
+        String content = new String(Files.readAllBytes(Paths.get(filePath)));
+        JsonParser parser = new JsonParser();
+        JsonObject jsonObject = parser.parse(content).getAsJsonObject();
 
-    private static void initialJsonExtractor(String filePath, int id, boolean isFrontWanted) throws IOException {
-        // TBA
+        // final result
+        Map<String, List<Symbol>> elements = new HashMap<>();
+
+        // itera tra tutti gli elementi del json finché non trova l'id giusto
+        for (String jasonKey : jsonObject.keySet()) {
+            JsonObject object = jsonObject.getAsJsonObject(jasonKey);
+
+            // se trova la carta con l'id giusto
+            if (object.get("id").getAsInt() == id) {
+                // estrae il lato giusto della carta
+                JsonObject sideObject = isFrontWanted ? object.getAsJsonObject("front") : object.getAsJsonObject("back");
+
+                processCornersAndCenter(sideObject, elements);
+            }
+            break;
+        }
+        return elements;
     }
 
     private static void objectiveJsonExtractor(String filePath, int id, boolean isFrontWanted) throws IOException {
