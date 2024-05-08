@@ -1,10 +1,11 @@
 package it.polimi.ingsw.controllers;
 
-import it.polimi.ingsw.client.ViewInterface;
+import it.polimi.ingsw.client.RemoteViewInterface;
 import it.polimi.ingsw.exceptions.*;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.Pair;
 
+import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
@@ -15,11 +16,11 @@ import java.util.Map;
  * Subclass of {@link PlayerController} that implements its abstract methods through RMI interactions.
  * Each instance of this class is supposed to be sent through {@link it.polimi.ingsw.server.Server#joinMatch(String, String)})
  * to an RMI View, this latter will then send its View instance to the PlayerController object, calling
- * {@link #registerView(ViewInterface)} on it.
+ * {@link #registerView(RemoteViewInterface)} on it.
  */
 public final class PlayerControllerRMI extends PlayerController implements PlayerControllerRMIInterface {
     // The remote View instance
-    private ViewInterface view;
+    private RemoteViewInterface view;
 
     /**
      * Instantiates the internal Player with the given nickname and sets the internal Match reference to the given one,
@@ -50,7 +51,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
      * @param view The View to save in the PlayerController internal state
      */
     @Override
-    public void registerView(ViewInterface view) {
+    public void registerView(RemoteViewInterface view) {
         if (this.view == null)
             this.view = view;
     }

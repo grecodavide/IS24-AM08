@@ -9,17 +9,20 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * RMI interface used to declare all and only the methods callable on a remote view instance implementing this interface.
+ * Network interface used to declare all and only the methods callable on a remote view instance implementing this interface or
+ * by message listener for TCP.
  * Since it's a remote interface, all the methods here defined are meant to notify the occurrence of an event to the remote
  * object. Given this, all methods also contain some parameters specific to the happened event.
  * For security reasons, each method doesn't expose to the receiving view important objects (e.g. Player), but
  * rather values representing them (e.g. Player's nickname).
  */
-public interface ViewInterface extends Remote {
+public interface RemoteViewInterface extends Remote {
     /**
-     * @param playersNicknames
+     * Updates the list of players in the lobby before the start of the match
+     *
+     * @param playersNicknames list of nicknames
      */
-    void giveLobbyInfo(List<String> playersNicknames);
+    void giveLobbyInfo(List<String> playersNicknames) throws RemoteException;
 
     /**
      * Notifies that the match has just started.
@@ -144,4 +147,5 @@ public interface ViewInterface extends Remote {
      * @param text            Content of the message
      */
     void someoneSentPrivateText(String someoneNickname, String text) throws RemoteException;
+
 }
