@@ -58,8 +58,7 @@ public class Server extends UnicastRemoteObject implements ServerRMIInterface {
     }
 
     @Override
-    public PlayerControllerRMI joinMatch(String matchName, String nickname) throws RemoteException, ChosenMatchException,
-            AlreadyUsedNicknameException, WrongStateException, WrongStateException, AlreadyUsedNicknameException {
+    public PlayerControllerRMI joinMatch(String matchName, String nickname) throws RemoteException, ChosenMatchException, WrongStateException, AlreadyUsedNicknameException {
         if (!matches.containsKey(matchName))
             throw new ChosenMatchException("The chosen match doesn't exist");
         if (matches.get(matchName).isFull())
@@ -67,7 +66,7 @@ public class Server extends UnicastRemoteObject implements ServerRMIInterface {
 
         Match chosenMatch = matches.get(matchName);
 
-        return new PlayerControllerRMI(nickname, chosenMatch, portRMI);
+        return new PlayerControllerRMI(nickname, chosenMatch);
     }
 
     @Override
@@ -106,9 +105,7 @@ public class Server extends UnicastRemoteObject implements ServerRMIInterface {
 
     public void startTCPServer() {
         TCPServer tcpServer = new TCPServer(portTCP, this);
-        new Thread(() -> {
-            tcpServer.listen();
-        }).start();
+        new Thread(tcpServer::listen).start();
     }
 
     public static String promptAndInput(String message, Scanner scanner) {

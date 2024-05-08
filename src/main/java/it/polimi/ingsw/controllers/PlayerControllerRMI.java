@@ -5,7 +5,6 @@ import it.polimi.ingsw.exceptions.*;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.Pair;
 
-import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
@@ -26,17 +25,13 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
     /**
      * Instantiates the internal Player with the given nickname and sets the internal Match reference to the given one,
      * add the new Player instance to the match and subscribe this class instance to the match observers.
-     * Moreover, this specific subclass exports the just instantiated object on the RMI registry listening on the given
-     * port.
      *
      * @param nickname The nickname of the new player of the Match
      * @param match    The match to which this PlayerClass must pertain
-     * @param port     The port on which the RMI Registry listens for requests
      * @throws AlreadyUsedNicknameException If the nickname is already taken by another player of the same match
      * @throws WrongStateException          If a new player cannot be added on the current state of the Match
-     * @throws RemoteException              If the exportation process on the RMI registry fails due to network errors
      */
-    public PlayerControllerRMI(String nickname, Match match, int port) throws AlreadyUsedNicknameException, WrongStateException, RemoteException {
+    public PlayerControllerRMI(String nickname, Match match) throws AlreadyUsedNicknameException, WrongStateException {
         super(nickname, match);
 
     }
@@ -51,9 +46,13 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
      * @param view The View to save in the PlayerController internal state
      */
     @Override
-    public void registerView(RemoteViewInterface view) {
-        if (this.view == null)
+    public void registerView(RemoteViewInterface view) throws RemoteException {
+        if (this.view == null) {
             this.view = view;
+
+            List<String> playersNicknames = match.getPlayers().stream().map(Player::getNickname).toList();
+            view.giveLobbyInfo(playersNicknames);
+        }
     }
 
     /**
@@ -65,7 +64,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
      * @throws WrongTurnException  If the current turn it's not the one of this player
      */
     @Override
-    public void drawInitialCard() throws WrongStateException, WrongTurnException {
+    public void drawInitialCard() throws WrongStateException, WrongTurnException, RemoteException {
         player.drawInitialCard();
     }
 
@@ -79,7 +78,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
      * @throws WrongTurnException  If the current turn it's not the one of this player
      */
     @Override
-    public void chooseInitialCardSide(Side side) throws WrongStateException, WrongTurnException {
+    public void chooseInitialCardSide(Side side) throws WrongStateException, WrongTurnException, RemoteException {
         player.chooseInitialCardSide(side);
     }
 
@@ -92,7 +91,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
      * @throws WrongTurnException  If the current turn it's not the one of this player
      */
     @Override
-    public void drawSecretObjectives() throws WrongStateException, WrongTurnException {
+    public void drawSecretObjectives() throws WrongStateException, WrongTurnException, RemoteException {
         player.drawSecretObjectives();
     }
 
@@ -107,7 +106,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
      * @throws WrongChoiceException If the chosen objective is not one of the two drawn ones using {@link #drawSecretObjectives()}
      */
     @Override
-    public void chooseSecretObjective(Objective objective) throws WrongStateException, WrongTurnException, WrongChoiceException {
+    public void chooseSecretObjective(Objective objective) throws WrongStateException, WrongTurnException, WrongChoiceException, RemoteException {
         player.chooseSecretObjective(objective);
     }
 
@@ -124,7 +123,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
      * @throws WrongChoiceException If the chosen card is not one of those in the player's current hand
      */
     @Override
-    public void playCard(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws WrongStateException, WrongTurnException, WrongChoiceException {
+    public void playCard(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws WrongStateException, WrongTurnException, WrongChoiceException, RemoteException {
         player.playCard(coords, card, side);
     }
 
@@ -140,7 +139,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
      * @throws WrongChoiceException If the chosen DrawSource doesn't have any card left (i.e. it's empty)
      */
     @Override
-    public void drawCard(DrawSource source) throws HandException, WrongStateException, WrongTurnException, WrongChoiceException {
+    public void drawCard(DrawSource source) throws HandException, WrongStateException, WrongTurnException, WrongChoiceException, RemoteException {
         player.drawCard(source);
     }
 
@@ -152,7 +151,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
      * @param text Text of the message
      */
     @Override
-    public void sendBroadcastText(String text) {
+    public void sendBroadcastText(String text) throws RemoteException {
         player.sendBroadcastText(text);
     }
 
@@ -165,7 +164,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
      * @param text      text of the message
      */
     @Override
-    public void sendPrivateText(String recipient, String text) {
+    public void sendPrivateText(String recipient, String text) throws RemoteException {
         if (match.getPlayers().stream().anyMatch(p -> p.getNickname().equals(recipient))) {
             Player p = match.getPlayers().stream()
                     .filter(pl -> pl.getNickname().equals(recipient))
@@ -181,7 +180,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
     @Override
     public void matchStarted() {
         if (view == null) {
-            onConnectionError();
+            onUnregisteredView();
         } else {
             // Get visible objectives, visible playable cards and visible decks top reigns
             Pair<Objective, Objective> visibleObjectives = match.getVisibleObjectives();
@@ -220,15 +219,10 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
     @Override
     public void someoneJoined(Player someone) {
         if (view == null) {
-            onConnectionError();
+            onUnregisteredView();
         } else {
             try {
-                if (player.equals(someone)) {
-                    List<String> playersNicknames = match.getPlayers().stream().map(Player::getNickname).toList();
-                    view.giveLobbyInfo(playersNicknames);
-                } else {
-                    view.someoneJoined(someone.getNickname());
-                }
+                view.someoneJoined(someone.getNickname());
             } catch (RemoteException e) {
                 onConnectionError();
             }
@@ -245,7 +239,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
     @Override
     public void someoneQuit(Player someone) {
         if (view == null) {
-            onConnectionError();
+            onUnregisteredView();
         } else {
             try {
                 view.someoneQuit(someone.getNickname());
@@ -268,7 +262,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
     @Override
     public void someoneDrewInitialCard(Player someone, InitialCard card) {
         if (view == null) {
-            onConnectionError();
+            onUnregisteredView();
         } else {
             try {
                 if (player.equals(someone)) {
@@ -293,7 +287,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
     @Override
     public void someoneSetInitialSide(Player someone, Side side) {
         if (view == null) {
-            onConnectionError();
+            onUnregisteredView();
         } else {
             try {
                 view.someoneSetInitialSide(someone.getNickname(), side);
@@ -316,7 +310,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
     @Override
     public void someoneDrewSecretObjective(Player someone, Pair<Objective, Objective> objectives) {
         if (view == null) {
-            onConnectionError();
+            onUnregisteredView();
         } else {
             try {
                 if (player.equals(someone)) {
@@ -342,7 +336,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
     @Override
     public void someoneChoseSecretObjective(Player someone, Objective objective) {
         if (view == null) {
-            onConnectionError();
+            onUnregisteredView();
         } else {
             try {
                 view.someoneChoseSecretObjective(someone.getNickname());
@@ -365,7 +359,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
     @Override
     public void someonePlayedCard(Player someone, Pair<Integer, Integer> coords, PlayableCard card, Side side) {
         if (view == null) {
-            onConnectionError();
+            onUnregisteredView();
         } else {
             try {
                 view.someonePlayedCard(someone.getNickname(), coords, card, side, this.player.getPoints());
@@ -390,7 +384,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
     @Override
     public void someoneDrewCard(Player someone, DrawSource source, PlayableCard card, PlayableCard replacementCard) {
         if (view == null) {
-            onConnectionError();
+            onUnregisteredView();
         } else {
             try {
                 PlayableCard rep = null;
@@ -417,7 +411,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
     @Override
     public void someoneSentBroadcastText(Player someone, String text) {
         if (view == null) {
-            onConnectionError();
+            onUnregisteredView();
         } else {
             try {
                 view.someoneSentBroadcastText(someone.getNickname(), text);
@@ -439,7 +433,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
     @Override
     public void someoneSentPrivateText(Player someone, Player recipient, String text) {
         if (view == null) {
-            onConnectionError();
+            onUnregisteredView();
         } else {
             if (recipient.equals(this.player)) {
                 try {
@@ -457,7 +451,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
     @Override
     public void matchFinished() {
         if (view == null) {
-            onConnectionError();
+            onUnregisteredView();
         } else {
             try {
                 List<Pair<Player, Boolean>> ranking = match.getPlayersFinalRanking();
@@ -472,11 +466,19 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
         }
     }
 
+    public RemoteViewInterface getView() {
+        return view;
+    }
+
     /**
      * Removes the player linked to this PlayerControllerRMI instance when there's a connection error.
      */
     private void onConnectionError() {
         match.removePlayer(player);
         System.err.println("There has been a connection error with player: " + player.getNickname());
+    }
+
+    private void onUnregisteredView() {
+        System.err.println("The PlayerControllerRMI of player " + player.getNickname() + " hasn't got a corresponding view");
     }
 }

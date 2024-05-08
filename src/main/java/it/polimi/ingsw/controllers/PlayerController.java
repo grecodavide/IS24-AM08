@@ -4,6 +4,7 @@ import it.polimi.ingsw.exceptions.*;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.Pair;
 
+import java.rmi.RemoteException;
 import java.util.List;
 
 /**
@@ -29,11 +30,6 @@ public abstract sealed class PlayerController implements MatchObserver permits P
      * @throws WrongStateException          If a new player cannot be added on the current state of the Match
      */
     public PlayerController(String nickname, Match match) throws AlreadyUsedNicknameException, WrongStateException {
-        List<String> playersNicknames = match.getPlayers().stream().map(Player::getNickname).toList();
-
-        if (playersNicknames.contains(nickname))
-            throw new AlreadyUsedNicknameException("The chosen nickname is already in use");
-
         this.player = new Player(nickname, match);
         this.match = match;
 
@@ -43,67 +39,7 @@ public abstract sealed class PlayerController implements MatchObserver permits P
         match.subscribeObserver(this);
     }
 
-    /**
-     * Draws an initial card.
-     *
-     * @throws WrongStateException If the current match state doesn't allow drawing an initial card
-     * @throws WrongTurnException  If the current turn it's not the one of this player
-     */
-    public abstract void drawInitialCard() throws WrongStateException, WrongTurnException;
-
-    /**
-     * Communicates the chosen initial card side.
-     *
-     * @param side The side on which play the initial card drawn using {@link #drawInitialCard()}
-     * @throws WrongStateException If the current match state doesn't allow setting the initial card side
-     * @throws WrongTurnException  If the current turn it's not the one of this player
-     */
-    public abstract void chooseInitialCardSide(Side side) throws WrongStateException, WrongTurnException;
-
-    /**
-     * Draws two secret objectives.
-     *
-     * @throws WrongStateException If the current match state doesn't allow drawing secret objectives
-     * @throws WrongTurnException  If the current turn it's not the one of this player
-     */
-    public abstract void drawSecretObjectives() throws WrongStateException, WrongTurnException;
-
-    /**
-     * Communicates the chosen secret objective.
-     *
-     * @param objective The chosen objective
-     * @throws WrongStateException  If the current match state doesn't allow choosing a secret objective
-     * @throws WrongTurnException   If the current turn it's not the one of this player
-     * @throws WrongChoiceException If the chosen objective is not one of the two drawn ones using {@link #drawSecretObjectives()}
-     */
-    public abstract void chooseSecretObjective(Objective objective) throws WrongStateException, WrongTurnException, WrongChoiceException;
-
-    /**
-     * Plays a card.
-     *
-     * @param coords The coordinates on which to place the card
-     * @param card   The PlayableCard to play
-     * @param side   The side on which to play the chosen card
-     * @throws WrongStateException  If the current match state doesn't allow playing cards
-     * @throws WrongTurnException   If the current turn it's not the one of this player
-     * @throws WrongChoiceException If the chosen card is not one of those in the player's current hand
-     */
-    public abstract void playCard(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws WrongStateException, WrongTurnException, WrongChoiceException;
-
-    /**
-     * Draws a card.
-     *
-     * @param source The drawing source to draw the card from
-     * @throws HandException        If the player already has a full hand of cards (three cards)
-     * @throws WrongStateException  If the current match state doesn't allow drawing cards
-     * @throws WrongTurnException   If the current turn it's not the one of this player
-     * @throws WrongChoiceException If the chosen DrawSource doesn't have any card left (i.e. it's empty)
-     */
-    public abstract void drawCard(DrawSource source) throws HandException, WrongStateException, WrongTurnException, WrongChoiceException;
-
-
-    public abstract void sendBroadcastText(String text);
-
-    public abstract void sendPrivateText(String recipient, String text);
-
+    public Player getPlayer() {
+        return player;
+    }
 }

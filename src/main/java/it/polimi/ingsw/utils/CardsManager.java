@@ -33,14 +33,10 @@ public final class CardsManager {
         CardJsonParser parser = new CardJsonParser();
         Gson gson = parser.getCardBuilder();
 
-        Type initialCardsType = new TypeToken<Map<Integer, InitialCard>>() {
-        }.getType();
-        Type goldCardsType = new TypeToken<Map<Integer, GoldCard>>() {
-        }.getType();
-        Type resourceCardsType = new TypeToken<Map<Integer, ResourceCard>>() {
-        }.getType();
-        Type objectivesType = new TypeToken<Map<Integer, Objective>>() {
-        }.getType();
+        Type initialCardsType = new TypeToken<Map<Integer, InitialCard>>() { }.getType();
+        Type goldCardsType = new TypeToken<Map<Integer, GoldCard>>() { }.getType();
+        Type resourceCardsType = new TypeToken<Map<Integer, ResourceCard>>() { }.getType();
+        Type objectivesType = new TypeToken<Map<Integer, Objective>>() {}.getType();
 
         try {
             initialCards = gson.fromJson(new FileReader("src/main/resources/json/initial_card.json"), initialCardsType);

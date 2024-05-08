@@ -1,8 +1,14 @@
 package it.polimi.ingsw.controllers;
 
 import it.polimi.ingsw.client.RemoteViewInterface;
-import it.polimi.ingsw.exceptions.*;
-import it.polimi.ingsw.gamemodel.*;
+import it.polimi.ingsw.exceptions.HandException;
+import it.polimi.ingsw.exceptions.WrongChoiceException;
+import it.polimi.ingsw.exceptions.WrongStateException;
+import it.polimi.ingsw.exceptions.WrongTurnException;
+import it.polimi.ingsw.gamemodel.DrawSource;
+import it.polimi.ingsw.gamemodel.Objective;
+import it.polimi.ingsw.gamemodel.PlayableCard;
+import it.polimi.ingsw.gamemodel.Side;
 import it.polimi.ingsw.utils.Pair;
 
 import java.rmi.Remote;
@@ -82,4 +88,18 @@ public interface PlayerControllerRMIInterface extends Remote {
      * @throws WrongChoiceException If the chosen DrawSource doesn't have any card left (i.e. it's empty)
      */
     void drawCard(DrawSource source) throws RemoteException, HandException, WrongStateException, WrongTurnException, WrongChoiceException;
+
+    /**
+     *
+     * @param text
+     * @throws RemoteException
+     */
+    public void sendBroadcastText(String text) throws RemoteException;
+
+    /**
+     *
+     * @param recipient
+     * @param text
+     */
+    public void sendPrivateText(String recipient, String text) throws RemoteException;
 }

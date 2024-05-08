@@ -104,7 +104,7 @@ public final class PlayerControllerTCP extends PlayerController {
         this.sendMessage(new MatchFinishedMessage(match.getPlayersFinalRanking()));
     }
 
-    @Override
+
     public void drawInitialCard() {
         try {
             this.player.drawInitialCard();
@@ -113,7 +113,7 @@ public final class PlayerControllerTCP extends PlayerController {
         }
     }
 
-    @Override
+
     public void chooseInitialCardSide(Side side) {
         try {
             this.player.chooseInitialCardSide(side);
@@ -122,7 +122,6 @@ public final class PlayerControllerTCP extends PlayerController {
         }
     }
 
-    @Override
     public void drawSecretObjectives() {
         try {
             this.player.drawSecretObjectives();
@@ -131,7 +130,6 @@ public final class PlayerControllerTCP extends PlayerController {
         }
     }
 
-    @Override
     public void chooseSecretObjective(Objective objective) {
         try {
             this.player.chooseSecretObjective(objective);
@@ -140,7 +138,6 @@ public final class PlayerControllerTCP extends PlayerController {
         }
     }
 
-    @Override
     public void playCard(Pair<Integer, Integer> coords, PlayableCard card, Side side) {
         try {
             this.player.playCard(coords, card, side);
@@ -149,7 +146,6 @@ public final class PlayerControllerTCP extends PlayerController {
         }
     }
 
-    @Override
     public void drawCard(DrawSource source) {
         try {
             this.player.drawCard(source);
@@ -172,12 +168,10 @@ public final class PlayerControllerTCP extends PlayerController {
         }
     }
 
-    @Override
     public void sendBroadcastText(String text) {
         this.player.sendBroadcastText(text);
     }
 
-    @Override
     public void sendPrivateText(String recipientUsername, String text) {
         Player recipient = null;
         for (Player player : this.match.getPlayers()) {
