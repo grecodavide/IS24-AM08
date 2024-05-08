@@ -8,6 +8,7 @@ import it.polimi.ingsw.utils.Pair;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +39,6 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
     public PlayerControllerRMI(String nickname, Match match, int port) throws AlreadyUsedNicknameException, WrongStateException, RemoteException {
         super(nickname, match);
 
-        UnicastRemoteObject.exportObject(this, port);
     }
 
     /**
@@ -197,7 +197,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
             // Fill the maps with proper values
             for (Player p : match.getPlayers()) {
                 playersNicknamesAndPawns.put(p.getPawnColor(), p.getNickname());
-                playersHands.put(player.getNickname(), p.getBoard().getCurrentHand());
+                playersHands.put(p.getNickname(), p.getBoard().getCurrentHand());
             }
 
             try {
@@ -368,7 +368,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
             onConnectionError();
         } else {
             try {
-                view.someonePlayedCard(someone.getNickname(), coords, card, side);
+                view.someonePlayedCard(someone.getNickname(), coords, card, side, this.player.getPoints());
             } catch (RemoteException e) {
                 onConnectionError();
             }
@@ -385,7 +385,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
      * @param someone         The Player instance that has drawn a card
      * @param source          The drawing source from which the card has been drawn
      * @param card            The card that has been drawn
-     * @param replacementCard The card that has replaced the drawn card
+     * @param replacementCard The card that has replaced the drawn card, null if the draw source is a deck
      */
     @Override
     public void someoneDrewCard(Player someone, DrawSource source, PlayableCard card, PlayableCard replacementCard) {
@@ -393,7 +393,11 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
             onConnectionError();
         } else {
             try {
-                view.someoneDrewCard(someone.getNickname(), source, card);
+                PlayableCard rep = null;
+                if (!source.equals(DrawSource.GOLDS_DECK) && !source.equals(DrawSource.RESOURCES_DECK)) {
+                    rep = replacementCard;
+                }
+                view.someoneDrewCard(someone.getNickname(), source, card, rep, replacementCard.getReign());
             } catch (RemoteException e) {
                 onConnectionError();
             }
@@ -452,7 +456,12 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
             onConnectionError();
         } else {
             try {
-                view.matchFinished();
+                List<Pair<Player, Boolean>> ranking = match.getPlayersFinalRanking();
+                List<Pair<String, Boolean>> rank = new ArrayList<>();
+                for (Pair<Player, Boolean> p : ranking) {
+                    rank.add(new Pair<>(p.first().getNickname(), p.second()));
+                }
+                view.matchFinished(rank);
             } catch (RemoteException e) {
                 onConnectionError();
             }

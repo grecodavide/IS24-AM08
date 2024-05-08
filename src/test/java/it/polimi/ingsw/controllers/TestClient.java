@@ -51,12 +51,12 @@ public class TestClient implements RemoteViewInterface {
     }
 
     @Override
-    public void someonePlayedCard(String someoneNickname, Pair<Integer, Integer> coords, PlayableCard card, Side side) throws RemoteException {
-        System.out.println("someonePlayedCard called");
+    public void someonePlayedCard(String someoneNickname, Pair<Integer, Integer> coords, PlayableCard card, Side side, int points) throws RemoteException {
+
     }
 
     @Override
-    public void someoneDrewCard(String someoneNickname, DrawSource source, Card card) throws RemoteException {
+    public void someoneDrewCard(String someoneNickname, DrawSource source, PlayableCard card, PlayableCard replacementCard, Symbol replacementReign) throws RemoteException {
         System.out.println("someoneDrewCard called");
     }
 
@@ -71,7 +71,7 @@ public class TestClient implements RemoteViewInterface {
     }
 
     @Override
-    public void matchFinished() throws RemoteException {
+    public void matchFinished(List<Pair<String, Boolean>> ranking) throws RemoteException {
         System.out.println("matchFinished called");
     }
 

@@ -50,13 +50,13 @@ public class NetworkViewTCP extends NetworkView{
     }
 
     @Override
-    public void someonePlayedCard(String someoneNickname, Pair<Integer, Integer> coords, PlayableCard card, Side side) {
+    public void someonePlayedCard(String someoneNickname, Pair<Integer, Integer> coords, PlayableCard card, Side side, int points) {
         // Example implementation
         graphicalInterface.someonePlayedCard(someoneNickname, coords, card, side);
     }
 
     @Override
-    public void someoneDrewCard(String someoneNickname, DrawSource source, Card card) throws RemoteException {
+    public void someoneDrewCard(String someoneNickname, DrawSource source, PlayableCard card, PlayableCard replacementCard, Symbol replacementReign) throws RemoteException {
 
     }
 
@@ -71,7 +71,7 @@ public class NetworkViewTCP extends NetworkView{
     }
 
     @Override
-    public void matchFinished() throws RemoteException {
+    public void matchFinished(List<Pair<String, Boolean>> ranking) throws RemoteException {
 
     }
 

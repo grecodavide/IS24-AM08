@@ -101,7 +101,7 @@ public interface RemoteViewInterface extends Remote {
      * @param side            The side on which the card has been played
      * @throws RemoteException If the remote object is considered not to be reachable any more and cannot return as usual
      */
-    void someonePlayedCard(String someoneNickname, Pair<Integer, Integer> coords, PlayableCard card, Side side) throws RemoteException;
+    void someonePlayedCard(String someoneNickname, Pair<Integer, Integer> coords, PlayableCard card, Side side, int points) throws RemoteException;
 
     /**
      * Notifies that someone (it may or may not be the receiving View instance) has drawn a card.
@@ -111,7 +111,7 @@ public interface RemoteViewInterface extends Remote {
      * @param card            The card that has been drawn
      * @throws RemoteException If the remote object is considered not to be reachable any more and cannot return as usual
      */
-    void someoneDrewCard(String someoneNickname, DrawSource source, Card card) throws RemoteException;
+    void someoneDrewCard(String someoneNickname, DrawSource source, PlayableCard card, PlayableCard replacementCard, Symbol replacementCardReign) throws RemoteException;
 
     /**
      * @param someoneNickname
@@ -130,7 +130,7 @@ public interface RemoteViewInterface extends Remote {
      *
      * @throws RemoteException If the remote object is considered not to be reachable any more and cannot return as usual
      */
-    void matchFinished() throws RemoteException;
+    void matchFinished(List<Pair<String, Boolean>> ranking) throws RemoteException;
 
     /**
      * Notifies that a new message in the global chat is sent
