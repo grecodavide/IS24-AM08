@@ -1,20 +1,10 @@
 package it.polimi.ingsw.controllers;
 
-import java.util.List;
-
-import it.polimi.ingsw.exceptions.AlreadyUsedNicknameException;
-import it.polimi.ingsw.exceptions.HandException;
-import it.polimi.ingsw.exceptions.WrongChoiceException;
-import it.polimi.ingsw.exceptions.WrongStateException;
-import it.polimi.ingsw.exceptions.WrongTurnException;
-import it.polimi.ingsw.gamemodel.DrawSource;
-import it.polimi.ingsw.gamemodel.Match;
-import it.polimi.ingsw.gamemodel.MatchObserver;
-import it.polimi.ingsw.gamemodel.Objective;
-import it.polimi.ingsw.gamemodel.PlayableCard;
-import it.polimi.ingsw.gamemodel.Player;
-import it.polimi.ingsw.gamemodel.Side;
+import it.polimi.ingsw.exceptions.*;
+import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.Pair;
+
+import java.util.List;
 
 /**
  * Controller for a match player, the only agent needing a view and so a controller in this application.
@@ -32,10 +22,11 @@ public abstract sealed class PlayerController implements MatchObserver permits P
     /**
      * Instantiates the internal Player with the given nickname and sets the internal Match reference to the given one,
      * furthermore add the new Player instance to the match and subscribe this class instance to the match observers.
+     *
      * @param nickname The nickname of the new player of the Match
-     * @param match The match to which this PlayerClass must pertain
+     * @param match    The match to which this PlayerClass must pertain
      * @throws AlreadyUsedNicknameException If the nickname is already taken by another player of the same match
-     * @throws WrongStateException If a new player cannot be added on the current state of the Match
+     * @throws WrongStateException          If a new player cannot be added on the current state of the Match
      */
     public PlayerController(String nickname, Match match) throws AlreadyUsedNicknameException, WrongStateException {
         List<String> playersNicknames = match.getPlayers().stream().map(Player::getNickname).toList();
@@ -54,52 +45,58 @@ public abstract sealed class PlayerController implements MatchObserver permits P
 
     /**
      * Draws an initial card.
+     *
      * @throws WrongStateException If the current match state doesn't allow drawing an initial card
-     * @throws WrongTurnException If the current turn it's not the one of this player
+     * @throws WrongTurnException  If the current turn it's not the one of this player
      */
     public abstract void drawInitialCard() throws WrongStateException, WrongTurnException;
 
     /**
      * Communicates the chosen initial card side.
+     *
      * @param side The side on which play the initial card drawn using {@link #drawInitialCard()}
      * @throws WrongStateException If the current match state doesn't allow setting the initial card side
-     * @throws WrongTurnException If the current turn it's not the one of this player
+     * @throws WrongTurnException  If the current turn it's not the one of this player
      */
     public abstract void chooseInitialCardSide(Side side) throws WrongStateException, WrongTurnException;
 
     /**
      * Draws two secret objectives.
+     *
      * @throws WrongStateException If the current match state doesn't allow drawing secret objectives
-     * @throws WrongTurnException If the current turn it's not the one of this player
+     * @throws WrongTurnException  If the current turn it's not the one of this player
      */
     public abstract void drawSecretObjectives() throws WrongStateException, WrongTurnException;
 
     /**
      * Communicates the chosen secret objective.
+     *
      * @param objective The chosen objective
-     * @throws WrongStateException If the current match state doesn't allow choosing a secret objective
-     * @throws WrongTurnException If the current turn it's not the one of this player
+     * @throws WrongStateException  If the current match state doesn't allow choosing a secret objective
+     * @throws WrongTurnException   If the current turn it's not the one of this player
      * @throws WrongChoiceException If the chosen objective is not one of the two drawn ones using {@link #drawSecretObjectives()}
      */
     public abstract void chooseSecretObjective(Objective objective) throws WrongStateException, WrongTurnException, WrongChoiceException;
 
     /**
      * Plays a card.
+     *
      * @param coords The coordinates on which to place the card
-     * @param card The PlayableCard to play
-     * @param side The side on which to play the chosen card
-     * @throws WrongStateException If the current match state doesn't allow playing cards
-     * @throws WrongTurnException If the current turn it's not the one of this player
+     * @param card   The PlayableCard to play
+     * @param side   The side on which to play the chosen card
+     * @throws WrongStateException  If the current match state doesn't allow playing cards
+     * @throws WrongTurnException   If the current turn it's not the one of this player
      * @throws WrongChoiceException If the chosen card is not one of those in the player's current hand
      */
     public abstract void playCard(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws WrongStateException, WrongTurnException, WrongChoiceException;
 
     /**
      * Draws a card.
+     *
      * @param source The drawing source to draw the card from
-     * @throws HandException If the player already has a full hand of cards (three cards)
-     * @throws WrongStateException If the current match state doesn't allow drawing cards
-     * @throws WrongTurnException If the current turn it's not the one of this player
+     * @throws HandException        If the player already has a full hand of cards (three cards)
+     * @throws WrongStateException  If the current match state doesn't allow drawing cards
+     * @throws WrongTurnException   If the current turn it's not the one of this player
      * @throws WrongChoiceException If the chosen DrawSource doesn't have any card left (i.e. it's empty)
      */
     public abstract void drawCard(DrawSource source) throws HandException, WrongStateException, WrongTurnException, WrongChoiceException;

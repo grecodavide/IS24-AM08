@@ -10,9 +10,10 @@ import java.util.Map;
 /**
  * This response is sent when a user is connected to the server.
  */
-public final class AvailableMatchesMessage extends ResponseMessage{
+public final class AvailableMatchesMessage extends ResponseMessage {
 
     private final List<JsonObject> matches;
+
     public AvailableMatchesMessage(Map<String, Match> availableMatches) {
         super(null);
         matches = new ArrayList<>();
@@ -20,7 +21,6 @@ public final class AvailableMatchesMessage extends ResponseMessage{
     }
 
     /**
-     *
      * @return a list containing a JsonObject for each match with properties:
      * name - name of the match
      * maxPlayers - maximum number of players

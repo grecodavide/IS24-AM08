@@ -1,11 +1,6 @@
 package it.polimi.ingsw.network.tcp;
 
-import java.io.EOFException;
-import java.io.IOException;
-import java.net.Socket;
-
 import com.google.gson.JsonParseException;
-
 import it.polimi.ingsw.controllers.PlayerControllerTCP;
 import it.polimi.ingsw.exceptions.AlreadyUsedNicknameException;
 import it.polimi.ingsw.exceptions.ChosenMatchException;
@@ -13,24 +8,17 @@ import it.polimi.ingsw.exceptions.WrongStateException;
 import it.polimi.ingsw.gamemodel.Match;
 import it.polimi.ingsw.gamemodel.PlayableCard;
 import it.polimi.ingsw.gamemodel.Player;
-import it.polimi.ingsw.network.messages.actions.ActionMessage;
-import it.polimi.ingsw.network.messages.actions.ChooseInitialCardSideMessage;
-import it.polimi.ingsw.network.messages.actions.ChooseSecretObjectiveMessage;
-import it.polimi.ingsw.network.messages.actions.CreateMatchMessage;
-import it.polimi.ingsw.network.messages.actions.DrawCardMessage;
-import it.polimi.ingsw.network.messages.actions.DrawInitialCardMessage;
-import it.polimi.ingsw.network.messages.actions.DrawSecretObjectivesMessage;
-import it.polimi.ingsw.network.messages.actions.GetAvailableMatchesMessage;
-import it.polimi.ingsw.network.messages.actions.JoinMatchMessage;
-import it.polimi.ingsw.network.messages.actions.PlayCardMessage;
-import it.polimi.ingsw.network.messages.actions.SendBroadcastTextMessage;
-import it.polimi.ingsw.network.messages.actions.SendPrivateTextMessage;
+import it.polimi.ingsw.network.messages.actions.*;
 import it.polimi.ingsw.network.messages.errors.ErrorMessage;
 import it.polimi.ingsw.network.messages.responses.AvailableMatchesMessage;
 import it.polimi.ingsw.network.messages.responses.ResponseMessage;
 import it.polimi.ingsw.server.Server;
 import it.polimi.ingsw.utils.MessageJsonParser;
 import it.polimi.ingsw.utils.Pair;
+
+import java.io.EOFException;
+import java.io.IOException;
+import java.net.Socket;
 
 /*
  * actual connection procedure:
@@ -50,7 +38,7 @@ import it.polimi.ingsw.utils.Pair;
  * - Create its {@link PlayerControllerTCP}, which will also make him join such
  * {@link Match}
  * - Listen for any message received and, execute the corresponding action
- *
+ * <p>
  * Note that this will just require the action to be executed, but its
  * {@link PlayerControllerTCP}
  * that actually calls the {@link Player} methods
@@ -66,7 +54,7 @@ public class ClientListener extends Thread {
      * Class constructor. Needs to have a reference to the server instance since it
      * needs to
      * handle the match assignment
-     * 
+     *
      * @param socket the socket that required a connection
      * @param server the instance of {@link Server} that's running
      */
@@ -91,7 +79,7 @@ public class ClientListener extends Thread {
      * communication,
      * and so the ListenerThread should not be created. All other cases are handled
      * internally
-     * 
+     *
      * @throws IOException            if the socket's input stream cannot be read
      * @throws ClassNotFoundException if the class of the received object (from the
      *                                socket's input stream) could not be found
@@ -154,7 +142,7 @@ public class ClientListener extends Thread {
      * throws {@link AlreadyUsedNicknameException} or {@link WrongStateException}
      * the acquisition procedure is restarted
      * after sending an {@link ErrorMessage} back to the client
-     * 
+     *
      * @throws IOException            if the socket's input stream cannot be read
      * @throws ClassNotFoundException if the class of the received object (from the
      * @throws EOFException           if the stream gets shut down while it was
@@ -175,7 +163,7 @@ public class ClientListener extends Thread {
      * This parses the message received from socket's input stream and executes the
      * request such message carried.
      * If the message is not one of the expected types, it will just be ignored
-     * 
+     *
      * @see ActionMessage
      */
     private void executeRequest(String msg) {

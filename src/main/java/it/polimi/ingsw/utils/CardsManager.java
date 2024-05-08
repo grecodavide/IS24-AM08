@@ -4,14 +4,10 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import it.polimi.ingsw.gamemodel.*;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 
 /**
  * Singleton that represents a collection of all cards actually existing in the Game, so only those used
@@ -37,10 +33,14 @@ public final class CardsManager {
         CardJsonParser parser = new CardJsonParser();
         Gson gson = parser.getCardBuilder();
 
-        Type initialCardsType = new TypeToken<Map<Integer, InitialCard>>(){}.getType();
-        Type goldCardsType = new TypeToken<Map<Integer, GoldCard>>(){}.getType();
-        Type resourceCardsType = new TypeToken<Map<Integer, ResourceCard>>(){}.getType();
-        Type objectivesType = new TypeToken<Map<Integer, Objective>>(){}.getType();
+        Type initialCardsType = new TypeToken<Map<Integer, InitialCard>>() {
+        }.getType();
+        Type goldCardsType = new TypeToken<Map<Integer, GoldCard>>() {
+        }.getType();
+        Type resourceCardsType = new TypeToken<Map<Integer, ResourceCard>>() {
+        }.getType();
+        Type objectivesType = new TypeToken<Map<Integer, Objective>>() {
+        }.getType();
 
         try {
             initialCards = gson.fromJson(new FileReader("src/main/resources/json/initial_card.json"), initialCardsType);
@@ -54,6 +54,7 @@ public final class CardsManager {
 
     /**
      * Getter for the only possible instance available of this class, so used instead of a constructor.
+     *
      * @return Always the same CardsManager instance
      */
     public static CardsManager getInstance() {
@@ -62,6 +63,7 @@ public final class CardsManager {
 
     /**
      * Getter for the initial cards
+     *
      * @return Map that matches an int ID to the corresponding initial card
      */
     public Map<Integer, InitialCard> getInitialCards() {
@@ -70,6 +72,7 @@ public final class CardsManager {
 
     /**
      * Getter for the gold cards
+     *
      * @return Map that matches an int ID to the corresponding gold card
      */
     public Map<Integer, GoldCard> getGoldCards() {
@@ -78,6 +81,7 @@ public final class CardsManager {
 
     /**
      * Getter for the resource cards
+     *
      * @return Map that matches an int ID to the corresponding resource card
      */
     public Map<Integer, ResourceCard> getResourceCards() {
@@ -86,6 +90,7 @@ public final class CardsManager {
 
     /**
      * Getter for the objectives
+     *
      * @return Map that matches an int ID to the corresponding objective
      */
     public Map<Integer, Objective> getObjectives() {

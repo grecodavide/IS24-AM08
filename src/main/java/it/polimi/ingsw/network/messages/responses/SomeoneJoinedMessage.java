@@ -1,13 +1,13 @@
 package it.polimi.ingsw.network.messages.responses;
 
-import java.util.List;
-
 import it.polimi.ingsw.gamemodel.Player;
+
+import java.util.List;
 
 /**
  * This response is sent when a player joins the current match.
  */
-public final class SomeoneJoinedMessage extends ResponseMessage{
+public final class SomeoneJoinedMessage extends ResponseMessage {
     private final List<String> joinedPlayers;
     private final int maxPlayers;
 

@@ -1,12 +1,11 @@
 package it.polimi.ingsw.network.messages.responses;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import com.google.gson.JsonObject;
-
 import it.polimi.ingsw.gamemodel.Player;
 import it.polimi.ingsw.utils.Pair;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * This response is sent to each player when the match is finished
@@ -36,5 +35,5 @@ public final class MatchFinishedMessage extends ResponseMessage {
         result.addProperty("winner", b);
         return result;
     }
-    
+
 }

@@ -1,12 +1,12 @@
 package it.polimi.ingsw.network.tcp;
 
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.Socket;
-
 import it.polimi.ingsw.network.messages.actions.ActionMessage;
 import it.polimi.ingsw.network.messages.actions.CreateMatchMessage;
 import it.polimi.ingsw.utils.MessageJsonParser;
+
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
 
 /**
  * ClientTester
@@ -47,7 +47,7 @@ public class ClientTester {
                     System.out.println(next);
                 }
             } catch (Exception e) {
-                
+
             }
         }
 

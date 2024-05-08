@@ -1,6 +1,6 @@
 package it.polimi.ingsw.gamemodel;
 
-public class WaitState extends MatchState{
+public class WaitState extends MatchState {
 
     public WaitState(Match match) {
         super(match);
@@ -12,7 +12,7 @@ public class WaitState extends MatchState{
             match.setupDecks();
             match.setupPlayers();
             match.setupBoards();
-            
+
             MatchState nextState = new NextTurnState(match);
             match.setState(nextState);
 

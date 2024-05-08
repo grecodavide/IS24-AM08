@@ -10,7 +10,7 @@ public class InitialCard extends Card {
     /**
      * The initial card only gives corners and resources, never points, so we only
      * need to know its topologic description
-     * 
+     *
      * @param front the front side of the card
      * @param back  the back side of the card
      */

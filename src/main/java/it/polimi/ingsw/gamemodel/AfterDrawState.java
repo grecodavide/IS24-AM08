@@ -10,7 +10,7 @@ public class AfterDrawState extends MatchState {
     public void transition() {
         MatchState nextState;
 
-        if(match.isFinished())
+        if (match.isFinished())
             nextState = new FinalState(match);
         else
             nextState = new NextTurnState(match);

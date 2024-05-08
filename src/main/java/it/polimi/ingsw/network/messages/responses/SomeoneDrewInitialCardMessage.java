@@ -10,9 +10,10 @@ public final class SomeoneDrewInitialCardMessage extends ResponseMessage {
         super(username);
         this.initialCardID = initialCardID;
     }
+
     /* ID of the given initial card */
     public Integer getInitialCardID() {
         return initialCardID;
     }
-    
+
 }
