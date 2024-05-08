@@ -394,10 +394,14 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
         } else {
             try {
                 PlayableCard rep = null;
+                Symbol repReign = null;
+                if (replacementCard != null) {
+                    repReign = replacementCard.getReign();
+                }
                 if (!source.equals(DrawSource.GOLDS_DECK) && !source.equals(DrawSource.RESOURCES_DECK)) {
                     rep = replacementCard;
                 }
-                view.someoneDrewCard(someone.getNickname(), source, card, rep, replacementCard.getReign());
+                view.someoneDrewCard(someone.getNickname(), source, card, rep, repReign);
             } catch (RemoteException e) {
                 onConnectionError();
             }

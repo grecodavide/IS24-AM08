@@ -89,8 +89,14 @@ public final class PlayerControllerTCP extends PlayerController {
 
     @Override
     public void someoneDrewCard(Player someone, DrawSource source, PlayableCard card, PlayableCard replacementCard) {
+        Integer repId = null;
+        Symbol repReign = null;
+        if (replacementCard != null) {
+            repId = replacementCard.getId();
+            repReign = replacementCard.getReign();
+        }
         this.sendMessage(new SomeoneDrewCardMessage(someone.getNickname(), source, card.getId(),
-                replacementCard.getId(), replacementCard.getReign()));
+                repId, repReign));
     }
 
     @Override
