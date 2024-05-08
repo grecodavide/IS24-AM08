@@ -3,6 +3,12 @@ Gruppo AM08: Francesco Caracciolo, Antonino Ciancimino, Gianluca Di Paola, David
 
 Valutazione del sequence diagram del gruppo AM17.
 
+## Lati positivi
+- La scelta del lato della carta iniziale viene effettuato in modo asincrono tra tutti i giocatori, evitando possibili delay della rete.
+- I diagrammi proposti mostrano una buona comprensione dell'architettura client-server.
+- La scelta degli obiettivi segreti viene effettuata in modo asincrono tra tutti i giocatori, evitando che ogni giocatore debba necessariamente aspettare ogni altro player prima di effettuare la sua mossa.
+- La parte di rete RMI e TCP mantengono una struttura omogenea; ciò permette di utilizzare le funzionalità di rete indipendentemente dalla specifica implementazione.
+
 ## Lati negativi
 
 ### Considerazioni generali
@@ -29,10 +35,6 @@ Valutazione del sequence diagram del gruppo AM17.
 - Rispetto a come avviene nello *Start socket connection sequence diagram*, a seguito della chiamata al metodo `startRMI(...)`, `ServerMain` non manda a `RMIreceiver` un'istanza di `GameController`.
 - Non viene mai inviato al `CientController` un oggetto remoto attraverso cui comunicare col server: in tal caso la comunicazione RMI da client a server non può avvenre.
 
-## Lati positivi generici
-- La scelta del lato della carta iniziale viene effettuato in modo asincrono tra tutti i giocatori, evitando possibili delay della rete.
-- La scelta degli obiettivi segreti viene effettuata in modo asincrono tra tutti i giocatori, evitando che ogni giocatore debba necessariamente aspettare ogni altro player prima di effettuare la sua mossa.
-- La parte di rete RMI e TCP mantengono una struttura omogenea; ciò permette di utilizzare le funzionalità di rete indipendentemente dalla specifica implementazione.
 
 ## Confronto tra le architetture
 - Nella vostra architettura, quando un giocatore entra in un match ottiene subito la lista di tutti gli altri giocatori già nel match.
