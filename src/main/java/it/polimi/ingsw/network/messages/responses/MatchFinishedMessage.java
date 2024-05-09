@@ -30,7 +30,7 @@ public final class MatchFinishedMessage extends ResponseMessage {
 
     private JsonObject createJsonObject(Player p, Boolean b) {
         JsonObject result = new JsonObject();
-        result.addProperty("username", p.getNickname());
+        result.addProperty("username", p.getUsername());
         result.addProperty("points", p.getPoints());
         result.addProperty("winner", b);
         return result;

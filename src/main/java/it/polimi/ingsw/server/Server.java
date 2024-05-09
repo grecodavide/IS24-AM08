@@ -1,7 +1,7 @@
 package it.polimi.ingsw.server;
 
 import it.polimi.ingsw.controllers.PlayerControllerRMI;
-import it.polimi.ingsw.exceptions.AlreadyUsedNicknameException;
+import it.polimi.ingsw.exceptions.AlreadyUsedUsernameException;
 import it.polimi.ingsw.exceptions.ChosenMatchException;
 import it.polimi.ingsw.exceptions.WrongStateException;
 import it.polimi.ingsw.gamemodel.InitialCard;
@@ -58,7 +58,7 @@ public class Server extends UnicastRemoteObject implements ServerRMIInterface {
     }
 
     @Override
-    public PlayerControllerRMI joinMatch(String matchName, String nickname) throws RemoteException, ChosenMatchException, WrongStateException, AlreadyUsedNicknameException {
+    public PlayerControllerRMI joinMatch(String matchName, String username) throws RemoteException, ChosenMatchException, WrongStateException, AlreadyUsedUsernameException {
         if (!matches.containsKey(matchName))
             throw new ChosenMatchException("The chosen match doesn't exist");
         if (matches.get(matchName).isFull())
@@ -66,7 +66,7 @@ public class Server extends UnicastRemoteObject implements ServerRMIInterface {
 
         Match chosenMatch = matches.get(matchName);
 
-        return new PlayerControllerRMI(nickname, chosenMatch);
+        return new PlayerControllerRMI(username, chosenMatch);
     }
 
     @Override

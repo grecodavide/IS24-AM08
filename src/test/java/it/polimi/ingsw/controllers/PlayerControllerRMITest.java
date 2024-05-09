@@ -13,7 +13,7 @@ import java.util.Map;
 import org.junit.Test;
 
 import it.polimi.ingsw.client.network.RemoteViewInterface;
-import it.polimi.ingsw.exceptions.AlreadyUsedNicknameException;
+import it.polimi.ingsw.exceptions.AlreadyUsedUsernameException;
 import it.polimi.ingsw.exceptions.WrongStateException;
 import it.polimi.ingsw.gamemodel.Color;
 import it.polimi.ingsw.gamemodel.DrawSource;
@@ -43,15 +43,15 @@ public class PlayerControllerRMITest {
 
         try {
             player1 = new PlayerControllerRMI("player1", match);
-        } catch (AlreadyUsedNicknameException | WrongStateException e) {
+        } catch (AlreadyUsedUsernameException | WrongStateException e) {
             fail("player1 init shouldn't throw exception: " + e.getMessage());
         }
 
         try {
             player2 = new PlayerControllerRMI("player1", match);
             // An exception is supposed to be thrown here
-            fail("player 2 init should have thrown AlreadyUsedNicknameException");
-        } catch (AlreadyUsedNicknameException e) {
+            fail("player 2 init should have thrown AlreadyUsedUsernameException");
+        } catch (AlreadyUsedUsernameException e) {
             // this exception should be thrown
         } catch (WrongStateException e) {
             fail("player2 initialization shouldn't thrown this specific exception exception: " + e.getMessage());
@@ -63,7 +63,7 @@ public class PlayerControllerRMITest {
             player1 = new PlayerControllerRMI("player3", match);
             // An exception is supposed to be thrown here
             fail("player 3 init should have thrown WrongStateException");
-        } catch (AlreadyUsedNicknameException e) {
+        } catch (AlreadyUsedUsernameException e) {
             fail("player2 initialization shouldn't thrown this specific exception exception: " + e.getMessage());
         } catch (WrongStateException e) {
             // this exception should be thrown
@@ -154,7 +154,7 @@ public class PlayerControllerRMITest {
 
             assertEquals("someoneDrewInitialCard: wrong last call in otherPlayerView", "someoneDrewInitialCard", otherPlayerView.getLastCall());
             assertEquals("someoneDrewInitialCard: wrong card arg in otherPlayerView", drawnCard, card);
-            assertEquals("someoneDrewInitialCard: wrong name arg in otherPlayerView", currentPlayer.getPlayer().getNickname(), name);
+            assertEquals("someoneDrewInitialCard: wrong name arg in otherPlayerView", currentPlayer.getPlayer().getUsername(), name);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -247,21 +247,21 @@ public class PlayerControllerRMITest {
             String name = (String) otherPlayerView.getLastCallArguments().get("name");
 
             assertEquals("someoneDrewSecretObjective: wrong last call in otherPlayerView", "someoneDrewSecretObjective", otherPlayerView.getLastCall());
-            assertEquals("someoneDrewSecretObjective: wrong arg in otherPlayerView", currentPlayer.getPlayer().getNickname(), name);
+            assertEquals("someoneDrewSecretObjective: wrong arg in otherPlayerView", currentPlayer.getPlayer().getUsername(), name);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     @Test
-    public void matchFinished() throws RemoteException, WrongStateException, AlreadyUsedNicknameException {
+    public void matchFinished() throws RemoteException, WrongStateException, AlreadyUsedUsernameException {
         this.initializeTwoPlayerFinishedMatch();
         Map<String, Object> args = view1.getLastCallArguments();
         List<Pair<String, Boolean>> ranking = (List<Pair<String, Boolean>>) args.get("ranking");
         List<Pair<Player, Boolean>> matchRaking = match.getPlayersFinalRanking();
 
         for (int i =0; i < ranking.size(); i++) {
-            assertEquals(matchRaking.get(i).first().getNickname(), ranking.get(i).first());
+            assertEquals(matchRaking.get(i).first().getUsername(), ranking.get(i).first());
             assertEquals(matchRaking.get(i).second(), ranking.get(i).second());
         }
     }
@@ -283,9 +283,9 @@ public class PlayerControllerRMITest {
         assertEquals(match.getDecksTopReigns().first(), ((Pair<Symbol, Symbol>) args.get("decksTopReigns")).first());
         assertEquals(match.getDecksTopReigns().second(), ((Pair<Symbol, Symbol>) args.get("decksTopReigns")).second());
         for (Player p : match.getPlayers()) {
-            assertEquals(p.getNickname(), pawns.get(p.getPawnColor()));
+            assertEquals(p.getUsername(), pawns.get(p.getPawnColor()));
             for (PlayableCard c : p.getBoard().getCurrentHand()) {
-                assertTrue(hands.get(p.getNickname()).contains(c));
+                assertTrue(hands.get(p.getUsername()).contains(c));
             }
         }
         for (DrawSource s : visbile.keySet()) {
@@ -352,7 +352,7 @@ public class PlayerControllerRMITest {
         }
     }
 
-    public void initializeTwoPlayerFinishedMatch() throws WrongStateException, AlreadyUsedNicknameException, RemoteException {
+    public void initializeTwoPlayerFinishedMatch() throws WrongStateException, AlreadyUsedUsernameException, RemoteException {
         int maxPlayers = 2;
 
         GameDeck<InitialCard> initialsDeck;
@@ -449,77 +449,77 @@ public class PlayerControllerRMITest {
             args.put("objectives", secretObjectives);
         }
 
-        public void giveLobbyInfo(List<String> playersNicknames) throws RemoteException {
+        public void giveLobbyInfo(List<String> playersUsernames) throws RemoteException {
             lastCall = "giveLobbyInfo";
             args = new HashMap<>();
-            args.put("names", playersNicknames);
+            args.put("names", playersUsernames);
         }
 
-        public void matchStarted(Map<Color, String> playersNicknamesAndPawns, Map<String, List<PlayableCard>> playersHands, Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards, Pair<Symbol, Symbol> decksTopReigns) throws RemoteException {
+        public void matchStarted(Map<Color, String> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands, Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards, Pair<Symbol, Symbol> decksTopReigns) throws RemoteException {
             lastCall = "matchStarted";
             args = new HashMap<>();
-            args.put("pawns", playersNicknamesAndPawns);
+            args.put("pawns", playersUsernamesAndPawns);
             args.put("hands", playersHands);
             args.put("objectives", visibleObjectives);
             args.put("playable", visiblePlayableCards);
             args.put("decksTopReigns", decksTopReigns);
         }
 
-        public void someoneDrewInitialCard(String someoneNickname, InitialCard card) throws RemoteException {
+        public void someoneDrewInitialCard(String someoneUsername, InitialCard card) throws RemoteException {
             lastCall = "someoneDrewInitialCard";
             args = new HashMap<>();
-            args.put("name", someoneNickname);
+            args.put("name", someoneUsername);
             args.put("card", card);
         }
 
-        public void someoneSetInitialSide(String someoneNickname, Side side) throws RemoteException {
+        public void someoneSetInitialSide(String someoneUsername, Side side) throws RemoteException {
             lastCall = "someoneSetInitialSide";
             args = new HashMap<>();
-            args.put("name", someoneNickname);
+            args.put("name", someoneUsername);
             args.put("side", side);
         }
 
-        public void someoneDrewSecretObjective(String someoneNickname) throws RemoteException {
+        public void someoneDrewSecretObjective(String someoneUsername) throws RemoteException {
             lastCall = "someoneDrewSecretObjective";
             args = new HashMap<>();
-            args.put("name", someoneNickname);
+            args.put("name", someoneUsername);
         }
 
-        public void someoneChoseSecretObjective(String someoneNickname) throws RemoteException {
+        public void someoneChoseSecretObjective(String someoneUsername) throws RemoteException {
             lastCall = "someoneChoseSecretObjective";
             args = new HashMap<>();
-            args.put("name", someoneNickname);
+            args.put("name", someoneUsername);
         }
 
-        public void someonePlayedCard(String someoneNickname, Pair<Integer, Integer> coords, PlayableCard card, Side side, int points) throws RemoteException {
+        public void someonePlayedCard(String someoneUsername, Pair<Integer, Integer> coords, PlayableCard card, Side side, int points) throws RemoteException {
             lastCall = "someonePlayedCard";
             args = new HashMap<>();
-            args.put("name", someoneNickname);
+            args.put("name", someoneUsername);
             args.put("coords", coords);
             args.put("card", card);
             args.put("side", side);
         }
 
-        public void someoneDrewCard(String someoneNickname, DrawSource source, PlayableCard card, PlayableCard replacementCard, Symbol replacementReign) throws RemoteException {
+        public void someoneDrewCard(String someoneUsername, DrawSource source, PlayableCard card, PlayableCard replacementCard, Symbol replacementReign) throws RemoteException {
             lastCall = "someonePlayedCard";
             args = new HashMap<>();
-            args.put("name", someoneNickname);
+            args.put("name", someoneUsername);
             args.put("source", source);
             args.put("card", card);
             args.put("replCard", replacementCard);
             args.put("replReign", replacementReign);
         }
 
-        public void someoneJoined(String someoneNickname) throws RemoteException {
+        public void someoneJoined(String someoneUsername) throws RemoteException {
             lastCall = "someoneJoined";
             args = new HashMap<>();
-            args.put("name", someoneNickname);
+            args.put("name", someoneUsername);
         }
 
-        public void someoneQuit(String someoneNickname) throws RemoteException {
+        public void someoneQuit(String someoneUsername) throws RemoteException {
             lastCall = "someoneQuit";
             args = new HashMap<>();
-            args.put("name", someoneNickname);
+            args.put("name", someoneUsername);
         }
 
         public void matchFinished(List<Pair<String, Boolean>> ranking) throws RemoteException {
@@ -528,17 +528,17 @@ public class PlayerControllerRMITest {
             args.put("ranking", ranking);
         }
 
-        public void someoneSentBroadcastText(String someoneNickname, String text) throws RemoteException {
+        public void someoneSentBroadcastText(String someoneUsername, String text) throws RemoteException {
             lastCall = "someonePlayedCard";
             args = new HashMap<>();
-            args.put("name", someoneNickname);
+            args.put("name", someoneUsername);
             args.put("text", text);
         }
 
-        public void someoneSentPrivateText(String someoneNickname, String text) throws RemoteException {
+        public void someoneSentPrivateText(String someoneUsername, String text) throws RemoteException {
             lastCall = "someonePlayedCard";
             args = new HashMap<>();
-            args.put("name", someoneNickname);
+            args.put("name", someoneUsername);
             args.put("text", text);
         }
 

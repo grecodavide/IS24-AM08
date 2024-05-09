@@ -16,12 +16,12 @@ import it.polimi.ingsw.utils.Pair;
 public class NetworkViewTCP extends NetworkView{
 
     @Override
-    public void giveLobbyInfo(List<String> playersNicknames) {
+    public void giveLobbyInfo(List<String> playersUsernames) {
 
     }
 
     @Override
-    public void matchStarted(Map<Color, String> playersNicknamesAndPawns, Map<String, List<PlayableCard>> playersHands, Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards, Pair<Symbol, Symbol> decksTopReigns) {
+    public void matchStarted(Map<Color, String> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands, Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards, Pair<Symbol, Symbol> decksTopReigns) {
 
     }
 
@@ -36,43 +36,43 @@ public class NetworkViewTCP extends NetworkView{
     }
 
     @Override
-    public void someoneDrewInitialCard(String someoneNickname, InitialCard card) {
+    public void someoneDrewInitialCard(String someoneUsername, InitialCard card) {
 
     }
 
     @Override
-    public void someoneSetInitialSide(String someoneNickname, Side side) {
+    public void someoneSetInitialSide(String someoneUsername, Side side) {
 
     }
 
     @Override
-    public void someoneDrewSecretObjective(String someoneNickname) {
+    public void someoneDrewSecretObjective(String someoneUsername) {
 
     }
 
     @Override
-    public void someoneChoseSecretObjective(String someoneNickname) {
+    public void someoneChoseSecretObjective(String someoneUsername) {
 
     }
 
     @Override
-    public void someonePlayedCard(String someoneNickname, Pair<Integer, Integer> coords, PlayableCard card, Side side, int points) {
+    public void someonePlayedCard(String someoneUsername, Pair<Integer, Integer> coords, PlayableCard card, Side side, int points) {
         // Example implementation
-        graphicalInterface.someonePlayedCard(someoneNickname, coords, card, side);
+        graphicalInterface.someonePlayedCard(someoneUsername, coords, card, side);
     }
 
     @Override
-    public void someoneDrewCard(String someoneNickname, DrawSource source, PlayableCard card, PlayableCard replacementCard, Symbol replacementReign) throws RemoteException {
-
-    }
-
-    @Override
-    public void someoneJoined(String someoneNickname) throws RemoteException {
+    public void someoneDrewCard(String someoneUsername, DrawSource source, PlayableCard card, PlayableCard replacementCard, Symbol replacementReign) throws RemoteException {
 
     }
 
     @Override
-    public void someoneQuit(String someoneNickname) throws RemoteException {
+    public void someoneJoined(String someoneUsername) throws RemoteException {
+
+    }
+
+    @Override
+    public void someoneQuit(String someoneUsername) throws RemoteException {
 
     }
 
@@ -82,12 +82,12 @@ public class NetworkViewTCP extends NetworkView{
     }
 
     @Override
-    public void someoneSentBroadcastText(String someoneNickname, String text) throws RemoteException {
+    public void someoneSentBroadcastText(String someoneUsername, String text) throws RemoteException {
 
     }
 
     @Override
-    public void someoneSentPrivateText(String someoneNickname, String text) throws RemoteException {
+    public void someoneSentPrivateText(String someoneUsername, String text) throws RemoteException {
 
     }
 

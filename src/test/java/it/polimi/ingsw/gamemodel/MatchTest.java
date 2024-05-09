@@ -151,7 +151,7 @@ public class MatchTest {
             match.addPlayer(player2);
             // a third player is not added, otherwise Match would be full and go to NextTurnState, then call nextTurn
             // automatically
-        } catch (WrongStateException|AlreadyUsedNicknameException e) {
+        } catch (WrongStateException|AlreadyUsedUsernameException e) {
             throw new RuntimeException(e);
         }
 
@@ -213,14 +213,14 @@ public class MatchTest {
 
         match = new Match(4, initialsDeck, resourcesDeck, goldsDeck, objectivesDeck);
 
-        // Verify that players with the same nickname can't join
+        // Verify that players with the same username can't join
         player1 = new Player("Doppio", match);
         player2 = new Player("Doppio", match);
         try {
             match.addPlayer(player1);
             match.addPlayer(player2);
-            fail("AlreadyUsedNicknameException not thrown");
-        } catch (AlreadyUsedNicknameException e) {
+            fail("AlreadyUsedUsernameException not thrown");
+        } catch (AlreadyUsedUsernameException e) {
             // Good
         } catch (Exception e) {
             fail("Wrong exception returned: " + e.getMessage());

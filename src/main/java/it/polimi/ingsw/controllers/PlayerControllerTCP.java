@@ -11,12 +11,12 @@ import it.polimi.ingsw.utils.Pair;
 public final class PlayerControllerTCP extends PlayerController {
     private IOHandler io;
 
-    public PlayerControllerTCP(String nickname, Match match, IOHandler io) throws AlreadyUsedNicknameException, WrongStateException {
-        super(nickname, match);
+    public PlayerControllerTCP(String username, Match match, IOHandler io) throws AlreadyUsedUsernameException, WrongStateException {
+        super(username, match);
 
         try {
             this.io = io;
-            Message joined = new SomeoneJoinedMessage(nickname, match.getPlayers(), match.getMaxPlayers());
+            Message joined = new SomeoneJoinedMessage(username, match.getPlayers(), match.getMaxPlayers());
             this.io.writeMsg(joined);
         } catch (Exception e) {
             e.printStackTrace();
@@ -48,29 +48,29 @@ public final class PlayerControllerTCP extends PlayerController {
 
     @Override
     public void someoneJoined(Player someone) {
-        this.sendMessage(new SomeoneJoinedMessage(someone.getNickname(), match.getPlayers(), match.getMaxPlayers()));
+        this.sendMessage(new SomeoneJoinedMessage(someone.getUsername(), match.getPlayers(), match.getMaxPlayers()));
     }
 
     @Override
     public void someoneQuit(Player someone) {
-        this.sendMessage(new SomeoneQuitMessage(someone.getNickname(), match.getPlayers().size(), match.isFinished()));
+        this.sendMessage(new SomeoneQuitMessage(someone.getUsername(), match.getPlayers().size(), match.isFinished()));
     }
 
     @Override
     public void someoneDrewInitialCard(Player someone, InitialCard card) {
-        this.sendMessage(new SomeoneDrewInitialCardMessage(someone.getNickname(), card.getId()));
+        this.sendMessage(new SomeoneDrewInitialCardMessage(someone.getUsername(), card.getId()));
     }
 
     @Override
     public void someoneSetInitialSide(Player someone, Side side) {
-        this.sendMessage(new SomeoneSetInitialSideMessage(someone.getNickname(), side));
+        this.sendMessage(new SomeoneSetInitialSideMessage(someone.getUsername(), side));
     }
 
     @Override
     public void someoneDrewSecretObjective(Player someone, Pair<Objective, Objective> objectives) {
         Pair<Integer, Integer> IDs = new Pair<Integer, Integer>(objectives.first().getID(),
                 objectives.second().getID());
-        this.sendMessage(new SomeoneDrewSecretObjectivesMessage(someone.getNickname(), IDs));
+        this.sendMessage(new SomeoneDrewSecretObjectivesMessage(someone.getUsername(), IDs));
     }
 
     @Override
@@ -78,13 +78,13 @@ public final class PlayerControllerTCP extends PlayerController {
         Integer objectiveID = null;
         if (someone.equals(player))
             objectiveID = objective.getID();
-        this.sendMessage(new SomeoneChoseSecretObjectiveMessage(someone.getNickname(), objectiveID));
+        this.sendMessage(new SomeoneChoseSecretObjectiveMessage(someone.getUsername(), objectiveID));
     }
 
     @Override
     public void someonePlayedCard(Player someone, Pair<Integer, Integer> coords, PlayableCard card, Side side) {
         this.sendMessage(
-                new SomeonePlayedCardMessage(someone.getNickname(), coords, card.getId(), side, someone.getPoints()));
+                new SomeonePlayedCardMessage(someone.getUsername(), coords, card.getId(), side, someone.getPoints()));
     }
 
     @Override
@@ -95,7 +95,7 @@ public final class PlayerControllerTCP extends PlayerController {
             repId = replacementCard.getId();
             repReign = replacementCard.getReign();
         }
-        this.sendMessage(new SomeoneDrewCardMessage(someone.getNickname(), source, card.getId(),
+        this.sendMessage(new SomeoneDrewCardMessage(someone.getUsername(), source, card.getId(),
                 repId, repReign));
     }
 
@@ -156,14 +156,14 @@ public final class PlayerControllerTCP extends PlayerController {
 
     @Override
     public void someoneSentBroadcastText(Player someone, String text) {
-        Message msg = new SomeoneSentBroadcastTextMessage(someone.getNickname(), text);
+        Message msg = new SomeoneSentBroadcastTextMessage(someone.getUsername(), text);
         this.sendMessage(msg);
     }
 
     @Override
     public void someoneSentPrivateText(Player someone, Player recipient, String text) {
-        if (recipient.getNickname().equals(this.player.getNickname())) {
-            Message msg = new SomeoneSentPrivateTextMessage(someone.getNickname(), recipient.getNickname(), text);
+        if (recipient.getUsername().equals(this.player.getUsername())) {
+            Message msg = new SomeoneSentPrivateTextMessage(someone.getUsername(), recipient.getUsername(), text);
             this.sendMessage(msg);
         }
     }
@@ -175,7 +175,7 @@ public final class PlayerControllerTCP extends PlayerController {
     public void sendPrivateText(String recipientUsername, String text) {
         Player recipient = null;
         for (Player player : this.match.getPlayers()) {
-            if (player.getNickname().equals(recipientUsername)) {
+            if (player.getUsername().equals(recipientUsername)) {
                 recipient = player;
                 break;
             }

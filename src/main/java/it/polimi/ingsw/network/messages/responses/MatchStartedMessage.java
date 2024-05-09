@@ -81,8 +81,8 @@ public final class MatchStartedMessage extends ResponseMessage {
             result = p.getBoard().getCurrentHand().stream()
                     .mapToInt(Card::getId)
                     .boxed().toArray(Integer[]::new);
-            playerPawnColors.put(p.getNickname(), p.getPawnColor());
-            playerHands.put(p.getNickname(), result);
+            playerPawnColors.put(p.getUsername(), p.getPawnColor());
+            playerHands.put(p.getUsername(), result);
         }
     }
 

@@ -1,7 +1,7 @@
 package it.polimi.ingsw.server;
 
 import it.polimi.ingsw.controllers.PlayerControllerRMI;
-import it.polimi.ingsw.exceptions.AlreadyUsedNicknameException;
+import it.polimi.ingsw.exceptions.AlreadyUsedUsernameException;
 import it.polimi.ingsw.exceptions.ChosenMatchException;
 import it.polimi.ingsw.exceptions.WrongStateException;
 
@@ -25,18 +25,18 @@ public interface ServerRMIInterface extends Remote {
     List<String> getJoinableMatches() throws RemoteException;
 
     /**
-     * Lets the calling view join on a match with the given player nickname, if possible; gives back to the client
+     * Lets the calling view join on a match with the given player username, if possible; gives back to the client
      * an instance of its PlayerControllerRMI, to start communicating through it with the match.
      *
      * @param matchName The unique name of the match to join to
-     * @param nickname  The chosen player nickname
+     * @param username  The chosen player username
      * @return An instance of PlayerControllerRMI, used exclusively by the calling view
      * @throws RemoteException              If the remote server is considered not to be reachable any more and cannot return as usual
      * @throws ChosenMatchException         If the chosen match is either already full or doesn't exist
-     * @throws AlreadyUsedNicknameException If the given nickname is already taken
+     * @throws AlreadyUsedUsernameException If the given username is already taken
      * @throws WrongStateException          If the match is in a state during which doesn't allow players to join any more
      */
-    PlayerControllerRMI joinMatch(String matchName, String nickname) throws RemoteException, ChosenMatchException, AlreadyUsedNicknameException, WrongStateException;
+    PlayerControllerRMI joinMatch(String matchName, String username) throws RemoteException, ChosenMatchException, AlreadyUsedUsernameException, WrongStateException;
 
     /**
      * Lets the calling view create a new match.

@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import it.polimi.ingsw.client.network.RemoteViewInterface;
-import it.polimi.ingsw.exceptions.AlreadyUsedNicknameException;
+import it.polimi.ingsw.exceptions.AlreadyUsedUsernameException;
 import it.polimi.ingsw.exceptions.HandException;
 import it.polimi.ingsw.exceptions.WrongChoiceException;
 import it.polimi.ingsw.exceptions.WrongStateException;
@@ -34,16 +34,16 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
     private RemoteViewInterface view;
 
     /**
-     * Instantiates the internal Player with the given nickname and sets the internal Match reference to the given one,
+     * Instantiates the internal Player with the given username and sets the internal Match reference to the given one,
      * add the new Player instance to the match and subscribe this class instance to the match observers.
      *
-     * @param nickname The nickname of the new player of the Match
+     * @param username The username of the new player of the Match
      * @param match    The match to which this PlayerClass must pertain
-     * @throws AlreadyUsedNicknameException If the nickname is already taken by another player of the same match
+     * @throws AlreadyUsedUsernameException If the username is already taken by another player of the same match
      * @throws WrongStateException          If a new player cannot be added on the current state of the Match
      */
-    public PlayerControllerRMI(String nickname, Match match) throws AlreadyUsedNicknameException, WrongStateException {
-        super(nickname, match);
+    public PlayerControllerRMI(String username, Match match) throws AlreadyUsedUsernameException, WrongStateException {
+        super(username, match);
 
     }
 
@@ -61,8 +61,8 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
         if (this.view == null) {
             this.view = view;
 
-            List<String> playersNicknames = match.getPlayers().stream().map(Player::getNickname).toList();
-            view.giveLobbyInfo(playersNicknames);
+            List<String> playersUsernames = match.getPlayers().stream().map(Player::getUsername).toList();
+            view.giveLobbyInfo(playersUsernames);
         }
     }
 
@@ -171,14 +171,14 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
      * {@link Player#sendPrivateText(Player, String)} )}.
      * Note that this method is supposed to be called by a view.
      *
-     * @param recipient nickname of the recipient
+     * @param recipient username of the recipient
      * @param text      text of the message
      */
     @Override
     public void sendPrivateText(String recipient, String text) throws RemoteException {
-        if (match.getPlayers().stream().anyMatch(p -> p.getNickname().equals(recipient))) {
+        if (match.getPlayers().stream().anyMatch(p -> p.getUsername().equals(recipient))) {
             Player p = match.getPlayers().stream()
-                    .filter(pl -> pl.getNickname().equals(recipient))
+                    .filter(pl -> pl.getUsername().equals(recipient))
                     .toList().getFirst();
             player.sendPrivateText(p, text);
         }
@@ -198,20 +198,20 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
             Map<DrawSource, PlayableCard> visiblePlayableCards = match.getVisiblePlayableCards();
             Pair<Symbol, Symbol> decksTopReigns = match.getDecksTopReigns();
 
-            // Create a map that matches each pawn colour to the corresponding player's nickname
-            Map<Color, String> playersNicknamesAndPawns = new HashMap<>();
+            // Create a map that matches each pawn colour to the corresponding player's username
+            Map<Color, String> playersUsernamesAndPawns = new HashMap<>();
 
-            // Create a map that matches each player's nickname to the corresponding list of cards in the hand
+            // Create a map that matches each player's username to the corresponding list of cards in the hand
             Map<String, List<PlayableCard>> playersHands = new HashMap<>();
 
             // Fill the maps with proper values
             for (Player p : match.getPlayers()) {
-                playersNicknamesAndPawns.put(p.getPawnColor(), p.getNickname());
-                playersHands.put(p.getNickname(), p.getBoard().getCurrentHand());
+                playersUsernamesAndPawns.put(p.getPawnColor(), p.getUsername());
+                playersHands.put(p.getUsername(), p.getBoard().getCurrentHand());
             }
 
             try {
-                view.matchStarted(playersNicknamesAndPawns, playersHands, visibleObjectives, visiblePlayableCards, decksTopReigns);
+                view.matchStarted(playersUsernamesAndPawns, playersHands, visibleObjectives, visiblePlayableCards, decksTopReigns);
             } catch (RemoteException e) {
                 onConnectionError();
             }
@@ -233,7 +233,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
             onUnregisteredView();
         } else {
             try {
-                view.someoneJoined(someone.getNickname());
+                view.someoneJoined(someone.getUsername());
             } catch (RemoteException e) {
                 onConnectionError();
             }
@@ -253,7 +253,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
             onUnregisteredView();
         } else {
             try {
-                view.someoneQuit(someone.getNickname());
+                view.someoneQuit(someone.getUsername());
             } catch (RemoteException e) {
                 onConnectionError();
             }
@@ -279,7 +279,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
                 if (player.equals(someone)) {
                     view.giveInitialCard(card);
                 } else {
-                    view.someoneDrewInitialCard(someone.getNickname(), card);
+                    view.someoneDrewInitialCard(someone.getUsername(), card);
                 }
             } catch (RemoteException e) {
                 onConnectionError();
@@ -301,7 +301,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
             onUnregisteredView();
         } else {
             try {
-                view.someoneSetInitialSide(someone.getNickname(), side);
+                view.someoneSetInitialSide(someone.getUsername(), side);
             } catch (RemoteException e) {
                 onConnectionError();
             }
@@ -313,7 +313,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
      * Note that this method is supposed to be called by a match, moreover the match calls this method on all the
      * MatchObservers instance subscribed to itself, then even the MatchObserver causing this event gets notified.
      * If and only if the PlayerController receiving this method call is the one linked to given `someone`, it notifies
-     * the view about the proposed objectives, the other views will just receive a notification about the player's nickname.
+     * the view about the proposed objectives, the other views will just receive a notification about the player's username.
      *
      * @param someone    The player instance that has drawn the objectives
      * @param objectives The two proposed objectives
@@ -327,7 +327,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
                 if (player.equals(someone)) {
                     view.giveSecretObjectives(objectives);
                 } else {
-                    view.someoneDrewSecretObjective(someone.getNickname());
+                    view.someoneDrewSecretObjective(someone.getUsername());
                 }
             } catch (RemoteException e) {
                 onConnectionError();
@@ -339,7 +339,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
      * Notifies that someone has chosen the secret objective.
      * Note that this method is supposed to be called by a match, moreover the match calls this method on all the
      * MatchObservers instance subscribed to itself, then even the MatchObserver causing this event gets notified.
-     * The view will just receive `someone` nickname, no the objective.
+     * The view will just receive `someone` username, no the objective.
      *
      * @param someone   The player instance that has chosen the secret objective
      * @param objective The chosen secret objective
@@ -350,7 +350,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
             onUnregisteredView();
         } else {
             try {
-                view.someoneChoseSecretObjective(someone.getNickname());
+                view.someoneChoseSecretObjective(someone.getUsername());
             } catch (RemoteException e) {
                 onConnectionError();
             }
@@ -373,7 +373,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
             onUnregisteredView();
         } else {
             try {
-                view.someonePlayedCard(someone.getNickname(), coords, card, side, this.player.getPoints());
+                view.someonePlayedCard(someone.getUsername(), coords, card, side, this.player.getPoints());
             } catch (RemoteException e) {
                 onConnectionError();
             }
@@ -406,7 +406,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
                 if (!source.equals(DrawSource.GOLDS_DECK) && !source.equals(DrawSource.RESOURCES_DECK)) {
                     rep = replacementCard;
                 }
-                view.someoneDrewCard(someone.getNickname(), source, card, rep, repReign);
+                view.someoneDrewCard(someone.getUsername(), source, card, rep, repReign);
             } catch (RemoteException e) {
                 onConnectionError();
             }
@@ -425,7 +425,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
             onUnregisteredView();
         } else {
             try {
-                view.someoneSentBroadcastText(someone.getNickname(), text);
+                view.someoneSentBroadcastText(someone.getUsername(), text);
             } catch (RemoteException e) {
                 onConnectionError();
             }
@@ -448,7 +448,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
         } else {
             if (recipient.equals(this.player)) {
                 try {
-                    view.someoneSentPrivateText(someone.getNickname(), text);
+                    view.someoneSentPrivateText(someone.getUsername(), text);
                 } catch (RemoteException e) {
                     onConnectionError();
                 }
@@ -468,7 +468,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
                 List<Pair<Player, Boolean>> ranking = match.getPlayersFinalRanking();
                 List<Pair<String, Boolean>> rank = new ArrayList<>();
                 for (Pair<Player, Boolean> p : ranking) {
-                    rank.add(new Pair<>(p.first().getNickname(), p.second()));
+                    rank.add(new Pair<>(p.first().getUsername(), p.second()));
                 }
                 view.matchFinished(rank);
             } catch (RemoteException e) {
@@ -486,10 +486,10 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
      */
     private void onConnectionError() {
         match.removePlayer(player);
-        System.err.println("There has been a connection error with player: " + player.getNickname());
+        System.err.println("There has been a connection error with player: " + player.getUsername());
     }
 
     private void onUnregisteredView() {
-        System.err.println("The PlayerControllerRMI of player " + player.getNickname() + " hasn't got a corresponding view");
+        System.err.println("The PlayerControllerRMI of player " + player.getUsername() + " hasn't got a corresponding view");
     }
 }

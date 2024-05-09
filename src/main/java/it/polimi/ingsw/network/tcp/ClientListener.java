@@ -2,7 +2,7 @@ package it.polimi.ingsw.network.tcp;
 
 import com.google.gson.JsonParseException;
 import it.polimi.ingsw.controllers.PlayerControllerTCP;
-import it.polimi.ingsw.exceptions.AlreadyUsedNicknameException;
+import it.polimi.ingsw.exceptions.AlreadyUsedUsernameException;
 import it.polimi.ingsw.exceptions.ChosenMatchException;
 import it.polimi.ingsw.exceptions.WrongStateException;
 import it.polimi.ingsw.gamemodel.Match;
@@ -139,7 +139,7 @@ public class ClientListener extends Thread {
     /**
      * Once everything went smoothly, we try to actually create the
      * {@link PlayerControllerTCP}. If this
-     * throws {@link AlreadyUsedNicknameException} or {@link WrongStateException}
+     * throws {@link AlreadyUsedUsernameException} or {@link WrongStateException}
      * the acquisition procedure is restarted
      * after sending an {@link ErrorMessage} back to the client
      *
@@ -151,7 +151,7 @@ public class ClientListener extends Thread {
     private void createPlayerController(String username, Match match) throws IOException, ClassNotFoundException, EOFException {
         try {
             this.playerController = new PlayerControllerTCP(username, match, this.io);
-        } catch (AlreadyUsedNicknameException | WrongStateException e) {
+        } catch (AlreadyUsedUsernameException | WrongStateException e) {
             ErrorMessage error = new ErrorMessage(e.getMessage(), e.getClass().getName());
             this.io.writeMsg(error);
             this.clientInteraction();
