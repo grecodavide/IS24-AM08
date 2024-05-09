@@ -1,6 +1,9 @@
 package it.polimi.ingsw.controllers;
 
-import it.polimi.ingsw.client.RemoteViewInterface;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+
+import it.polimi.ingsw.client.network.RemoteViewInterface;
 import it.polimi.ingsw.exceptions.HandException;
 import it.polimi.ingsw.exceptions.WrongChoiceException;
 import it.polimi.ingsw.exceptions.WrongStateException;
@@ -10,9 +13,6 @@ import it.polimi.ingsw.gamemodel.Objective;
 import it.polimi.ingsw.gamemodel.PlayableCard;
 import it.polimi.ingsw.gamemodel.Side;
 import it.polimi.ingsw.utils.Pair;
-
-import java.rmi.Remote;
-import java.rmi.RemoteException;
 
 /**
  * RMI interface used to declare all and only the methods callable on a remote PlayerControllerRMI instance implementing

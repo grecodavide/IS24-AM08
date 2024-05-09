@@ -1,9 +1,6 @@
-package it.polimi.ingsw.client;
+package it.polimi.ingsw.client.network;
 
-import it.polimi.ingsw.exceptions.HandException;
-import it.polimi.ingsw.exceptions.WrongChoiceException;
-import it.polimi.ingsw.exceptions.WrongStateException;
-import it.polimi.ingsw.exceptions.WrongTurnException;
+import it.polimi.ingsw.client.frontend.GraphicalViewInterface;
 import it.polimi.ingsw.gamemodel.DrawSource;
 import it.polimi.ingsw.gamemodel.Objective;
 import it.polimi.ingsw.gamemodel.PlayableCard;

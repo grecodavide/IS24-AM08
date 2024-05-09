@@ -1,25 +1,34 @@
 package it.polimi.ingsw.controllers;
 
-import it.polimi.ingsw.client.RemoteViewInterface;
-import it.polimi.ingsw.exceptions.AlreadyUsedNicknameException;
-import it.polimi.ingsw.exceptions.ChosenMatchException;
-import it.polimi.ingsw.exceptions.WrongStateException;
-import it.polimi.ingsw.gamemodel.*;
-import it.polimi.ingsw.server.Server;
-import it.polimi.ingsw.server.ServerRMIInterface;
-import it.polimi.ingsw.utils.Pair;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.lang.reflect.Field;
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import org.junit.Test;
+
+import it.polimi.ingsw.client.network.RemoteViewInterface;
+import it.polimi.ingsw.exceptions.AlreadyUsedNicknameException;
+import it.polimi.ingsw.exceptions.WrongStateException;
+import it.polimi.ingsw.gamemodel.Color;
+import it.polimi.ingsw.gamemodel.DrawSource;
+import it.polimi.ingsw.gamemodel.GameDeck;
+import it.polimi.ingsw.gamemodel.GoldCard;
+import it.polimi.ingsw.gamemodel.InitialCard;
+import it.polimi.ingsw.gamemodel.Match;
+import it.polimi.ingsw.gamemodel.MatchTest;
+import it.polimi.ingsw.gamemodel.Objective;
+import it.polimi.ingsw.gamemodel.PlayableCard;
+import it.polimi.ingsw.gamemodel.Player;
+import it.polimi.ingsw.gamemodel.ResourceCard;
+import it.polimi.ingsw.gamemodel.Side;
+import it.polimi.ingsw.gamemodel.Symbol;
+import it.polimi.ingsw.utils.Pair;
 
 public class PlayerControllerRMITest {
     private Match match;
