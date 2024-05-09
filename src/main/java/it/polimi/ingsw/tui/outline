@@ -1,13 +1,13 @@
 --------------------------------------------
-symbol       icon   color-code
+symbol       icon   color-code   
 --------------------------------------------
-fungus:        ■     \033[31     (red)
-animal:        ■     \033[36     (cyano)
-plant:         ■     \033[32     (green)
-insect:        ■     \033[35     (purple)
-inkwell:       I     \033[33     (yellow)
-parchment:     P     \033[33     (yellow)
-feather:       F     \033[33     (yellow)
+fungus:        ■     \033[31■     (red)
+animal:        ■     \033[36■     (cyano)
+plant:         ■     \033[32■     (green)
+insect:        ■     \033[35■     (purple)
+inkwell:       I     \033[33I     (yellow)
+parchment:     P     \033[33P     (yellow)
+feather:       F     \033[33F     (yellow)
 
 ----------------------------------dimensions
 card_w   = 18
