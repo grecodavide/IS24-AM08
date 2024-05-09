@@ -1,6 +1,6 @@
 package it.polimi.ingsw.gamemodel;
 
-import it.polimi.ingsw.exceptions.AlreadyUsedNicknameException;
+import it.polimi.ingsw.exceptions.AlreadyUsedUsernameException;
 import it.polimi.ingsw.exceptions.WrongStateException;
 import it.polimi.ingsw.exceptions.WrongTurnException;
 import it.polimi.ingsw.utils.Pair;
@@ -33,7 +33,7 @@ public class PlayerTest {
             match.addPlayer(player2);
             match.addPlayer(player3);
             match.addPlayer(player4);
-        } catch (WrongStateException | AlreadyUsedNicknameException e) {
+        } catch (WrongStateException | AlreadyUsedUsernameException e) {
             throw new RuntimeException(e);
         }
 

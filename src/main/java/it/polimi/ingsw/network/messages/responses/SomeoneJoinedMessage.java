@@ -13,7 +13,7 @@ public final class SomeoneJoinedMessage extends ResponseMessage {
 
     public SomeoneJoinedMessage(String username, List<Player> joinedPlayers, int maxPlayers) {
         super(username);
-        this.joinedPlayers = joinedPlayers.stream().map(Player::getNickname).toList();
+        this.joinedPlayers = joinedPlayers.stream().map(Player::getUsername).toList();
         this.maxPlayers = maxPlayers;
     }
 

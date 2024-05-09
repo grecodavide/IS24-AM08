@@ -94,13 +94,13 @@ public class Match {
      * @throws IllegalArgumentException if the player is already in the match or too many players would be in the match
      * @throws WrongStateException      if called while in a state that doesn't allow adding players
      */
-    public void addPlayer(Player player) throws IllegalArgumentException, WrongStateException, AlreadyUsedNicknameException {
-        List<String> playersNicknames = getPlayers().stream().map(Player::getNickname).toList();
+    public void addPlayer(Player player) throws IllegalArgumentException, WrongStateException, AlreadyUsedUsernameException {
+        List<String> playersUsernames = getPlayers().stream().map(Player::getUsername).toList();
 
         if (players.contains(player))
             throw new IllegalArgumentException("Duplicated player in a match");
-        if (playersNicknames.contains(player.getNickname()))
-            throw new AlreadyUsedNicknameException("The chosen nickname is already in use");
+        if (playersUsernames.contains(player.getUsername()))
+            throw new AlreadyUsedUsernameException("The chosen username is already in use");
 
         currentState.addPlayer();
         players.add(player);

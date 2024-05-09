@@ -11,12 +11,12 @@ import java.util.Map;
 public class TestClient implements RemoteViewInterface {
 
     @Override
-    public void giveLobbyInfo(List<String> playersNicknames) {
+    public void giveLobbyInfo(List<String> playersUsernames) {
         System.out.println("giveLobbyInfo called");
     }
 
     @Override
-    public void matchStarted(Map<Color, String> playersNicknamesAndPawns, Map<String, List<PlayableCard>> playersHands, Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards, Pair<Symbol, Symbol> decksTopReigns) throws RemoteException {
+    public void matchStarted(Map<Color, String> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands, Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards, Pair<Symbol, Symbol> decksTopReigns) throws RemoteException {
         System.out.println("matchStarted called");
     }
 
@@ -31,42 +31,42 @@ public class TestClient implements RemoteViewInterface {
     }
 
     @Override
-    public void someoneDrewInitialCard(String someoneNickname, InitialCard card) throws RemoteException {
+    public void someoneDrewInitialCard(String someoneUsername, InitialCard card) throws RemoteException {
         System.out.println("someoneDrewInitialCard called");
     }
 
     @Override
-    public void someoneSetInitialSide(String someoneNickname, Side side) throws RemoteException {
+    public void someoneSetInitialSide(String someoneUsername, Side side) throws RemoteException {
         System.out.println("someoneSetInitialSide called");
     }
 
     @Override
-    public void someoneDrewSecretObjective(String someoneNickname) throws RemoteException {
+    public void someoneDrewSecretObjective(String someoneUsername) throws RemoteException {
         System.out.println("someoneDrewSecretObjective called");
     }
 
     @Override
-    public void someoneChoseSecretObjective(String someoneNickname) throws RemoteException {
+    public void someoneChoseSecretObjective(String someoneUsername) throws RemoteException {
         System.out.println("someoneChoseSecretObjective called");
     }
 
     @Override
-    public void someonePlayedCard(String someoneNickname, Pair<Integer, Integer> coords, PlayableCard card, Side side, int points) throws RemoteException {
+    public void someonePlayedCard(String someoneUsername, Pair<Integer, Integer> coords, PlayableCard card, Side side, int points) throws RemoteException {
 
     }
 
     @Override
-    public void someoneDrewCard(String someoneNickname, DrawSource source, PlayableCard card, PlayableCard replacementCard, Symbol replacementReign) throws RemoteException {
+    public void someoneDrewCard(String someoneUsername, DrawSource source, PlayableCard card, PlayableCard replacementCard, Symbol replacementReign) throws RemoteException {
         System.out.println("someoneDrewCard called");
     }
 
     @Override
-    public void someoneJoined(String someoneNickname) throws RemoteException {
+    public void someoneJoined(String someoneUsername) throws RemoteException {
         System.out.println("someoneJoined called");
     }
 
     @Override
-    public void someoneQuit(String someoneNickname) throws RemoteException {
+    public void someoneQuit(String someoneUsername) throws RemoteException {
         System.out.println("someoneQuit called");
     }
 
@@ -76,12 +76,12 @@ public class TestClient implements RemoteViewInterface {
     }
 
     @Override
-    public void someoneSentBroadcastText(String someoneNickname, String text) throws RemoteException {
+    public void someoneSentBroadcastText(String someoneUsername, String text) throws RemoteException {
         System.out.println("someoneSentBroadcastText called");
     }
 
     @Override
-    public void someoneSentPrivateText(String someoneNickname, String text) throws RemoteException {
+    public void someoneSentPrivateText(String someoneUsername, String text) throws RemoteException {
         System.out.println("someoneSentPrivateText called");
     }
 }

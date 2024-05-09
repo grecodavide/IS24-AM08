@@ -11,7 +11,7 @@ import it.polimi.ingsw.utils.Pair;
  * It's also responsible for the board's logic, which is a slice of the game logic.
  */
 public class Player {
-    private final String nickname;
+    private final String username;
     private final Match match;
     private int points;
     private final Board board;
@@ -21,11 +21,11 @@ public class Player {
     /**
      * Initializes the main player's attributes.
      *
-     * @param nickname the player's nickname
+     * @param username the player's username
      * @param match    the match the player belongs to
      */
-    public Player(String nickname, Match match) {
-        this.nickname = nickname;
+    public Player(String username, Match match) {
+        this.username = username;
         this.match = match;
 
         //Initialize values
@@ -191,9 +191,9 @@ public class Player {
     }
 
     /**
-     * Getter for the player's nickname.
+     * Getter for the player's username.
      */
-    public String getNickname() {
-        return nickname;
+    public String getUsername() {
+        return username;
     }
 }

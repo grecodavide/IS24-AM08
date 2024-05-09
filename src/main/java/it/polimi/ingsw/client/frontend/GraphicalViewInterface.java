@@ -27,7 +27,7 @@ public interface GraphicalViewInterface {
      * Notifies the view that someone played a card
      *
      */
-    void someonePlayedCard(String someoneNickname, Pair<Integer, Integer> coords, PlayableCard card, Side side);
+    void someonePlayedCard(String someoneUsername, Pair<Integer, Integer> coords, PlayableCard card, Side side);
 
     /**
      * (Temporary demo method)

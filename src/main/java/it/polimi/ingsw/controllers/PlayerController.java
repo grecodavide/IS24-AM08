@@ -21,16 +21,16 @@ public abstract sealed class PlayerController implements MatchObserver permits P
     protected Match match;
 
     /**
-     * Instantiates the internal Player with the given nickname and sets the internal Match reference to the given one,
+     * Instantiates the internal Player with the given username and sets the internal Match reference to the given one,
      * furthermore add the new Player instance to the match and subscribe this class instance to the match observers.
      *
-     * @param nickname The nickname of the new player of the Match
+     * @param username The username of the new player of the Match
      * @param match    The match to which this PlayerClass must pertain
-     * @throws AlreadyUsedNicknameException If the nickname is already taken by another player of the same match
+     * @throws AlreadyUsedUsernameException If the username is already taken by another player of the same match
      * @throws WrongStateException          If a new player cannot be added on the current state of the Match
      */
-    public PlayerController(String nickname, Match match) throws AlreadyUsedNicknameException, WrongStateException {
-        this.player = new Player(nickname, match);
+    public PlayerController(String username, Match match) throws AlreadyUsedUsernameException, WrongStateException {
+        this.player = new Player(username, match);
         this.match = match;
 
         match.addPlayer(player);
