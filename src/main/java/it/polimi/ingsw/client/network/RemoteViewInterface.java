@@ -1,12 +1,18 @@
-package it.polimi.ingsw.client;
-
-import it.polimi.ingsw.gamemodel.*;
-import it.polimi.ingsw.utils.Pair;
+package it.polimi.ingsw.client.network;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Map;
+
+import it.polimi.ingsw.gamemodel.Color;
+import it.polimi.ingsw.gamemodel.DrawSource;
+import it.polimi.ingsw.gamemodel.InitialCard;
+import it.polimi.ingsw.gamemodel.Objective;
+import it.polimi.ingsw.gamemodel.PlayableCard;
+import it.polimi.ingsw.gamemodel.Side;
+import it.polimi.ingsw.gamemodel.Symbol;
+import it.polimi.ingsw.utils.Pair;
 
 /**
  * Network interface used to declare all and only the methods callable on a remote view instance implementing this interface or

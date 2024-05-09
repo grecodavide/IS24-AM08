@@ -14,5 +14,5 @@ public final class SomeoneSentBroadcastTextMessage extends ResponseMessage {
     public String getText() {
         return text;
     }
-    
+
 }

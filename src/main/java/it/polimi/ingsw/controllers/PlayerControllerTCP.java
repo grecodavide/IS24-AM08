@@ -1,31 +1,10 @@
 package it.polimi.ingsw.controllers;
 
-import it.polimi.ingsw.exceptions.AlreadyUsedNicknameException;
-import it.polimi.ingsw.exceptions.HandException;
-import it.polimi.ingsw.exceptions.WrongChoiceException;
-import it.polimi.ingsw.exceptions.WrongStateException;
-import it.polimi.ingsw.exceptions.WrongTurnException;
-import it.polimi.ingsw.gamemodel.DrawSource;
-import it.polimi.ingsw.gamemodel.InitialCard;
-import it.polimi.ingsw.gamemodel.Match;
-import it.polimi.ingsw.gamemodel.Objective;
-import it.polimi.ingsw.gamemodel.PlayableCard;
-import it.polimi.ingsw.gamemodel.Player;
-import it.polimi.ingsw.gamemodel.Side;
+import it.polimi.ingsw.exceptions.*;
+import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.network.messages.Message;
 import it.polimi.ingsw.network.messages.errors.ErrorMessage;
-import it.polimi.ingsw.network.messages.responses.MatchFinishedMessage;
-import it.polimi.ingsw.network.messages.responses.MatchStartedMessage;
-import it.polimi.ingsw.network.messages.responses.SomeoneChoseSecretObjectiveMessage;
-import it.polimi.ingsw.network.messages.responses.SomeoneDrewCardMessage;
-import it.polimi.ingsw.network.messages.responses.SomeoneDrewInitialCardMessage;
-import it.polimi.ingsw.network.messages.responses.SomeoneDrewSecretObjectivesMessage;
-import it.polimi.ingsw.network.messages.responses.SomeoneJoinedMessage;
-import it.polimi.ingsw.network.messages.responses.SomeonePlayedCardMessage;
-import it.polimi.ingsw.network.messages.responses.SomeoneQuitMessage;
-import it.polimi.ingsw.network.messages.responses.SomeoneSentBroadcastTextMessage;
-import it.polimi.ingsw.network.messages.responses.SomeoneSentPrivateTextMessage;
-import it.polimi.ingsw.network.messages.responses.SomeoneSetInitialSideMessage;
+import it.polimi.ingsw.network.messages.responses.*;
 import it.polimi.ingsw.network.tcp.IOHandler;
 import it.polimi.ingsw.utils.Pair;
 
@@ -110,8 +89,14 @@ public final class PlayerControllerTCP extends PlayerController {
 
     @Override
     public void someoneDrewCard(Player someone, DrawSource source, PlayableCard card, PlayableCard replacementCard) {
+        Integer repId = null;
+        Symbol repReign = null;
+        if (replacementCard != null) {
+            repId = replacementCard.getId();
+            repReign = replacementCard.getReign();
+        }
         this.sendMessage(new SomeoneDrewCardMessage(someone.getNickname(), source, card.getId(),
-                replacementCard.getId(), replacementCard.getReign()));
+                repId, repReign));
     }
 
     @Override
@@ -119,7 +104,7 @@ public final class PlayerControllerTCP extends PlayerController {
         this.sendMessage(new MatchFinishedMessage(match.getPlayersFinalRanking()));
     }
 
-    @Override
+
     public void drawInitialCard() {
         try {
             this.player.drawInitialCard();
@@ -128,7 +113,7 @@ public final class PlayerControllerTCP extends PlayerController {
         }
     }
 
-    @Override
+
     public void chooseInitialCardSide(Side side) {
         try {
             this.player.chooseInitialCardSide(side);
@@ -137,7 +122,6 @@ public final class PlayerControllerTCP extends PlayerController {
         }
     }
 
-    @Override
     public void drawSecretObjectives() {
         try {
             this.player.drawSecretObjectives();
@@ -146,7 +130,6 @@ public final class PlayerControllerTCP extends PlayerController {
         }
     }
 
-    @Override
     public void chooseSecretObjective(Objective objective) {
         try {
             this.player.chooseSecretObjective(objective);
@@ -155,7 +138,6 @@ public final class PlayerControllerTCP extends PlayerController {
         }
     }
 
-    @Override
     public void playCard(Pair<Integer, Integer> coords, PlayableCard card, Side side) {
         try {
             this.player.playCard(coords, card, side);
@@ -164,7 +146,6 @@ public final class PlayerControllerTCP extends PlayerController {
         }
     }
 
-    @Override
     public void drawCard(DrawSource source) {
         try {
             this.player.drawCard(source);
@@ -187,12 +168,10 @@ public final class PlayerControllerTCP extends PlayerController {
         }
     }
 
-    @Override
     public void sendBroadcastText(String text) {
         this.player.sendBroadcastText(text);
     }
 
-    @Override
     public void sendPrivateText(String recipientUsername, String text) {
         Player recipient = null;
         for (Player player : this.match.getPlayers()) {

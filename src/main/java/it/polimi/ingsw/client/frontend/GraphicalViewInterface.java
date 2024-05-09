@@ -1,10 +1,9 @@
-package it.polimi.ingsw.client;
+package it.polimi.ingsw.client.frontend;
 
+import it.polimi.ingsw.client.network.NetworkView;
 import it.polimi.ingsw.gamemodel.PlayableCard;
 import it.polimi.ingsw.gamemodel.Side;
 import it.polimi.ingsw.utils.Pair;
-
-import java.rmi.RemoteException;
 
 public interface GraphicalViewInterface {
 

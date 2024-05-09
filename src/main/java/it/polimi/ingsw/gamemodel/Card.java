@@ -11,7 +11,7 @@ public abstract class Card {
 
     /**
      * Getter for the required side of the card
-     * 
+     *
      * @param side the required side
      * @return the structure of the specified side
      * @see CardFace

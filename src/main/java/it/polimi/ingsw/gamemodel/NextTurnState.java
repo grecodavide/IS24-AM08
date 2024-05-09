@@ -1,4 +1,5 @@
 package it.polimi.ingsw.gamemodel;
+
 import it.polimi.ingsw.exceptions.WrongStateException;
 
 public class NextTurnState extends MatchState {

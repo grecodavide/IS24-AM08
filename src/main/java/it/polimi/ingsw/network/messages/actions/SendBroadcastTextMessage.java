@@ -14,5 +14,5 @@ public final class SendBroadcastTextMessage extends ActionMessage {
     public String getText() {
         return text;
     }
-    
+
 }

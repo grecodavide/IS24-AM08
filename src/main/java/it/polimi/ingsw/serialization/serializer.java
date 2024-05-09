@@ -1,11 +1,9 @@
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import it.polimi.ingsw.exceptions.InvalidResourceException;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.Pair;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;

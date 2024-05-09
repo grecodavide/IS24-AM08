@@ -20,5 +20,5 @@ public final class SendPrivateTextMessage extends ActionMessage {
     public String getText() {
         return text;
     }
-    
+
 }

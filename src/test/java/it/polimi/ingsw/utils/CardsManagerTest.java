@@ -34,6 +34,7 @@ public class CardsManagerTest {
         CardFace back = initialCards.get(1).getSide(Side.BACK);
 
         assertEquals("Initial card id.1 has wrong id", Integer.valueOf(1), initialCards.get(1).getId());
+        System.out.println(Symbol.INSECT.toString());
 
         assertEquals("Initial card id.1 has wrong front top left corner", Symbol.INSECT, front.getCorner(Corner.TOP_LEFT));
         assertEquals("Initial card id.1 has wrong front top right corner", Symbol.FUNGUS, front.getCorner(Corner.TOP_RIGHT));
@@ -107,7 +108,6 @@ public class CardsManagerTest {
 
         Set<Symbol> centerExpectedValues = new HashSet<>();
         centerExpectedValues.add(Symbol.INSECT);
-
         assertEquals("Resource card id.1 has wrong back top left corner", Symbol.FULL_CORNER, back.getCorner(Corner.TOP_LEFT));
         assertEquals("Resource card id.1 has wrong back top right corner", Symbol.FULL_CORNER, back.getCorner(Corner.TOP_RIGHT));
         assertEquals("Resource card id.1 has wrong back bottom left corner", Symbol.FULL_CORNER, back.getCorner(Corner.BOTTOM_LEFT));
@@ -124,6 +124,9 @@ public class CardsManagerTest {
         assertEquals("Objective id.1 has wrong id", Integer.valueOf(1), obj.getID());
         assertEquals("Objective id.1 has wrong points", 2, obj.getPoints());
         assertTrue("Objective id.1 has wrong requirement type", obj.getReq() instanceof QuantityRequirement);
+
+        obj = objectives.get(13);
+        assertTrue("Objective id.13 was wrong requirement type", obj.getReq() instanceof PositionRequirement);
     }
 
 }

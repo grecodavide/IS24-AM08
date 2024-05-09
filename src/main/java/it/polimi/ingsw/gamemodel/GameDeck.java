@@ -7,39 +7,42 @@ import java.util.Collections;
 import java.util.List;
 
 /**
-* Generic used to create the decks for all the types of cards
-*/
+ * Generic used to create the decks for all the types of cards
+ */
 public class GameDeck<T> {
     private List<T> cardsList;
 
     /**
-    * Class constructor, takes no argument as the decks start empty
-    */
+     * Class constructor, takes no argument as the decks start empty
+     */
     public GameDeck() {
         cardsList = new ArrayList<>();
     }
 
     /**
-    * Adds a card to the bottom of the deck
-    * @param card the card to add
-    */
+     * Adds a card to the bottom of the deck
+     *
+     * @param card the card to add
+     */
     public void add(T card) {
         this.cardsList.addFirst(card);
     }
 
     /**
-    * Getter for the deck's size
-    * @return the deck's size
-    */
+     * Getter for the deck's size
+     *
+     * @return the deck's size
+     */
     public int getSize() {
         return this.cardsList.size();
     }
 
     /**
-    * Removes a card from the deck's top (throws exception if the deck is empty)
-    * @return the removed card
-    * @throws DeckException if the deck is empty
-    */
+     * Removes a card from the deck's top (throws exception if the deck is empty)
+     *
+     * @return the removed card
+     * @throws DeckException if the deck is empty
+     */
     public T pop() throws DeckException {
         if (this.isEmpty())
             throw new DeckException("Tried to draw from an empty deck!");
@@ -48,6 +51,7 @@ public class GameDeck<T> {
 
     /**
      * Returns a card from the deck's top without removing it (returns null if empty)
+     *
      * @return the card
      */
     public T peek() {
@@ -57,9 +61,10 @@ public class GameDeck<T> {
     }
 
     /**
-    * Removes a card from the deck's top (null if the deck is empty)
-    * @return the removed card (null if the deck is empty)
-    */
+     * Removes a card from the deck's top (null if the deck is empty)
+     *
+     * @return the removed card (null if the deck is empty)
+     */
     public T poll() {
         if (this.isEmpty())
             return null;
@@ -67,16 +72,17 @@ public class GameDeck<T> {
     }
 
     /**
-    * Shuffles the deck
-    */
+     * Shuffles the deck
+     */
     public void shuffle() {
         Collections.shuffle(this.cardsList);
     }
 
     /**
-    * Checks whether the deck is empty or not
-    * @return whether the deck is empty or not
-    */
+     * Checks whether the deck is empty or not
+     *
+     * @return whether the deck is empty or not
+     */
     public boolean isEmpty() {
         return this.cardsList.isEmpty();
     }

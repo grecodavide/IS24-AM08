@@ -1,12 +1,12 @@
 package it.polimi.ingsw.network.tcp;
 
+import it.polimi.ingsw.gamemodel.Match;
+import it.polimi.ingsw.server.Server;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.rmi.RemoteException;
-
-import it.polimi.ingsw.gamemodel.Match;
-import it.polimi.ingsw.server.Server;
 
 /**
  * Class containing the {@link ServerSocket}. This will just accept sockets and
@@ -18,7 +18,7 @@ public class TCPServer {
 
     /**
      * Class constructor. It will open a {@link ServerSocket} on the specified port
-     * 
+     *
      * @param port   the port on which the server should be started
      * @param server the {@link Server} object that contains all the {@link Match}
      *               objects

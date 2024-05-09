@@ -17,5 +17,5 @@ public final class SomeoneChoseSecretObjectiveMessage extends ResponseMessage {
         super(username);
         this.objectiveID = objectiveID;
     }
-    
+
 }

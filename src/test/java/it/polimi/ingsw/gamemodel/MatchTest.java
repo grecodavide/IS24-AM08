@@ -735,7 +735,7 @@ public class MatchTest {
         resourcesDeck = createDeterministicResourcesDeck(resourcesNum);
     }
 
-    protected static GameDeck<Objective> createDeterministicObjectivesDeck(int size) {
+    public static GameDeck<Objective> createDeterministicObjectivesDeck(int size) {
         // Initialize Objective deck
         GameDeck<Objective> objectivesDeck = new GameDeck<>();
         Objective objective = null;
@@ -754,7 +754,7 @@ public class MatchTest {
         return objectivesDeck;
     }
 
-    protected static GameDeck<InitialCard> createDeterministicInitialsDeck(int size) {
+    public static GameDeck<InitialCard> createDeterministicInitialsDeck(int size) {
         // Initialize Initial Cards deck
         GameDeck<InitialCard> initialsDeck = new GameDeck<InitialCard>();
         InitialCard card = null;
@@ -768,7 +768,7 @@ public class MatchTest {
         return initialsDeck;
     }
 
-    protected static GameDeck<ResourceCard> createDeterministicResourcesDeck(int size) {
+    public static GameDeck<ResourceCard> createDeterministicResourcesDeck(int size) {
         GameDeck<ResourceCard> resourcesDeck = new GameDeck<>();
         ResourceCard card = null;
         for (int i = 0; i < size; i++) {
@@ -785,7 +785,7 @@ public class MatchTest {
         return resourcesDeck;
     }
 
-    protected static GameDeck<GoldCard> createDeterministicGoldsDeck(int size) {
+    public static GameDeck<GoldCard> createDeterministicGoldsDeck(int size) {
         GameDeck<GoldCard> goldsDeck = new GameDeck<>();
         GoldCard card = null;
         HashMap<Symbol, Integer> resources = new HashMap<>();
@@ -868,7 +868,7 @@ public class MatchTest {
         }
     }
 
-    protected static InitialCard generateRandomInitialCard() {
+    public static InitialCard generateRandomInitialCard() {
         EnumSet<Symbol> reigns = Symbol.getReigns();
         // Generate a random number between 0 and 3
         int index = (int) (Math.random() * 3);
@@ -880,7 +880,7 @@ public class MatchTest {
                         Set.of(randomSymbol(reigns))));
     }
 
-    protected static Objective generateRandomObjective() {
+    public static Objective generateRandomObjective() {
         EnumSet<Symbol> resources = Symbol.getBasicResources();
         try {
             return new Objective((int) (Math.random() * 2),
@@ -890,7 +890,7 @@ public class MatchTest {
         }
     }
 
-    private static Symbol randomSymbol(EnumSet<Symbol> validSymbols) {
+    public static Symbol randomSymbol(EnumSet<Symbol> validSymbols) {
         int size = validSymbols.size();
         // Generate a random number between 0 and 3
         int index = (int) (Math.random() * size);

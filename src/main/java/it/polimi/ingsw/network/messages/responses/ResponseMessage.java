@@ -15,7 +15,7 @@ public sealed class ResponseMessage extends Message permits AvailableMatchesMess
 
     /**
      * @return username of the user that did the action
-     *         null if not specified by the protocol
+     * null if not specified by the protocol
      */
     public String getUsername() {
         return username;

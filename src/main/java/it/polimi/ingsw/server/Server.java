@@ -1,14 +1,5 @@
 package it.polimi.ingsw.server;
 
-import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
-
 import it.polimi.ingsw.controllers.PlayerControllerRMI;
 import it.polimi.ingsw.exceptions.AlreadyUsedNicknameException;
 import it.polimi.ingsw.exceptions.ChosenMatchException;
@@ -19,6 +10,15 @@ import it.polimi.ingsw.gamemodel.Objective;
 import it.polimi.ingsw.gamemodel.PlayableCard;
 import it.polimi.ingsw.network.tcp.TCPServer;
 import it.polimi.ingsw.utils.DeckCreator;
+
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
 
 public class Server extends UnicastRemoteObject implements ServerRMIInterface {
     private final Map<String, Match> matches;
@@ -58,8 +58,7 @@ public class Server extends UnicastRemoteObject implements ServerRMIInterface {
     }
 
     @Override
-    public PlayerControllerRMI joinMatch(String matchName, String nickname) throws RemoteException, ChosenMatchException,
-            AlreadyUsedNicknameException, WrongStateException, WrongStateException, AlreadyUsedNicknameException {
+    public PlayerControllerRMI joinMatch(String matchName, String nickname) throws RemoteException, ChosenMatchException, WrongStateException, AlreadyUsedNicknameException {
         if (!matches.containsKey(matchName))
             throw new ChosenMatchException("The chosen match doesn't exist");
         if (matches.get(matchName).isFull())
@@ -67,7 +66,7 @@ public class Server extends UnicastRemoteObject implements ServerRMIInterface {
 
         Match chosenMatch = matches.get(matchName);
 
-        return new PlayerControllerRMI(nickname, chosenMatch, portRMI);
+        return new PlayerControllerRMI(nickname, chosenMatch);
     }
 
     @Override
@@ -106,9 +105,7 @@ public class Server extends UnicastRemoteObject implements ServerRMIInterface {
 
     public void startTCPServer() {
         TCPServer tcpServer = new TCPServer(portTCP, this);
-        new Thread(() -> {
-            tcpServer.listen();
-        }).start();
+        new Thread(tcpServer::listen).start();
     }
 
     public static String promptAndInput(String message, Scanner scanner) {

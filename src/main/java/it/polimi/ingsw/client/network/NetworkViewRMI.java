@@ -1,16 +1,21 @@
-package it.polimi.ingsw.client;
+package it.polimi.ingsw.client.network;
+
+import java.rmi.RemoteException;
+import java.util.List;
+import java.util.Map;
 
 import it.polimi.ingsw.controllers.PlayerControllerRMIInterface;
 import it.polimi.ingsw.exceptions.WrongChoiceException;
 import it.polimi.ingsw.exceptions.WrongStateException;
 import it.polimi.ingsw.exceptions.WrongTurnException;
-import it.polimi.ingsw.gamemodel.*;
+import it.polimi.ingsw.gamemodel.Color;
+import it.polimi.ingsw.gamemodel.DrawSource;
+import it.polimi.ingsw.gamemodel.InitialCard;
+import it.polimi.ingsw.gamemodel.Objective;
+import it.polimi.ingsw.gamemodel.PlayableCard;
+import it.polimi.ingsw.gamemodel.Side;
+import it.polimi.ingsw.gamemodel.Symbol;
 import it.polimi.ingsw.utils.Pair;
-
-import java.rmi.Remote;
-import java.rmi.RemoteException;
-import java.util.List;
-import java.util.Map;
 
 public class NetworkViewRMI extends NetworkView {
 

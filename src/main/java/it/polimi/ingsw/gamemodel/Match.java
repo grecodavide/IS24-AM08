@@ -1,19 +1,9 @@
 package it.polimi.ingsw.gamemodel;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import it.polimi.ingsw.exceptions.AlreadyUsedNicknameException;
-import it.polimi.ingsw.exceptions.CardException;
-import it.polimi.ingsw.exceptions.DeckException;
-import it.polimi.ingsw.exceptions.HandException;
-import it.polimi.ingsw.exceptions.WrongChoiceException;
-import it.polimi.ingsw.exceptions.WrongStateException;
+import it.polimi.ingsw.exceptions.*;
 import it.polimi.ingsw.utils.Pair;
+
+import java.util.*;
 
 /**
  * Represents the match played by {@link Player} instances, therefore implements a slice of game logic
@@ -64,14 +54,15 @@ public class Match {
 
     /**
      * Initializes main Match attributes and allocate the attribute players List, assuming no parameter is null.
-     * @param maxPlayers maximum number of players to be added to the match, chosen by the first player joining the match
-     * @param initialsDeck deck of initial cards
-     * @param resourcesDeck deck of resource cards
-     * @param goldsDeck deck of gold cards
+     *
+     * @param maxPlayers     maximum number of players to be added to the match, chosen by the first player joining the match
+     * @param initialsDeck   deck of initial cards
+     * @param resourcesDeck  deck of resource cards
+     * @param goldsDeck      deck of gold cards
      * @param objectivesDeck deck of objectives
      * @throws IllegalArgumentException if the decks provided do not have enough cards to start a game or maxPlayers are not 2,3,4
      */
-    public Match(int maxPlayers, GameDeck<InitialCard> initialsDeck, GameDeck<ResourceCard> resourcesDeck, GameDeck<GoldCard> goldsDeck, GameDeck<Objective> objectivesDeck) throws IllegalArgumentException{
+    public Match(int maxPlayers, GameDeck<InitialCard> initialsDeck, GameDeck<ResourceCard> resourcesDeck, GameDeck<GoldCard> goldsDeck, GameDeck<Objective> objectivesDeck) throws IllegalArgumentException {
         this.maxPlayers = maxPlayers;
         this.initialsDeck = initialsDeck;
         this.resourcesDeck = resourcesDeck;
@@ -82,7 +73,7 @@ public class Match {
 
         if (goldsDeck.getSize() < maxPlayers + 2)
             throw new IllegalArgumentException("goldsDeck does not have enough cards");
-        else if (resourcesDeck.getSize() < maxPlayers*2 + 2)
+        else if (resourcesDeck.getSize() < maxPlayers * 2 + 2)
             throw new IllegalArgumentException("resourcesDeck does not have enough cards");
         else if (initialsDeck.getSize() < maxPlayers)
             throw new IllegalArgumentException("initialDeck does not have enough cards");
@@ -98,14 +89,15 @@ public class Match {
     /**
      * Adds a new player to the match, assuming it's not null.
      * Note: Called by the Controller when a player joins the match.
+     *
      * @param player player to be added to the match
      * @throws IllegalArgumentException if the player is already in the match or too many players would be in the match
-     * @throws WrongStateException if called while in a state that doesn't allow adding players
+     * @throws WrongStateException      if called while in a state that doesn't allow adding players
      */
     public void addPlayer(Player player) throws IllegalArgumentException, WrongStateException, AlreadyUsedNicknameException {
         List<String> playersNicknames = getPlayers().stream().map(Player::getNickname).toList();
 
-        if(players.contains(player))
+        if (players.contains(player))
             throw new IllegalArgumentException("Duplicated player in a match");
         if (playersNicknames.contains(player.getNickname()))
             throw new AlreadyUsedNicknameException("The chosen nickname is already in use");
@@ -119,6 +111,7 @@ public class Match {
     /**
      * Removes a player from the match, assuming the player is in the match.
      * Note: Called by the Controller when a player quits the match.
+     *
      * @param player player to be removed from the match
      */
     public void removePlayer(Player player) {
@@ -131,6 +124,7 @@ public class Match {
     /**
      * Verifies if the match is full, thus no more players can join.
      * Note: Used by the Controller
+     *
      * @return true if the match is full, false otherwise
      */
     public boolean isFull() {
@@ -144,7 +138,7 @@ public class Match {
      * Note: Called by NextTurnState every time a new turn starts.
      */
     protected void nextPlayer() {
-        if(!players.isEmpty()) {
+        if (!players.isEmpty()) {
             // If player has never been initialized OR the current player is the last one
             if (currentPlayer == null || currentPlayer.equals(players.getLast())) {
                 // Set currentPlayer as the first one
@@ -164,6 +158,7 @@ public class Match {
     /**
      * Verifies if the match is finished.
      * Note: Called by the Controller and NextTurnState.
+     *
      * @return true if the match is finished, false otherwise
      */
     public boolean isFinished() {
@@ -181,6 +176,7 @@ public class Match {
     /**
      * Verifies if the initial turn is finished.
      * Note: Called by NextTurnState.
+     *
      * @return true if the initial turn is finished, false otherwise
      */
     public boolean isInitialTurnFinished() {
@@ -198,6 +194,7 @@ public class Match {
     /**
      * Verifies if the match is started.
      * Note: Called by NextTurnState to check when to effectively start the match.
+     *
      * @return true if the match is started, false otherwise
      */
     public boolean isStarted() {
@@ -207,6 +204,7 @@ public class Match {
     /**
      * Gets the player who's playing (or choosing the secret objective) at the moment.
      * Note: Used by the Controller.
+     *
      * @return the player playing at the moment, null if the match has never reached NextTurnState
      */
     public Player getCurrentPlayer() {
@@ -215,6 +213,7 @@ public class Match {
 
     /**
      * Gets the match players.
+     *
      * @return the match players in a List, dynamically defined as an ArrayList
      */
     public List<Player> getPlayers() {
@@ -224,6 +223,7 @@ public class Match {
     /**
      * Sets the current match state, assuming it's not null.
      * Note: Called by each state to let the match enter to the next state.
+     *
      * @param state the state in which the match has to be
      */
     protected void setState(MatchState state) {
@@ -232,6 +232,7 @@ public class Match {
 
     /**
      * Draws a card from the initial cards deck
+     *
      * @return the card drawn from the initial cards deck
      * @throws WrongStateException if called while in a state that doesn't allow drawing an initial card
      */
@@ -254,6 +255,7 @@ public class Match {
     /**
      * Extracts two cards from the deck of objectives and returns them.
      * Note: Called by the Controller.
+     *
      * @return two objective cards extracted from the objectives deck
      */
     protected Pair<Objective, Objective> proposeSecretObjectives() throws WrongStateException {
@@ -278,6 +280,7 @@ public class Match {
      * Checks that the given objective is one of the proposed ones to the current player
      * and put the discarded objective back in the objectives deck.
      * Note: Called by the current player
+     *
      * @param objective the accepted objective by the player (NOT the discarded one)
      */
     protected void setSecretObjective(Objective objective) throws WrongChoiceException, WrongStateException {
@@ -380,12 +383,13 @@ public class Match {
      * in particular, checks if the placement is valid, then places the card on the player's board and add points
      * to the player.
      * Note: Called by the current player.
+     *
      * @param coords coordinates in which to place the card
-     * @param card card to place
-     * @param side side of the card to be placed
-     * @throws WrongStateException if called while in a state that doesn't allow making moves
+     * @param card   card to place
+     * @param side   side of the card to be placed
+     * @throws WrongStateException  if called while in a state that doesn't allow making moves
      * @throws WrongChoiceException if the move is not allowed (placement not allowed, or not enough resources, or card
-     * not in player's hand)
+     *                              not in player's hand)
      */
     protected void makeMove(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws WrongStateException, WrongChoiceException {
         currentState.makeMove();
@@ -446,10 +450,11 @@ public class Match {
      * (THIRD/FOURTH_VISIBLE) will be substituted by a resource card if possible, if not, by a gold card, if not again,
      * they will be null (then not substituted).
      * Note: Called by the current player.
-     * @param source  the source to draw a card from
-     * @throws WrongStateException if called while in a state that doesn't allow making moves
-     * @throws WrongChoiceException if the source does not have cards
+     *
+     * @param source the source to draw a card from
      * @return the card drawn
+     * @throws WrongStateException  if called while in a state that doesn't allow making moves
+     * @throws WrongChoiceException if the source does not have cards
      */
     protected PlayableCard drawCard(DrawSource source) throws WrongStateException, WrongChoiceException {
         PlayableCard card;
@@ -486,7 +491,7 @@ public class Match {
 
                 // If the golds deck is NOT empty, substitute the first/second visible
                 // card with a new gold
-                if(!goldsDeck.isEmpty()) {
+                if (!goldsDeck.isEmpty()) {
                     replacementCard = goldsDeck.poll();
                     visiblePlayableCards.put(source, replacementCard);
                 }
@@ -510,7 +515,7 @@ public class Match {
 
                 // If the resources deck is NOT empty, substitute the third/fourth visible
                 // card with a new resource
-                if(!resourcesDeck.isEmpty()) {
+                if (!resourcesDeck.isEmpty()) {
                     replacementCard = resourcesDeck.poll();
                     visiblePlayableCards.put(source, replacementCard);
                 }
@@ -545,6 +550,7 @@ public class Match {
 
     /**
      * Sets the current player's initial card side.
+     *
      * @param side the side to put the initial card on
      * @throws WrongStateException if called while in a state that doesn't allow choosing the initial card side
      */
@@ -638,6 +644,7 @@ public class Match {
     /**
      * Getter for the final ranking of players. Return a valid result if and only if called when the match is in the
      * FinalState, so it's finished.
+     *
      * @return Players ranking of the match at the end of it; the List order represents the ranking order, the Boolean
      * represent if the related player is a winner; this is needed since the match can end in a tie, in such case the
      * first two/three players of the List will have a True flag
@@ -648,8 +655,9 @@ public class Match {
 
     /**
      * Returns the visible objectives.
+     *
      * @return a Pair containing the two visible objectives
-    */
+     */
     public Pair<Objective, Objective> getVisibleObjectives() {
         return visibleObjectives;
     }
@@ -657,6 +665,7 @@ public class Match {
     /**
      * Getter for the four visible playable cards (i.e. resource cards and gold cards, not objectives) on the common
      * table.
+     *
      * @return a Map that links each visible playable card to a DrawSource (restricted to FIRST_VISIBLE, SECOND_VISIBLE,
      * THIRD_VISIBLE, FOURTH_VISIBLE)
      */
@@ -666,6 +675,7 @@ public class Match {
 
     /**
      * Getter for the current match state.
+     *
      * @return the current state of the match
      */
     public MatchState getCurrentState() {
@@ -675,6 +685,7 @@ public class Match {
     /**
      * Getter for the cards back on the top of the decks (i.e. those visible top cards).
      * Both of them always contain just a reign.
+     *
      * @return Pair of two reign Symbol (see {@link Symbol}.getReigns()), the first one regards the
      * top card of gold cards deck, the second one regards the top card of resource cards deck
      */
@@ -685,13 +696,13 @@ public class Match {
         Symbol goldReign;
         Symbol resourceReign;
 
-        if(goldCard == null) {
+        if (goldCard == null) {
             goldReign = null;
         } else {
             goldReign = goldCard.getReign();
         }
 
-        if(resourceCard == null) {
+        if (resourceCard == null) {
             resourceReign = null;
         } else {
             resourceReign = resourceCard.getReign();
@@ -702,6 +713,7 @@ public class Match {
 
     /**
      * Getter for the maximum number of player for the match
+     *
      * @return The maximum number of player
      */
     public int getMaxPlayers() {
@@ -710,6 +722,7 @@ public class Match {
 
     /**
      * Adds the given MatchObserver to those observers notified on match events.
+     *
      * @param observer The observer to be notified from now on when an event occurs
      */
     public void subscribeObserver(MatchObserver observer) {
@@ -724,10 +737,25 @@ public class Match {
         notifyObservers(MatchObserver::matchStarted);
     }
 
+    /**
+     * Sends a broadcast message in the chat. Notifies all observers of the event.
+     * Called by Player
+     *
+     * @param sender player that sends the message
+     * @param text   content of the message
+     */
     protected void sendBroadcastText(Player sender, String text) {
         notifyObservers(observer -> observer.someoneSentBroadcastText(sender, text));
     }
 
+    /**
+     * Sends a private message to the recipient chat. Notifies all observers of the event.
+     * Called by Player
+     *
+     * @param sender    player that sends the message
+     * @param recipient player that receives the message
+     * @param text      content of the message
+     */
     protected void sendPrivateText(Player sender, Player recipient, String text) {
         notifyObservers(observer -> observer.someoneSentPrivateText(sender, recipient, text));
     }
@@ -736,13 +764,14 @@ public class Match {
      * Notifies asynchronously all match observers, calling the passed MatchObserverCallable on each of them.
      * To be more specific: creates a thread for each match observer, each thread is appointed to call the passed callable
      * on a MatchObserver instance; then runs all of them; finally joins on them (waiting each of them to return and exit).
+     *
      * @param observerCallable The "method" to be called on each observer of the match
      */
     private void notifyObservers(MatchObserverCallable observerCallable) {
         List<Thread> threads = new ArrayList<>();
 
         // Add a Thread for each MatchObserver in observers
-        for (MatchObserver observer : observers)  {
+        for (MatchObserver observer : observers) {
             threads.add(new Thread(() -> {
                 // Each thread calls the passed MatchObserverCallable on the current observer
                 observerCallable.call(observer);
