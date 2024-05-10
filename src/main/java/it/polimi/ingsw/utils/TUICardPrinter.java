@@ -1,314 +1,255 @@
 package it.polimi.ingsw.utils;
 
+import it.polimi.ingsw.exceptions.CardException;
 import it.polimi.ingsw.gamemodel.*;
 
-import java.io.IOException;
-import com.google.gson.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
-import java.util.ArrayList;
+import java.util.*;
 
 
 public class TUICardPrinter {
-
-    // NEEDS TO BE MOVED: IT'S TUI-VIEW LOGIC
-    /*
-    Terminal term;
-
-    Pair<Integer, Integer> center;
-
-    public TUICardPrinter() throws IOException {
-        // get the terminal
-        term = org.jline.terminal.TerminalBuilder.terminal();
-        int cols = term.getWidth(),
-            rows = term.getHeight();
-
-        // center of the terminal
-        center = new Pair<>(
-                (cols % 2 == 0) ? cols/2 : (cols-1)/2,
-                (rows % 2 == 0) ? rows/2 : (rows-1)/2
-        );
-    }
-    */
+    Map<Integer, InitialCard> initialCards;
+    Map<Integer, Objective> objectives;
+    Map<Integer, GoldCard> goldCards;
+    Map<Integer, ResourceCard> resourceCards;
 
     public TUICardPrinter(){
+        CardsManager cardsManager = CardsManager.getInstance();
+
+        initialCards = cardsManager.getInitialCards();
+        objectives = cardsManager.getObjectives();
+        goldCards = cardsManager.getGoldCards();
+        resourceCards = cardsManager.getResourceCards();
+
     }
 
-    /**
-     * The method is called by the TUI View, in order to get what to print on the terminal.
-     * @param cardID ID of the requested card
-     * @param filePath path of the json file to process
-     * @param isFacingUp is the card facing up? If not, it's facing down
-     * @param startingCoord x and y coordinates (determined from the terminal size and the board status) in which the card will be rendered
-     * @return the string containing the series characters representing the side on which the card was played.
-     * @throws IOException if needed
-     */
-    public String getPrintableCardAsStringWithCoord(int cardID, String filePath, Boolean isFacingUp, Pair<Integer, Integer> startingCoord) throws IOException {
+    public String getCardString(int id, Pair<Integer, Integer> coord, Boolean isFacingUp) {
+        if (resourceCards.get(id) != null)
+            return parseCard(resourceCards.get(id), coord, isFacingUp);
+        else if (goldCards.get(id) != null)
+            return parseCard(goldCards.get(id), coord, isFacingUp);
+        return "Invalid card";
+    }
 
-        StringBuffer printableCard = new StringBuffer("\"\"\"\n"); // stringa per la stampa
+    public String getInitialString(int id, Pair<Integer, Integer> coord, Boolean isFacingUp){
+        return parseCard(initialCards.get(id), coord, isFacingUp);
+    }
 
+    public String getObjectiveString(int id, Pair<Integer, Integer> coord, Boolean isFacingUp){
+        return parseObjective(objectives.get(id), coord, isFacingUp);
+    }
+
+    private String parseCard(Card card, Pair<Integer, Integer> coord, Boolean isFacingUp){
+
+        // acquire information
+        Map<Corner, Symbol> cornersToProcess = new HashMap<>();
+        acquireCornerSymbols(cornersToProcess, card, isFacingUp);
+
+        Set<Symbol> centerToProcess = new HashSet<>();
+        acquireCenterSymbols(centerToProcess, card, isFacingUp);
+
+        // process information
+        Map<Corner, List<String>> cornersAsString = new HashMap<>();
+        processCorners(cornersAsString, cornersToProcess, coord);
+
+        Map<Integer, List<String>> centerAsString = new HashMap<>();
+        processCenter(centerAsString, centerToProcess);
+
+        // assemble the card
+
+        // dipende che tipo di carta è devo o meno pulire la board e settare il colore
+
+        String tripleBrackets = "\"\"\"";
+
+        return "TBA";
+    }
+
+    private String parseObjective(Objective card, Pair<Integer, Integer> coord, Boolean isFacingUp){
+        return "TBA";
+    }
+
+    private void acquireCornerSymbols(Map<Corner, Symbol> cornersToProcess, Card card, Boolean isFacingUp) {
         try {
-            if(filePath.contains("initial")) {
-                Map<String, List<Symbol>> jsonMap = initialJsonExtractor(filePath, cardID, isFacingUp);
-                processInitialCard(jsonMap, printableCard, isFacingUp, startingCoord);
-                printableCard.append("\"\"\"");
-            }
-            else if (filePath.contains("gold")) {
-                goldJsonExtractor(filePath, cardID, isFacingUp);
-                // TBA
-            }
-            else if (filePath.contains("resource")) {
-                resourceJsonExtractor(filePath, cardID, isFacingUp);
-                // TBA
-            }
-            else if (filePath.contains("objective")) {
-                objectiveJsonExtractor(filePath, cardID, isFacingUp);
-                // TBA
-            }
-        } catch (IOException e) {
+            Side side = (isFacingUp) ? Side.FRONT : Side.BACK;
+            Symbol topLeft = card.getSide(side).getCorner(Corner.TOP_LEFT);
+            Symbol topRight = card.getSide(side).getCorner(Corner.TOP_RIGHT);
+            Symbol bottomLeft = card.getSide(side).getCorner(Corner.BOTTOM_LEFT);
+            Symbol bottomRight = card.getSide(side).getCorner(Corner.BOTTOM_RIGHT);
+
+            cornersToProcess.put(Corner.TOP_LEFT, topLeft);
+            cornersToProcess.put(Corner.TOP_RIGHT, topRight);
+            cornersToProcess.put(Corner.BOTTOM_LEFT, bottomLeft);
+            cornersToProcess.put(Corner.BOTTOM_RIGHT, bottomRight);
+        } catch (CardException e) {
             throw new RuntimeException(e);
         }
-
-        return printableCard.toString();
-        
     }
 
-    private void processInitialCard(Map<String, List<Symbol>> jsonMap, StringBuffer printableCard, Boolean isFacingUp, Pair<Integer, Integer> startingCoord) {
-        // TBA
+    private void acquireCenterSymbols(Set<Symbol> centerToProcess, Card card, Boolean isFacingUp){
+        Side side = (isFacingUp) ? Side.FRONT : Side.BACK;
+        centerToProcess.addAll(card.getSide(side).getCenter());
     }
 
-    private void processObjectiveCard(Map<String, List<Symbol>> jsonMap, StringBuffer printableCard) {
-        // TBA
-    }
+    private void processCorners(Map<Corner, List<String>> cornersAsString, Map<Corner, Symbol> cornersToProcess, Pair<Integer, Integer> coord){
 
-    private void processGoldCard(Map<String, List<Symbol>> jsonMap, StringBuffer printableCard) {
-        // TBA
-    }
-
-    private void processResourceCard(Map<String, List<Symbol>> jsonMap, StringBuffer printableCard) {
-        // TBA
-    }
-
-    /**
-     * The method converts the corners' information to the corresponding sequence of characters.
-     * @param jsonMap is the map with the information to process (see the jsonExtractor methods for more details)
-     * @param coord starting coordinates for the card
-     * @return a map where each element (corner) is mapped to its corresponding 3 lines of characters
-     */
-    private Map<String, List<String>> processCorners(Map<String, List<Symbol>> jsonMap, Pair<Integer, Integer> coord) {
-
-        //NB. L'assegnazione complessiva del colore della carta va fatta nella funzione di processamento generale
-
-        int rows = coord.first(),
-            cols = coord.second();
-
-        Map<String, Symbol> cornersToProcess = new HashMap<>();
-        cornersToProcess.put("topLeft", jsonMap.get("topLeft").getFirst());
-        cornersToProcess.put("topRight", jsonMap.get("topRight").getFirst());
-        cornersToProcess.put("bottomLeft", jsonMap.get("bottomLeft").getFirst());
-        cornersToProcess.put("bottomRight", jsonMap.get("bottomRight").getFirst());
-
-        Map<String, List<String>> cornersAsStrings = new HashMap<>();
         List<String> singleCorner;
-        String prefix, suffix = "\n";
-        Symbol symbol;
+        String suffix;
 
-        for (String corner : cornersToProcess.keySet()) {
-
-            prefix = "\033[" + String.valueOf(rows) + ";" + String.valueOf(cols) + "H";
-            symbol = cornersToProcess.get(corner);
+        for (Corner corner : cornersToProcess.keySet()) {
             singleCorner = new ArrayList<>();
 
-            switch (corner) {
-
-                case "topLeft":
-                    if (symbol.equals(Symbol.EMPTY_CORNER)) {
-                        singleCorner.add(prefix + "┌────");
-                        prefix = "\033[" + String.valueOf(rows+1) + ";" + String.valueOf(cols) + "H";
-                        singleCorner.add(prefix + "│    ");
-                        prefix = "\033[" + String.valueOf(rows+2) + ";" + String.valueOf(cols) + "H";
-                        singleCorner.add(prefix + "│    ");
-
-                    } else {
-                        singleCorner.add(prefix + "┌───┬");
-                        prefix = "\033[" + String.valueOf(rows+1) + ";" + String.valueOf(cols) + "H";
-                        singleCorner.add(prefix + "│ " + getRightIcon(symbol) + " │");
-                        prefix = "\033[" + String.valueOf(rows+2) + ";" + String.valueOf(cols) + "H";
-                        singleCorner.add(prefix + "├───┘");
-                    }
+            switch (corner){
+                case Corner.TOP_LEFT:
+                    suffix = "";
+                    singleCorner.addAll(getTopLeftCorner(coord, cornersToProcess.get(corner), suffix));
                     break;
 
-                case "topRight":
-                    if (symbol.equals(Symbol.EMPTY_CORNER)){
-                        singleCorner.add(prefix + "────┐" + suffix);
-                        prefix = "\033[" + String.valueOf(rows+1) + ";" + String.valueOf(cols) + "H";
-                        singleCorner.add(prefix + "    │" + suffix);
-                        prefix = "\033[" + String.valueOf(rows+2) + ";" + String.valueOf(cols) + "H";
-                        singleCorner.add(prefix + "    │" + suffix);
-
-                    } else {
-                        singleCorner.add(prefix + "┬───┐" + suffix);
-                        prefix = "\033[" + String.valueOf(rows+1) + ";" + String.valueOf(cols) + "H";
-                        singleCorner.add(prefix + "│ " + getRightIcon(symbol) + " │" + suffix);
-                        prefix = "\033[" + String.valueOf(rows+2) + ";" + String.valueOf(cols) + "H";
-                        singleCorner.add(prefix + "└───┤" + suffix);
-                    }
+                case Corner.TOP_RIGHT:
+                    suffix = "\n";
+                    singleCorner.addAll(getTopRightCorner(coord, cornersToProcess.get(corner), suffix));
                     break;
 
-                case "bottomLeft":
-                    if (symbol.equals(Symbol.EMPTY_CORNER)){
-                        prefix = "\033[" + String.valueOf(rows+3) + ";" + String.valueOf(cols) + "H";
-                        singleCorner.add(prefix + "│    " );
-                        prefix = "\033[" + String.valueOf(rows+4) + ";" + String.valueOf(cols) + "H";
-                        singleCorner.add(prefix + "│    ");
-                        prefix = "\033[" + String.valueOf(rows+5) + ";" + String.valueOf(cols) + "H";
-                        singleCorner.add(prefix + "└────");
-
-                    } else {
-                        prefix = "\033[" + String.valueOf(rows+3) + ";" + String.valueOf(cols) + "H";
-                        singleCorner.add(prefix + "├───┐");
-                        prefix = "\033[" + String.valueOf(rows+4) + ";" + String.valueOf(cols) + "H";
-                        singleCorner.add(prefix + "│ " + getRightIcon(symbol) + " │");
-                        prefix = "\033[" + String.valueOf(rows+5) + ";" + String.valueOf(cols) + "H";
-                        singleCorner.add(prefix + "└───┴");
-                    }
+                case Corner.BOTTOM_LEFT:
+                    suffix = "";
+                    singleCorner.addAll(getBottomLeftCorner(coord, cornersToProcess.get(corner), suffix));
                     break;
 
-                case "bottomRight":
-                    if (symbol.equals(Symbol.EMPTY_CORNER)){
-                        prefix = "\033[" + String.valueOf(rows+3) + ";" + String.valueOf(cols) + "H";
-                        singleCorner.add(prefix + "    │" + suffix);
-                        prefix = "\033[" + String.valueOf(rows+4) + ";" + String.valueOf(cols) + "H";
-                        singleCorner.add(prefix + "    │" + suffix);
-                        prefix = "\033[" + String.valueOf(rows+5) + ";" + String.valueOf(cols) + "H";
-                        singleCorner.add(prefix + "────┘" + suffix);
-
-                    } else {
-                        prefix = "\033[" + String.valueOf(rows+3) + ";" + String.valueOf(cols) + "H";
-                        singleCorner.add(prefix + "┌───┤" + suffix);
-                        prefix = "\033[" + String.valueOf(rows+4) + ";" + String.valueOf(cols) + "H";
-                        singleCorner.add(prefix + "│ " + getRightIcon(symbol) + " │" + suffix);
-                        prefix = "\033[" + String.valueOf(rows+5) + ";" + String.valueOf(cols) + "H";
-                        singleCorner.add(prefix + "┴───┘" + suffix);
-                    }
+                case Corner.BOTTOM_RIGHT:
+                    suffix = "\n";
+                    singleCorner.addAll(getBottomRightCorner(coord, cornersToProcess.get(corner), suffix));
                     break;
 
                 default:
                     break;
+
             }
-
-            cornersAsStrings.put(corner, singleCorner);
+            cornersAsString.put(corner, singleCorner);
         }
+    }
 
-        return cornersAsStrings;
+    private void processCenter(Map<Integer, List<String>> centerAsString, Set<Symbol> centerToProcess) {
+        // TBA
+    }
+
+
+    private String getPrefixCoord(Pair<Integer, Integer> coord, int linePosition){
+        int x = coord.first(),
+                y = coord.second();
+
+        return switch (linePosition) {
+            case 1 -> "\033[" + String.valueOf(y) + ";" + String.valueOf(x) + "H";
+            case 2 -> "\033[" + String.valueOf(y + 1) + ";" + String.valueOf(x) + "H";
+            case 3 -> "\033[" + String.valueOf(y + 2) + ";" + String.valueOf(x) + "H";
+            case 4 -> "\033[" + String.valueOf(y + 3) + ";" + String.valueOf(x) + "H";
+            case 5 -> "\033[" + String.valueOf(y + 4) + ";" + String.valueOf(x) + "H";
+            case 6 -> "\033[" + String.valueOf(y + 5) + ";" + String.valueOf(x) + "H";
+            default -> "";
+        };
+
     }
 
     /**
-     * The method is used to obtain the right "icon" and color to use during the construction of a card. See {@link TUICardPrinter#processCorners(Map, Pair)} for reference.
+     * The method is used to obtain the right "icon" and color to use during the construction of a card. See { TUICardPrinter#processCorners(Map, Pair)} for reference.
      * @param symbol symbol of the specific corner
      * @return the correct sequence of character, representing the coloured symbol
      */
     private String getRightIcon(Symbol symbol) {
+        return switch (symbol) {
+            case     FULL_CORNER     -> " ";
+            case     EMPTY_CORNER    -> " ";
+            case     FUNGUS          -> "\033[31■";
+            case     ANIMAL          -> "\033[36■";
+            case     PLANT           -> "\033[32■";
+            case     INSECT          -> "\033[35■";
+            case     INKWELL         -> "\033[33I";
+            case     PARCHMENT       -> "\033[33P";
+            case     FEATHER         -> "\033[33F";
+            default  -> " ";
+        };
+    }
+
+
+    private List<String> getTopLeftCorner(Pair<Integer, Integer> coord, Symbol symbol, String suffix){
+
+        List<String> corner = new ArrayList<>();
+
         switch (symbol) {
-            case FULL_CORNER:
-                return " ";
-            case EMPTY_CORNER:
-                return " ";
-            case FUNGUS:
-                return "\033[31■";
-            case ANIMAL:
-                return "\033[36■";
-            case PLANT:
-                return "\033[32■";
-            case INSECT:
-                return "\033[35■";
-            case INKWELL:
-                return "\033[33I";
-            case PARCHMENT:
-                return "\033[33P";
-            case FEATHER:
-                return "\033[33F";
+            case Symbol.EMPTY_CORNER:
+                corner.add(getPrefixCoord(coord, 1) + "┌────" + suffix);
+                corner.add(getPrefixCoord(coord, 2) + "│    " + suffix);
+                corner.add(getPrefixCoord(coord, 3) + "│    " + suffix);
+                break;
+
             default:
-                return " ";
+                corner.add(getPrefixCoord(coord, 1) + "┌───┬" + suffix);
+                corner.add(getPrefixCoord(coord, 2) + "│ " + getRightIcon(symbol) + " │" + suffix);
+                corner.add(getPrefixCoord(coord, 3) + "├───┘" + suffix);
+                break;
         }
+
+        return corner;
     }
 
+    private List<String> getTopRightCorner(Pair<Integer, Integer> coord, Symbol symbol, String suffix){
 
-    private void processCenteredSpace(Map<String, List<Symbol>> jsonMap) {
-        // TBA
-    }
+        List<String> corner = new ArrayList<>();
 
+        switch (symbol) {
+            case Symbol.EMPTY_CORNER:
+                corner.add(getPrefixCoord(coord, 1) + "────┐" + suffix);
+                corner.add(getPrefixCoord(coord, 2) + "    │" + suffix);
+                corner.add(getPrefixCoord(coord, 3) + "    │" + suffix);
+                break;
 
-    /**
-     * It processes (from the JsonObject) the corners and the center of the given side of the card.
-     * @param sideObject the card's side to convert
-     * @param elements the map containing the association JsonKey-Symbols
-     */
-    private void extractJsonCornersAndCenter(JsonObject sideObject, Map<String, List<Symbol>> elements) {
-
-        for (String jsonKey : sideObject.keySet()) {
-
-            if(jsonKey.equals("center")){
-                JsonArray symbols = sideObject.getAsJsonArray("center");
-                List<Symbol> centerSymbols = new ArrayList<>();
-                for (JsonElement symbol : symbols) {
-                    centerSymbols.add(Symbol.valueOf(symbol.getAsString().toUpperCase()));
-                }
-                elements.put("center", centerSymbols);
-
-            }else{
-                // lista di simboli per ogni chiave del json a cui aggiungo tutti i vari simboli (più per il centro, uno per angolo)
-                List<Symbol> symbols = new ArrayList<>();
-
-                symbols.add(Symbol.valueOf(sideObject.get(jsonKey).getAsString().toUpperCase()));
-                elements.put(jsonKey, symbols);
-            }
-
+            default:
+                corner.add(getPrefixCoord(coord, 1) + "┬───┐" + suffix);
+                corner.add(getPrefixCoord(coord, 2) + "│ " + getRightIcon(symbol) + " │" + suffix);
+                corner.add(getPrefixCoord(coord, 3) + "└───┤" + suffix);
+                break;
         }
+
+        return corner;
     }
 
-    /**
-     * The method looks in the Json file of initial cards for the wanted side of the card, and processes it.
-     * @param filePath path of the json file (of initial cards) to process
-     * @param id ID of the initial card to process
-     * @param isFrontWanted is it requiring the face of the card? If not, then it is the back
-     * @return the map containing the association JsonKey-Symbols
-     * @throws IOException if needed
-     */
-    private Map<String, List<Symbol>> initialJsonExtractor(String filePath, int id, boolean isFrontWanted) throws IOException {
-        String content = new String(Files.readAllBytes(Paths.get(filePath)));
-        JsonParser parser = new JsonParser();
-        JsonObject jsonObject = parser.parse(content).getAsJsonObject();
+    private List<String> getBottomLeftCorner(Pair<Integer, Integer> coord, Symbol symbol, String suffix){
 
-        // final result
-        Map<String, List<Symbol>> elements = new HashMap<>();
+        List<String> corner = new ArrayList<>();
 
-        // itera tra tutti gli elementi del json finché non trova l'id giusto
-        for (String jasonKey : jsonObject.keySet()) {
-            JsonObject object = jsonObject.getAsJsonObject(jasonKey);
+        switch (symbol) {
+            case Symbol.EMPTY_CORNER:
+                corner.add(getPrefixCoord(coord, 4) + "│    " + suffix);
+                corner.add(getPrefixCoord(coord, 5) + "│    " + suffix);
+                corner.add(getPrefixCoord(coord, 6) + "└────" + suffix);
+                break;
 
-            // se trova la carta con l'id giusto
-            if (object.get("id").getAsInt() == id) {
-                // estrae il lato giusto della carta
-                JsonObject sideObject = isFrontWanted ? object.getAsJsonObject("front") : object.getAsJsonObject("back");
-
-                extractJsonCornersAndCenter(sideObject, elements);
-            }
-            break;
+            default:
+                corner.add(getPrefixCoord(coord, 4) + "├───┐" + suffix);
+                corner.add(getPrefixCoord(coord, 5) + "│ " + getRightIcon(symbol) + " │" + suffix);
+                corner.add(getPrefixCoord(coord, 6) + "└───┴" + suffix);
+                break;
         }
-        return elements;
+
+        return corner;
     }
 
-    private void objectiveJsonExtractor(String filePath, int id, boolean isFrontWanted) throws IOException {
-        // TBA
+    private List<String> getBottomRightCorner(Pair<Integer, Integer> coord, Symbol symbol, String suffix){
+
+        List<String> corner = new ArrayList<>();
+
+        switch (symbol) {
+            case Symbol.EMPTY_CORNER:
+                corner.add(getPrefixCoord(coord, 4) + "    │" + suffix);
+                corner.add(getPrefixCoord(coord, 5) + "    │" + suffix);
+                corner.add(getPrefixCoord(coord, 6) + "────┘" + suffix);
+                break;
+
+            default:
+                corner.add(getPrefixCoord(coord, 4) + "┌───┤" + suffix);
+                corner.add(getPrefixCoord(coord, 5) + "│ " + getRightIcon(symbol) + " │" + suffix);
+                corner.add(getPrefixCoord(coord, 6) + "┴───┘" + suffix);
+                break;
+        }
+
+        return corner;
     }
-    private void goldJsonExtractor(String filePath, int id, boolean isFrontWanted) throws IOException {
-        // TBA
-    }
-    private void resourceJsonExtractor(String filePath, int id, boolean isFrontWanted) throws IOException {
-        // TBA
-    }
+
 }
