@@ -1,19 +1,36 @@
 package it.polimi.ingsw.client.network;
 
+import java.io.IOException;
+import java.net.Socket;
 import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Map;
-
-import it.polimi.ingsw.gamemodel.Color;
-import it.polimi.ingsw.gamemodel.DrawSource;
-import it.polimi.ingsw.gamemodel.InitialCard;
-import it.polimi.ingsw.gamemodel.Objective;
-import it.polimi.ingsw.gamemodel.PlayableCard;
-import it.polimi.ingsw.gamemodel.Side;
-import it.polimi.ingsw.gamemodel.Symbol;
+import it.polimi.ingsw.gamemodel.*;
+import it.polimi.ingsw.network.messages.Message;
+import it.polimi.ingsw.network.messages.actions.*;
+import it.polimi.ingsw.network.tcp.IOHandler;
 import it.polimi.ingsw.utils.Pair;
 
-public class NetworkViewTCP extends NetworkView{
+public class NetworkViewTCP extends NetworkView {
+    private final String username;
+    private IOHandler io;
+
+    public NetworkViewTCP(String username, Socket socket) {
+        this.username = username;
+        try {
+            this.io = new IOHandler(socket);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void sendMessage(Message msg) {
+        try {
+            this.io.writeMsg(msg);
+        } catch (IOException e) {
+            // TODO: error handling
+        }
+    }
 
     @Override
     public void giveLobbyInfo(List<String> playersUsernames) {
@@ -21,7 +38,9 @@ public class NetworkViewTCP extends NetworkView{
     }
 
     @Override
-    public void matchStarted(Map<Color, String> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands, Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards, Pair<Symbol, Symbol> decksTopReigns) {
+    public void matchStarted(Map<Color, String> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands,
+            Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards,
+            Pair<Symbol, Symbol> decksTopReigns) {
 
     }
 
@@ -62,7 +81,8 @@ public class NetworkViewTCP extends NetworkView{
     }
 
     @Override
-    public void someoneDrewCard(String someoneUsername, DrawSource source, PlayableCard card, PlayableCard replacementCard, Symbol replacementReign) throws RemoteException {
+    public void someoneDrewCard(String someoneUsername, DrawSource source, PlayableCard card, PlayableCard replacementCard,
+            Symbol replacementReign) throws RemoteException {
 
     }
 
@@ -90,35 +110,62 @@ public class NetworkViewTCP extends NetworkView{
     public void someoneSentPrivateText(String someoneUsername, String text) throws RemoteException {
 
     }
-
+    
+    /**
+     * sends a {@link drawinitialcardmessage}
+     */
     @Override
     public void drawInitialCard() {
-
+        this.sendMessage(new DrawInitialCardMessage(this.username));
     }
-
+    
+    /**
+     * Sends a {@link ChooseInitialCardSideMessage}
+     *
+     * @param side the chosen side
+     */
     @Override
     public void chooseInitialCardSide(Side side) {
-
+        this.sendMessage(new ChooseInitialCardSideMessage(this.username, side));
     }
-
+    
+    /**
+     * Sends a {@link DrawSecretObjectivesMessage}
+     */
     @Override
     public void drawSecretObjectives() {
-
+        this.sendMessage(new DrawSecretObjectivesMessage(this.username));
     }
-
+    
+    /**
+     * Sends a {@link ChooseSecretObjectiveMessage}
+     *
+     * @param objective the chosen objective
+     */
     @Override
     public void chooseSecretObjective(Objective objective) {
-
+        this.sendMessage(new ChooseSecretObjectiveMessage(this.username, objective.getID()));
     }
-
+    
+    /**
+     * Sends a {@link PlayCardMessage}
+     *
+     * @param coords the coordinates the card should be played on
+     * @param card the chosen card
+     * @param side the card's chosen side
+     */
     @Override
     public void playCard(Pair<Integer, Integer> coords, PlayableCard card, Side side) {
-        // Send a PlayCardMessage
-        // this.sendMessage(new PlayCardMessage(...));
+        this.sendMessage(new PlayCardMessage(this.username, coords, card.getId(), side));
     }
-
+    
+    /**
+     * Sends a {@link DrawCardMessage} 
+     *
+     * @param source from where the card should be drawn
+     */
     @Override
     public void drawCard(DrawSource source) {
-
+        this.sendMessage(new DrawCardMessage(this.username, source));
     }
 }
