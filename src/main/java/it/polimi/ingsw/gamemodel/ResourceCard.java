@@ -23,7 +23,7 @@ public final class ResourceCard extends PlayableCard {
     /**
      * Getter for the ResourceCard class
      *
-     * @return the quantity requirement for the gold card to be played.
+     * @return points held by the card
      */
     public int getPoints() {
         return this.points;

@@ -61,6 +61,15 @@ public final class GoldCard extends PlayableCard {
     }
 
     /**
+     * Getter for the GoldCard class
+     *
+     * @return points held by the card
+     */
+    public int getPoints() {
+        return this.points;
+    }
+
+    /**
      * Will compute the total points this card gives based on the board it's played on.
      * It MUST be called AFTER the placement of the gold card
      *

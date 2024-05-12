@@ -48,4 +48,13 @@ public class QuantityRequirement extends Requirement {
 
         return min;
     }
+
+    /**
+     * Getter for the QuantityRequirement class
+     *
+     * @return Map<Symbol, Integer> representing the card's placement requirements
+     */
+    public Map<Symbol, Integer> getReqs() {
+        return this.reqs;
+    }
 }
