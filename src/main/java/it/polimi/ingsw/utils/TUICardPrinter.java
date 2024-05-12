@@ -44,23 +44,20 @@ public class TUICardPrinter {
 
     private String parseCard(Card card, Pair<Integer, Integer> coord, Boolean isFacingUp) throws CardException {
 
-        if (isFacingUp){ // ???
-
-            // assemble the card
-
-            // dipende che tipo di carta è devo o meno pulire la board e settare il colore
-
-        } else {
-
-            // ???
-        }
-
         // acquire information
         Map<Corner, Symbol> cornersToProcess = new HashMap<>();
         acquireCornerSymbols(cornersToProcess, card, isFacingUp);
 
         Set<Symbol> centerToProcess = new HashSet<>();
         acquireCenterSymbols(centerToProcess, card, isFacingUp);
+
+        String cardColor;
+        switch (card) {
+            case InitialCard initialCard        -> cardColor = "\033[0m";
+            case GoldCard goldCard              -> cardColor = getRightColor(goldCard.getReign());
+            case ResourceCard resourceCard      -> cardColor = getRightColor(resourceCard.getReign());
+            default                             -> throw new CardException("Invalid card type: " + card.getClass() + "!");
+        }
 
         // process information
         Map<Corner, List<String>> cornersAsString = new HashMap<>();
@@ -74,13 +71,66 @@ public class TUICardPrinter {
             default                             -> throw new CardException("Invalid card type: " + card.getClass() + "!");
         }
 
-        String tripleBrackets = "\"\"\"";
+        // assemble the string
+        String tripleBrackets = "\"\"\"", newLine = "\n";
+        StringBuilder printableCard = new StringBuilder(tripleBrackets + newLine).append(cardColor).append(newLine);
+        assembleCard(printableCard, cornersAsString, centerAsString); // if it doesn't work, use the safe version assembleCardSafe
+        printableCard.append(newLine);
 
-        return "TBA";
+        // card assembled
+        return printableCard.toString();
     }
 
     private String parseObjective(Objective card, Pair<Integer, Integer> coord, Boolean isFacingUp){
         return "TBA";
+    }
+
+    // cool algorithmic version
+    private void assembleCard(StringBuilder printableCard, Map<Corner, List<String>> cornersAsString, Map<Integer, String> centerAsString){
+
+        List<Corner> left = new ArrayList<>(), right = new ArrayList<>();
+        left.add(Corner.TOP_LEFT);
+        left.add(Corner.BOTTOM_LEFT);
+        right.add(Corner.TOP_RIGHT);
+        right.add(Corner.BOTTOM_RIGHT);
+
+        int i, j, k;
+        for(i = 0; i < 6; i++){
+            j = (i <= 2) ? 0 : 1;
+            k = i % 3;
+
+            printableCard.append(cornersAsString.get(left.get(j)).get(k));
+            printableCard.append(centerAsString.get(i));
+            printableCard.append(cornersAsString.get(right.get(j)).get(k));
+        }
+
+    }
+
+    // boring safe version
+    private void assembleCardSafe(StringBuilder printableCard, Map<Corner, List<String>> cornersAsString, Map<Integer, String> centerAsString){
+        printableCard.append(cornersAsString.get(Corner.TOP_LEFT).get(0));
+        printableCard.append(centerAsString.get(0));
+        printableCard.append(cornersAsString.get(Corner.TOP_RIGHT).get(0));
+
+        printableCard.append(cornersAsString.get(Corner.TOP_LEFT).get(1));
+        printableCard.append(centerAsString.get(1));
+        printableCard.append(cornersAsString.get(Corner.TOP_RIGHT).get(1));
+
+        printableCard.append(cornersAsString.get(Corner.TOP_LEFT).get(2));
+        printableCard.append(centerAsString.get(2));
+        printableCard.append(cornersAsString.get(Corner.TOP_RIGHT).get(2));
+
+        printableCard.append(cornersAsString.get(Corner.BOTTOM_LEFT).get(0));
+        printableCard.append(centerAsString.get(3));
+        printableCard.append(cornersAsString.get(Corner.BOTTOM_RIGHT).get(0));
+
+        printableCard.append(cornersAsString.get(Corner.BOTTOM_LEFT).get(1));
+        printableCard.append(centerAsString.get(4));
+        printableCard.append(cornersAsString.get(Corner.BOTTOM_RIGHT).get(1));
+
+        printableCard.append(cornersAsString.get(Corner.BOTTOM_LEFT).get(2));
+        printableCard.append(centerAsString.get(5));
+        printableCard.append(cornersAsString.get(Corner.BOTTOM_RIGHT).get(2));
     }
 
     private void acquireCornerSymbols(Map<Corner, Symbol> cornersToProcess, Card card, Boolean isFacingUp) {
@@ -254,7 +304,7 @@ public class TUICardPrinter {
             case     PLANT                          -> "\033[32";
             case     INSECT                         -> "\033[35";
             case     INKWELL, PARCHMENT, FEATHER    -> "\033[33";
-            default  -> "";
+            default                                 -> "";
         };
     }
 
@@ -266,7 +316,7 @@ public class TUICardPrinter {
             case     PARCHMENT                      -> "P";
             case     FEATHER                        -> "F";
             case     CORNER_OBJ                     -> "◳";
-            default  -> " ";
+            default                                 -> " ";
         };
     }
 
