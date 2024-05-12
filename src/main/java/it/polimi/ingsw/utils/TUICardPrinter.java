@@ -40,11 +40,11 @@ public class TUICardPrinter {
         return parseCard(initialCards.get(id), coord, isFacingUp);
     }
 
-    public String getObjectiveString(int id, Pair<Integer, Integer> coord, Boolean isFacingUp) throws CardException {
+    public String getObjectiveString(int id, Pair<Integer, Integer> coord) throws CardException {
         if (objectives.get(id) == null)
             throw new CardException("Invalid card type!");
 
-        return parseObjective(objectives.get(id), coord, isFacingUp);
+        return parseObjective(objectives.get(id), coord);
     }
 
     // NO JAVADOC
