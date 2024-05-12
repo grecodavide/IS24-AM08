@@ -5,6 +5,7 @@ import java.net.Socket;
 import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Map;
+
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.network.messages.Message;
 import it.polimi.ingsw.network.messages.actions.*;
@@ -24,14 +25,7 @@ public class NetworkViewTCP extends NetworkView {
         }
     }
 
-    private void sendMessage(Message msg) {
-        try {
-            this.io.writeMsg(msg);
-        } catch (IOException e) {
-            // TODO: error handling
-        }
-    }
-
+    // GRAPHICAL
     @Override
     public void giveLobbyInfo(List<String> playersUsernames) {
 
@@ -111,6 +105,15 @@ public class NetworkViewTCP extends NetworkView {
 
     }
     
+    // NETWORK
+    private void sendMessage(Message msg) {
+        try {
+            this.io.writeMsg(msg);
+        } catch (IOException e) {
+            // TODO: error handling
+        }
+    }
+
     /**
      * sends a {@link drawinitialcardmessage}
      */
