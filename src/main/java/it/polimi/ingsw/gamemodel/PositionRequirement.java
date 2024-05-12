@@ -76,4 +76,13 @@ public class PositionRequirement extends Requirement {
         return timesMet;
     }
 
+    /**
+     * Getter for the PositionRequirement class
+     * @return the positioning requirement for the objective card to be activated
+     *
+     */
+    public Map<Pair<Integer, Integer>, Symbol> getReqs(){
+        return this.reqs;
+    }
+
 }
