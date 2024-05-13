@@ -1,12 +1,11 @@
 package it.polimi.ingsw.controllers;
 
-import it.polimi.ingsw.client.RemoteViewInterface;
-import it.polimi.ingsw.gamemodel.*;
-import it.polimi.ingsw.utils.Pair;
-
 import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Map;
+import it.polimi.ingsw.client.network.RemoteViewInterface;
+import it.polimi.ingsw.gamemodel.*;
+import it.polimi.ingsw.utils.Pair;
 
 public class TestClient implements RemoteViewInterface {
 
