@@ -1,5 +1,6 @@
 package it.polimi.ingsw.utils;
 
+import java.io.IOException;
 import java.util.*;
 import it.polimi.ingsw.exceptions.CardException;
 import it.polimi.ingsw.gamemodel.*;
@@ -161,34 +162,6 @@ public class TUICardPrinter {
             printableCard.append(cornersAsString.get(right.get(j)).get(k));
         }
 
-    }
-
-    // boring safe version
-    private void assembleCardSafe(StringBuilder printableCard, Map<Corner, List<String>> cornersAsString,
-            Map<Integer, String> centerAsString) {
-        printableCard.append(cornersAsString.get(Corner.TOP_LEFT).get(0));
-        printableCard.append(centerAsString.get(0));
-        printableCard.append(cornersAsString.get(Corner.TOP_RIGHT).get(0));
-
-        printableCard.append(cornersAsString.get(Corner.TOP_LEFT).get(1));
-        printableCard.append(centerAsString.get(1));
-        printableCard.append(cornersAsString.get(Corner.TOP_RIGHT).get(1));
-
-        printableCard.append(cornersAsString.get(Corner.TOP_LEFT).get(2));
-        printableCard.append(centerAsString.get(2));
-        printableCard.append(cornersAsString.get(Corner.TOP_RIGHT).get(2));
-
-        printableCard.append(cornersAsString.get(Corner.BOTTOM_LEFT).get(0));
-        printableCard.append(centerAsString.get(3));
-        printableCard.append(cornersAsString.get(Corner.BOTTOM_RIGHT).get(0));
-
-        printableCard.append(cornersAsString.get(Corner.BOTTOM_LEFT).get(1));
-        printableCard.append(centerAsString.get(4));
-        printableCard.append(cornersAsString.get(Corner.BOTTOM_RIGHT).get(1));
-
-        printableCard.append(cornersAsString.get(Corner.BOTTOM_LEFT).get(2));
-        printableCard.append(centerAsString.get(5));
-        printableCard.append(cornersAsString.get(Corner.BOTTOM_RIGHT).get(2));
     }
 
 
@@ -355,7 +328,7 @@ public class TUICardPrinter {
 
         switch (objective.getReq()) {
             case PositionRequirement positionRequirement:
-                getPositioningString(centerAsString, positioningClassifier(positionRequirement.getReqs()));
+                positioningClassifier(centerAsString, positionRequirement.getReqs());
                 break;
             case QuantityRequirement quantityRequirement:
                 centerAsString.put(2, "        ");
@@ -526,129 +499,41 @@ public class TUICardPrinter {
 
     }
 
-    private void getPositioningString(Map<Integer, String> cornersAsString, Pair<Positioning, List<Symbol>> positioning) {
-
-        switch (positioning.first()) {
-            case DIAGONAL_LF:
-                cornersAsString.put(4, getPosixIcon(positioning.second().get(0)) + "      ");
-                break;
-            case DIAGONAL_RG:
-                cornersAsString.put(2, getPosixIcon(positioning.second().get(0)) + "      ");
-                cornersAsString.put(3, "   " + getPosixIcon(positioning.second().get(0)) + "   ");
-                cornersAsString.put(4, "      " + getPosixIcon(positioning.second().get(0)));
-                break;
-            case DIAG_VERT_LF:
-                cornersAsString.put(2, "      " + getPosixIcon(positioning.second().get(1)));
-                cornersAsString.put(3, "   " + getPosixIcon(positioning.second().get(0)) + "   ");
-                cornersAsString.put(4, "   " + getPosixIcon(positioning.second().get(0)) + "   ");
-                break;
-            case DIAG_VERT_RG:
-                cornersAsString.put(2, getPosixIcon(positioning.second().get(1)) + "      ");
-                cornersAsString.put(3, "   " + getPosixIcon(positioning.second().get(0)) + "   ");
-                cornersAsString.put(4, "   " + getPosixIcon(positioning.second().get(0)) + "   ");
-                break;
-            case VERT_DIAG_LF:
-                cornersAsString.put(2, "   " + getPosixIcon(positioning.second().get(0)) + "   ");
-                cornersAsString.put(3, "   " + getPosixIcon(positioning.second().get(0)) + "   ");
-                cornersAsString.put(4, getPosixIcon(positioning.second().get(1)) + "      ");
-                break;
-            case VERT_DIAG_RG:
-                cornersAsString.put(2, "   " + getPosixIcon(positioning.second().get(0)) + "   ");
-                cornersAsString.put(3, "   " + getPosixIcon(positioning.second().get(0)) + "   ");
-                cornersAsString.put(4, "      " + getPosixIcon(positioning.second().get(1)));
-                break;
-            default:
-                break;
-        }
-    }
-
 
     // UTILS
-    private void coordSorter(List<Pair<Integer, Integer>> coordList) {
+    private void positioningClassifier(Map<Integer, String> centerAsString, Map<Pair<Integer, Integer>, Symbol> reqs) {
+        Pair<Integer, Integer> bottomMost = null;
+        Pair<Integer, Integer> leftMost = null;
 
-        // comparator sorts by the second element of the pair, in descending order
-        Comparator<Pair<Integer, Integer>> comparator = new Comparator<Pair<Integer, Integer>>() {
-            @Override
-            public int compare(Pair<Integer, Integer> p1, Pair<Integer, Integer> p2) {
-                // ret a negative / zero / positive int as the first argument is less / equal / greater than the
-                // second
-                return Integer.compare(p2.second(), p1.second());
+
+        for (Pair<Integer, Integer> coord : reqs.keySet()) {
+            if (bottomMost == null || coord.second() < bottomMost.second()) {
+                bottomMost = coord;
             }
-        };
-
-        Collections.sort(coordList, comparator); // sort the list
-
-    }
-
-    private Boolean doesItGoVertical(Pair<Integer, Integer> upper, Pair<Integer, Integer> lower) {
-
-        int upperY = upper.second(), lowerY = lower.second();
-
-        return (upperY == lowerY + 2);
-    }
-
-    private Pair<Positioning, List<Symbol>> positioningClassifier(Map<Pair<Integer, Integer>, Symbol> posix) {
-
-        // sort coordinates
-        List<Pair<Integer, Integer>> coordList = new ArrayList<>(posix.keySet());
-        coordSorter(coordList);
-
-        Pair<Integer, Integer> first = coordList.get(0), second = coordList.get(1), third = coordList.get(2);
-
-        // check
-        if (doesItGoVertical(first, second)) {
-
-            if (third.first() == second.first() + 1) {
-                Positioning positioning = Positioning.VERT_DIAG_RG;
-                List<Symbol> symbolList = new ArrayList<>();
-                symbolList.add(posix.get(first));
-                symbolList.add(posix.get(third));
-                return new Pair<>(positioning, symbolList);
-
-            } else if (third.first() == second.first() - 1) {
-                Positioning positioning = Positioning.VERT_DIAG_LF;
-                List<Symbol> symbolList = new ArrayList<>();
-                symbolList.add(posix.get(first));
-                symbolList.add(posix.get(third));
-                return new Pair<>(positioning, symbolList);
-
+            if (leftMost == null || coord.first() < leftMost.first()) {
+                leftMost = coord;
             }
         }
 
-        if (doesItGoVertical(second, third)) {
+        Integer col, row;
+        for (Pair<Integer, Integer> coord : reqs.keySet()) {
+            row = 2-(coord.second()-bottomMost.second()); // 2 (max) - (curr - offset): we go top to bottom
+            col = coord.first()-leftMost.first();         // simply offset
 
-            if (second.first() == first.first() + 1) {
-                Positioning positioning = Positioning.DIAG_VERT_RG;
-                List<Symbol> symbolList = new ArrayList<>();
-                symbolList.add(posix.get(second));
-                symbolList.add(posix.get(first));
-                return new Pair<>(positioning, symbolList);
-
-            } else if (second.first() == first.first() - 1) {
-                Positioning positioning = Positioning.DIAG_VERT_LF;
-                List<Symbol> symbolList = new ArrayList<>();
-                symbolList.add(posix.get(second));
-                symbolList.add(posix.get(first));
-                return new Pair<>(positioning, symbolList);
-
+            // String building (with horizontal spaces)
+            String tmp = "";
+            for (int i = 0; i < col; i++) {
+                tmp += "  ";
             }
+            tmp+=getPosixIcon(reqs.get(coord));
+            for (int i = col; i < 3; i++) {
+                tmp += "  ";
+            }
+
+            centerAsString.put(row+2, tmp); // +2: start from second line of card
         }
-
-        if (second.first() == first.first() + 1) {
-            Positioning positioning = Positioning.DIAGONAL_RG;
-            List<Symbol> symbolList = new ArrayList<>();
-            symbolList.add(posix.get(first));
-            return new Pair<>(positioning, symbolList);
-
-        }
-        // else if (second.first() == first.first() - 1) {
-        Positioning positioning = Positioning.DIAGONAL_LF;
-        List<Symbol> symbolList = new ArrayList<>();
-        symbolList.add(posix.get(first));
-        return new Pair<>(positioning, symbolList);
-        // }
-
     }
+
 
     private String getObjectiveSpace(QuantityRequirement reqs) {
         switch (reqs.getReqs().size()) {
@@ -664,4 +549,250 @@ public class TUICardPrinter {
         }
     }
 
+
+
+    public static void main(String[] args) throws IOException, CardException {
+        TUICardPrinter printer = new TUICardPrinter();
+
+        System.out.println("\033[2J");
+        // ----------------
+        // -- OBJECTIVES --
+        // ----------------
+        System.out.println(printer.getObjectiveString(1,  new Pair<Integer, Integer>(10, 10)));
+        System.out.println(printer.getObjectiveString(2,  new Pair<Integer, Integer>(30, 10)));
+        System.out.println(printer.getObjectiveString(3,  new Pair<Integer, Integer>(50, 10)));
+        System.out.println(printer.getObjectiveString(4,  new Pair<Integer, Integer>(70, 10)));
+        System.out.println(printer.getObjectiveString(5,  new Pair<Integer, Integer>(90, 10)));
+        System.out.println(printer.getObjectiveString(6,  new Pair<Integer, Integer>(110, 10)));
+        System.out.println(printer.getObjectiveString(7,  new Pair<Integer, Integer>(130, 10)));
+        System.out.println(printer.getObjectiveString(8,  new Pair<Integer, Integer>(150, 10)));
+
+        System.out.println(printer.getObjectiveString(9,  new Pair<Integer, Integer> (10, 20)));
+        System.out.println(printer.getObjectiveString(10, new Pair<Integer, Integer>(30, 20)));
+        System.out.println(printer.getObjectiveString(11, new Pair<Integer, Integer>(50, 20)));
+        System.out.println(printer.getObjectiveString(12, new Pair<Integer, Integer>(70, 20)));
+        System.out.println(printer.getObjectiveString(13, new Pair<Integer, Integer>(90, 20)));
+        System.out.println(printer.getObjectiveString(14, new Pair<Integer, Integer>(110, 20)));
+        System.out.println(printer.getObjectiveString(15, new Pair<Integer, Integer>(130, 20)));
+        System.out.println(printer.getObjectiveString(16, new Pair<Integer, Integer>(150, 20)));
+
+
+        // // --------------
+        // // -- INITIALS --
+        // // --------------
+        // System.out.println(printer.getInitialString(1, new Pair<Integer, Integer>(10, 10), true));
+        // System.out.println(printer.getInitialString(2, new Pair<Integer, Integer>(30, 10), true));
+        // System.out.println(printer.getInitialString(3, new Pair<Integer, Integer>(50, 10), true));
+        // System.out.println(printer.getInitialString(4, new Pair<Integer, Integer>(70, 10), true));
+        // System.out.println(printer.getInitialString(5, new Pair<Integer, Integer>(90, 10), true));
+        // System.out.println(printer.getInitialString(6, new Pair<Integer, Integer>(110, 10), true));
+
+        // System.out.println(printer.getInitialString(1, new Pair<Integer, Integer>(10, 20), false));
+        // System.out.println(printer.getInitialString(2, new Pair<Integer, Integer>(30, 20), false));
+        // System.out.println(printer.getInitialString(3, new Pair<Integer, Integer>(50, 20), false));
+        // System.out.println(printer.getInitialString(4, new Pair<Integer, Integer>(70, 20), false));
+        // System.out.println(printer.getInitialString(5, new Pair<Integer, Integer>(90, 20), false));
+        // System.out.println(printer.getInitialString(6, new Pair<Integer, Integer>(110, 20), false));
+
+        // // --------------
+        // // -- PLAYABLE --
+        // // --------------
+        // System.out.println(printer.getCardString( 1, new Pair<Integer, Integer>(10,  10), true));
+        // System.out.println(printer.getCardString( 2, new Pair<Integer, Integer>(30,  10), true));
+        // System.out.println(printer.getCardString( 3, new Pair<Integer, Integer>(50,  10), true));
+        // System.out.println(printer.getCardString( 4, new Pair<Integer, Integer>(70,  10), true));
+        // System.out.println(printer.getCardString( 5, new Pair<Integer, Integer>(90,  10), true));
+        // System.out.println(printer.getCardString( 6, new Pair<Integer, Integer>(110, 10), true));
+        // System.out.println(printer.getCardString( 7, new Pair<Integer, Integer>(130, 10), true));
+        // System.out.println(printer.getCardString( 8, new Pair<Integer, Integer>(150, 10), true));
+        // 
+        // System.out.println(printer.getCardString( 9, new Pair<Integer, Integer>(10,  20), true));
+        // System.out.println(printer.getCardString(10, new Pair<Integer, Integer>(30,  20), true));
+        // System.out.println(printer.getCardString(11, new Pair<Integer, Integer>(50,  20), true));
+        // System.out.println(printer.getCardString(12, new Pair<Integer, Integer>(70,  20), true));
+        // System.out.println(printer.getCardString(13, new Pair<Integer, Integer>(90,  20), true));
+        // System.out.println(printer.getCardString(14, new Pair<Integer, Integer>(110, 20), true));
+        // System.out.println(printer.getCardString(15, new Pair<Integer, Integer>(130, 20), true));
+        // System.out.println(printer.getCardString(16, new Pair<Integer, Integer>(150, 20), true));
+
+        // System.out.println(printer.getCardString(17, new Pair<Integer, Integer>(10,  30), true));
+        // System.out.println(printer.getCardString(18, new Pair<Integer, Integer>(30,  30), true));
+        // System.out.println(printer.getCardString(19, new Pair<Integer, Integer>(50,  30), true));
+        // System.out.println(printer.getCardString(20, new Pair<Integer, Integer>(70,  30), true));
+        // System.out.println(printer.getCardString(21, new Pair<Integer, Integer>(90,  30), true));
+        // System.out.println(printer.getCardString(22, new Pair<Integer, Integer>(110, 30), true));
+        // System.out.println(printer.getCardString(23, new Pair<Integer, Integer>(130, 30), true));
+        // System.out.println(printer.getCardString(24, new Pair<Integer, Integer>(150, 30), true));
+
+        // System.out.println(printer.getCardString(25, new Pair<Integer, Integer>(10,  40), true));
+        // System.out.println(printer.getCardString(26, new Pair<Integer, Integer>(30,  40), true));
+        // System.out.println(printer.getCardString(27, new Pair<Integer, Integer>(50,  40), true));
+        // System.out.println(printer.getCardString(28, new Pair<Integer, Integer>(70,  40), true));
+        // System.out.println(printer.getCardString(29, new Pair<Integer, Integer>(90,  40), true));
+        // System.out.println(printer.getCardString(30, new Pair<Integer, Integer>(110, 40), true));
+        // System.out.println(printer.getCardString(31, new Pair<Integer, Integer>(130, 40), true));
+        // System.out.println(printer.getCardString(32, new Pair<Integer, Integer>(150, 40), true));
+
+        // System.out.println(printer.getCardString(33, new Pair<Integer, Integer>(10,  50), true));
+        // System.out.println(printer.getCardString(34, new Pair<Integer, Integer>(30,  50), true));
+        // System.out.println(printer.getCardString(35, new Pair<Integer, Integer>(50,  50), true));
+        // System.out.println(printer.getCardString(36, new Pair<Integer, Integer>(70,  50), true));
+        // System.out.println(printer.getCardString(37, new Pair<Integer, Integer>(90,  50), true));
+        // System.out.println(printer.getCardString(38, new Pair<Integer, Integer>(110, 50), true));
+        // System.out.println(printer.getCardString(39, new Pair<Integer, Integer>(130, 50), true));
+        // System.out.println(printer.getCardString(40, new Pair<Integer, Integer>(150, 50), true));
+
+        // System.out.println(printer.getCardString(41, new Pair<Integer, Integer>(10,  10), true));
+        // System.out.println(printer.getCardString(42, new Pair<Integer, Integer>(30,  10), true));
+        // System.out.println(printer.getCardString(43, new Pair<Integer, Integer>(50,  10), true));
+        // System.out.println(printer.getCardString(44, new Pair<Integer, Integer>(70,  10), true));
+        // System.out.println(printer.getCardString(45, new Pair<Integer, Integer>(90,  10), true));
+        // System.out.println(printer.getCardString(46, new Pair<Integer, Integer>(110, 10), true));
+        // System.out.println(printer.getCardString(47, new Pair<Integer, Integer>(130, 10), true));
+        // System.out.println(printer.getCardString(48, new Pair<Integer, Integer>(150, 10), true));
+        // 
+        // System.out.println(printer.getCardString(49, new Pair<Integer, Integer>(10,  20), true));
+        // System.out.println(printer.getCardString(50, new Pair<Integer, Integer>(30,  20), true));
+        // System.out.println(printer.getCardString(51, new Pair<Integer, Integer>(50,  20), true));
+        // System.out.println(printer.getCardString(52, new Pair<Integer, Integer>(70,  20), true));
+        // System.out.println(printer.getCardString(53, new Pair<Integer, Integer>(90,  20), true));
+        // System.out.println(printer.getCardString(54, new Pair<Integer, Integer>(110, 20), true));
+        // System.out.println(printer.getCardString(55, new Pair<Integer, Integer>(130, 20), true));
+        // System.out.println(printer.getCardString(56, new Pair<Integer, Integer>(150, 20), true));
+
+        // System.out.println(printer.getCardString(57, new Pair<Integer, Integer>(10,  30), true));
+        // System.out.println(printer.getCardString(58, new Pair<Integer, Integer>(30,  30), true));
+        // System.out.println(printer.getCardString(59, new Pair<Integer, Integer>(50,  30), true));
+        // System.out.println(printer.getCardString(60, new Pair<Integer, Integer>(70,  30), true));
+        // System.out.println(printer.getCardString(61, new Pair<Integer, Integer>(90,  30), true));
+        // System.out.println(printer.getCardString(62, new Pair<Integer, Integer>(110, 30), true));
+        // System.out.println(printer.getCardString(63, new Pair<Integer, Integer>(130, 30), true));
+        // System.out.println(printer.getCardString(64, new Pair<Integer, Integer>(150, 30), true));
+
+        // System.out.println(printer.getCardString(65, new Pair<Integer, Integer>(10,  40), true));
+        // System.out.println(printer.getCardString(66, new Pair<Integer, Integer>(30,  40), true));
+        // System.out.println(printer.getCardString(67, new Pair<Integer, Integer>(50,  40), true));
+        // System.out.println(printer.getCardString(68, new Pair<Integer, Integer>(70,  40), true));
+        // System.out.println(printer.getCardString(69, new Pair<Integer, Integer>(90,  40), true));
+        // System.out.println(printer.getCardString(70, new Pair<Integer, Integer>(110, 40), true));
+        // System.out.println(printer.getCardString(71, new Pair<Integer, Integer>(130, 40), true));
+        // System.out.println(printer.getCardString(72, new Pair<Integer, Integer>(150, 40), true));
+
+        // System.out.println(printer.getCardString(73, new Pair<Integer, Integer>(10,  50), true));
+        // System.out.println(printer.getCardString(74, new Pair<Integer, Integer>(30,  50), true));
+        // System.out.println(printer.getCardString(75, new Pair<Integer, Integer>(50,  50), true));
+        // System.out.println(printer.getCardString(76, new Pair<Integer, Integer>(70,  50), true));
+        // System.out.println(printer.getCardString(77, new Pair<Integer, Integer>(90,  50), true));
+        // System.out.println(printer.getCardString(78, new Pair<Integer, Integer>(110, 50), true));
+        // System.out.println(printer.getCardString(79, new Pair<Integer, Integer>(130, 50), true));
+        // System.out.println(printer.getCardString(80, new Pair<Integer, Integer>(150, 50), true));
+
+        // System.out.println(printer.getInitialString(1, new Pair<Integer, Integer>(10, 10), true));
+        // System.out.println(printer.getInitialString(2, new Pair<Integer, Integer>(30, 10), true));
+        // System.out.println(printer.getInitialString(3, new Pair<Integer, Integer>(50, 10), true));
+        // System.out.println(printer.getInitialString(4, new Pair<Integer, Integer>(70, 10), true));
+        // System.out.println(printer.getInitialString(5, new Pair<Integer, Integer>(90, 10), true));
+        // System.out.println(printer.getInitialString(6, new Pair<Integer, Integer>(110, 10), true));
+
+        // System.out.println(printer.getInitialString(1, new Pair<Integer, Integer>(10, 20), false));
+        // System.out.println(printer.getInitialString(2, new Pair<Integer, Integer>(30, 20), false));
+        // System.out.println(printer.getInitialString(3, new Pair<Integer, Integer>(50, 20), false));
+        // System.out.println(printer.getInitialString(4, new Pair<Integer, Integer>(70, 20), false));
+        // System.out.println(printer.getInitialString(5, new Pair<Integer, Integer>(90, 20), false));
+        // System.out.println(printer.getInitialString(6, new Pair<Integer, Integer>(110, 20), false));
+
+
+        // // --------------
+        // // -- PLAYABLE --
+        // // --------------
+        // System.out.println(printer.getCardString( 1, new Pair<Integer, Integer>(10,  10), false));
+        // System.out.println(printer.getCardString( 2, new Pair<Integer, Integer>(30,  10), false));
+        // System.out.println(printer.getCardString( 3, new Pair<Integer, Integer>(50,  10), false));
+        // System.out.println(printer.getCardString( 4, new Pair<Integer, Integer>(70,  10), false));
+        // System.out.println(printer.getCardString( 5, new Pair<Integer, Integer>(90,  10), false));
+        // System.out.println(printer.getCardString( 6, new Pair<Integer, Integer>(110, 10), false));
+        // System.out.println(printer.getCardString( 7, new Pair<Integer, Integer>(130, 10), false));
+        // System.out.println(printer.getCardString( 8, new Pair<Integer, Integer>(150, 10), false));
+
+        // System.out.println(printer.getCardString( 9, new Pair<Integer, Integer>(10,  20), false));
+        // System.out.println(printer.getCardString(10, new Pair<Integer, Integer>(30,  20), false));
+        // System.out.println(printer.getCardString(11, new Pair<Integer, Integer>(50,  20), false));
+        // System.out.println(printer.getCardString(12, new Pair<Integer, Integer>(70,  20), false));
+        // System.out.println(printer.getCardString(13, new Pair<Integer, Integer>(90,  20), false));
+        // System.out.println(printer.getCardString(14, new Pair<Integer, Integer>(110, 20), false));
+        // System.out.println(printer.getCardString(15, new Pair<Integer, Integer>(130, 20), false));
+        // System.out.println(printer.getCardString(16, new Pair<Integer, Integer>(150, 20), false));
+
+        // System.out.println(printer.getCardString(17, new Pair<Integer, Integer>(10,  30), false));
+        // System.out.println(printer.getCardString(18, new Pair<Integer, Integer>(30,  30), false));
+        // System.out.println(printer.getCardString(19, new Pair<Integer, Integer>(50,  30), false));
+        // System.out.println(printer.getCardString(20, new Pair<Integer, Integer>(70,  30), false));
+        // System.out.println(printer.getCardString(21, new Pair<Integer, Integer>(90,  30), false));
+        // System.out.println(printer.getCardString(22, new Pair<Integer, Integer>(110, 30), false));
+        // System.out.println(printer.getCardString(23, new Pair<Integer, Integer>(130, 30), false));
+        // System.out.println(printer.getCardString(24, new Pair<Integer, Integer>(150, 30), false));
+
+        // System.out.println(printer.getCardString(25, new Pair<Integer, Integer>(10,  40), false));
+        // System.out.println(printer.getCardString(26, new Pair<Integer, Integer>(30,  40), false));
+        // System.out.println(printer.getCardString(27, new Pair<Integer, Integer>(50,  40), false));
+        // System.out.println(printer.getCardString(28, new Pair<Integer, Integer>(70,  40), false));
+        // System.out.println(printer.getCardString(29, new Pair<Integer, Integer>(90,  40), false));
+        // System.out.println(printer.getCardString(30, new Pair<Integer, Integer>(110, 40), false));
+        // System.out.println(printer.getCardString(31, new Pair<Integer, Integer>(130, 40), false));
+        // System.out.println(printer.getCardString(32, new Pair<Integer, Integer>(150, 40), false));
+
+        // System.out.println(printer.getCardString(33, new Pair<Integer, Integer>(10,  50), false));
+        // System.out.println(printer.getCardString(34, new Pair<Integer, Integer>(30,  50), false));
+        // System.out.println(printer.getCardString(35, new Pair<Integer, Integer>(50,  50), false));
+        // System.out.println(printer.getCardString(36, new Pair<Integer, Integer>(70,  50), false));
+        // System.out.println(printer.getCardString(37, new Pair<Integer, Integer>(90,  50), false));
+        // System.out.println(printer.getCardString(38, new Pair<Integer, Integer>(110, 50), false));
+        // System.out.println(printer.getCardString(39, new Pair<Integer, Integer>(130, 50), false));
+        // System.out.println(printer.getCardString(40, new Pair<Integer, Integer>(150, 50), false));
+
+        // System.out.println(printer.getCardString(41, new Pair<Integer, Integer>(10,  10), false));
+        // System.out.println(printer.getCardString(42, new Pair<Integer, Integer>(30,  10), false));
+        // System.out.println(printer.getCardString(43, new Pair<Integer, Integer>(50,  10), false));
+        // System.out.println(printer.getCardString(44, new Pair<Integer, Integer>(70,  10), false));
+        // System.out.println(printer.getCardString(45, new Pair<Integer, Integer>(90,  10), false));
+        // System.out.println(printer.getCardString(46, new Pair<Integer, Integer>(110, 10), false));
+        // System.out.println(printer.getCardString(47, new Pair<Integer, Integer>(130, 10), false));
+        // System.out.println(printer.getCardString(48, new Pair<Integer, Integer>(150, 10), false));
+
+        // System.out.println(printer.getCardString(49, new Pair<Integer, Integer>(10,  20), false));
+        // System.out.println(printer.getCardString(50, new Pair<Integer, Integer>(30,  20), false));
+        // System.out.println(printer.getCardString(51, new Pair<Integer, Integer>(50,  20), false));
+        // System.out.println(printer.getCardString(52, new Pair<Integer, Integer>(70,  20), false));
+        // System.out.println(printer.getCardString(53, new Pair<Integer, Integer>(90,  20), false));
+        // System.out.println(printer.getCardString(54, new Pair<Integer, Integer>(110, 20), false));
+        // System.out.println(printer.getCardString(55, new Pair<Integer, Integer>(130, 20), false));
+        // System.out.println(printer.getCardString(56, new Pair<Integer, Integer>(150, 20), false));
+
+        // System.out.println(printer.getCardString(57, new Pair<Integer, Integer>(10,  30), false));
+        // System.out.println(printer.getCardString(58, new Pair<Integer, Integer>(30,  30), false));
+        // System.out.println(printer.getCardString(59, new Pair<Integer, Integer>(50,  30), false));
+        // System.out.println(printer.getCardString(60, new Pair<Integer, Integer>(70,  30), false));
+        // System.out.println(printer.getCardString(61, new Pair<Integer, Integer>(90,  30), false));
+        // System.out.println(printer.getCardString(62, new Pair<Integer, Integer>(110, 30), false));
+        // System.out.println(printer.getCardString(63, new Pair<Integer, Integer>(130, 30), false));
+        // System.out.println(printer.getCardString(64, new Pair<Integer, Integer>(150, 30), false));
+
+        // System.out.println(printer.getCardString(65, new Pair<Integer, Integer>(10,  40), false));
+        // System.out.println(printer.getCardString(66, new Pair<Integer, Integer>(30,  40), false));
+        // System.out.println(printer.getCardString(67, new Pair<Integer, Integer>(50,  40), false));
+        // System.out.println(printer.getCardString(68, new Pair<Integer, Integer>(70,  40), false));
+        // System.out.println(printer.getCardString(69, new Pair<Integer, Integer>(90,  40), false));
+        // System.out.println(printer.getCardString(70, new Pair<Integer, Integer>(110, 40), false));
+        // System.out.println(printer.getCardString(71, new Pair<Integer, Integer>(130, 40), false));
+        // System.out.println(printer.getCardString(72, new Pair<Integer, Integer>(150, 40), false));
+
+        // System.out.println(printer.getCardString(73, new Pair<Integer, Integer>(10,  50), false));
+        // System.out.println(printer.getCardString(74, new Pair<Integer, Integer>(30,  50), false));
+        // System.out.println(printer.getCardString(75, new Pair<Integer, Integer>(50,  50), false));
+        // System.out.println(printer.getCardString(76, new Pair<Integer, Integer>(70,  50), false));
+        // System.out.println(printer.getCardString(77, new Pair<Integer, Integer>(90,  50), false));
+        // System.out.println(printer.getCardString(78, new Pair<Integer, Integer>(110, 50), false));
+        // System.out.println(printer.getCardString(79, new Pair<Integer, Integer>(130, 50), false));
+        // System.out.println(printer.getCardString(80, new Pair<Integer, Integer>(150, 50), false));
+    }
 }
