@@ -2,6 +2,7 @@ package it.polimi.ingsw.utils;
 
 import java.io.IOException;
 import java.util.*;
+import org.jline.terminal.Terminal;
 import it.polimi.ingsw.exceptions.CardException;
 import it.polimi.ingsw.gamemodel.*;
 
@@ -242,16 +243,31 @@ public class TUICardPrinter {
         if (centerToProcess.isEmpty()) {
             centerAsString.put(2, "        ");
             centerAsString.put(1, "   " + getRightColor(card.getMultiplier()) + String.valueOf(card.getPoints())
-                    + getRightIcon(card.getMultiplier()) + colorReset + "   ");
+                    + getRightIcon(card.getMultiplier()) + colorReset + "  ");
 
-            String space = (card.getRequirement().getReqs().size() == 1) ? "   " : "  ";
-            centerAsString.put(4, space + getQuantityString(card.getRequirement().getReqs(), colorReset) + space);
+            String prefixSpace, postfixSpace;
+            switch (card.getRequirement().getReqs().size()) {
+                case 1:
+                    prefixSpace = "   ";
+                    postfixSpace = "  ";
+                    break;
+                case 2:
+                    prefixSpace = postfixSpace = " ";
+                    break;
+                case 3:
+                    prefixSpace = postfixSpace = "";
+                    break;
+                default:
+                    prefixSpace = postfixSpace = "";
+                    break;
+            };
+            centerAsString.put(4, prefixSpace + getQuantityString(card.getRequirement().getReqs(), colorReset) + postfixSpace);
 
             return;
         }
 
         centerAsString.put(1, "        ");
-        centerAsString.put(2, "   " + getRightColor(card.getReign()) + "1" + getRightIcon(card.getReign()) + "   "); // back
+        centerAsString.put(2, "   " + getRightColor(card.getReign()) + "1" + getRightIcon(card.getReign()) + "  "); // back
         centerAsString.put(4, "        ");
     }
 
@@ -273,7 +289,7 @@ public class TUICardPrinter {
         }
 
         centerAsString.put(1, "        ");
-        centerAsString.put(2, "   " + getRightColor(card.getReign()) + "1" + getRightIcon(card.getReign()) + "   "); // back
+        centerAsString.put(2, "   " + getRightColor(card.getReign()) + "1" + getRightIcon(card.getReign()) + "  "); // back
     }
 
     private void processCenter(Map<Integer, String> centerAsString, Set<Symbol> centerToProcess, InitialCard card) {
@@ -292,17 +308,17 @@ public class TUICardPrinter {
 
         Symbol[] symbols = centerToProcess.toArray(new Symbol[0]);
 
-        centerAsString.put(2, "   " + getRightColor(symbols[0]) + "1" + getRightIcon(symbols[0]) + colorReset + "   ");
+        centerAsString.put(2, "   " + getRightColor(symbols[0]) + "1" + getRightIcon(symbols[0]) + colorReset + "  ");
         switch (centerToProcess.size()) {
             case 1:
                 centerAsString.put(3, "        ");
                 break;
             case 2:
-                centerAsString.put(3, "   " + getRightColor(symbols[1]) + "1" + getRightIcon(symbols[1]) + colorReset + "   ");
+                centerAsString.put(3, "   " + getRightColor(symbols[1]) + "1" + getRightIcon(symbols[1]) + colorReset + "  ");
                 break;
             case 3:
-                centerAsString.put(3, "  " + getRightColor(symbols[1]) + "1" + getRightIcon(symbols[1]) + getRightColor(symbols[2]) + "1"
-                        + getRightIcon(symbols[2]) + colorReset + "  ");
+                centerAsString.put(3, " " + getRightColor(symbols[1]) + "1" + getRightIcon(symbols[1]) + getRightColor(symbols[2]) + "1"
+                        + getRightIcon(symbols[2]) + colorReset + " ");
                 break;
             default:
                 break;
@@ -320,6 +336,7 @@ public class TUICardPrinter {
     }
 
 
+
     private void processObjectiveCenter(Map<Integer, String> centerAsString, Objective objective) {
 
         centerAsString.put(0, "────────");
@@ -331,13 +348,35 @@ public class TUICardPrinter {
                 positioningClassifier(centerAsString, positionRequirement.getReqs());
                 break;
             case QuantityRequirement quantityRequirement:
+                Map<Symbol, Integer> req = quantityRequirement.getReqs();
+                int size = req.size();
                 centerAsString.put(2, "        ");
                 centerAsString.put(4, "        ");
-                String space = getObjectiveSpace(quantityRequirement);
-                if (space != null) {
-                    centerAsString.put(3, space + getQuantityString(quantityRequirement.getReqs(), "\033[0m") + space);
-                    break;
+                int reqSize = req.size();
+                if (reqSize < 3) {
+                    String space = getObjectiveSpace(size);
+                    if (space != null) {
+                        centerAsString.put(3, space + " " + getQuantityString(req, "\033[0m") + space);
+                        break;
+                    }
+                } else {
+                    int firstHalf = size / 2;
+                    String space = getObjectiveSpace(firstHalf);
+                    Map<Symbol, Integer> first = new HashMap<>(), second = new HashMap<>();
+                    int cycle = 0;
+                    for (Symbol s : req.keySet()) {
+                        if (cycle < firstHalf)
+                            first.put(s, req.get(s));
+                        else
+                            second.put(s, req.get(s));
+                        cycle++;
+                    }
+
+                    centerAsString.put(3, space + " " + getQuantityString(first, "\033[0m") + space);
+                    space = getObjectiveSpace(size - firstHalf);
+                    centerAsString.put(4, space + getQuantityString(second, "\033[0m") + space);
                 }
+                break;
             default:
                 throw new IllegalStateException("Unexpected value: " + objective.getReq());
         }
@@ -381,23 +420,29 @@ public class TUICardPrinter {
     private String getRightColor(Symbol symbol) {
         return switch (symbol) {
             case FUNGUS -> "\033[31m";
-            case ANIMAL -> "\033[36m";
+            case ANIMAL -> "\033[34m";
             case PLANT -> "\033[32m";
             case INSECT -> "\033[35m";
-            case INKWELL, PARCHMENT, FEATHER -> "\033[33m";
+
+            case INKWELL-> "\033[33m";
+            case PARCHMENT -> "\033[33m";
+            case FEATHER -> "\033[33m";
             default -> "";
         };
     }
 
     private String getRightIcon(Symbol symbol) {
         return switch (symbol) {
-            case FULL_CORNER, EMPTY_CORNER -> " ";
-            case FUNGUS, ANIMAL, PLANT, INSECT -> "■";
-            case INKWELL -> "I";
-            case PARCHMENT -> "P";
-            case FEATHER -> "F";
-            case CORNER_OBJ -> "◳";
-            default -> " ";
+            case FULL_CORNER, EMPTY_CORNER -> "  ";
+            case FUNGUS -> "󰟟 ";
+            case ANIMAL -> " ";
+            case PLANT -> " ";
+            case INSECT -> "󱖉 ";
+            case INKWELL -> "󱄮 ";
+            case PARCHMENT -> " ";
+            case FEATHER -> " ";
+            case CORNER_OBJ -> "󱨈 ";
+            default -> "  ";
         };
     }
 
@@ -413,7 +458,7 @@ public class TUICardPrinter {
 
             default:
                 corner.add(getPrefixCoord(coord, 1) + "┌───┬" + suffix);
-                corner.add(getPrefixCoord(coord, 2) + "│ " + getColorAndIcon(symbol) + borderColor + " │" + suffix);
+                corner.add(getPrefixCoord(coord, 2) + "│ " + getColorAndIcon(symbol) + borderColor + "│" + suffix);
                 corner.add(getPrefixCoord(coord, 3) + "├───┘" + suffix);
                 break;
         }
@@ -434,7 +479,7 @@ public class TUICardPrinter {
 
             default:
                 corner.add("┬───┐" + suffix);
-                corner.add("│ " + getColorAndIcon(symbol) + borderColor + " │" + suffix);
+                corner.add("│ " + getColorAndIcon(symbol) + borderColor + "│" + suffix);
                 corner.add("└───┤" + suffix);
                 break;
         }
@@ -455,7 +500,7 @@ public class TUICardPrinter {
 
             default:
                 corner.add(getPrefixCoord(coord, 4) + "├───┐" + suffix);
-                corner.add(getPrefixCoord(coord, 5) + "│ " + getColorAndIcon(symbol) + borderColor + " │" + suffix);
+                corner.add(getPrefixCoord(coord, 5) + "│ " + getColorAndIcon(symbol) + borderColor + "│" + suffix);
                 corner.add(getPrefixCoord(coord, 6) + "└───┴" + suffix);
                 break;
         }
@@ -476,7 +521,7 @@ public class TUICardPrinter {
 
             default:
                 corner.add("┌───┤" + suffix);
-                corner.add("│ " + getColorAndIcon(symbol) + borderColor + " │" + suffix);
+                corner.add("│ " + getColorAndIcon(symbol) + borderColor + "│" + suffix);
                 corner.add("┴───┘" + suffix);
                 break;
         }
@@ -517,32 +562,31 @@ public class TUICardPrinter {
 
         Integer col, row;
         for (Pair<Integer, Integer> coord : reqs.keySet()) {
-            row = 2-(coord.second()-bottomMost.second()); // 2 (max) - (curr - offset): we go top to bottom
-            col = coord.first()-leftMost.first();         // simply offset
+            row = 2 - (coord.second() - bottomMost.second()); // 2 (max) - (curr - offset): we go top to bottom
+            col = coord.first() - leftMost.first(); // simply offset
 
             // String building (with horizontal spaces)
             String tmp = "";
             for (int i = 0; i < col; i++) {
                 tmp += "  ";
             }
-            tmp+=getPosixIcon(reqs.get(coord));
+            tmp += getPosixIcon(reqs.get(coord));
             for (int i = col; i < 3; i++) {
                 tmp += "  ";
             }
 
-            centerAsString.put(row+2, tmp); // +2: start from second line of card
+            centerAsString.put(row + 2, tmp); // +2: start from second line of card
         }
     }
 
-
-    private String getObjectiveSpace(QuantityRequirement reqs) {
-        switch (reqs.getReqs().size()) {
+    private String getObjectiveSpace(Integer size) {
+        switch (size) {
             case 1:
-                return "   ";
-            case 2:
                 return "  ";
-            case 3:
+            case 2:
                 return " ";
+            case 3:
+                return "";
 
             default:
                 return null;
@@ -550,249 +594,89 @@ public class TUICardPrinter {
     }
 
 
+    // Pure and simple testing, never going to be used in practice
+    private void printObjectives(int rowsCycle, int colsCycle, int startRow, int startCol, int incCol, int incRow, int max)
+            throws CardException {
+        for (int i = 0, id = 1; i < rowsCycle; i++) {
+            for (int j = 0; j < colsCycle; j++, id++) {
+                if (id > max) {
+                    return;
+                }
+                System.out.println(getObjectiveString(id, new Pair<Integer, Integer>(startCol + j * incCol, startRow + i * incRow)));
+            }
+        }
+    }
+
+    private void printInitials(int rowsCycle, int colsCycle, int startRow, int startCol, int incCol, int incRow, int max,
+            boolean isFacingUp) throws CardException {
+        for (int i = 0, id = 1; i < rowsCycle; i += 2) {
+            for (int j = 0; j < colsCycle; j++, id++) {
+                if (id > max) {
+                    return;
+                }
+                System.out.println(
+                        getInitialString(id, new Pair<Integer, Integer>(startCol + j * incCol, startRow + i * incRow), isFacingUp));
+                System.out.println(
+                        getInitialString(id, new Pair<Integer, Integer>(startCol + j * incCol, startRow + (i + 1) * incRow), !isFacingUp));
+            }
+        }
+    }
+
+    private void printPlayable(int rowsCycle, int colsCycle, int startRow, int startCol, int incCol, int incRow, int max,
+            boolean isFacingUp) throws CardException {
+        for (int i = 0, id = 1; i < rowsCycle; i++) {
+            for (int j = 0; j < colsCycle; j++, id++) {
+                if (id > max) {
+                    return;
+                }
+                System.out.println(getCardString(id, new Pair<Integer, Integer>(startCol + j * incCol, startRow + i * incRow), isFacingUp));
+            }
+        }
+
+    }
+
+
 
     public static void main(String[] args) throws IOException, CardException {
         TUICardPrinter printer = new TUICardPrinter();
+        Scanner scanner = new Scanner(System.in);
 
-        System.out.println("\033[2J");
-        // ----------------
-        // -- OBJECTIVES --
-        // ----------------
-        System.out.println(printer.getObjectiveString(1,  new Pair<Integer, Integer>(10, 10)));
-        System.out.println(printer.getObjectiveString(2,  new Pair<Integer, Integer>(30, 10)));
-        System.out.println(printer.getObjectiveString(3,  new Pair<Integer, Integer>(50, 10)));
-        System.out.println(printer.getObjectiveString(4,  new Pair<Integer, Integer>(70, 10)));
-        System.out.println(printer.getObjectiveString(5,  new Pair<Integer, Integer>(90, 10)));
-        System.out.println(printer.getObjectiveString(6,  new Pair<Integer, Integer>(110, 10)));
-        System.out.println(printer.getObjectiveString(7,  new Pair<Integer, Integer>(130, 10)));
-        System.out.println(printer.getObjectiveString(8,  new Pair<Integer, Integer>(150, 10)));
+        String in;
+        boolean shouldLoop = true;
 
-        System.out.println(printer.getObjectiveString(9,  new Pair<Integer, Integer> (10, 20)));
-        System.out.println(printer.getObjectiveString(10, new Pair<Integer, Integer>(30, 20)));
-        System.out.println(printer.getObjectiveString(11, new Pair<Integer, Integer>(50, 20)));
-        System.out.println(printer.getObjectiveString(12, new Pair<Integer, Integer>(70, 20)));
-        System.out.println(printer.getObjectiveString(13, new Pair<Integer, Integer>(90, 20)));
-        System.out.println(printer.getObjectiveString(14, new Pair<Integer, Integer>(110, 20)));
-        System.out.println(printer.getObjectiveString(15, new Pair<Integer, Integer>(130, 20)));
-        System.out.println(printer.getObjectiveString(16, new Pair<Integer, Integer>(150, 20)));
+        Terminal terminal = org.jline.terminal.TerminalBuilder.terminal();
+        int startCol = 1, startRow = 1;
+        int incRow = 6, incCol = 19;
 
+        while (shouldLoop) {
+            in = scanner.nextLine();
+            System.out.println("\033[2J");
+            int rowsCycle = (terminal.getHeight() - startCol) / incRow - 1;
+            int colsCycle = (terminal.getWidth() - startRow) / incCol;
 
-        // // --------------
-        // // -- INITIALS --
-        // // --------------
-        // System.out.println(printer.getInitialString(1, new Pair<Integer, Integer>(10, 10), true));
-        // System.out.println(printer.getInitialString(2, new Pair<Integer, Integer>(30, 10), true));
-        // System.out.println(printer.getInitialString(3, new Pair<Integer, Integer>(50, 10), true));
-        // System.out.println(printer.getInitialString(4, new Pair<Integer, Integer>(70, 10), true));
-        // System.out.println(printer.getInitialString(5, new Pair<Integer, Integer>(90, 10), true));
-        // System.out.println(printer.getInitialString(6, new Pair<Integer, Integer>(110, 10), true));
+            switch (in) {
+                case "o":
+                    printer.printObjectives(rowsCycle, colsCycle, startRow, startCol, incCol, incRow, 16);
+                    break;
+                case "i":
+                    printer.printInitials(rowsCycle, colsCycle, startRow, startCol, incCol, incRow, 6, true);
+                    break;
+                case "f":
+                    printer.printPlayable(rowsCycle, colsCycle, startRow, startCol, incCol, incRow, 80, true);
+                    break;
+                case "b":
+                    printer.printPlayable(rowsCycle, colsCycle, startRow, startCol, incCol, incRow, 80, false);
+                    break;
+                case "q":
+                    shouldLoop = false;
+                    break;
+                default:
+                    System.out.println("not a known command");
+                    break;
+            }
+            System.out.println("\033[0m");
+        }
+        scanner.close();
 
-        // System.out.println(printer.getInitialString(1, new Pair<Integer, Integer>(10, 20), false));
-        // System.out.println(printer.getInitialString(2, new Pair<Integer, Integer>(30, 20), false));
-        // System.out.println(printer.getInitialString(3, new Pair<Integer, Integer>(50, 20), false));
-        // System.out.println(printer.getInitialString(4, new Pair<Integer, Integer>(70, 20), false));
-        // System.out.println(printer.getInitialString(5, new Pair<Integer, Integer>(90, 20), false));
-        // System.out.println(printer.getInitialString(6, new Pair<Integer, Integer>(110, 20), false));
-
-        // // --------------
-        // // -- PLAYABLE --
-        // // --------------
-        // System.out.println(printer.getCardString( 1, new Pair<Integer, Integer>(10,  10), true));
-        // System.out.println(printer.getCardString( 2, new Pair<Integer, Integer>(30,  10), true));
-        // System.out.println(printer.getCardString( 3, new Pair<Integer, Integer>(50,  10), true));
-        // System.out.println(printer.getCardString( 4, new Pair<Integer, Integer>(70,  10), true));
-        // System.out.println(printer.getCardString( 5, new Pair<Integer, Integer>(90,  10), true));
-        // System.out.println(printer.getCardString( 6, new Pair<Integer, Integer>(110, 10), true));
-        // System.out.println(printer.getCardString( 7, new Pair<Integer, Integer>(130, 10), true));
-        // System.out.println(printer.getCardString( 8, new Pair<Integer, Integer>(150, 10), true));
-        // 
-        // System.out.println(printer.getCardString( 9, new Pair<Integer, Integer>(10,  20), true));
-        // System.out.println(printer.getCardString(10, new Pair<Integer, Integer>(30,  20), true));
-        // System.out.println(printer.getCardString(11, new Pair<Integer, Integer>(50,  20), true));
-        // System.out.println(printer.getCardString(12, new Pair<Integer, Integer>(70,  20), true));
-        // System.out.println(printer.getCardString(13, new Pair<Integer, Integer>(90,  20), true));
-        // System.out.println(printer.getCardString(14, new Pair<Integer, Integer>(110, 20), true));
-        // System.out.println(printer.getCardString(15, new Pair<Integer, Integer>(130, 20), true));
-        // System.out.println(printer.getCardString(16, new Pair<Integer, Integer>(150, 20), true));
-
-        // System.out.println(printer.getCardString(17, new Pair<Integer, Integer>(10,  30), true));
-        // System.out.println(printer.getCardString(18, new Pair<Integer, Integer>(30,  30), true));
-        // System.out.println(printer.getCardString(19, new Pair<Integer, Integer>(50,  30), true));
-        // System.out.println(printer.getCardString(20, new Pair<Integer, Integer>(70,  30), true));
-        // System.out.println(printer.getCardString(21, new Pair<Integer, Integer>(90,  30), true));
-        // System.out.println(printer.getCardString(22, new Pair<Integer, Integer>(110, 30), true));
-        // System.out.println(printer.getCardString(23, new Pair<Integer, Integer>(130, 30), true));
-        // System.out.println(printer.getCardString(24, new Pair<Integer, Integer>(150, 30), true));
-
-        // System.out.println(printer.getCardString(25, new Pair<Integer, Integer>(10,  40), true));
-        // System.out.println(printer.getCardString(26, new Pair<Integer, Integer>(30,  40), true));
-        // System.out.println(printer.getCardString(27, new Pair<Integer, Integer>(50,  40), true));
-        // System.out.println(printer.getCardString(28, new Pair<Integer, Integer>(70,  40), true));
-        // System.out.println(printer.getCardString(29, new Pair<Integer, Integer>(90,  40), true));
-        // System.out.println(printer.getCardString(30, new Pair<Integer, Integer>(110, 40), true));
-        // System.out.println(printer.getCardString(31, new Pair<Integer, Integer>(130, 40), true));
-        // System.out.println(printer.getCardString(32, new Pair<Integer, Integer>(150, 40), true));
-
-        // System.out.println(printer.getCardString(33, new Pair<Integer, Integer>(10,  50), true));
-        // System.out.println(printer.getCardString(34, new Pair<Integer, Integer>(30,  50), true));
-        // System.out.println(printer.getCardString(35, new Pair<Integer, Integer>(50,  50), true));
-        // System.out.println(printer.getCardString(36, new Pair<Integer, Integer>(70,  50), true));
-        // System.out.println(printer.getCardString(37, new Pair<Integer, Integer>(90,  50), true));
-        // System.out.println(printer.getCardString(38, new Pair<Integer, Integer>(110, 50), true));
-        // System.out.println(printer.getCardString(39, new Pair<Integer, Integer>(130, 50), true));
-        // System.out.println(printer.getCardString(40, new Pair<Integer, Integer>(150, 50), true));
-
-        // System.out.println(printer.getCardString(41, new Pair<Integer, Integer>(10,  10), true));
-        // System.out.println(printer.getCardString(42, new Pair<Integer, Integer>(30,  10), true));
-        // System.out.println(printer.getCardString(43, new Pair<Integer, Integer>(50,  10), true));
-        // System.out.println(printer.getCardString(44, new Pair<Integer, Integer>(70,  10), true));
-        // System.out.println(printer.getCardString(45, new Pair<Integer, Integer>(90,  10), true));
-        // System.out.println(printer.getCardString(46, new Pair<Integer, Integer>(110, 10), true));
-        // System.out.println(printer.getCardString(47, new Pair<Integer, Integer>(130, 10), true));
-        // System.out.println(printer.getCardString(48, new Pair<Integer, Integer>(150, 10), true));
-        // 
-        // System.out.println(printer.getCardString(49, new Pair<Integer, Integer>(10,  20), true));
-        // System.out.println(printer.getCardString(50, new Pair<Integer, Integer>(30,  20), true));
-        // System.out.println(printer.getCardString(51, new Pair<Integer, Integer>(50,  20), true));
-        // System.out.println(printer.getCardString(52, new Pair<Integer, Integer>(70,  20), true));
-        // System.out.println(printer.getCardString(53, new Pair<Integer, Integer>(90,  20), true));
-        // System.out.println(printer.getCardString(54, new Pair<Integer, Integer>(110, 20), true));
-        // System.out.println(printer.getCardString(55, new Pair<Integer, Integer>(130, 20), true));
-        // System.out.println(printer.getCardString(56, new Pair<Integer, Integer>(150, 20), true));
-
-        // System.out.println(printer.getCardString(57, new Pair<Integer, Integer>(10,  30), true));
-        // System.out.println(printer.getCardString(58, new Pair<Integer, Integer>(30,  30), true));
-        // System.out.println(printer.getCardString(59, new Pair<Integer, Integer>(50,  30), true));
-        // System.out.println(printer.getCardString(60, new Pair<Integer, Integer>(70,  30), true));
-        // System.out.println(printer.getCardString(61, new Pair<Integer, Integer>(90,  30), true));
-        // System.out.println(printer.getCardString(62, new Pair<Integer, Integer>(110, 30), true));
-        // System.out.println(printer.getCardString(63, new Pair<Integer, Integer>(130, 30), true));
-        // System.out.println(printer.getCardString(64, new Pair<Integer, Integer>(150, 30), true));
-
-        // System.out.println(printer.getCardString(65, new Pair<Integer, Integer>(10,  40), true));
-        // System.out.println(printer.getCardString(66, new Pair<Integer, Integer>(30,  40), true));
-        // System.out.println(printer.getCardString(67, new Pair<Integer, Integer>(50,  40), true));
-        // System.out.println(printer.getCardString(68, new Pair<Integer, Integer>(70,  40), true));
-        // System.out.println(printer.getCardString(69, new Pair<Integer, Integer>(90,  40), true));
-        // System.out.println(printer.getCardString(70, new Pair<Integer, Integer>(110, 40), true));
-        // System.out.println(printer.getCardString(71, new Pair<Integer, Integer>(130, 40), true));
-        // System.out.println(printer.getCardString(72, new Pair<Integer, Integer>(150, 40), true));
-
-        // System.out.println(printer.getCardString(73, new Pair<Integer, Integer>(10,  50), true));
-        // System.out.println(printer.getCardString(74, new Pair<Integer, Integer>(30,  50), true));
-        // System.out.println(printer.getCardString(75, new Pair<Integer, Integer>(50,  50), true));
-        // System.out.println(printer.getCardString(76, new Pair<Integer, Integer>(70,  50), true));
-        // System.out.println(printer.getCardString(77, new Pair<Integer, Integer>(90,  50), true));
-        // System.out.println(printer.getCardString(78, new Pair<Integer, Integer>(110, 50), true));
-        // System.out.println(printer.getCardString(79, new Pair<Integer, Integer>(130, 50), true));
-        // System.out.println(printer.getCardString(80, new Pair<Integer, Integer>(150, 50), true));
-
-        // System.out.println(printer.getInitialString(1, new Pair<Integer, Integer>(10, 10), true));
-        // System.out.println(printer.getInitialString(2, new Pair<Integer, Integer>(30, 10), true));
-        // System.out.println(printer.getInitialString(3, new Pair<Integer, Integer>(50, 10), true));
-        // System.out.println(printer.getInitialString(4, new Pair<Integer, Integer>(70, 10), true));
-        // System.out.println(printer.getInitialString(5, new Pair<Integer, Integer>(90, 10), true));
-        // System.out.println(printer.getInitialString(6, new Pair<Integer, Integer>(110, 10), true));
-
-        // System.out.println(printer.getInitialString(1, new Pair<Integer, Integer>(10, 20), false));
-        // System.out.println(printer.getInitialString(2, new Pair<Integer, Integer>(30, 20), false));
-        // System.out.println(printer.getInitialString(3, new Pair<Integer, Integer>(50, 20), false));
-        // System.out.println(printer.getInitialString(4, new Pair<Integer, Integer>(70, 20), false));
-        // System.out.println(printer.getInitialString(5, new Pair<Integer, Integer>(90, 20), false));
-        // System.out.println(printer.getInitialString(6, new Pair<Integer, Integer>(110, 20), false));
-
-
-        // // --------------
-        // // -- PLAYABLE --
-        // // --------------
-        // System.out.println(printer.getCardString( 1, new Pair<Integer, Integer>(10,  10), false));
-        // System.out.println(printer.getCardString( 2, new Pair<Integer, Integer>(30,  10), false));
-        // System.out.println(printer.getCardString( 3, new Pair<Integer, Integer>(50,  10), false));
-        // System.out.println(printer.getCardString( 4, new Pair<Integer, Integer>(70,  10), false));
-        // System.out.println(printer.getCardString( 5, new Pair<Integer, Integer>(90,  10), false));
-        // System.out.println(printer.getCardString( 6, new Pair<Integer, Integer>(110, 10), false));
-        // System.out.println(printer.getCardString( 7, new Pair<Integer, Integer>(130, 10), false));
-        // System.out.println(printer.getCardString( 8, new Pair<Integer, Integer>(150, 10), false));
-
-        // System.out.println(printer.getCardString( 9, new Pair<Integer, Integer>(10,  20), false));
-        // System.out.println(printer.getCardString(10, new Pair<Integer, Integer>(30,  20), false));
-        // System.out.println(printer.getCardString(11, new Pair<Integer, Integer>(50,  20), false));
-        // System.out.println(printer.getCardString(12, new Pair<Integer, Integer>(70,  20), false));
-        // System.out.println(printer.getCardString(13, new Pair<Integer, Integer>(90,  20), false));
-        // System.out.println(printer.getCardString(14, new Pair<Integer, Integer>(110, 20), false));
-        // System.out.println(printer.getCardString(15, new Pair<Integer, Integer>(130, 20), false));
-        // System.out.println(printer.getCardString(16, new Pair<Integer, Integer>(150, 20), false));
-
-        // System.out.println(printer.getCardString(17, new Pair<Integer, Integer>(10,  30), false));
-        // System.out.println(printer.getCardString(18, new Pair<Integer, Integer>(30,  30), false));
-        // System.out.println(printer.getCardString(19, new Pair<Integer, Integer>(50,  30), false));
-        // System.out.println(printer.getCardString(20, new Pair<Integer, Integer>(70,  30), false));
-        // System.out.println(printer.getCardString(21, new Pair<Integer, Integer>(90,  30), false));
-        // System.out.println(printer.getCardString(22, new Pair<Integer, Integer>(110, 30), false));
-        // System.out.println(printer.getCardString(23, new Pair<Integer, Integer>(130, 30), false));
-        // System.out.println(printer.getCardString(24, new Pair<Integer, Integer>(150, 30), false));
-
-        // System.out.println(printer.getCardString(25, new Pair<Integer, Integer>(10,  40), false));
-        // System.out.println(printer.getCardString(26, new Pair<Integer, Integer>(30,  40), false));
-        // System.out.println(printer.getCardString(27, new Pair<Integer, Integer>(50,  40), false));
-        // System.out.println(printer.getCardString(28, new Pair<Integer, Integer>(70,  40), false));
-        // System.out.println(printer.getCardString(29, new Pair<Integer, Integer>(90,  40), false));
-        // System.out.println(printer.getCardString(30, new Pair<Integer, Integer>(110, 40), false));
-        // System.out.println(printer.getCardString(31, new Pair<Integer, Integer>(130, 40), false));
-        // System.out.println(printer.getCardString(32, new Pair<Integer, Integer>(150, 40), false));
-
-        // System.out.println(printer.getCardString(33, new Pair<Integer, Integer>(10,  50), false));
-        // System.out.println(printer.getCardString(34, new Pair<Integer, Integer>(30,  50), false));
-        // System.out.println(printer.getCardString(35, new Pair<Integer, Integer>(50,  50), false));
-        // System.out.println(printer.getCardString(36, new Pair<Integer, Integer>(70,  50), false));
-        // System.out.println(printer.getCardString(37, new Pair<Integer, Integer>(90,  50), false));
-        // System.out.println(printer.getCardString(38, new Pair<Integer, Integer>(110, 50), false));
-        // System.out.println(printer.getCardString(39, new Pair<Integer, Integer>(130, 50), false));
-        // System.out.println(printer.getCardString(40, new Pair<Integer, Integer>(150, 50), false));
-
-        // System.out.println(printer.getCardString(41, new Pair<Integer, Integer>(10,  10), false));
-        // System.out.println(printer.getCardString(42, new Pair<Integer, Integer>(30,  10), false));
-        // System.out.println(printer.getCardString(43, new Pair<Integer, Integer>(50,  10), false));
-        // System.out.println(printer.getCardString(44, new Pair<Integer, Integer>(70,  10), false));
-        // System.out.println(printer.getCardString(45, new Pair<Integer, Integer>(90,  10), false));
-        // System.out.println(printer.getCardString(46, new Pair<Integer, Integer>(110, 10), false));
-        // System.out.println(printer.getCardString(47, new Pair<Integer, Integer>(130, 10), false));
-        // System.out.println(printer.getCardString(48, new Pair<Integer, Integer>(150, 10), false));
-
-        // System.out.println(printer.getCardString(49, new Pair<Integer, Integer>(10,  20), false));
-        // System.out.println(printer.getCardString(50, new Pair<Integer, Integer>(30,  20), false));
-        // System.out.println(printer.getCardString(51, new Pair<Integer, Integer>(50,  20), false));
-        // System.out.println(printer.getCardString(52, new Pair<Integer, Integer>(70,  20), false));
-        // System.out.println(printer.getCardString(53, new Pair<Integer, Integer>(90,  20), false));
-        // System.out.println(printer.getCardString(54, new Pair<Integer, Integer>(110, 20), false));
-        // System.out.println(printer.getCardString(55, new Pair<Integer, Integer>(130, 20), false));
-        // System.out.println(printer.getCardString(56, new Pair<Integer, Integer>(150, 20), false));
-
-        // System.out.println(printer.getCardString(57, new Pair<Integer, Integer>(10,  30), false));
-        // System.out.println(printer.getCardString(58, new Pair<Integer, Integer>(30,  30), false));
-        // System.out.println(printer.getCardString(59, new Pair<Integer, Integer>(50,  30), false));
-        // System.out.println(printer.getCardString(60, new Pair<Integer, Integer>(70,  30), false));
-        // System.out.println(printer.getCardString(61, new Pair<Integer, Integer>(90,  30), false));
-        // System.out.println(printer.getCardString(62, new Pair<Integer, Integer>(110, 30), false));
-        // System.out.println(printer.getCardString(63, new Pair<Integer, Integer>(130, 30), false));
-        // System.out.println(printer.getCardString(64, new Pair<Integer, Integer>(150, 30), false));
-
-        // System.out.println(printer.getCardString(65, new Pair<Integer, Integer>(10,  40), false));
-        // System.out.println(printer.getCardString(66, new Pair<Integer, Integer>(30,  40), false));
-        // System.out.println(printer.getCardString(67, new Pair<Integer, Integer>(50,  40), false));
-        // System.out.println(printer.getCardString(68, new Pair<Integer, Integer>(70,  40), false));
-        // System.out.println(printer.getCardString(69, new Pair<Integer, Integer>(90,  40), false));
-        // System.out.println(printer.getCardString(70, new Pair<Integer, Integer>(110, 40), false));
-        // System.out.println(printer.getCardString(71, new Pair<Integer, Integer>(130, 40), false));
-        // System.out.println(printer.getCardString(72, new Pair<Integer, Integer>(150, 40), false));
-
-        // System.out.println(printer.getCardString(73, new Pair<Integer, Integer>(10,  50), false));
-        // System.out.println(printer.getCardString(74, new Pair<Integer, Integer>(30,  50), false));
-        // System.out.println(printer.getCardString(75, new Pair<Integer, Integer>(50,  50), false));
-        // System.out.println(printer.getCardString(76, new Pair<Integer, Integer>(70,  50), false));
-        // System.out.println(printer.getCardString(77, new Pair<Integer, Integer>(90,  50), false));
-        // System.out.println(printer.getCardString(78, new Pair<Integer, Integer>(110, 50), false));
-        // System.out.println(printer.getCardString(79, new Pair<Integer, Integer>(130, 50), false));
-        // System.out.println(printer.getCardString(80, new Pair<Integer, Integer>(150, 50), false));
     }
 }
