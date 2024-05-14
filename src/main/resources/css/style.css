@@ -1,0 +1,70 @@
+* {
+    -fx-foreground-color: #412714;
+    -fx-primary-container: #e4dcb6;
+    -fx-secondary-container: #dad2ac;
+    -fx-primary-border-color: #412714;
+    -fx-accent-bg-color: #a49849;
+    -fx-accent-fg-color: #2c2119;
+    -fx-third-bg-color: #f6f3e4;
+}
+#pane{
+    -fx-background-image: url("../images/background.png");
+    -fx-background-repeat: repeat;
+    -fx-background-position: center center;
+}
+
+.connection-box {
+    -fx-background-color: -fx-primary-container;
+    -fx-border-color: -fx-primary-border-color;
+    -fx-border-width: 5px;
+    -fx-border-radius: 20px;
+    -fx-background-radius: 20px;
+    -fx-box-shadow: rgba(0,0,0,0.8) 0 0 10px;
+}
+
+.input {
+    -fx-text-fill: -fx-foreground-color;
+    -fx-background-color: -fx-third-bg-color;
+    -fx-font-size: 30px;
+    -fx-accent: -fx-accent-bg-color;
+}
+
+.input-label {
+    -fx-text-fill: -fx-foreground-color;
+    -fx-font-size: 30px;
+}
+.radio {
+    -fx-text-fill: -fx-foreground-color;
+    -jfx-selected-color: -fx-accent-bg-color;
+    -fx-font-size: 30px;
+    -fx-focus-color: transparent;
+}
+.radio .radio {
+    -fx-background-image: null;
+    -fx-background-color: -fx-third-bg-color;
+
+}
+.radio:selected .radio .dot {
+    -fx-text-fill: -fx-foreground-color;
+    -fx-background-color: -fx-accent-bg-color;
+    -fx-background-insets: 0;
+}
+
+.button {
+    -fx-text-fill: -fx-accent-fg-color;
+    -fx-font-size: 30px;
+    -fx-background-color: -fx-accent-bg-color;
+
+    -fx-border-color: -fx-primary-border-color;
+    -fx-border-width: 3px;
+    -fx-border-radius: 16px;
+    -fx-background-radius: 16px;
+
+    -fx-padding: 16px 32px;
+}
+
+.button:hover {
+    -fx-background-color: -fx-secondary-bg-color;
+    -fx-text-fill: -fx-accent-bg-color;
+    -fx-border-color: -fx-accent-bg-color;
+}
