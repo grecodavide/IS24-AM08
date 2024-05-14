@@ -8,7 +8,7 @@
 *.ctxt
 
 # Resources dir
-resources/images
+src/main/resources/images
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
