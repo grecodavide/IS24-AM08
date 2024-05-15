@@ -31,7 +31,7 @@ public class TUICardParser {
      * @param coord where to place the card (relative to the terminal, not {@link Board})
      * @param isFacingUp wheter the card is facing up or down
      * 
-     * @returns the string representing the card
+     * @return the string representing the card
      * 
      * @throws CardException if the card type is not known
      */
@@ -51,7 +51,7 @@ public class TUICardParser {
      * @param coord where to place the card (relative to the terminal, not {@link Board})
      * @param isFacingUp wheter the card is facing up or down
      * 
-     * @returns the string representing the card
+     * @return the string representing the card
      * 
      * @throws CardException if the card type is not known
      */
@@ -68,7 +68,7 @@ public class TUICardParser {
      * @param id the card id
      * @param coord where to place the card (relative to the terminal, not {@link Board})
      * 
-     * @returns the string representing the card
+     * @return the string representing the card
      * 
      * @throws CardException if the card type is not known
      */
@@ -580,17 +580,12 @@ public class TUICardParser {
     }
 
     private String getObjectiveSpace(Integer size) {
-        switch (size) {
-            case 1:
-                return "  ";
-            case 2:
-                return " ";
-            case 3:
-                return "";
-
-            default:
-                return null;
-        }
+        return switch (size) {
+            case 1 -> "  ";
+            case 2 -> " ";
+            case 3 -> "";
+            default -> null;
+        };
     }
 
 
