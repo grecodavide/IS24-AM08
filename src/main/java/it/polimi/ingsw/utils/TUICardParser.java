@@ -677,6 +677,6 @@ public class TUICardParser {
             System.out.println("\033[0m");
         }
         scanner.close();
-
     }
+
 }

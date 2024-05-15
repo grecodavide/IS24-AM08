@@ -1,12 +1,13 @@
 package it.polimi.ingsw.client.frontend;
 
+import java.util.Map;
 import it.polimi.ingsw.client.network.NetworkView;
 import it.polimi.ingsw.gamemodel.PlayableCard;
 import it.polimi.ingsw.gamemodel.Side;
+import it.polimi.ingsw.gamemodel.Symbol;
 import it.polimi.ingsw.utils.Pair;
 
 public interface GraphicalViewInterface {
-
     /**
      * Sets the network interface to communicate
      *
@@ -27,7 +28,7 @@ public interface GraphicalViewInterface {
      * Notifies the view that someone played a card
      *
      */
-    void someonePlayedCard(String someoneUsername, Pair<Integer, Integer> coords, PlayableCard card, Side side);
+    void someonePlayedCard(String someoneUsername, Pair<Integer, Integer> coords, PlayableCard card, Side side, Integer points, Map<Symbol, Integer> resources);
 
     /**
      * (Temporary demo method)

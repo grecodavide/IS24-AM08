@@ -1,6 +1,8 @@
 package it.polimi.ingsw.network.messages.responses;
 
+import java.util.Map;
 import it.polimi.ingsw.gamemodel.Side;
+import it.polimi.ingsw.gamemodel.Symbol;
 import it.polimi.ingsw.utils.Pair;
 
 /**
@@ -11,6 +13,14 @@ public final class SomeonePlayedCardMessage extends ResponseMessage {
     private final Integer cardID;
     private final Side side;
     private final Integer points;
+    private final Map<Symbol, Integer> resources;
+
+    /**
+     * @return the resources of the players
+     */
+    public Map<Symbol, Integer> getResources() {
+        return resources;
+    }
 
     /**
      * @return x coordinate of the played card
@@ -47,13 +57,14 @@ public final class SomeonePlayedCardMessage extends ResponseMessage {
         return points;
     }
 
-    public SomeonePlayedCardMessage(String username, Pair<Integer, Integer> coords, Integer cardID, Side side, int points) {
+    public SomeonePlayedCardMessage(String username, Pair<Integer, Integer> coords, Integer cardID, Side side, int points, Map<Symbol, Integer> resources) {
         super(username);
         this.x = coords.first();
         this.y = coords.second();
         this.cardID = cardID;
         this.side = side;
         this.points = points;
+        this.resources = resources;
     }
 
 }
