@@ -1,8 +1,10 @@
 package it.polimi.ingsw.client.frontend.tui;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import org.jline.terminal.Terminal;
+import it.polimi.ingsw.client.frontend.ClientBoard;
 import it.polimi.ingsw.client.frontend.ShownCard;
 import it.polimi.ingsw.exceptions.CardException;
 import it.polimi.ingsw.gamemodel.Side;
@@ -57,28 +59,30 @@ public class TuiPrinter {
      * 
      * @throws CardException If the card is not found
      */
-    public void printCard(ShownCard card) throws CardException {
+    private void printCard(ShownCard card) throws CardException {
         if (card.coords().equals(new Pair<>(0, 0)))
             System.out.println(parser.getInitial(card.card().getId(), getCardCoords(card.coords()), card.side() == Side.FRONT));
         else
-            System.out.println(parser.getPlayable(card.card().getId(), getCardCoords(card.coords()), card.side() == Side.FRONT));
+            System.out.println(parser.getPlayable(card.card().getId(), getCardCoords(card.coords()), card.coords(), card.side() == Side.FRONT));
         System.out.println("\033[0m");
     }
 
-    public void printPoints(Integer points) {
+    private void printPoints(String username, Integer points) {
         int termRows = this.terminal.getHeight(), termCols = this.terminal.getWidth();
-        String out = "Current points: " + points ;
+        String out = username + "'s Points: " + points ;
         System.out.println("\033[" + (termRows-infoLineOffset) + ";" + ((termCols-out.length())/4)+"H" + out);
     }
 
-
-    // if we want the same position always, then we need to hardcode them. Ugly
-    public void printResources(Map<Symbol, Integer> availableResources) {
+    private void printResources(Map<Symbol, Integer> availableResources) {
         int termRows = this.terminal.getHeight(), termCols = this.terminal.getWidth();
         String out = "";
         String spaces = "    ";
         Integer len = availableResources.keySet().size()*(5+spaces.length()); // icon, space, :, space, number
-        for (Symbol resource : availableResources.keySet()) {
+        List<Symbol> toPrint = List.of(
+            Symbol.PLANT, Symbol.INSECT, Symbol.FUNGUS, Symbol.ANIMAL, Symbol.PARCHMENT, Symbol.FEATHER, Symbol.INKWELL
+        );
+
+        for (Symbol resource : toPrint) {
             out += parser.getRightColor(resource) + parser.getRightIcon(resource) + ": " + availableResources.get(resource) + spaces;
         }
 
@@ -94,6 +98,33 @@ public class TuiPrinter {
     public void printMessage(String string) {
         int termRows = this.terminal.getHeight();
         System.out.println("\033[" + (termRows-infoLineOffset) + ";" + "1H" + string);
+    }
+
+    public void printPlayerList(List<String> players) {
+        Integer offset = 0;
+        for (String username : players) {
+            int termRows = this.terminal.getHeight();
+            System.out.println("\033[" + (termRows-infoLineOffset-offset) + ";" + "1H" + (offset+1) + ". " + username);
+            offset++;
+        }
+    }
+    
+    public void printPlayerBoard(String username, ClientBoard board) {
+        this.clearTerminal();
+        if (board == null) {
+            this.printMessage("No such player exists!");
+            return;
+        }
+        Map<Integer, ShownCard> placed = board.getPlaced();
+        for (Integer turn : placed.keySet()) {
+            try {
+                this.printCard(placed.get(turn));
+            } catch (CardException e) {
+                e.printStackTrace();
+            }
+        }
+        this.printResources(board.getResources());
+        this.printPoints(username, board.getPoints());
     }
 
 }

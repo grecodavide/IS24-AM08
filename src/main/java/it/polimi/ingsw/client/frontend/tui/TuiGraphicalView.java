@@ -1,14 +1,10 @@
 package it.polimi.ingsw.client.frontend.tui;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 import it.polimi.ingsw.client.frontend.ClientBoard;
 import it.polimi.ingsw.client.frontend.GraphicalViewInterface;
-import it.polimi.ingsw.client.frontend.ShownCard;
 import it.polimi.ingsw.client.network.NetworkView;
-import it.polimi.ingsw.exceptions.CardException;
 import it.polimi.ingsw.gamemodel.PlayableCard;
 import it.polimi.ingsw.gamemodel.Side;
 import it.polimi.ingsw.gamemodel.Symbol;
@@ -21,12 +17,14 @@ import it.polimi.ingsw.utils.Pair;
 
 public class TuiGraphicalView implements GraphicalViewInterface {
     private Map<String, ClientBoard> boards;
+    private List<String> players;
     private TuiPrinter printer; // init this, call getPlaced() and pass it to printer with foreach in someonePlayedCard to test
     private boolean isConnected;
 
     public TuiGraphicalView() throws IOException {
         this.boards = new HashMap<>();
         this.printer = new TuiPrinter();
+        this.players = new ArrayList<>();
         this.isConnected = true;
     }
 
@@ -51,24 +49,6 @@ public class TuiGraphicalView implements GraphicalViewInterface {
         throw new UnsupportedOperationException("Unimplemented method 'cancelLastAction'");
     }
 
-    public void printPlayerBoard(String username) {
-        ClientBoard board = boards.get(username);
-        this.printer.clearTerminal();
-        if (board == null) {
-            this.printer.printMessage("No such player exists!");
-            return;
-        }
-        Map<Integer, ShownCard> placed = board.getPlaced();
-        for (Integer turn : placed.keySet()) {
-            try {
-                printer.printCard(placed.get(turn));
-            } catch (CardException e) {
-                e.printStackTrace();
-            }
-        }
-        this.printer.printResources(board.getResources());
-        this.printer.printPoints(board.getPoints());
-    }
 
     private void parseInstruction(String line) {
         String instruction;
@@ -79,22 +59,34 @@ public class TuiGraphicalView implements GraphicalViewInterface {
         }
         instruction = line.substring(0, end);
         switch (instruction) {
-            case "q":
+            case "quit", "q":
                 this.printer.clearTerminal();
                 this.isConnected = false;
                 break;
 
-            case "place":
+            case "place", "p":
                 break;
 
-            case "show":
+            case "list", "l":
+                this.printer.printPlayerList(this.players);
+                break;
+
+            case "show", "s":
                 if (end == line.length()) {
                     this.printer.printMessage("No name specified, skipping this");
                 } else {
-                    this.printPlayerBoard(line.substring(end + 1));
+                    String user = line.substring(end + 1);
+
+                    // if the next element is a number, use it. Else directly search username
+                    try {
+                        String username = this.players.get(Integer.valueOf(user)-1);
+                        this.printer.printPlayerBoard(username, this.boards.get(username));
+                    } catch (NumberFormatException e) {
+                        this.printer.printPlayerBoard(user, this.boards.get(user));
+                    }
                 }
                 break;
-            case "h":
+            case "help", "h":
                 this.printer.printMessage("Told you it was TBA");
                 break;
             default:
@@ -108,6 +100,7 @@ public class TuiGraphicalView implements GraphicalViewInterface {
     public void start() {
         Scanner scanner = new Scanner(System.in);
         String line;
+        this.printer.clearTerminal();
         while (this.isConnected) {
             this.printer.printPrompt();
             line = scanner.nextLine();
@@ -120,16 +113,36 @@ public class TuiGraphicalView implements GraphicalViewInterface {
     public static void main(String[] args) throws IOException {
         TuiGraphicalView view = new TuiGraphicalView();
         Integer[] hand = {1, 2, 3};
-        view.boards.put("Davide", new ClientBoard(hand));
-        ClientBoard board = view.boards.get("Davide");
+
+        String player1 = "Uga";
+        view.boards.put(player1, new ClientBoard(hand));
+        view.players.add(player1);
+        ClientBoard player1Board = view.boards.get(player1);
+
+        String player2 = "Buga";
+        view.boards.put(player2, new ClientBoard(hand));
+        view.players.add(player2);
+        ClientBoard player2Board = view.boards.get(player2);
+
         CardsManager manager = CardsManager.getInstance();
 
-        board.placeInitial(manager.getInitialCards().get(1), Side.FRONT);
-        board.placeCard(new Pair<>(1, 1), manager.getResourceCards().get(20), Side.FRONT, 0, Map.of());
-        board.placeCard(new Pair<>(1, -1), manager.getResourceCards().get(1), Side.FRONT, 0, Map.of());
-        board.placeCard(new Pair<>(2, 0), manager.getResourceCards().get(30), Side.FRONT, 0, Map.of());
-        board.placeCard(new Pair<>(3, -1), manager.getGoldCards().get(41), Side.FRONT, 2, Map.of(Symbol.PLANT, 2, Symbol.INSECT, 3,
+        player1Board.placeInitial(manager.getInitialCards().get(1), Side.FRONT);
+        player1Board.placeCard(new Pair<>(1, 1), manager.getResourceCards().get(20), Side.FRONT, 0, Map.of());
+        player1Board.placeCard(new Pair<>(1, -1), manager.getResourceCards().get(1), Side.FRONT, 0, Map.of());
+        player1Board.placeCard(new Pair<>(2, 0), manager.getResourceCards().get(30), Side.FRONT, 0, Map.of());
+        player1Board.placeCard(new Pair<>(-1, -1), manager.getResourceCards().get(14), Side.BACK, 0, Map.of());
+        player1Board.placeCard(new Pair<>(3, -1), manager.getGoldCards().get(41), Side.FRONT, 2, Map.of(Symbol.PLANT, 3, Symbol.INSECT, 3,
                 Symbol.ANIMAL, 1, Symbol.FUNGUS, 1, Symbol.PARCHMENT, 1, Symbol.FEATHER, 0, Symbol.INKWELL, 0));
+
+
+        player2Board.placeInitial(manager.getInitialCards().get(2), Side.FRONT);
+        player2Board.placeCard(new Pair<>(-1, 1), manager.getResourceCards().get(20), Side.FRONT, 0, Map.of());
+        player2Board.placeCard(new Pair<>(-1, -1), manager.getResourceCards().get(1), Side.FRONT, 0, Map.of());
+        player2Board.placeCard(new Pair<>(-2, 0), manager.getResourceCards().get(29), Side.FRONT, 0, Map.of());
+        player2Board.placeCard(new Pair<>(1, -1), manager.getResourceCards().get(14), Side.BACK, 0, Map.of());
+        player2Board.placeCard(new Pair<>(-3, -1), manager.getGoldCards().get(46), Side.FRONT, 2, Map.of(Symbol.PLANT, 2, Symbol.INSECT, 2,
+                Symbol.ANIMAL, 2, Symbol.FUNGUS, 1, Symbol.PARCHMENT, 1, Symbol.FEATHER, 1, Symbol.INKWELL, 0));
+
 
         view.start();
         // view.printPlayerBoard("Luca");
