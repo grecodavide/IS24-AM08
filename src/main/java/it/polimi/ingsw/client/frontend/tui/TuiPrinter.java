@@ -13,7 +13,7 @@ import it.polimi.ingsw.utils.Pair;
 import it.polimi.ingsw.utils.TUICardParser;
 
 /**
- * Class to show Cards on the TUI. It handles coordinates conversion from relative to absolute, and prints to terminal in the right position
+ * Class that handles the actual printing to the terminal
  */
 public class TuiPrinter {
     private final Terminal terminal;
@@ -30,12 +30,11 @@ public class TuiPrinter {
         return new Pair<>(op1.first() + op2.first(), op1.second() + op2.second());
     }
 
-    // note that terminal will be inside the class
     private Pair<Integer, Integer> getCardCoords(Pair<Integer, Integer> coords) {
         int cardRows = 6, cardCols = 18;
         int cornerRows = 3, cornerCols = 5;
 
-        int termRows = this.terminal.getHeight(), termCols = this.terminal.getWidth();
+        int termRows = this.getHeight(), termCols = this.getWidth();
 
         Pair<Integer, Integer> coordOffset = new Pair<Integer, Integer>((termCols - cardCols) / 2, (termRows - cardRows) / 2);
         Pair<Integer, Integer> coordUpdated = new Pair<Integer, Integer>(coords.first() * (cardCols - cornerCols),
@@ -43,22 +42,7 @@ public class TuiPrinter {
 
         return this.add(coordOffset, coordUpdated);
     }
-
     
-    /**
-     * Clears the terminal
-     */
-    public void clearTerminal() {
-        System.out.println("\033[2J");
-    }
-    
-    /**
-     * Outputs to terminal a {@link ShownCard}
-     * 
-     * @param card The card to show
-     * 
-     * @throws CardException If the card is not found
-     */
     private void printCard(ShownCard card) throws CardException {
         if (card.coords().equals(new Pair<>(0, 0)))
             System.out.println(parser.getInitial(card.card().getId(), getCardCoords(card.coords()), card.side() == Side.FRONT));
@@ -68,13 +52,13 @@ public class TuiPrinter {
     }
 
     private void printPoints(String username, Integer points) {
-        int termRows = this.terminal.getHeight(), termCols = this.terminal.getWidth();
+        int termRows = this.getHeight(), termCols = this.getWidth();
         String out = username + "'s Points: " + points ;
         System.out.println("\033[" + (termRows-infoLineOffset) + ";" + ((termCols-out.length())/4)+"H" + out);
     }
 
     private void printResources(Map<Symbol, Integer> availableResources) {
-        int termRows = this.terminal.getHeight(), termCols = this.terminal.getWidth();
+        int termRows = this.getHeight(), termCols = this.getWidth();
         String out = "";
         String spaces = "    ";
         Integer len = availableResources.keySet().size()*(5+spaces.length()); // icon, space, :, space, number
@@ -89,26 +73,62 @@ public class TuiPrinter {
         System.out.println("\033[" + (termRows-infoLineOffset) + ";" + ((termCols - len)/2)+"H" + out + "\033[0m");
     }
 
+    private Integer getHeight() {
+        return this.terminal.getHeight();
+    }
+
+    private Integer getWidth() {
+        return this.terminal.getWidth();
+    }
+
+
+    /**
+     * Clears the terminal
+     */
+    public void clearTerminal() {
+        System.out.println("\033[2J");
+    }
+    
+    /**
+     * Prints the command prompt
+     */
     public void printPrompt() {
-        int termRows = this.terminal.getHeight();
+        int termRows = this.getHeight();
         System.out.print("\033[" + (termRows-infoLineOffset+1) + ";" + "1H" + "Command: ");
         System.out.flush();
     }
-
+    
+    /**
+     * Prints a message in the line above the prompt
+     * 
+     * @param string The message to print
+     */
     public void printMessage(String string) {
-        int termRows = this.terminal.getHeight();
+        int termRows = this.getHeight();
         System.out.println("\033[" + (termRows-infoLineOffset) + ";" + "1H" + string);
     }
 
+    
+    /**
+     * Prints the list of players with their associated number
+     * 
+     * @param players the list of players to print
+     */
     public void printPlayerList(List<String> players) {
+        int termRows = this.getHeight();
         Integer offset = 0;
         for (String username : players) {
-            int termRows = this.terminal.getHeight();
             System.out.println("\033[" + (termRows-infoLineOffset-offset) + ";" + "1H" + (offset+1) + ". " + username);
             offset++;
         }
     }
     
+    /**
+     * Prints the whole board, including username, points and resources
+     * 
+     * @param username The username to print
+     * @param board the board to be printed
+     */
     public void printPlayerBoard(String username, ClientBoard board) {
         this.clearTerminal();
         if (board == null) {

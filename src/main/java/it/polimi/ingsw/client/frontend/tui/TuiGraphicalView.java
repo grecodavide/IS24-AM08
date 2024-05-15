@@ -79,7 +79,7 @@ public class TuiGraphicalView implements GraphicalViewInterface {
 
                     // if the next element is a number, use it. Else directly search username
                     try {
-                        String username = this.players.get(Integer.valueOf(user)-1);
+                        String username = this.players.get(Integer.valueOf(user) - 1);
                         this.printer.printPlayerBoard(username, this.boards.get(username));
                     } catch (NumberFormatException e) {
                         this.printer.printPlayerBoard(user, this.boards.get(user));
@@ -97,6 +97,10 @@ public class TuiGraphicalView implements GraphicalViewInterface {
 
     }
 
+
+    /**
+     * infinite loop (until end of game) that acquires next instruction and executes it
+     */
     public void start() {
         Scanner scanner = new Scanner(System.in);
         String line;
@@ -110,6 +114,7 @@ public class TuiGraphicalView implements GraphicalViewInterface {
         scanner.close();
     }
 
+    // here for testing
     public static void main(String[] args) throws IOException {
         TuiGraphicalView view = new TuiGraphicalView();
         Integer[] hand = {1, 2, 3};
@@ -145,7 +150,6 @@ public class TuiGraphicalView implements GraphicalViewInterface {
 
 
         view.start();
-        // view.printPlayerBoard("Luca");
     }
 
 }
