@@ -1,23 +1,27 @@
 package it.polimi.ingsw.client.frontend.tui;
 
 import java.io.IOException;
+import java.util.Map;
 import org.jline.terminal.Terminal;
 import it.polimi.ingsw.client.frontend.ShownCard;
 import it.polimi.ingsw.exceptions.CardException;
 import it.polimi.ingsw.gamemodel.Side;
+import it.polimi.ingsw.gamemodel.Symbol;
 import it.polimi.ingsw.utils.Pair;
 import it.polimi.ingsw.utils.TUICardParser;
 
 /**
  * Class to show Cards on the TUI. It handles coordinates conversion from relative to absolute, and prints to terminal in the right position
  */
-public class TuiCardPrinter {
+public class TuiPrinter {
     private final Terminal terminal;
     private final TUICardParser parser;
+    private final Integer infoLineOffset;
 
-    public TuiCardPrinter() throws IOException {
+    public TuiPrinter() throws IOException {
         this.terminal = org.jline.terminal.TerminalBuilder.terminal();
         this.parser = new TUICardParser();
+        this.infoLineOffset = 2;
     }
 
     private Pair<Integer, Integer> add(Pair<Integer, Integer> op1, Pair<Integer, Integer> op2) {
@@ -59,6 +63,37 @@ public class TuiCardPrinter {
         else
             System.out.println(parser.getPlayable(card.card().getId(), getCardCoords(card.coords()), card.side() == Side.FRONT));
         System.out.println("\033[0m");
+    }
+
+    public void printPoints(Integer points) {
+        int termRows = this.terminal.getHeight(), termCols = this.terminal.getWidth();
+        String out = "Current points: " + points ;
+        System.out.println("\033[" + (termRows-infoLineOffset) + ";" + ((termCols-out.length())/4)+"H" + out);
+    }
+
+
+    // if we want the same position always, then we need to hardcode them. Ugly
+    public void printResources(Map<Symbol, Integer> availableResources) {
+        int termRows = this.terminal.getHeight(), termCols = this.terminal.getWidth();
+        String out = "";
+        String spaces = "    ";
+        Integer len = availableResources.keySet().size()*(5+spaces.length()); // icon, space, :, space, number
+        for (Symbol resource : availableResources.keySet()) {
+            out += parser.getRightColor(resource) + parser.getRightIcon(resource) + ": " + availableResources.get(resource) + spaces;
+        }
+
+        System.out.println("\033[" + (termRows-infoLineOffset) + ";" + ((termCols - len)/2)+"H" + out + "\033[0m");
+    }
+
+    public void printPrompt() {
+        int termRows = this.terminal.getHeight();
+        System.out.print("\033[" + (termRows-infoLineOffset+1) + ";" + "1H" + "Command: ");
+        System.out.flush();
+    }
+
+    public void printMessage(String string) {
+        int termRows = this.terminal.getHeight();
+        System.out.println("\033[" + (termRows-infoLineOffset) + ";" + "1H" + string);
     }
 
 }

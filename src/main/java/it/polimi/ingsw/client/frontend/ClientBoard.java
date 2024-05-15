@@ -63,5 +63,9 @@ public class ClientBoard {
         return placed;
     }
 
+    public Map<Symbol, Integer> getResources() {
+        return resources;
+    }
+
 
 }

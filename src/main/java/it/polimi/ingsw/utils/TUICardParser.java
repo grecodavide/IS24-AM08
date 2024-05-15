@@ -417,7 +417,7 @@ public class TUICardParser {
         return getRightColor(symbol) + getRightIcon(symbol);
     }
 
-    private String getRightColor(Symbol symbol) {
+    public String getRightColor(Symbol symbol) {
         return switch (symbol) {
             case FUNGUS -> "\033[31m";
             case ANIMAL -> "\033[34m";
@@ -431,7 +431,7 @@ public class TUICardParser {
         };
     }
 
-    private String getRightIcon(Symbol symbol) {
+    public String getRightIcon(Symbol symbol) {
         return switch (symbol) {
             case FULL_CORNER, EMPTY_CORNER -> "  ";
             case FUNGUS -> "󰟟 ";

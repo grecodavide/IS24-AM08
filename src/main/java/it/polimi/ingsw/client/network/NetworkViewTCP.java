@@ -5,7 +5,6 @@ import java.net.Socket;
 import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Map;
-
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.network.messages.Message;
 import it.polimi.ingsw.network.messages.actions.*;
@@ -68,10 +67,9 @@ public class NetworkViewTCP extends NetworkView {
 
     }
 
-    @Override
-    public void someonePlayedCard(String someoneUsername, Pair<Integer, Integer> coords, PlayableCard card, Side side, int points) {
+    public void someonePlayedCard(String someoneUsername, Pair<Integer, Integer> coords, PlayableCard card, Side side, int points, Map<Symbol, Integer> resources) {
         // Example implementation
-        graphicalInterface.someonePlayedCard(someoneUsername, coords, card, side);
+        graphicalInterface.someonePlayedCard(someoneUsername, coords, card, side, points, resources);
     }
 
     @Override
