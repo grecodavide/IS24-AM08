@@ -1,8 +1,6 @@
 package it.polimi.ingsw.utils;
 
-import java.io.IOException;
 import java.util.*;
-import org.jline.terminal.Terminal;
 import it.polimi.ingsw.exceptions.CardException;
 import it.polimi.ingsw.gamemodel.*;
 
@@ -35,11 +33,11 @@ public class TUICardParser {
      * 
      * @throws CardException if the card type is not known
      */
-    public String getPlayable(int id, Pair<Integer, Integer> coord, Boolean isFacingUp) throws CardException {
+    public String getPlayable(int id, Pair<Integer, Integer> coord, Pair<Integer, Integer> displayCoord, Boolean isFacingUp) throws CardException {
         if (resourceCards.get(id) != null)
-            return parseCard(resourceCards.get(id), coord, isFacingUp);
+            return parseCard(resourceCards.get(id), coord, displayCoord, isFacingUp);
         else if (goldCards.get(id) != null)
-            return parseCard(goldCards.get(id), coord, isFacingUp);
+            return parseCard(goldCards.get(id), coord, displayCoord, isFacingUp);
 
         throw new CardException("Invalid card type: " + initialCards.get(id).getClass() + "or" + objectives.get(id).getClass() + "!");
     }
@@ -59,7 +57,7 @@ public class TUICardParser {
         if (initialCards.get(id) == null)
             throw new CardException("Invalid card type!");
 
-        return parseCard(initialCards.get(id), coord, isFacingUp);
+        return parseCard(initialCards.get(id), coord, null, isFacingUp);
     }
 
     /**
@@ -82,7 +80,7 @@ public class TUICardParser {
     // NO JAVADOC
 
     // PARSERS
-    private String parseCard(Card card, Pair<Integer, Integer> coord, Boolean isFacingUp) throws CardException {
+    private String parseCard(Card card, Pair<Integer, Integer> coord, Pair<Integer, Integer> displayCoord, Boolean isFacingUp) throws CardException {
 
         // acquire information
         Map<Corner, Symbol> cornersToProcess = new HashMap<>();
@@ -107,8 +105,8 @@ public class TUICardParser {
         Map<Integer, String> centerAsString = new HashMap<>();
         switch (card) {
             case InitialCard initialCard -> processCenter(centerAsString, centerToProcess, initialCard);
-            case GoldCard goldCard -> processCenter(centerAsString, centerToProcess, goldCard);
-            case ResourceCard resourceCard -> processCenter(centerAsString, centerToProcess, resourceCard);
+            case GoldCard goldCard -> processCenter(centerAsString, displayCoord, centerToProcess, goldCard);
+            case ResourceCard resourceCard -> processCenter(centerAsString, displayCoord, centerToProcess, resourceCard);
             default -> throw new CardException("Invalid card type: " + card.getClass() + "!");
         }
 
@@ -231,17 +229,25 @@ public class TUICardParser {
         }
     }
 
-    // only considers cases of goldcards with 1 or 2 different symbols as placement requirement
-    private void processCenter(Map<Integer, String> centerAsString, Set<Symbol> centerToProcess, GoldCard card) {
+    private String getPlayableCoord(Integer x, Integer y) {
+        String coords = "("+x.toString()+","+y.toString()+")";
+        Integer preSpacesNumber = (8 - coords.length())/2; // center is 8 chars
+        String preSpaces = " ".repeat(preSpacesNumber);
+        String postSpaces = " ".repeat(8-preSpacesNumber-coords.length());
 
+        return preSpaces + coords + postSpaces;
+    }
+
+    // only considers cases of goldcards with 1 or 2 different symbols as placement requirement
+    private void processCenter(Map<Integer, String> centerAsString, Pair<Integer, Integer> displayCoord, Set<Symbol> centerToProcess, GoldCard card) {
         centerAsString.put(0, "────────");
-        centerAsString.put(3, "        ");
+        centerAsString.put(2, getPlayableCoord(displayCoord.first(), displayCoord.second()));
         centerAsString.put(5, "────────");
 
         String colorReset = getRightColor(card.getReign());
 
         if (centerToProcess.isEmpty()) {
-            centerAsString.put(2, "        ");
+            centerAsString.put(3, "        ");
             centerAsString.put(1, "   " + getRightColor(card.getMultiplier()) + String.valueOf(card.getPoints())
                     + getRightIcon(card.getMultiplier()) + colorReset + "  ");
 
@@ -267,13 +273,13 @@ public class TUICardParser {
         }
 
         centerAsString.put(1, "        ");
-        centerAsString.put(2, "   " + getRightColor(card.getReign()) + "1" + getRightIcon(card.getReign()) + "  "); // back
+        centerAsString.put(3, "   " + getRightColor(card.getReign()) + "1" + getRightIcon(card.getReign()) + "  "); // back
         centerAsString.put(4, "        ");
     }
 
-    private void processCenter(Map<Integer, String> centerAsString, Set<Symbol> centerToProcess, ResourceCard card) {
+    private void processCenter(Map<Integer, String> centerAsString, Pair<Integer, Integer> displayCoord, Set<Symbol> centerToProcess, ResourceCard card) {
         centerAsString.put(0, "────────");
-        centerAsString.put(3, "        ");
+        centerAsString.put(2, getPlayableCoord(displayCoord.first(), displayCoord.second()));
         centerAsString.put(4, "        ");
         centerAsString.put(5, "────────");
 
@@ -284,12 +290,12 @@ public class TUICardParser {
                 centerAsString.put(1, "   " + String.valueOf(card.getPoints()) + "    ");
             }
 
-            centerAsString.put(2, "        ");
+            centerAsString.put(3, "        ");
             return;
         }
 
         centerAsString.put(1, "        ");
-        centerAsString.put(2, "   " + getRightColor(card.getReign()) + "1" + getRightIcon(card.getReign()) + "  "); // back
+        centerAsString.put(3, "   " + getRightColor(card.getReign()) + "1" + getRightIcon(card.getReign()) + "  "); // back
     }
 
     private void processCenter(Map<Integer, String> centerAsString, Set<Symbol> centerToProcess, InitialCard card) {
@@ -417,6 +423,11 @@ public class TUICardParser {
         return getRightColor(symbol) + getRightIcon(symbol);
     }
 
+    /**
+     * The method is a getter for the TUI-relative color of a specific symbol.
+     * @param symbol the specified symbol
+     * @return the color code as String
+     */
     public String getRightColor(Symbol symbol) {
         return switch (symbol) {
             case FUNGUS -> "\033[31m";
@@ -431,6 +442,11 @@ public class TUICardParser {
         };
     }
 
+    /**
+     * The method is a getter for the TUI-relative icon of a specific symbol.
+     * @param symbol the specified symbol
+     * @return the symbol icon as String
+     */
     public String getRightIcon(Symbol symbol) {
         return switch (symbol) {
             case FULL_CORNER, EMPTY_CORNER -> "  ";
@@ -586,92 +602,6 @@ public class TUICardParser {
             case 3 -> "";
             default -> null;
         };
-    }
-
-
-    // Pure and simple testing, never going to be used in practice
-    private void printObjectives(int rowsCycle, int colsCycle, int startRow, int startCol, int incCol, int incRow, int max)
-            throws CardException {
-        for (int i = 0, id = 1; i < rowsCycle; i++) {
-            for (int j = 0; j < colsCycle; j++, id++) {
-                if (id > max) {
-                    return;
-                }
-                System.out.println(getObjective(id, new Pair<Integer, Integer>(startCol + j * incCol, startRow + i * incRow)));
-            }
-        }
-    }
-
-    private void printInitials(int rowsCycle, int colsCycle, int startRow, int startCol, int incCol, int incRow, int max,
-            boolean isFacingUp) throws CardException {
-        for (int i = 0, id = 1; i < rowsCycle; i += 2) {
-            for (int j = 0; j < colsCycle; j++, id++) {
-                if (id > max) {
-                    return;
-                }
-                System.out.println(
-                        getInitial(id, new Pair<Integer, Integer>(startCol + j * incCol, startRow + i * incRow), isFacingUp));
-                System.out.println(
-                        getInitial(id, new Pair<Integer, Integer>(startCol + j * incCol, startRow + (i + 1) * incRow), !isFacingUp));
-            }
-        }
-    }
-
-    private void printPlayable(int rowsCycle, int colsCycle, int startRow, int startCol, int incCol, int incRow, int max,
-            boolean isFacingUp) throws CardException {
-        for (int i = 0, id = 1; i < rowsCycle; i++) {
-            for (int j = 0; j < colsCycle; j++, id++) {
-                if (id > max) {
-                    return;
-                }
-                System.out.println(getPlayable(id, new Pair<Integer, Integer>(startCol + j * incCol, startRow + i * incRow), isFacingUp));
-            }
-        }
-
-    }
-
-
-
-    public static void main(String[] args) throws IOException, CardException {
-        TUICardParser printer = new TUICardParser();
-        Scanner scanner = new Scanner(System.in);
-
-        String in;
-        boolean shouldLoop = true;
-
-        Terminal terminal = org.jline.terminal.TerminalBuilder.terminal();
-        int startCol = 1, startRow = 1;
-        int incRow = 6, incCol = 19;
-
-        while (shouldLoop) {
-            in = scanner.nextLine();
-            System.out.println("\033[2J");
-            int rowsCycle = (terminal.getHeight() - startCol) / incRow - 1;
-            int colsCycle = (terminal.getWidth() - startRow) / incCol;
-
-            switch (in) {
-                case "o":
-                    printer.printObjectives(rowsCycle, colsCycle, startRow, startCol, incCol, incRow, 16);
-                    break;
-                case "i":
-                    printer.printInitials(rowsCycle, colsCycle, startRow, startCol, incCol, incRow, 6, true);
-                    break;
-                case "f":
-                    printer.printPlayable(rowsCycle, colsCycle, startRow, startCol, incCol, incRow, 80, true);
-                    break;
-                case "b":
-                    printer.printPlayable(rowsCycle, colsCycle, startRow, startCol, incCol, incRow, 80, false);
-                    break;
-                case "q":
-                    shouldLoop = false;
-                    break;
-                default:
-                    System.out.println("not a known command");
-                    break;
-            }
-            System.out.println("\033[0m");
-        }
-        scanner.close();
     }
 
 }
