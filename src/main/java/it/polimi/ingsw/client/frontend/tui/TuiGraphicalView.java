@@ -84,10 +84,10 @@ public class TuiGraphicalView extends GraphicalViewInterface {
                 this.printer.printPlayerList(this.players);
                 break;
 
-            case "chat", "c":
+            case "chat view", "cv":
                 this.printer.printChat(chat);
                 break;
-            case "send message", "sm":
+            case "chat send", "cs":
                 // TBA
                 break;
             case "show", "s":
@@ -99,8 +99,8 @@ public class TuiGraphicalView extends GraphicalViewInterface {
                 b = this.boards.get(user);
                 this.printer.printHand(user, b.getColor(), b.getHand());
                 break;
-            case "help":
-                this.printer.printMessage("Told you it was TBA");
+            case "help", "-h":
+                this.printer.printHelp();
                 break;
             case "objective", "o":
                 b = this.boards.get(this.username);

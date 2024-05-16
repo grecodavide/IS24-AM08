@@ -1,6 +1,7 @@
 package it.polimi.ingsw.client.frontend.tui;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.jline.terminal.Terminal;
@@ -21,11 +22,23 @@ public class TuiPrinter {
     private final TUICardParser parser;
     private final Integer infoLineOffset;
     private static final Integer cardRows = 6, cardCols = 18, cornerRows = 3, cornerCols = 5;
+    private final Map<Pair<String, String>, String> commandList;
 
     public TuiPrinter() throws IOException {
         this.terminal = org.jline.terminal.TerminalBuilder.terminal();
         this.parser = new TUICardParser();
         this.infoLineOffset = 2;
+        this.commandList = new HashMap<>();
+
+        commandList.put(new Pair<>("quit", "q"), "exit the match");
+        commandList.put(new Pair<>("place", "p"), "place a card in the chosen coordinates"); // review
+        commandList.put(new Pair<>("list", "l"), "print player list");
+        commandList.put(new Pair<>("chat view", "cv"), "view the latest messages of the chat");
+        commandList.put(new Pair<>("chat send", "cs"), "send a message in the chat");
+        commandList.put(new Pair<>("show", "s"), "show the board of the chosen player");
+        commandList.put(new Pair<>("hand", "h"), "show the hand of the chosen player");
+        commandList.put(new Pair<>("help", "-h"), "show the list of all available commands");
+        commandList.put(new Pair<>("objective", "o"), "show the objectives of the current player");
     }
 
     private Pair<Integer, Integer> sumCoords(Pair<Integer, Integer> op1, Pair<Integer, Integer> op2) {
@@ -163,7 +176,7 @@ public class TuiPrinter {
     }
 
     /**
-     * Prints the hand of the player, which includes the 3 available-to-play cards.
+     * Prints the hand of the player, which includes the 3 available-to-play cards
      *
      * @param username username of the player
      * @param color color of the player's token
@@ -191,7 +204,7 @@ public class TuiPrinter {
     }
 
     /**
-     * Prints the objectives, both common and secret, of a given player.
+     * Prints the objectives, both common and secret, of a given player
      *
      * @param username username of the player
      * @param color color of the player's token
@@ -230,8 +243,13 @@ public class TuiPrinter {
         }
     }
 
+    /**
+     * Prints the message history of the most recent messages
+     *
+     * @param chat chat object, as a list of strings
+     */
     public void printChat(List<String> chat) {
-        int rows = this.getHeight() - infoLineOffset+1;
+        int rows = this.getHeight() - infoLineOffset + 1;
         int start = chat.size() - rows;
         if (start < 0) {
             start = 0;
@@ -241,6 +259,21 @@ public class TuiPrinter {
             System.out.println(this.setPosition(1, i-start) + chat.get(i));
         }
         
+    }
+
+    /**
+     * Prints a list of available commands
+     */
+    public void printHelp(){
+        String prefix = "Command used to";
+        int maxLen = this.getHeight() - infoLineOffset + 1;
+        int y = maxLen - this.commandList.size();
+
+        for (Pair<String, String> command : this.commandList.keySet()){
+            System.out.printf("%s%-15s %2s: %s %s", this.setPosition(1, y), command.first()+",", command.second(), prefix, this.commandList.get(command));
+            y++;
+
+        }
     }
 
 }
