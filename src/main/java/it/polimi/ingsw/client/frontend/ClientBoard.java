@@ -4,10 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import it.polimi.ingsw.gamemodel.InitialCard;
-import it.polimi.ingsw.gamemodel.PlayableCard;
-import it.polimi.ingsw.gamemodel.Side;
-import it.polimi.ingsw.gamemodel.Symbol;
+import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.Pair;
 
 /**
@@ -20,10 +17,15 @@ public class ClientBoard {
     private List<Integer> hand;
     private Integer points;
     private Map<Symbol, Integer> resources;
+    private final String username;
+    private final Color color;
+    private Integer objective;
 
-    public ClientBoard(Integer[] hand) {
+    public ClientBoard(String username, Color color, Integer[] hand) {
         this.turn = 0;
         this.placed = new HashMap<>();
+        this.username = username;
+        this.color = color;
 
         this.hand = new ArrayList<>();
         for (Integer cardID : hand) {
@@ -33,6 +35,10 @@ public class ClientBoard {
         this.points = 0;
 
         this.resources = new HashMap<>();
+    }
+
+    public void setSecretObjective(Integer objectiveID) {
+        this.objective = objectiveID;
     }
 
     public void placeCard(Pair<Integer, Integer> coords, PlayableCard card, Side side, Integer points, Map<Symbol, Integer> resources) {
@@ -67,5 +73,16 @@ public class ClientBoard {
         return resources;
     }
 
+    public String getUsername() {
+        return username;
+    }
+
+    public Color getColor() {
+        return color;
+    }
+
+    public Integer getObjective() {
+        return objective;
+    }
 
 }

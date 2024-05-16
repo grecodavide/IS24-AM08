@@ -7,6 +7,7 @@ import it.polimi.ingsw.gamemodel.PlayableCard;
 import it.polimi.ingsw.gamemodel.Side;
 import it.polimi.ingsw.utils.Pair;
 
+// we need graphicalInterface to RECEIVE information
 public abstract class NetworkView implements RemoteViewInterface {
     GraphicalViewInterface graphicalInterface;
     /**

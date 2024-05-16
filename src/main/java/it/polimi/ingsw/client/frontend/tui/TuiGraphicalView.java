@@ -1,13 +1,13 @@
 package it.polimi.ingsw.client.frontend.tui;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
 import it.polimi.ingsw.client.frontend.ClientBoard;
 import it.polimi.ingsw.client.frontend.GraphicalViewInterface;
 import it.polimi.ingsw.client.network.NetworkView;
-import it.polimi.ingsw.gamemodel.PlayableCard;
-import it.polimi.ingsw.gamemodel.Side;
-import it.polimi.ingsw.gamemodel.Symbol;
+import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.CardsManager;
 import it.polimi.ingsw.utils.Pair;
 
@@ -15,22 +15,17 @@ import it.polimi.ingsw.utils.Pair;
  * TuiGraphicalView
  */
 
-public class TuiGraphicalView implements GraphicalViewInterface {
-    private Map<String, ClientBoard> boards;
-    private List<String> players;
+public class TuiGraphicalView extends GraphicalViewInterface {
     private TuiPrinter printer; // init this, call getPlaced() and pass it to printer with foreach in someonePlayedCard to test
     private boolean isConnected;
+    private List<String> chat; // when someoneSentBroadcast/PrivateText, add to this. Then simply show when "chat" command is sent
+    private final String username;
 
-    public TuiGraphicalView() throws IOException {
-        this.boards = new HashMap<>();
+    public TuiGraphicalView(NetworkView networkView, String username) throws IOException {
+        super(networkView);
         this.printer = new TuiPrinter();
-        this.players = new ArrayList<>();
         this.isConnected = true;
-    }
-
-    @Override
-    public void setNetworkInterface(NetworkView networkView) {
-        throw new UnsupportedOperationException("Unimplemented method 'setNetworkInterface'");
+        this.username = username;
     }
 
     @Override
@@ -50,14 +45,30 @@ public class TuiGraphicalView implements GraphicalViewInterface {
     }
 
 
+    private String getPassedUsername(String instruction, Integer startIndex) {
+        if (startIndex == instruction.length()) {
+            return this.username;
+        } else {
+            String arg = instruction.substring(startIndex + 1);
+            // if the next element is a number, use it. Else directly search username
+            try {
+                return this.players.get(Integer.valueOf(arg) - 1);
+            } catch (NumberFormatException e) {
+                return arg;
+            }
+        }
+
+    }
     private void parseInstruction(String line) {
         String instruction;
-        Integer end;
-        end = line.indexOf(" ");
-        if (end == -1) {
-            end = line.length();
+        String user;
+        Integer argStartIndex;
+        ClientBoard b;
+        argStartIndex = line.indexOf(" ");
+        if (argStartIndex == -1) {
+            argStartIndex = line.length();
         }
-        instruction = line.substring(0, end);
+        instruction = line.substring(0, argStartIndex);
         switch (instruction) {
             case "quit", "q":
                 this.printer.clearTerminal();
@@ -71,27 +82,28 @@ public class TuiGraphicalView implements GraphicalViewInterface {
                 this.printer.printPlayerList(this.players);
                 break;
 
-            case "show", "s":
-                if (end == line.length()) {
-                    this.printer.printMessage("No name specified, skipping this");
-                } else {
-                    String user = line.substring(end + 1);
-
-                    // if the next element is a number, use it. Else directly search username
-                    try {
-                        String username = this.players.get(Integer.valueOf(user) - 1);
-                        this.printer.printPlayerBoard(username, this.boards.get(username));
-                    } catch (NumberFormatException e) {
-                        this.printer.printPlayerBoard(user, this.boards.get(user));
-                    }
-                }
+            case "chat", "c":
+                this.printer.printChat(chat);
                 break;
-            case "help", "h":
+            case "show", "s":
+                user = getPassedUsername(line, argStartIndex);
+                this.printer.printPlayerBoard(user, this.boards.get(user));
+                break;
+            case "hand", "h":
+                user = getPassedUsername(line, argStartIndex);
+                b = this.boards.get(user);
+                this.printer.printHand(user, b.getColor(), b.getHand());
+                break;
+            case "help":
                 this.printer.printMessage("Told you it was TBA");
+                break;
+            case "objective", "o":
+                b = this.boards.get(this.username);
+                this.printer.printObjectives(this.username, b.getColor(), b.getObjective(), this.visibleObjectives);
                 break;
             default:
                 this.printer.clearTerminal();
-                this.printer.printMessage("No such command. Type 'h' to show help (TBA)");
+                this.printer.printMessage("No such command. Type 'help' to show help (TBA)");
                 break;
         }
 
@@ -116,20 +128,24 @@ public class TuiGraphicalView implements GraphicalViewInterface {
 
     // here for testing
     public static void main(String[] args) throws IOException {
-        TuiGraphicalView view = new TuiGraphicalView();
-        Integer[] hand = {1, 2, 3};
-
         String player1 = "Uga";
-        view.boards.put(player1, new ClientBoard(hand));
-        view.players.add(player1);
-        ClientBoard player1Board = view.boards.get(player1);
-
         String player2 = "Buga";
-        view.boards.put(player2, new ClientBoard(hand));
-        view.players.add(player2);
+        TuiGraphicalView view = new TuiGraphicalView(null, player1); // for now null, tba
+
+        Integer[] player1Hand = {44, 55, 56};
+        Integer[] player2Hand = {12, 21, 33};
+
+        Integer[] visibleObjectives = {2, 4};
+        Map<DrawSource, Integer> visibleCards = Map.of(DrawSource.FIRST_VISIBLE, 31, DrawSource.SECOND_VISIBLE, 79, DrawSource.THIRD_VISIBLE, 80, DrawSource.FOURTH_VISIBLE, 77);
+        Symbol[] visibleReigns = {Symbol.FUNGUS, Symbol.PLANT};
+        view.matchStarted(visibleObjectives, visibleCards, visibleReigns, Map.of(player1, player1Hand, player2, player2Hand), Map.of(player1, Color.RED, player2, Color.BLUE));
+
+        ClientBoard player1Board = view.boards.get(player1);
         ClientBoard player2Board = view.boards.get(player2);
 
         CardsManager manager = CardsManager.getInstance();
+
+        player1Board.setSecretObjective(11);
 
         player1Board.placeInitial(manager.getInitialCards().get(1), Side.FRONT);
         player1Board.placeCard(new Pair<>(1, 1), manager.getResourceCards().get(20), Side.FRONT, 0, Map.of());
@@ -139,6 +155,7 @@ public class TuiGraphicalView implements GraphicalViewInterface {
         player1Board.placeCard(new Pair<>(3, -1), manager.getGoldCards().get(41), Side.FRONT, 2, Map.of(Symbol.PLANT, 3, Symbol.INSECT, 3,
                 Symbol.ANIMAL, 1, Symbol.FUNGUS, 1, Symbol.PARCHMENT, 1, Symbol.FEATHER, 0, Symbol.INKWELL, 0));
 
+        player2Board.setSecretObjective(12);
 
         player2Board.placeInitial(manager.getInitialCards().get(2), Side.FRONT);
         player2Board.placeCard(new Pair<>(-1, 1), manager.getResourceCards().get(20), Side.FRONT, 0, Map.of());

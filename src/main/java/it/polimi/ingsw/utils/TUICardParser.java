@@ -33,7 +33,8 @@ public class TUICardParser {
      * 
      * @throws CardException if the card type is not known
      */
-    public String getPlayable(int id, Pair<Integer, Integer> coord, Pair<Integer, Integer> displayCoord, Boolean isFacingUp) throws CardException {
+    public String getPlayable(int id, Pair<Integer, Integer> coord, Pair<Integer, Integer> displayCoord, Boolean isFacingUp)
+            throws CardException {
         if (resourceCards.get(id) != null)
             return parseCard(resourceCards.get(id), coord, displayCoord, isFacingUp);
         else if (goldCards.get(id) != null)
@@ -80,7 +81,8 @@ public class TUICardParser {
     // NO JAVADOC
 
     // PARSERS
-    private String parseCard(Card card, Pair<Integer, Integer> coord, Pair<Integer, Integer> displayCoord, Boolean isFacingUp) throws CardException {
+    private String parseCard(Card card, Pair<Integer, Integer> coord, Pair<Integer, Integer> displayCoord, Boolean isFacingUp)
+            throws CardException {
 
         // acquire information
         Map<Corner, Symbol> cornersToProcess = new HashMap<>();
@@ -230,18 +232,23 @@ public class TUICardParser {
     }
 
     private String getPlayableCoord(Integer x, Integer y) {
-        String coords = "("+x.toString()+","+y.toString()+")";
-        Integer preSpacesNumber = (8 - coords.length())/2; // center is 8 chars
+        String coords = "(" + x.toString() + "," + y.toString() + ")";
+        Integer preSpacesNumber = (8 - coords.length()) / 2; // center is 8 chars
         String preSpaces = " ".repeat(preSpacesNumber);
-        String postSpaces = " ".repeat(8-preSpacesNumber-coords.length());
+        String postSpaces = " ".repeat(8 - preSpacesNumber - coords.length());
 
         return preSpaces + coords + postSpaces;
     }
 
     // only considers cases of goldcards with 1 or 2 different symbols as placement requirement
-    private void processCenter(Map<Integer, String> centerAsString, Pair<Integer, Integer> displayCoord, Set<Symbol> centerToProcess, GoldCard card) {
+    private void processCenter(Map<Integer, String> centerAsString, Pair<Integer, Integer> displayCoord, Set<Symbol> centerToProcess,
+            GoldCard card) {
         centerAsString.put(0, "────────");
-        centerAsString.put(2, getPlayableCoord(displayCoord.first(), displayCoord.second()));
+        if (displayCoord != null) {
+            centerAsString.put(2, getPlayableCoord(displayCoord.first(), displayCoord.second()));
+        } else {
+            centerAsString.put(2, "        ");
+        }
         centerAsString.put(5, "────────");
 
         String colorReset = getRightColor(card.getReign());
@@ -277,9 +284,14 @@ public class TUICardParser {
         centerAsString.put(4, "        ");
     }
 
-    private void processCenter(Map<Integer, String> centerAsString, Pair<Integer, Integer> displayCoord, Set<Symbol> centerToProcess, ResourceCard card) {
+    private void processCenter(Map<Integer, String> centerAsString, Pair<Integer, Integer> displayCoord, Set<Symbol> centerToProcess,
+            ResourceCard card) {
         centerAsString.put(0, "────────");
-        centerAsString.put(2, getPlayableCoord(displayCoord.first(), displayCoord.second()));
+        if (displayCoord != null) {
+            centerAsString.put(2, getPlayableCoord(displayCoord.first(), displayCoord.second()));
+        } else {
+            centerAsString.put(2, "        ");
+        }
         centerAsString.put(4, "        ");
         centerAsString.put(5, "────────");
 
@@ -425,6 +437,7 @@ public class TUICardParser {
 
     /**
      * The method is a getter for the TUI-relative color of a specific symbol.
+     * 
      * @param symbol the specified symbol
      * @return the color code as String
      */
@@ -435,7 +448,7 @@ public class TUICardParser {
             case PLANT -> "\033[32m";
             case INSECT -> "\033[35m";
 
-            case INKWELL-> "\033[33m";
+            case INKWELL -> "\033[33m";
             case PARCHMENT -> "\033[33m";
             case FEATHER -> "\033[33m";
             default -> "";
@@ -444,6 +457,7 @@ public class TUICardParser {
 
     /**
      * The method is a getter for the TUI-relative icon of a specific symbol.
+     * 
      * @param symbol the specified symbol
      * @return the symbol icon as String
      */
