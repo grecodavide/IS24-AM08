@@ -163,7 +163,13 @@ public class TuiPrinter {
         this.printPoints(username, board.getColor(), board.getPoints());
     }
 
-
+    /**
+     * Prints the hand of the player, which includes the 3 available-to-play cards.
+     *
+     * @param username username of the player
+     * @param color color of the player's token
+     * @param hand list of cards (as IDs)
+     */
     public void printHand(String username, Color color, List<Integer> hand) {
         int termCols = this.getWidth();
         Integer handSize = hand.size();
@@ -185,6 +191,14 @@ public class TuiPrinter {
         }
     }
 
+    /**
+     * Prints the objectives, both common and secret, of a given player.
+     *
+     * @param username username of the player
+     * @param color color of the player's token
+     * @param secret secret objective (as ID)
+     * @param visibles array of common objectives (as IDs)
+     */
     public void printObjectives(String username, Color color, Integer secret, Integer[] visibles) {
         int termCols = this.getWidth();
         Integer visiblesSize = visibles.length;
