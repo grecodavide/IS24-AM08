@@ -94,13 +94,15 @@ public interface RemoteViewInterface extends Remote {
     /**
      * Notifies that someone (it may or may not be the receiving View instance) has played a card.
      *
-     * @param someoneUsername The username of the player who has played a card
-     * @param coords          The coordinates where the card has been placed as a Pair of int
-     * @param card            The card that has been played
-     * @param side            The side on which the card has been played
+     * @param someoneUsername     The username of the player who has played a card
+     * @param coords              The coordinates where the card has been placed as a Pair of int
+     * @param card                The card that has been played
+     * @param side                The side on which the card has been played
+     * @param points              The total points after placing the card
+     * @param availableResources  The resources possessed by the player after the card was placed
      * @throws RemoteException If the remote object is considered not to be reachable any more and cannot return as usual
      */
-    void someonePlayedCard(String someoneUsername, Pair<Integer, Integer> coords, PlayableCard card, Side side, int points) throws RemoteException;
+    void someonePlayedCard(String someoneUsername, Pair<Integer, Integer> coords, PlayableCard card, Side side, int points, Map<Symbol, Integer> availableResources) throws RemoteException;
 
     /**
      * Notifies that someone (it may or may not be the receiving View instance) has drawn a card.

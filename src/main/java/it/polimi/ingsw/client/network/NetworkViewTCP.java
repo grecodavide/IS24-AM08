@@ -15,9 +15,11 @@ import it.polimi.ingsw.utils.Pair;
 public class NetworkViewTCP extends NetworkView {
     private final String username;
     private IOHandler io;
+    private final Socket socket;
 
     public NetworkViewTCP(String username, Socket socket) {
         this.username = username;
+        this.socket = socket;
         try {
             this.io = new IOHandler(socket);
         } catch (IOException e) {
@@ -44,10 +46,25 @@ public class NetworkViewTCP extends NetworkView {
         Symbol[] decksReign = {decksTopReign.first(), decksTopReign.second()};
         Map<String, Integer[]> hands = new HashMap<>();
         for (String username : playersHand.keySet()) {
-            hands.put(username, playersHand.get(username).stream().toArray(Integer[]::new ));
+            hands.put(username, playersHand.get(username).stream().toArray(Integer[]::new));
         }
 
         this.graphicalInterface.matchStarted(objectives, visibles, decksReign, hands, playersPawn);
+
+        new Thread(() -> {
+            this.listen();
+        }).start();
+    }
+
+    private void listen() {
+        String message;
+        try {
+            while (!this.socket.isClosed()) {
+                message = this.io.readMsg();
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            // TODO: handle exception
+        }
     }
 
     @Override
@@ -81,9 +98,9 @@ public class NetworkViewTCP extends NetworkView {
     }
 
     @Override
-    public void someonePlayedCard(String someoneUsername, Pair<Integer, Integer> coords, PlayableCard card, Side side, int points)
-            throws RemoteException {
-        throw new UnsupportedOperationException("Unimplemented method 'someonePlayedCard'");
+    public void someonePlayedCard(String someoneUsername, Pair<Integer, Integer> coords, PlayableCard card, Side side, int points,
+            Map<Symbol, Integer> availableResources) throws RemoteException {
+        this.graphicalInterface.someonePlayedCard(someoneUsername, coords, card, side, points, availableResources);
     }
 
     @Override
@@ -116,7 +133,7 @@ public class NetworkViewTCP extends NetworkView {
     public void someoneSentPrivateText(String someoneUsername, String text) throws RemoteException {
 
     }
-    
+
     // NETWORK
     private void sendMessage(Message msg) {
         try {
@@ -133,7 +150,7 @@ public class NetworkViewTCP extends NetworkView {
     public void drawInitialCard() {
         this.sendMessage(new DrawInitialCardMessage(this.username));
     }
-    
+
     /**
      * Sends a {@link ChooseInitialCardSideMessage}
      *
@@ -143,7 +160,7 @@ public class NetworkViewTCP extends NetworkView {
     public void chooseInitialCardSide(Side side) {
         this.sendMessage(new ChooseInitialCardSideMessage(this.username, side));
     }
-    
+
     /**
      * Sends a {@link DrawSecretObjectivesMessage}
      */
@@ -151,7 +168,7 @@ public class NetworkViewTCP extends NetworkView {
     public void drawSecretObjectives() {
         this.sendMessage(new DrawSecretObjectivesMessage(this.username));
     }
-    
+
     /**
      * Sends a {@link ChooseSecretObjectiveMessage}
      *
@@ -161,7 +178,7 @@ public class NetworkViewTCP extends NetworkView {
     public void chooseSecretObjective(Objective objective) {
         this.sendMessage(new ChooseSecretObjectiveMessage(this.username, objective.getID()));
     }
-    
+
     /**
      * Sends a {@link PlayCardMessage}
      *
@@ -173,9 +190,9 @@ public class NetworkViewTCP extends NetworkView {
     public void playCard(Pair<Integer, Integer> coords, PlayableCard card, Side side) {
         this.sendMessage(new PlayCardMessage(this.username, coords, card.getId(), side));
     }
-    
+
     /**
-     * Sends a {@link DrawCardMessage} 
+     * Sends a {@link DrawCardMessage}
      *
      * @param source from where the card should be drawn
      */

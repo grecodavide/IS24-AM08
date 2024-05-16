@@ -59,9 +59,9 @@ public class NetworkViewRMI extends NetworkView {
     }
 
     @Override
-    public void someonePlayedCard(String someoneUsername, Pair<Integer, Integer> coords, PlayableCard card, Side side, int points) throws RemoteException {
+    public void someonePlayedCard(String someoneUsername, Pair<Integer, Integer> coords, PlayableCard card, Side side, int points, Map<Symbol, Integer> availableResources) throws RemoteException {
         // Demo implementation
-        graphicalInterface.someonePlayedCard(someoneUsername, coords, card, side, points, null);
+        graphicalInterface.someonePlayedCard(someoneUsername, coords, card, side, points, availableResources);
     }
 
     @Override
