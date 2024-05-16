@@ -2,6 +2,7 @@ package it.polimi.ingsw.utils;
 
 import java.util.*;
 import it.polimi.ingsw.exceptions.CardException;
+import it.polimi.ingsw.exceptions.InvalidResourceException;
 import it.polimi.ingsw.gamemodel.*;
 
 
@@ -76,6 +77,15 @@ public class TUICardParser {
             throw new CardException("Invalid card type!");
 
         return parseObjective(objectives.get(id), coord);
+    }
+
+    public String getGenericBack(Symbol reign, Pair<Integer, Integer> coord) {
+        try {
+            PlayableCard card = new ResourceCard(null, reign, 0);
+            return parseCard(card, coord, null, false);
+        } catch (InvalidResourceException | CardException e) {
+            return "";
+        }
     }
 
     // NO JAVADOC
