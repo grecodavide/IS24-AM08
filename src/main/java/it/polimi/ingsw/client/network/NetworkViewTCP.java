@@ -3,6 +3,7 @@ package it.polimi.ingsw.client.network;
 import java.io.IOException;
 import java.net.Socket;
 import java.rmi.RemoteException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import it.polimi.ingsw.gamemodel.*;
@@ -31,10 +32,22 @@ public class NetworkViewTCP extends NetworkView {
     }
 
     @Override
-    public void matchStarted(Map<Color, String> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands,
+    public void matchStarted(Map<String, Color> playersPawn, Map<String, List<PlayableCard>> playersHand,
             Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards,
-            Pair<Symbol, Symbol> decksTopReigns) {
+            Pair<Symbol, Symbol> decksTopReign) {
+        Integer[] objectives = {visibleObjectives.first().getID(), visibleObjectives.second().getID()};
 
+        Map<DrawSource, Integer> visibles = new HashMap<>();
+        for (DrawSource source : visiblePlayableCards.keySet()) {
+            visibles.put(source, visiblePlayableCards.get(source).getId());
+        }
+        Symbol[] decksReign = {decksTopReign.first(), decksTopReign.second()};
+        Map<String, Integer[]> hands = new HashMap<>();
+        for (String username : playersHand.keySet()) {
+            hands.put(username, playersHand.get(username).stream().toArray(Integer[]::new ));
+        }
+
+        this.graphicalInterface.matchStarted(objectives, visibles, decksReign, hands, playersPawn);
     }
 
     @Override
@@ -67,9 +80,10 @@ public class NetworkViewTCP extends NetworkView {
 
     }
 
-    public void someonePlayedCard(String someoneUsername, Pair<Integer, Integer> coords, PlayableCard card, Side side, int points, Map<Symbol, Integer> resources) {
-        // Example implementation
-        graphicalInterface.someonePlayedCard(someoneUsername, coords, card, side, points, resources);
+    @Override
+    public void someonePlayedCard(String someoneUsername, Pair<Integer, Integer> coords, PlayableCard card, Side side, int points)
+            throws RemoteException {
+        throw new UnsupportedOperationException("Unimplemented method 'someonePlayedCard'");
     }
 
     @Override
@@ -169,4 +183,6 @@ public class NetworkViewTCP extends NetworkView {
     public void drawCard(DrawSource source) {
         this.sendMessage(new DrawCardMessage(this.username, source));
     }
+
+
 }

@@ -5,22 +5,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import it.polimi.ingsw.client.network.RemoteViewInterface;
-import it.polimi.ingsw.exceptions.AlreadyUsedUsernameException;
-import it.polimi.ingsw.exceptions.HandException;
-import it.polimi.ingsw.exceptions.WrongChoiceException;
-import it.polimi.ingsw.exceptions.WrongStateException;
-import it.polimi.ingsw.exceptions.WrongTurnException;
-import it.polimi.ingsw.gamemodel.Color;
-import it.polimi.ingsw.gamemodel.DrawSource;
-import it.polimi.ingsw.gamemodel.InitialCard;
-import it.polimi.ingsw.gamemodel.Match;
-import it.polimi.ingsw.gamemodel.Objective;
-import it.polimi.ingsw.gamemodel.PlayableCard;
-import it.polimi.ingsw.gamemodel.Player;
-import it.polimi.ingsw.gamemodel.Side;
-import it.polimi.ingsw.gamemodel.Symbol;
+import it.polimi.ingsw.exceptions.*;
+import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.Pair;
 
 /**
@@ -199,14 +186,14 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
             Pair<Symbol, Symbol> decksTopReigns = match.getDecksTopReigns();
 
             // Create a map that matches each pawn colour to the corresponding player's username
-            Map<Color, String> playersUsernamesAndPawns = new HashMap<>();
+            Map<String, Color> playersUsernamesAndPawns = new HashMap<>();
 
             // Create a map that matches each player's username to the corresponding list of cards in the hand
             Map<String, List<PlayableCard>> playersHands = new HashMap<>();
 
             // Fill the maps with proper values
             for (Player p : match.getPlayers()) {
-                playersUsernamesAndPawns.put(p.getPawnColor(), p.getUsername());
+                playersUsernamesAndPawns.put(p.getUsername(), p.getPawnColor());
                 playersHands.put(p.getUsername(), p.getBoard().getCurrentHand());
             }
 

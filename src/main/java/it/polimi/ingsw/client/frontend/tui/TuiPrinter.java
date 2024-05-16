@@ -97,7 +97,6 @@ public class TuiPrinter {
         System.out.println(this.setPosition((termCols - len) / 2, termRows - infoLineOffset) + out + "\033[0m");
     }
 
-
     /**
      * Clears the terminal
      */
@@ -233,7 +232,6 @@ public class TuiPrinter {
 
     public void printChat(List<String> chat) {
         int rows = this.getHeight() - infoLineOffset+1;
-        int index = 1;
         int start = chat.size() - rows;
         if (start < 0) {
             start = 0;

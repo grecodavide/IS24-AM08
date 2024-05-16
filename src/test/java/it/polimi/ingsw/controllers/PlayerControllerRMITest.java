@@ -3,15 +3,12 @@ package it.polimi.ingsw.controllers;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
 import java.lang.reflect.Field;
 import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.junit.Test;
-
 import it.polimi.ingsw.client.network.RemoteViewInterface;
 import it.polimi.ingsw.exceptions.AlreadyUsedUsernameException;
 import it.polimi.ingsw.exceptions.WrongStateException;
@@ -262,7 +259,7 @@ public class PlayerControllerRMITest {
         player1.matchStarted();
         player2.matchStarted();
         Map<String, Object> args = view1.getLastCallArguments();
-        Map<Color, String> pawns = (Map<Color, String>) args.get("pawns");
+        Map<String, Color> pawns = (Map<String, Color>) args.get("pawns");
         Map<String, List<PlayableCard>> hands = (Map<String, List<PlayableCard>>) args.get("hands");
         Map<DrawSource, PlayableCard> visbile = (Map<DrawSource, PlayableCard>) args.get("playable");
 
@@ -271,7 +268,7 @@ public class PlayerControllerRMITest {
         assertEquals(match.getDecksTopReigns().first(), ((Pair<Symbol, Symbol>) args.get("decksTopReigns")).first());
         assertEquals(match.getDecksTopReigns().second(), ((Pair<Symbol, Symbol>) args.get("decksTopReigns")).second());
         for (Player p : match.getPlayers()) {
-            assertEquals(p.getUsername(), pawns.get(p.getPawnColor()));
+            assertEquals(p.getPawnColor(), pawns.get(p.getUsername()));
             for (PlayableCard c : p.getBoard().getCurrentHand()) {
                 assertTrue(hands.get(p.getUsername()).contains(c));
             }
@@ -443,14 +440,16 @@ public class PlayerControllerRMITest {
             args.put("names", playersUsernames);
         }
 
-        public void matchStarted(Map<Color, String> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands, Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards, Pair<Symbol, Symbol> decksTopReigns) throws RemoteException {
+    public void matchStarted(Map<String, Color> playersPawn, Map<String, List<PlayableCard>> playersHand,
+            Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards,
+            Pair<Symbol, Symbol> decksTopReign) {
             lastCall = "matchStarted";
             args = new HashMap<>();
-            args.put("pawns", playersUsernamesAndPawns);
-            args.put("hands", playersHands);
+            args.put("pawns", playersPawn);
+            args.put("hands", playersHand);
             args.put("objectives", visibleObjectives);
             args.put("playable", visiblePlayableCards);
-            args.put("decksTopReigns", decksTopReigns);
+            args.put("decksTopReigns", decksTopReign);
         }
 
         public void someoneDrewInitialCard(String someoneUsername, InitialCard card) throws RemoteException {
