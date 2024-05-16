@@ -1,7 +1,6 @@
 package it.polimi.ingsw.client.frontend.tui;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.jline.terminal.Terminal;
@@ -41,12 +40,12 @@ public class TuiPrinter {
         return this.terminal.getWidth();
     }
 
-    private String parsePosition(Integer x, Integer y) {
+    private String setPosition(Integer x, Integer y) {
         return "\033[" + y + ";" + x + "H";
     }
 
 
-    private Pair<Integer, Integer> parseCoords(Pair<Integer, Integer> coords) {
+    private Pair<Integer, Integer> getAbsoluteCoords(Pair<Integer, Integer> coords) {
         int termRows = this.getHeight(), termCols = this.getWidth();
 
         Pair<Integer, Integer> coordOffset = new Pair<Integer, Integer>((termCols - cardCols) / 2, (termRows - cardRows) / 2);
@@ -70,17 +69,17 @@ public class TuiPrinter {
 
     private void printCard(ShownCard card) throws CardException {
         if (card.coords().equals(new Pair<>(0, 0)))
-            System.out.println(parser.getInitial(card.card().getId(), parseCoords(card.coords()), card.side() == Side.FRONT));
+            System.out.println(parser.getInitial(card.card().getId(), getAbsoluteCoords(card.coords()), card.side() == Side.FRONT));
         else
             System.out
-                    .println(parser.getPlayable(card.card().getId(), parseCoords(card.coords()), card.coords(), card.side() == Side.FRONT));
+                    .println(parser.getPlayable(card.card().getId(), getAbsoluteCoords(card.coords()), card.coords(), card.side() == Side.FRONT));
         System.out.println("\033[0m");
     }
 
     private void printPoints(String username, Color color, Integer points) {
         int termRows = this.getHeight(), termCols = this.getWidth();
         String out = this.parseUsername(username, color) + "'s Points: " + points;
-        System.out.println(this.parsePosition((termCols - out.length()) / 4, termRows - infoLineOffset) + out);
+        System.out.println(this.setPosition((termCols - out.length()) / 4, termRows - infoLineOffset) + out);
     }
 
     private void printAvailableResources(Map<Symbol, Integer> availableResources) {
@@ -95,7 +94,7 @@ public class TuiPrinter {
             out += parser.getRightColor(resource) + parser.getRightIcon(resource) + ": " + availableResources.get(resource) + spaces;
         }
 
-        System.out.println(this.parsePosition((termCols - len) / 2, termRows - infoLineOffset) + out + "\033[0m");
+        System.out.println(this.setPosition((termCols - len) / 2, termRows - infoLineOffset) + out + "\033[0m");
     }
 
 
@@ -111,7 +110,7 @@ public class TuiPrinter {
      */
     public void printPrompt() {
         int termRows = this.getHeight();
-        System.out.print(this.parsePosition(1, termRows - infoLineOffset + 1) + "Command: ");
+        System.out.print(this.setPosition(1, termRows - infoLineOffset + 1) + "Command: ");
         System.out.flush();
     }
 
@@ -122,7 +121,7 @@ public class TuiPrinter {
      */
     public void printMessage(String string) {
         int termRows = this.getHeight();
-        System.out.println(this.parsePosition(1, termRows - infoLineOffset) + string);
+        System.out.println(this.setPosition(1, termRows - infoLineOffset) + string);
     }
 
 
@@ -135,7 +134,7 @@ public class TuiPrinter {
         int termRows = this.getHeight();
         Integer offset = 0;
         for (String username : players) {
-            System.out.println(this.parsePosition(1, termRows - infoLineOffset - offset) + (offset + 1) + ". " + username);
+            System.out.println(this.setPosition(1, termRows - infoLineOffset - offset) + (offset + 1) + ". " + username);
             offset++;
         }
     }
@@ -181,7 +180,7 @@ public class TuiPrinter {
 
         Integer last = (termCols - (handSize) * (cardCols)) / 2 - spaces * (handSize - 1) / 2;
 
-        System.out.println(this.parsePosition((termCols - strlen) / 2, 1) + username);
+        System.out.println(this.setPosition((termCols - strlen) / 2, 1) + username);
         for (Integer cardID : hand) {
             try {
                 System.out.println(parser.getPlayable(cardID, new Pair<Integer, Integer>(last, 2), null, true) + "\033[0m");
@@ -209,7 +208,7 @@ public class TuiPrinter {
         strlen = ("Your secret objective").length();
         username = this.parseUsername("Your", color) + " secret objective:";
         Integer last = (termCols - strlen) / 2;
-        System.out.println(this.parsePosition(last, 1) + username);
+        System.out.println(this.setPosition(last, 1) + username);
 
         last = (termCols - cardCols) / 2;
         try {
@@ -219,7 +218,7 @@ public class TuiPrinter {
         }
 
         username = "Common objectives:";
-        System.out.println(this.parsePosition((termCols - username.length()) / 2, 3+cardRows) + username);
+        System.out.println(this.setPosition((termCols - username.length()) / 2, 3+cardRows) + username);
 
         last = (termCols - (visiblesSize) * (cardCols)) / 2 - spaces * (visiblesSize - 1) / 2;
         for (Integer cardID : visibles) {
@@ -233,21 +232,17 @@ public class TuiPrinter {
     }
 
     public void printChat(List<String> chat) {
+        int rows = this.getHeight() - infoLineOffset+1;
+        int index = 1;
+        int start = chat.size() - rows;
+        if (start < 0) {
+            start = 0;
+        }
 
-        List<String> chatSubset = new ArrayList<>();
-        int commandPromptHeight = 1;
-        int index = chat.size() - this.getHeight() - commandPromptHeight;
-
-        // get sub-list of last msg
-        for ( ; index < chat.size(); index++)
-            chatSubset.add(chat.get(index));
-
-        // clear the tui view, then print each existing message
-        clearTerminal();
-        for (String string : chatSubset)
-            System.out.println(string);
-        System.out.flush();
-
+        for (int i = start; i < chat.size(); i++) {
+            System.out.println(this.setPosition(1, i-start) + chat.get(i));
+        }
+        
     }
 
 }

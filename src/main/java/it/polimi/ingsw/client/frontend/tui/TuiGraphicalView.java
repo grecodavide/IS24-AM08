@@ -1,6 +1,7 @@
 package it.polimi.ingsw.client.frontend.tui;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -8,7 +9,6 @@ import it.polimi.ingsw.client.frontend.ClientBoard;
 import it.polimi.ingsw.client.frontend.GraphicalViewInterface;
 import it.polimi.ingsw.client.network.NetworkView;
 import it.polimi.ingsw.gamemodel.*;
-import it.polimi.ingsw.network.messages.actions.SendBroadcastTextMessage;
 import it.polimi.ingsw.utils.CardsManager;
 import it.polimi.ingsw.utils.Pair;
 
@@ -27,6 +27,7 @@ public class TuiGraphicalView extends GraphicalViewInterface {
         this.printer = new TuiPrinter();
         this.isConnected = true;
         this.username = username;
+        this.chat = new ArrayList<>();
     }
 
     @Override
