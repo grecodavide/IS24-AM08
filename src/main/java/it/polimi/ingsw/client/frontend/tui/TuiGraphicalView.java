@@ -30,23 +30,11 @@ public class TuiGraphicalView extends GraphicalViewInterface {
         this.chat = new ArrayList<>();
     }
 
-    @Override
-    public void sendError(String text) {
-        throw new UnsupportedOperationException("Unimplemented method 'sendError'");
-    }
+    // --------------- //
+    // PRIVATE METHODS //
+    // --------------- //
 
-    @Override
-    public void someonePlayedCard(String someoneUsername, Pair<Integer, Integer> coords, PlayableCard card, Side side, Integer points,
-            Map<Symbol, Integer> resources) {
-        boards.get(someoneUsername).placeCard(coords, card, side, points, resources);
-    }
-
-    @Override
-    public void cancelLastAction() {
-        throw new UnsupportedOperationException("Unimplemented method 'cancelLastAction'");
-    }
-
-
+    // extracts the username passed as string, form an instruction
     private String getPassedUsername(String instruction, Integer startIndex) {
         if (startIndex == instruction.length()) {
             return this.username;
@@ -59,8 +47,9 @@ public class TuiGraphicalView extends GraphicalViewInterface {
                 return arg;
             }
         }
-
     }
+
+    // TO BE DELETED
     private void parseInstruction(String line) {
         String instruction;
         String user;
@@ -114,19 +103,84 @@ public class TuiGraphicalView extends GraphicalViewInterface {
 
     }
 
+    // -------------- //
+    // PUBLIC METHODS //
+    // -------------- //
+
+    @Override
+    public void sendError(String text) {
+        throw new UnsupportedOperationException("Unimplemented method 'sendError'");
+    }
+
+    @Override
+    public void someonePlayedCard(String someoneUsername, Pair<Integer, Integer> coords, PlayableCard card, Side side, Integer points,
+            Map<Symbol, Integer> resources) {
+        boards.get(someoneUsername).placeCard(coords, card, side, points, resources);
+    }
+
+    @Override
+    public void cancelLastAction() {
+        throw new UnsupportedOperationException("Unimplemented method 'cancelLastAction'");
+    }
+
+    public void quitGame(){
+        this.printer.clearTerminal();
+        this.isConnected = false;
+    }
+
+    public void placeCard(){
+        // TBA
+    }
+
+    public void printPlayerList(){
+        this.printer.printPlayerList(this.players);
+    }
+
+    public void printPlayerBoard(String line){
+        Integer argStartIndex = line.indexOf(" ");
+        String user = getPassedUsername(line, argStartIndex);
+
+        this.printer.printPlayerBoard(user, this.boards.get(user));
+    }
+
+    public void printHand(String line){
+        Integer argStartIndex = line.indexOf(" ");
+        String user = getPassedUsername(line, argStartIndex);
+        ClientBoard clientBoard = this.boards.get(user);
+
+        this.printer.printHand(user, clientBoard.getColor(), clientBoard.getHand());
+    }
+
+    public void printObjectives(){
+        ClientBoard clientBoard = this.boards.get(this.username);
+
+        this.printer.printObjectives(this.username, clientBoard.getColor(), clientBoard.getObjective(), this.visibleObjectives);
+    }
+
+    public void printChat(){
+        this.printer.printChat(this.chat);
+    }
+
+    public void printHelp(){
+        this.printer.printHelp();
+    }
+
+    public void printPrompt(String customMessage){
+        this.printer.printPrompt(customMessage);
+    }
 
     /**
-     * infinite loop (until end of game) that acquires next instruction and executes it
+     * Infinite loop (until end of game) that acquires next instruction and executes it
      */
     public void start() {
         Scanner scanner = new Scanner(System.in);
         String line;
         this.printer.clearTerminal();
         while (this.isConnected) {
-            this.printer.printPrompt();
+            printPrompt("Command");
             line = scanner.nextLine();
             this.printer.clearTerminal();
-            this.parseInstruction(line);
+            this.parseInstruction(line); //deprecated
         }
         scanner.close();
     }

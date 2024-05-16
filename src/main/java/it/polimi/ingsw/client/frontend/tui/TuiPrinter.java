@@ -30,6 +30,7 @@ public class TuiPrinter {
         this.infoLineOffset = 2;
         this.commandList = new HashMap<>();
 
+        // list of available commands
         commandList.put(new Pair<>("quit", "q"), "exit the match");
         commandList.put(new Pair<>("place", "p"), "place a card in the chosen coordinates"); // review
         commandList.put(new Pair<>("list", "l"), "print player list");
@@ -40,6 +41,10 @@ public class TuiPrinter {
         commandList.put(new Pair<>("help", "-h"), "show the list of all available commands");
         commandList.put(new Pair<>("objective", "o"), "show the objectives of the current player");
     }
+
+    // --------------- //
+    // PRIVATE METHODS //
+    // --------------- //
 
     private Pair<Integer, Integer> sumCoords(Pair<Integer, Integer> op1, Pair<Integer, Integer> op2) {
         return new Pair<>(op1.first() + op2.first(), op1.second() + op2.second());
@@ -56,7 +61,6 @@ public class TuiPrinter {
     private String setPosition(Integer x, Integer y) {
         return "\033[" + y + ";" + x + "H";
     }
-
 
     private Pair<Integer, Integer> getAbsoluteCoords(Pair<Integer, Integer> coords) {
         int termRows = this.getHeight(), termCols = this.getWidth();
@@ -110,6 +114,10 @@ public class TuiPrinter {
         System.out.println(this.setPosition((termCols - len) / 2, termRows - infoLineOffset) + out + "\033[0m");
     }
 
+    // -------------- //
+    // PUBLIC METHODS //
+    // -------------- //
+
     /**
      * Clears the terminal
      */
@@ -120,9 +128,9 @@ public class TuiPrinter {
     /**
      * Prints the command prompt
      */
-    public void printPrompt() {
+    public void printPrompt(String customMessage) {
         int termRows = this.getHeight();
-        System.out.print(this.setPosition(1, termRows - infoLineOffset + 1) + "Command: ");
+        System.out.print(this.setPosition(1, termRows - infoLineOffset + 1) + customMessage + ": ");
         System.out.flush();
     }
 
@@ -135,7 +143,6 @@ public class TuiPrinter {
         int termRows = this.getHeight();
         System.out.println(this.setPosition(1, termRows - infoLineOffset) + string);
     }
-
 
     /**
      * Prints the list of players with their associated number
