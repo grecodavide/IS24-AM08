@@ -1,6 +1,7 @@
 package it.polimi.ingsw.client.frontend.tui;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.jline.terminal.Terminal;
@@ -231,11 +232,22 @@ public class TuiPrinter {
         }
     }
 
-    // TBA
     public void printChat(List<String> chat) {
-        for (String string : chat) {
 
-        }
+        List<String> chatSubset = new ArrayList<>();
+        int commandPromptHeight = 1;
+        int index = chat.size() - this.getHeight() - commandPromptHeight;
+
+        // get sub-list of last msg
+        for ( ; index < chat.size(); index++)
+            chatSubset.add(chat.get(index));
+
+        // clear the tui view, then print each existing message
+        clearTerminal();
+        for (String string : chatSubset)
+            System.out.println(string);
+        System.out.flush();
+
     }
 
 }

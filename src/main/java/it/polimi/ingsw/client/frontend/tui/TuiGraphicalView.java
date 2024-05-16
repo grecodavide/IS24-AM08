@@ -8,6 +8,7 @@ import it.polimi.ingsw.client.frontend.ClientBoard;
 import it.polimi.ingsw.client.frontend.GraphicalViewInterface;
 import it.polimi.ingsw.client.network.NetworkView;
 import it.polimi.ingsw.gamemodel.*;
+import it.polimi.ingsw.network.messages.actions.SendBroadcastTextMessage;
 import it.polimi.ingsw.utils.CardsManager;
 import it.polimi.ingsw.utils.Pair;
 
@@ -84,6 +85,9 @@ public class TuiGraphicalView extends GraphicalViewInterface {
 
             case "chat", "c":
                 this.printer.printChat(chat);
+                break;
+            case "send message", "sm":
+                // TBA
                 break;
             case "show", "s":
                 user = getPassedUsername(line, argStartIndex);
@@ -164,7 +168,9 @@ public class TuiGraphicalView extends GraphicalViewInterface {
         player2Board.placeCard(new Pair<>(1, -1), manager.getResourceCards().get(14), Side.BACK, 0, Map.of());
         player2Board.placeCard(new Pair<>(-3, -1), manager.getGoldCards().get(46), Side.FRONT, 2, Map.of(Symbol.PLANT, 2, Symbol.INSECT, 2,
                 Symbol.ANIMAL, 2, Symbol.FUNGUS, 1, Symbol.PARCHMENT, 1, Symbol.FEATHER, 1, Symbol.INKWELL, 0));
-
+        
+        for (int i = 1; i <= 100; i++)
+            view.chat.add("This is the message number:   " + i);
 
         view.start();
     }
