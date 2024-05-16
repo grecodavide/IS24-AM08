@@ -123,19 +123,33 @@ public class TuiGraphicalView extends GraphicalViewInterface {
         throw new UnsupportedOperationException("Unimplemented method 'cancelLastAction'");
     }
 
+    /**
+     * Clears the tui and changes to `false` the `isConnected` flag
+     */
     public void quitGame(){
         this.printer.clearTerminal();
         this.isConnected = false;
     }
 
+    /**
+     * TBA
+     */
     public void placeCard(){
         // TBA
     }
 
+    /**
+     * Calls the method that prints the list of players connected to the game
+     */
     public void printPlayerList(){
         this.printer.printPlayerList(this.players);
     }
 
+    /**
+     * Calls the method that prints the board of a specific player
+     * @param line string representing the command given by the user.
+     *             It's used to extract the username of the desired player
+     */
     public void printPlayerBoard(String line){
         Integer argStartIndex = line.indexOf(" ");
         String user = getPassedUsername(line, argStartIndex);
@@ -143,6 +157,12 @@ public class TuiGraphicalView extends GraphicalViewInterface {
         this.printer.printPlayerBoard(user, this.boards.get(user));
     }
 
+    /**
+     * Calls the method that prints the hand-held cards of the player
+     * @param line string representing the command given by the user.
+     *             It's used to extract the username of the desired player
+     *
+     */
     public void printHand(String line){
         Integer argStartIndex = line.indexOf(" ");
         String user = getPassedUsername(line, argStartIndex);
@@ -151,20 +171,33 @@ public class TuiGraphicalView extends GraphicalViewInterface {
         this.printer.printHand(user, clientBoard.getColor(), clientBoard.getHand());
     }
 
+    /**
+     * Calls the method that prints the objectives (secret and common) of the playing user
+     */
     public void printObjectives(){
         ClientBoard clientBoard = this.boards.get(this.username);
 
         this.printer.printObjectives(this.username, clientBoard.getColor(), clientBoard.getObjective(), this.visibleObjectives);
     }
 
+    /**
+     * Calls the method that prints the most recent chat messages
+     */
     public void printChat(){
         this.printer.printChat(this.chat);
     }
 
+    /**
+     * Calls the method that prints all the available commands to the user
+     */
     public void printHelp(){
         this.printer.printHelp();
     }
 
+    /**
+     * Calls the method that prints the prompt-bar
+     * @param customMessage string representing the prompt-bar's brief indication
+     */
     public void printPrompt(String customMessage){
         this.printer.printPrompt(customMessage);
     }
