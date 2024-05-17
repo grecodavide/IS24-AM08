@@ -122,7 +122,7 @@
           <artifactId>javafx-maven-plugin</artifactId>
           <version>0.0.8</version>
           <configuration>
-            <mainClass>it.polimi.ingsw.gui.Test</mainClass>
+            <mainClass>it.polimi.ingsw.client.frontend.gui.GraphicalViewGUI</mainClass>
           </configuration>
         </plugin>
         </plugins>
