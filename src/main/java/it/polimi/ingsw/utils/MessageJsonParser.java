@@ -1,13 +1,14 @@
 package it.polimi.ingsw.utils;
 
-import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.Optional;
 import com.google.gson.*;
 import it.polimi.ingsw.network.messages.Message;
 import it.polimi.ingsw.network.messages.actions.ActionMessage;
 import it.polimi.ingsw.network.messages.errors.ErrorMessage;
 import it.polimi.ingsw.network.messages.responses.ResponseMessage;
+
+import java.lang.reflect.Type;
+import java.util.Arrays;
+import java.util.Optional;
 
 public class MessageJsonParser {
 
@@ -35,6 +36,7 @@ public class MessageJsonParser {
     }
 
     private class MessageTypeAdapter implements JsonDeserializer<Message> {
+
         @Override
         public Message deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
             JsonObject messageObject = json.getAsJsonObject();

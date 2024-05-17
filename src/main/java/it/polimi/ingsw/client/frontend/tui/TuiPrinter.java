@@ -171,7 +171,7 @@ public class TuiPrinter {
                 e.printStackTrace();
             }
         }
-        this.printAvailableResources(board.getResources());
+        this.printAvailableResources(board.getAvailableResources());
         this.printPoints(username, board.getColor(), board.getPoints());
     }
 
@@ -211,9 +211,9 @@ public class TuiPrinter {
      * @param secret secret objective (as ID)
      * @param visibles array of common objectives (as IDs)
      */
-    public void printObjectives(String username, Color color, Objective secret, Objective[] visibles) {
+    public void printObjectives(String username, Color color, Objective secret, Pair<Objective, Objective> visibles) {
         int termCols = this.getWidth();
-        Integer visiblesSize = visibles.length;
+        Integer visiblesSize = 2;
         Integer spaces = 4;
         Integer strlen;
 
@@ -229,10 +229,9 @@ public class TuiPrinter {
         System.out.println(this.setPosition((termCols - username.length()) / 2, 3+cardRows) + username);
 
         last = (termCols - (visiblesSize) * (cardCols)) / 2 - spaces * (visiblesSize - 1) / 2;
-        for (Objective card: visibles) {
-            System.out.println(parser.parseObjective(card, new Pair<Integer, Integer>(last, 4+cardRows)) + "\033[0m");
-            last += cardCols + spaces;
-        }
+
+        System.out.println(parser.parseObjective(visibles.first(), new Pair<Integer, Integer>(last, 4+cardRows)) + "\033[0m");
+        System.out.println(parser.parseObjective(visibles.second(), new Pair<Integer, Integer>(last+spaces, 4+cardRows)) + "\033[0m");
     }
 
     /**

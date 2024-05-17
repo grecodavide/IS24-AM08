@@ -1,13 +1,14 @@
 package it.polimi.ingsw.controllers;
 
 import java.rmi.RemoteException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import it.polimi.ingsw.client.network.RemoteViewInterface;
 import it.polimi.ingsw.exceptions.*;
 import it.polimi.ingsw.gamemodel.*;
+import it.polimi.ingsw.utils.LeaderboardEntry;
 import it.polimi.ingsw.utils.Pair;
 
 /**
@@ -360,7 +361,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
             onUnregisteredView();
         } else {
             try {
-                view.someonePlayedCard(someone.getUsername(), coords, card, side, this.player.getPoints());
+                view.someonePlayedCard(someone.getUsername(), coords, card, side, this.player.getPoints(), this.player.getBoard().getAvailableResources());
             } catch (RemoteException e) {
                 onConnectionError();
             }
@@ -443,6 +444,10 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
         }
     }
 
+    private LeaderboardEntry createLeaderboardEntry(Player p, Boolean b) {
+        return new LeaderboardEntry(p.getUsername(), p.getPoints(), b);
+    }
+
     /**
      * Notifies that the match has just finished.
      */
@@ -452,12 +457,10 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
             onUnregisteredView();
         } else {
             try {
-                List<Pair<Player, Boolean>> ranking = match.getPlayersFinalRanking();
-                List<Pair<String, Boolean>> rank = new ArrayList<>();
-                for (Pair<Player, Boolean> p : ranking) {
-                    rank.add(new Pair<>(p.first().getUsername(), p.second()));
-                }
-                view.matchFinished(rank);
+                List<LeaderboardEntry> ranking = match.getPlayersFinalRanking()
+                    .stream()
+                    .map(p -> createLeaderboardEntry(p.first(), p.second())).collect(Collectors.toList());
+                view.matchFinished(ranking);
             } catch (RemoteException e) {
                 onConnectionError();
             }

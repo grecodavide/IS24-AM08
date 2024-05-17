@@ -1,24 +1,45 @@
 package it.polimi.ingsw.client.network;
 
-import it.polimi.ingsw.client.frontend.GraphicalViewInterface;
+import it.polimi.ingsw.client.frontend.GraphicalView;
 import it.polimi.ingsw.gamemodel.DrawSource;
 import it.polimi.ingsw.gamemodel.Objective;
 import it.polimi.ingsw.gamemodel.PlayableCard;
 import it.polimi.ingsw.gamemodel.Side;
+import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.Pair;
 
-// we need graphicalInterface to RECEIVE information
 public abstract class NetworkView implements RemoteViewInterface {
-    GraphicalViewInterface graphicalInterface;
-    /**
-     * Register the graphical interface to notify changes
-     * @param graphicalInterface graphicat interface to notify changes
-     */
-    protected void setGraphicalInterface(GraphicalViewInterface graphicalInterface) {
-        this.graphicalInterface = graphicalInterface;
+    GraphicalView graphicalInterface;
+    protected String username;
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
+    public NetworkView(GraphicalView graphicalViewInterface) {
+        this.graphicalInterface = graphicalViewInterface;
+    }
+    
+    /**
+     * Asks the server to send a list of {@link AvailableMatch}
+     */
+    public abstract void getAvailableMatches();
+
     // Action Methods
+    /**
+     * Tries to create a match
+     * 
+     * @param matchName The match's name
+     */
+    public abstract void createMatch(String matchName);
+    
+    /**
+     * Tries to join a match
+     * 
+     * @param matchName the match's name
+     */
+    public abstract void joinMatch(String matchName);
+
     /**
      * Draws an initial card for the player.
      */

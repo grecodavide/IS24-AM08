@@ -1,12 +1,8 @@
 package it.polimi.ingsw.utils;
 
-import java.util.Map;
+import it.polimi.ingsw.gamemodel.*;
 
-import it.polimi.ingsw.gamemodel.GameDeck;
-import it.polimi.ingsw.gamemodel.GoldCard;
-import it.polimi.ingsw.gamemodel.InitialCard;
-import it.polimi.ingsw.gamemodel.Objective;
-import it.polimi.ingsw.gamemodel.ResourceCard;
+import java.util.Map;
 
 /**
  * This is a temporary class, used to have all the logic related to deck creation in a single place, so that
@@ -24,7 +20,7 @@ public class DeckCreator {
 
         return deck;
     }
-    
+
     public GameDeck<ResourceCard> createResourceDeck() {
         GameDeck<ResourceCard> deck = new GameDeck<>();
         Map<Integer, ResourceCard> cards = CardsManager.getInstance().getResourceCards();

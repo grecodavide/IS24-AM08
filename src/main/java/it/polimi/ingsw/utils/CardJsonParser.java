@@ -1,32 +1,26 @@
 package it.polimi.ingsw.utils;
 
-import java.lang.reflect.Type;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-
+import com.google.gson.*;
 import it.polimi.ingsw.exceptions.InvalidResourceException;
 import it.polimi.ingsw.gamemodel.PositionRequirement;
 import it.polimi.ingsw.gamemodel.QuantityRequirement;
 import it.polimi.ingsw.gamemodel.Requirement;
 import it.polimi.ingsw.gamemodel.Symbol;
 
+import java.lang.reflect.Type;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Parser of Cards, implements a custom parser for Requirement
  */
 public class CardJsonParser {
-    Gson cardBuilder = new GsonBuilder().registerTypeAdapter(Requirement.class,(new CardTypeAdapter())).setPrettyPrinting().create();
+    Gson cardBuilder = new GsonBuilder().registerTypeAdapter(Requirement.class, (new CardTypeAdapter())).setPrettyPrinting().create();
 
     /**
      * Returns a Gson builder with pretty print and custom Requirement deserializer
+     *
      * @return
      */
     public Gson getCardBuilder() {
@@ -50,7 +44,7 @@ public class CardJsonParser {
                     } catch (InvalidResourceException e) {
                         throw new RuntimeException(e);
                     }
-                // If reqs has symbols inside, then it's a QuantityRequirement
+                    // If reqs has symbols inside, then it's a QuantityRequirement
                 } else if (symbols.stream().anyMatch(s -> reqObject.has(s.toString()))) {
                     return context.deserialize(requirementObject, QuantityRequirement.class);
                 } else {
@@ -63,6 +57,7 @@ public class CardJsonParser {
 
         /**
          * Deserializes pair object
+         *
          * @param pair string of the encoded pair
          * @return The decoded Pair object
          */
@@ -74,6 +69,7 @@ public class CardJsonParser {
 
         /**
          * Deserializes the map containing the positional requirement
+         *
          * @param j
          * @return
          */

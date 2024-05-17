@@ -1,41 +1,35 @@
 package it.polimi.ingsw.client.frontend;
 
-    // cool algorithmic version
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.Pair;
 
 /**
- * ClientBoard
+ * This class contains just elements needed to show the player's board, points, resources, hand and objectives
  */
-
 public class ClientBoard {
     private final Map<Integer, ShownCard> placed;
-    private Integer turn;
+    private Integer placementNumber;
     private List<PlayableCard> hand;
     private Integer points;
-    private Map<Symbol, Integer> resources;
-    private final String username;
+    private Map<Symbol, Integer> availableResources;
     private final Color color;
     private Objective objective;
 
-    public ClientBoard(String username, Color color, PlayableCard[] hand) {
-        this.turn = 0;
+    public ClientBoard(Color color, List<PlayableCard> hand) {
+        this.placementNumber = 0;
         this.placed = new HashMap<>();
-        this.username = username;
         this.color = color;
 
         this.hand = new ArrayList<>();
-        this.hand = List.of(hand);
+        this.hand = hand;
 
         this.points = 0;
 
-        this.resources = new HashMap<>();
+        this.availableResources = new HashMap<>();
     }
 
     public void setSecretObjective(Objective objective) {
@@ -43,20 +37,20 @@ public class ClientBoard {
     }
 
     public void placeCard(Pair<Integer, Integer> coords, PlayableCard card, Side side, Integer points, Map<Symbol, Integer> resources) {
-        this.placed.put(turn, new ShownCard(card, side, coords));
+        this.placed.put(placementNumber, new ShownCard(card, side, coords));
         this.points = points;
-        this.resources = resources;
-        this.turn++;
+        this.availableResources = resources;
+        this.placementNumber++;
     }
 
     public void placeInitial(InitialCard card, Side side) {
-        this.placed.put(turn, new ShownCard(card, side, new Pair<>(0, 0)));
-        this.turn++;
+        this.placed.put(placementNumber, new ShownCard(card, side, new Pair<>(0, 0)));
+        this.placementNumber++;
     }
 
 
-    public Integer getTurn() {
-        return turn;
+    public Integer getPlacementNumber() {
+        return placementNumber;
     }
 
     public List<PlayableCard> getHand() {
@@ -70,12 +64,8 @@ public class ClientBoard {
         return placed;
     }
 
-    public Map<Symbol, Integer> getResources() {
-        return resources;
-    }
-
-    public String getUsername() {
-        return username;
+    public Map<Symbol, Integer> getAvailableResources() {
+        return availableResources;
     }
 
     public Color getColor() {

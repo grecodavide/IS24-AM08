@@ -3,30 +3,29 @@ package it.polimi.ingsw.client.frontend.tui;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
 import it.polimi.ingsw.client.frontend.ClientBoard;
-import it.polimi.ingsw.client.frontend.GraphicalViewInterface;
+import it.polimi.ingsw.client.frontend.GraphicalView;
 import it.polimi.ingsw.client.network.NetworkView;
-import it.polimi.ingsw.gamemodel.PlayableCard;
+import it.polimi.ingsw.gamemodel.InitialCard;
+import it.polimi.ingsw.gamemodel.Objective;
 import it.polimi.ingsw.gamemodel.Side;
-import it.polimi.ingsw.gamemodel.Symbol;
 import it.polimi.ingsw.utils.AvailableMatch;
+import it.polimi.ingsw.utils.LeaderboardEntry;
 import it.polimi.ingsw.utils.Pair;
 
 /**
  * TuiGraphicalView
  */
 
-public class TuiGraphicalView extends GraphicalViewInterface {
+public class TuiGraphicalView extends GraphicalView {
     private TuiPrinter printer; // init this, call getPlaced() and pass it to printer with foreach in someonePlayedCard to test
     private boolean isConnected;
     private List<String> chat; // when someoneSentBroadcast/PrivateText, add to this. Then simply show when "chat" command is sent
     private String username;
     private final Scanner scanner;
 
-    public TuiGraphicalView(NetworkView networkView) throws IOException {
-        super(networkView);
+    public TuiGraphicalView() throws IOException {
         this.printer = new TuiPrinter();
         this.isConnected = true;
         this.chat = new ArrayList<>();
@@ -84,18 +83,18 @@ public class TuiGraphicalView extends GraphicalViewInterface {
                 break;
             case "show", "s":
                 user = getInstructionTarget(line, argStartIndex);
-                this.printer.printPlayerBoard(user, this.boards.get(user));
+                this.printer.printPlayerBoard(user, this.clientBoards.get(user));
                 break;
             case "hand", "h":
                 user = getInstructionTarget(line, argStartIndex);
-                b = this.boards.get(user);
+                b = this.clientBoards.get(user);
                 this.printer.printHand(user, b.getColor(), b.getHand());
                 break;
             case "help", "-h":
                 this.printer.printHelp();
                 break;
             case "objective", "o":
-                b = this.boards.get(this.username);
+                b = this.clientBoards.get(this.username);
                 this.printer.printObjectives(this.username, b.getColor(), b.getObjective(), this.visibleObjectives);
                 break;
             default:
@@ -131,13 +130,7 @@ public class TuiGraphicalView extends GraphicalViewInterface {
     // PUBLIC METHODS //
     // -------------- //
 
-    @Override
-    public void sendError(String text) {
-        throw new UnsupportedOperationException("Unimplemented method 'sendError'");
-    }
-
     // order by: execution flow
-
 
     public NetworkView setConnectionType() {
         String userIn;
@@ -194,17 +187,6 @@ public class TuiGraphicalView extends GraphicalViewInterface {
 
 
 
-    @Override
-    public void someonePlayedCard(String someoneUsername, Pair<Integer, Integer> coords, PlayableCard card, Side side, Integer points,
-            Map<Symbol, Integer> resources) {
-        boards.get(someoneUsername).placeCard(coords, card, side, points, resources);
-    }
-
-    @Override
-    public void cancelLastAction() {
-        throw new UnsupportedOperationException("Unimplemented method 'cancelLastAction'");
-    }
-
     /**
      * Clears the tui and changes to `false` the `isConnected` flag
      */
@@ -237,7 +219,7 @@ public class TuiGraphicalView extends GraphicalViewInterface {
         Integer argStartIndex = line.indexOf(" ");
         String user = getInstructionTarget(line, argStartIndex);
 
-        this.printer.printPlayerBoard(user, this.boards.get(user));
+        this.printer.printPlayerBoard(user, this.clientBoards.get(user));
     }
 
     /**
@@ -250,7 +232,7 @@ public class TuiGraphicalView extends GraphicalViewInterface {
     public void printHand(String line) {
         Integer argStartIndex = line.indexOf(" ");
         String user = getInstructionTarget(line, argStartIndex);
-        ClientBoard clientBoard = this.boards.get(user);
+        ClientBoard clientBoard = this.clientBoards.get(user);
 
         this.printer.printHand(user, clientBoard.getColor(), clientBoard.getHand());
     }
@@ -259,7 +241,7 @@ public class TuiGraphicalView extends GraphicalViewInterface {
      * Calls the method that prints the objectives (secret and common) of the playing user
      */
     public void printObjectives() {
-        ClientBoard clientBoard = this.boards.get(this.username);
+        ClientBoard clientBoard = this.clientBoards.get(this.username);
 
         this.printer.printObjectives(this.username, clientBoard.getColor(), clientBoard.getObjective(), this.visibleObjectives);
     }
@@ -305,6 +287,96 @@ public class TuiGraphicalView extends GraphicalViewInterface {
     // will start when someone tries to start a TUI client
     public static void main(String[] args) {
         // TuiGraphicalView tui = new TuiGraphicalView(networkView, username);
+    }
+
+    @Override
+    public void changePlayer() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'changePlayer'");
+    }
+
+    @Override
+    public void giveLobbyInfo(List<String> playersUsernames) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'giveLobbyInfo'");
+    }
+
+    @Override
+    public void receiveAvailableMatches(List<AvailableMatch> availableMatchs) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'receiveAvailableMatches'");
+    }
+
+    @Override
+    public void giveInitialCard(InitialCard initialCard) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'giveInitialCard'");
+    }
+
+    @Override
+    public void giveSecretObjectives(Pair<Objective, Objective> secretObjectives) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'giveSecretObjectives'");
+    }
+
+    @Override
+    public void someoneDrewInitialCard(String someoneUsername, InitialCard card) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'someoneDrewInitialCard'");
+    }
+
+    @Override
+    public void someoneSetInitialSide(String someoneUsername, Side side) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'someoneSetInitialSide'");
+    }
+
+    @Override
+    public void someoneDrewSecretObjective(String someoneUsername) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'someoneDrewSecretObjective'");
+    }
+
+    @Override
+    public void someoneChoseSecretObjective(String someoneUsername) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'someoneChoseSecretObjective'");
+    }
+
+    @Override
+    public void notifyLastTurn() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'notifyLastTurn'");
+    }
+
+    @Override
+    public void someoneJoined(String someoneUsername) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'someoneJoined'");
+    }
+
+    @Override
+    public void someoneQuit(String someoneUsername) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'someoneQuit'");
+    }
+
+    @Override
+    public void matchFinished(List<LeaderboardEntry> ranking) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'matchFinished'");
+    }
+
+    @Override
+    public void someoneSentBroadcastText(String someoneUsername, String text) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'someoneSentBroadcastText'");
+    }
+
+    @Override
+    public void someoneSentPrivateText(String someoneUsername, String text) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'someoneSentPrivateText'");
     }
 
 }

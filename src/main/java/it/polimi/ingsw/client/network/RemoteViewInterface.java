@@ -5,6 +5,8 @@ import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Map;
 import it.polimi.ingsw.gamemodel.*;
+import it.polimi.ingsw.utils.AvailableMatch;
+import it.polimi.ingsw.utils.LeaderboardEntry;
 import it.polimi.ingsw.utils.Pair;
 
 /**
@@ -37,6 +39,14 @@ public interface RemoteViewInterface extends Remote {
      * @throws RemoteException If the remote object is considered not to be reachable any more and cannot return as usual
      */
     void matchStarted(Map<String, Color> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands, Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards, Pair<Symbol, Symbol> decksTopReigns) throws RemoteException;
+
+    
+    /**
+     * Gives the graphical view a list of available matches
+     * 
+     * @param availableMatchs The available matches
+     */
+    void receiveAvailableMatches(List<AvailableMatch> availableMatchs) throws RemoteException;
 
     /**
      * Gives to the remote object an initial card to show it in the view.
@@ -94,12 +104,10 @@ public interface RemoteViewInterface extends Remote {
     /**
      * Notifies that someone (it may or may not be the receiving View instance) has played a card.
      *
-     * @param someoneUsername     The username of the player who has played a card
-     * @param coords              The coordinates where the card has been placed as a Pair of int
-     * @param card                The card that has been played
-     * @param side                The side on which the card has been played
-     * @param points              The total points after placing the card
-     * @param availableResources  The resources possessed by the player after the card was placed
+     * @param someoneUsername The username of the player who has played a card
+     * @param coords          The coordinates where the card has been placed as a Pair of int
+     * @param card            The card that has been played
+     * @param side            The side on which the card has been played
      * @throws RemoteException If the remote object is considered not to be reachable any more and cannot return as usual
      */
     void someonePlayedCard(String someoneUsername, Pair<Integer, Integer> coords, PlayableCard card, Side side, int points, Map<Symbol, Integer> availableResources) throws RemoteException;
@@ -131,7 +139,7 @@ public interface RemoteViewInterface extends Remote {
      *
      * @throws RemoteException If the remote object is considered not to be reachable any more and cannot return as usual
      */
-    void matchFinished(List<Pair<String, Boolean>> ranking) throws RemoteException;
+    void matchFinished(List<LeaderboardEntry> ranking) throws RemoteException;
 
     /**
      * Notifies that a new message in the global chat is sent
