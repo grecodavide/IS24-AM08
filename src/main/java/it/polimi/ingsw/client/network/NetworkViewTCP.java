@@ -9,6 +9,9 @@ import java.util.Map;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.network.messages.Message;
 import it.polimi.ingsw.network.messages.actions.*;
+import it.polimi.ingsw.network.messages.responses.MatchStartedMessage;
+import it.polimi.ingsw.network.messages.responses.ResponseMessage;
+import it.polimi.ingsw.network.messages.responses.SomeoneJoinedMessage;
 import it.polimi.ingsw.network.tcp.IOHandler;
 import it.polimi.ingsw.utils.Pair;
 
@@ -33,6 +36,36 @@ public class NetworkViewTCP extends NetworkView {
 
     }
 
+
+    private void listen() {
+        String message;
+        try {
+            while (!this.socket.isClosed()) {
+                message = this.io.readMsg();
+                this.executeRequest(message);
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            // TODO: handle exception
+        }
+    }
+
+    private void executeRequest(String message) {
+        ResponseMessage originalMessage = (ResponseMessage) this.io.stringToMsg(message);
+        try {
+            switch (originalMessage) {
+                case SomeoneJoinedMessage msg:
+                    this.someoneJoined(msg.getUsername());
+                    break;
+                case MatchStartedMessage msg:
+                default:
+                    break;
+            }
+
+        } catch (RemoteException e) {
+            // TODO: handle exception
+        }
+    }
+
     @Override
     public void matchStarted(Map<String, Color> playersPawn, Map<String, List<PlayableCard>> playersHand,
             Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards,
@@ -54,17 +87,6 @@ public class NetworkViewTCP extends NetworkView {
         new Thread(() -> {
             this.listen();
         }).start();
-    }
-
-    private void listen() {
-        String message;
-        try {
-            while (!this.socket.isClosed()) {
-                message = this.io.readMsg();
-            }
-        } catch (IOException | ClassNotFoundException e) {
-            // TODO: handle exception
-        }
     }
 
     @Override

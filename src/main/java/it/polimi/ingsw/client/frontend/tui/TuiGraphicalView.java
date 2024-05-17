@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-
 import it.polimi.ingsw.client.frontend.ClientBoard;
 import it.polimi.ingsw.client.frontend.GraphicalViewInterface;
 import it.polimi.ingsw.client.network.NetworkView;
@@ -119,6 +118,7 @@ public class TuiGraphicalView extends GraphicalViewInterface {
 
     // order by: execution flow
 
+    // public void create
     
     /**
      * Asks the user (not necessarily a {@link Player}) some kind of data, expecting an answer from stdin

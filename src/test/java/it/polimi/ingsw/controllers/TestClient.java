@@ -50,7 +50,7 @@ public class TestClient implements RemoteViewInterface {
     }
 
     @Override
-    public void someonePlayedCard(String someoneUsername, Pair<Integer, Integer> coords, PlayableCard card, Side side, int points) throws RemoteException {
+    public void someonePlayedCard(String someoneUsername, Pair<Integer, Integer> coords, PlayableCard card, Side side, int points, Map<Symbol, Integer> avilableresources) throws RemoteException {
 
     }
 
