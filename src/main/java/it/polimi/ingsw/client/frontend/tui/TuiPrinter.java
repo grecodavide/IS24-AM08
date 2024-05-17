@@ -4,13 +4,13 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.jline.terminal.Terminal;
+
 import it.polimi.ingsw.client.frontend.ClientBoard;
 import it.polimi.ingsw.client.frontend.ShownCard;
 import it.polimi.ingsw.exceptions.CardException;
-import it.polimi.ingsw.gamemodel.Color;
-import it.polimi.ingsw.gamemodel.Side;
-import it.polimi.ingsw.gamemodel.Symbol;
+import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.Pair;
 import it.polimi.ingsw.utils.TUICardParser;
 
@@ -86,10 +86,10 @@ public class TuiPrinter {
 
     private void printCard(ShownCard card) throws CardException {
         if (card.coords().equals(new Pair<>(0, 0)))
-            System.out.println(parser.getInitial(card.card().getId(), getAbsoluteCoords(card.coords()), card.side() == Side.FRONT));
+            System.out.println(parser.parseCard(card.card(), getAbsoluteCoords(card.coords()), null, card.side() == Side.FRONT));
         else
             System.out
-                    .println(parser.getPlayable(card.card().getId(), getAbsoluteCoords(card.coords()), card.coords(), card.side() == Side.FRONT));
+                    .println(parser.parseCard(card.card(), getAbsoluteCoords(card.coords()), card.coords(), card.side() == Side.FRONT));
         System.out.println("\033[0m");
     }
 
@@ -189,7 +189,7 @@ public class TuiPrinter {
      * @param color color of the player's token
      * @param hand list of cards (as IDs)
      */
-    public void printHand(String username, Color color, List<Integer> hand) {
+    public void printHand(String username, Color color, List<PlayableCard> hand) {
         int termCols = this.getWidth();
         Integer handSize = hand.size();
         Integer spaces = 4;
@@ -200,9 +200,9 @@ public class TuiPrinter {
         Integer last = (termCols - (handSize) * (cardCols)) / 2 - spaces * (handSize - 1) / 2;
 
         System.out.println(this.setPosition((termCols - strlen) / 2, 1) + username);
-        for (Integer cardID : hand) {
+        for (PlayableCard card: hand) {
             try {
-                System.out.println(parser.getPlayable(cardID, new Pair<Integer, Integer>(last, 2), null, true) + "\033[0m");
+                System.out.println(parser.parseCard(card, new Pair<Integer, Integer>(last, 2), null, true) + "\033[0m");
                 last += cardCols + spaces;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -218,7 +218,7 @@ public class TuiPrinter {
      * @param secret secret objective (as ID)
      * @param visibles array of common objectives (as IDs)
      */
-    public void printObjectives(String username, Color color, Integer secret, Integer[] visibles) {
+    public void printObjectives(String username, Color color, Objective secret, Objective[] visibles) {
         int termCols = this.getWidth();
         Integer visiblesSize = visibles.length;
         Integer spaces = 4;
@@ -230,23 +230,15 @@ public class TuiPrinter {
         System.out.println(this.setPosition(last, 1) + username);
 
         last = (termCols - cardCols) / 2;
-        try {
-            System.out.println(parser.getObjective(secret, new Pair<Integer, Integer>(last, 2)) + "\033[0m");
-        } catch (CardException e) {
-            e.printStackTrace();
-        }
+        System.out.println(parser.parseObjective(secret, new Pair<Integer, Integer>(last, 2)) + "\033[0m");
 
         username = "Common objectives:";
         System.out.println(this.setPosition((termCols - username.length()) / 2, 3+cardRows) + username);
 
         last = (termCols - (visiblesSize) * (cardCols)) / 2 - spaces * (visiblesSize - 1) / 2;
-        for (Integer cardID : visibles) {
-            try {
-                System.out.println(parser.getObjective(cardID, new Pair<Integer, Integer>(last, 4+cardRows)) + "\033[0m");
-                last += cardCols + spaces;
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        for (Objective card: visibles) {
+            System.out.println(parser.parseObjective(card, new Pair<Integer, Integer>(last, 4+cardRows)) + "\033[0m");
+            last += cardCols + spaces;
         }
     }
 

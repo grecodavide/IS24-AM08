@@ -5,11 +5,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+
 import it.polimi.ingsw.client.frontend.ClientBoard;
 import it.polimi.ingsw.client.frontend.GraphicalViewInterface;
 import it.polimi.ingsw.client.network.NetworkView;
-import it.polimi.ingsw.gamemodel.*;
-import it.polimi.ingsw.utils.CardsManager;
+import it.polimi.ingsw.gamemodel.PlayableCard;
+import it.polimi.ingsw.gamemodel.Player;
+import it.polimi.ingsw.gamemodel.Side;
+import it.polimi.ingsw.gamemodel.Symbol;
 import it.polimi.ingsw.utils.Pair;
 
 /**
@@ -20,7 +23,8 @@ public class TuiGraphicalView extends GraphicalViewInterface {
     private TuiPrinter printer; // init this, call getPlaced() and pass it to printer with foreach in someonePlayedCard to test
     private boolean isConnected;
     private List<String> chat; // when someoneSentBroadcast/PrivateText, add to this. Then simply show when "chat" command is sent
-    private final String username;
+    private String username;
+    private final Scanner scanner;
 
     public TuiGraphicalView(NetworkView networkView, String username) throws IOException {
         super(networkView);
@@ -28,6 +32,7 @@ public class TuiGraphicalView extends GraphicalViewInterface {
         this.isConnected = true;
         this.username = username;
         this.chat = new ArrayList<>();
+        this.scanner = new Scanner(System.in);
     }
 
     // --------------- //
@@ -111,6 +116,23 @@ public class TuiGraphicalView extends GraphicalViewInterface {
     public void sendError(String text) {
         throw new UnsupportedOperationException("Unimplemented method 'sendError'");
     }
+
+    // order by: execution flow
+
+    
+    /**
+     * Asks the user (not necessarily a {@link Player}) some kind of data, expecting an answer from stdin
+     * 
+     * @param prompt The prompt to show in order to make the request
+     * 
+     * @returns the user's answer
+     */
+    public String askData(String prompt) {
+        this.printer.clearTerminal();
+        this.printPrompt(prompt);
+        return this.scanner.nextLine();
+    }
+
 
     @Override
     public void someonePlayedCard(String someoneUsername, Pair<Integer, Integer> coords, PlayableCard card, Side side, Integer points,
@@ -206,7 +228,6 @@ public class TuiGraphicalView extends GraphicalViewInterface {
      * Infinite loop (until end of game) that acquires next instruction and executes it
      */
     public void start() {
-        Scanner scanner = new Scanner(System.in);
         String line;
         this.printer.clearTerminal();
         while (this.isConnected) {
@@ -218,49 +239,9 @@ public class TuiGraphicalView extends GraphicalViewInterface {
         scanner.close();
     }
 
-    // here for testing
-    public static void main(String[] args) throws IOException {
-        String player1 = "Uga";
-        String player2 = "Buga";
-        TuiGraphicalView view = new TuiGraphicalView(null, player1); // for now null, tba
-
-        Integer[] player1Hand = {44, 55, 56};
-        Integer[] player2Hand = {12, 21, 33};
-
-        Integer[] visibleObjectives = {2, 4};
-        Map<DrawSource, Integer> visibleCards = Map.of(DrawSource.FIRST_VISIBLE, 31, DrawSource.SECOND_VISIBLE, 79, DrawSource.THIRD_VISIBLE, 80, DrawSource.FOURTH_VISIBLE, 77);
-        Symbol[] visibleReigns = {Symbol.FUNGUS, Symbol.PLANT};
-        view.matchStarted(visibleObjectives, visibleCards, visibleReigns, Map.of(player1, player1Hand, player2, player2Hand), Map.of(player1, Color.RED, player2, Color.BLUE));
-
-        ClientBoard player1Board = view.boards.get(player1);
-        ClientBoard player2Board = view.boards.get(player2);
-
-        CardsManager manager = CardsManager.getInstance();
-
-        player1Board.setSecretObjective(11);
-
-        player1Board.placeInitial(manager.getInitialCards().get(1), Side.FRONT);
-        player1Board.placeCard(new Pair<>(1, 1), manager.getResourceCards().get(20), Side.FRONT, 0, Map.of());
-        player1Board.placeCard(new Pair<>(1, -1), manager.getResourceCards().get(1), Side.FRONT, 0, Map.of());
-        player1Board.placeCard(new Pair<>(2, 0), manager.getResourceCards().get(30), Side.FRONT, 0, Map.of());
-        player1Board.placeCard(new Pair<>(-1, -1), manager.getResourceCards().get(14), Side.BACK, 0, Map.of());
-        player1Board.placeCard(new Pair<>(3, -1), manager.getGoldCards().get(41), Side.FRONT, 2, Map.of(Symbol.PLANT, 3, Symbol.INSECT, 3,
-                Symbol.ANIMAL, 1, Symbol.FUNGUS, 1, Symbol.PARCHMENT, 1, Symbol.FEATHER, 0, Symbol.INKWELL, 0));
-
-        player2Board.setSecretObjective(12);
-
-        player2Board.placeInitial(manager.getInitialCards().get(2), Side.FRONT);
-        player2Board.placeCard(new Pair<>(-1, 1), manager.getResourceCards().get(20), Side.FRONT, 0, Map.of());
-        player2Board.placeCard(new Pair<>(-1, -1), manager.getResourceCards().get(1), Side.FRONT, 0, Map.of());
-        player2Board.placeCard(new Pair<>(-2, 0), manager.getResourceCards().get(29), Side.FRONT, 0, Map.of());
-        player2Board.placeCard(new Pair<>(1, -1), manager.getResourceCards().get(14), Side.BACK, 0, Map.of());
-        player2Board.placeCard(new Pair<>(-3, -1), manager.getGoldCards().get(46), Side.FRONT, 2, Map.of(Symbol.PLANT, 2, Symbol.INSECT, 2,
-                Symbol.ANIMAL, 2, Symbol.FUNGUS, 1, Symbol.PARCHMENT, 1, Symbol.FEATHER, 1, Symbol.INKWELL, 0));
-        
-        for (int i = 1; i <= 100; i++)
-            view.chat.add("This is the message number:   " + i);
-
-        view.start();
+    // will start when someone tries to start a TUI client
+    public static void main(String[] args) {
+        // TuiGraphicalView tui = new TuiGraphicalView(networkView, username);
     }
 
 }

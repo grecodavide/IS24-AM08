@@ -1,9 +1,12 @@
 package it.polimi.ingsw.client.frontend;
 
+    // cool algorithmic version
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.Pair;
 
@@ -14,31 +17,29 @@ import it.polimi.ingsw.utils.Pair;
 public class ClientBoard {
     private final Map<Integer, ShownCard> placed;
     private Integer turn;
-    private List<Integer> hand;
+    private List<PlayableCard> hand;
     private Integer points;
     private Map<Symbol, Integer> resources;
     private final String username;
     private final Color color;
-    private Integer objective;
+    private Objective objective;
 
-    public ClientBoard(String username, Color color, Integer[] hand) {
+    public ClientBoard(String username, Color color, PlayableCard[] hand) {
         this.turn = 0;
         this.placed = new HashMap<>();
         this.username = username;
         this.color = color;
 
         this.hand = new ArrayList<>();
-        for (Integer cardID : hand) {
-            this.hand.add(cardID);
-        }
+        this.hand = List.of(hand);
 
         this.points = 0;
 
         this.resources = new HashMap<>();
     }
 
-    public void setSecretObjective(Integer objectiveID) {
-        this.objective = objectiveID;
+    public void setSecretObjective(Objective objective) {
+        this.objective = objective;
     }
 
     public void placeCard(Pair<Integer, Integer> coords, PlayableCard card, Side side, Integer points, Map<Symbol, Integer> resources) {
@@ -58,7 +59,7 @@ public class ClientBoard {
         return turn;
     }
 
-    public List<Integer> getHand() {
+    public List<PlayableCard> getHand() {
         return hand;
     }
 
@@ -81,7 +82,7 @@ public class ClientBoard {
         return color;
     }
 
-    public Integer getObjective() {
+    public Objective getObjective() {
         return objective;
     }
 

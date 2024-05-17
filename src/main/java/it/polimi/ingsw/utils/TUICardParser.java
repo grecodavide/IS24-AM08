@@ -7,77 +7,6 @@ import it.polimi.ingsw.gamemodel.*;
 
 
 public class TUICardParser {
-    Map<Integer, InitialCard> initialCards;
-    Map<Integer, Objective> objectives;
-    Map<Integer, GoldCard> goldCards;
-    Map<Integer, ResourceCard> resourceCards;
-
-    public TUICardParser() {
-        CardsManager cardsManager = CardsManager.getInstance();
-
-        initialCards = cardsManager.getInitialCards();
-        objectives = cardsManager.getObjectives();
-        goldCards = cardsManager.getGoldCards();
-        resourceCards = cardsManager.getResourceCards();
-
-    }
-
-
-    /**
-     * Generates a {@link PlayableCard} as a string to be printed
-     * 
-     * @param id the card id
-     * @param coord where to place the card (relative to the terminal, not {@link Board})
-     * @param isFacingUp wheter the card is facing up or down
-     * 
-     * @return the string representing the card
-     * 
-     * @throws CardException if the card type is not known
-     */
-    public String getPlayable(int id, Pair<Integer, Integer> coord, Pair<Integer, Integer> displayCoord, Boolean isFacingUp)
-            throws CardException {
-        if (resourceCards.get(id) != null)
-            return parseCard(resourceCards.get(id), coord, displayCoord, isFacingUp);
-        else if (goldCards.get(id) != null)
-            return parseCard(goldCards.get(id), coord, displayCoord, isFacingUp);
-
-        throw new CardException("Invalid card type: " + initialCards.get(id).getClass() + "or" + objectives.get(id).getClass() + "!");
-    }
-
-    /**
-     * Generates a {@link InitialCard} as a string to be printed
-     * 
-     * @param id the card id
-     * @param coord where to place the card (relative to the terminal, not {@link Board})
-     * @param isFacingUp wheter the card is facing up or down
-     * 
-     * @return the string representing the card
-     * 
-     * @throws CardException if the card type is not known
-     */
-    public String getInitial(int id, Pair<Integer, Integer> coord, Boolean isFacingUp) throws CardException {
-        if (initialCards.get(id) == null)
-            throw new CardException("Invalid card type!");
-
-        return parseCard(initialCards.get(id), coord, null, isFacingUp);
-    }
-
-    /**
-     * Generates a {@link Objective} as a string to be printed
-     * 
-     * @param id the card id
-     * @param coord where to place the card (relative to the terminal, not {@link Board})
-     * 
-     * @return the string representing the card
-     * 
-     * @throws CardException if the card type is not known
-     */
-    public String getObjective(int id, Pair<Integer, Integer> coord) throws CardException {
-        if (objectives.get(id) == null)
-            throw new CardException("Invalid card type!");
-
-        return parseObjective(objectives.get(id), coord);
-    }
 
     public String getGenericBack(Symbol reign, Pair<Integer, Integer> coord) {
         try {
@@ -88,10 +17,24 @@ public class TUICardParser {
         }
     }
 
-    // NO JAVADOC
+
+
 
     // PARSERS
-    private String parseCard(Card card, Pair<Integer, Integer> coord, Pair<Integer, Integer> displayCoord, Boolean isFacingUp)
+    
+    /**
+     * Generates a printable string representing a {@link Card} of any type
+     * 
+     * @param card the card to be parsed
+     * @param coord where to place the card (relative to the terminal, not {@link Board})
+     * @param displayCoord coordinates to display on the card (null if none should be displayed)
+     * @param isFacingUp wheter the card is facing up or down
+     * 
+     * @returns 
+     * 
+     * @throws CardException 
+     */
+    public String parseCard(Card card, Pair<Integer, Integer> coord, Pair<Integer, Integer> displayCoord, Boolean isFacingUp)
             throws CardException {
 
         // acquire information
@@ -132,7 +75,7 @@ public class TUICardParser {
         return printableCard.toString();
     }
 
-    private String parseObjective(Objective card, Pair<Integer, Integer> coord) {
+    public String parseObjective(Objective card, Pair<Integer, Integer> coord) {
 
         // process information
         Map<Corner, List<String>> cornersAsString = new HashMap<>();
@@ -152,9 +95,8 @@ public class TUICardParser {
     }
 
 
+    // NO JAVADOC
     // ASSEMBLERERS
-
-    // cool algorithmic version
     private void assembleCard(StringBuilder printableCard, Map<Corner, List<String>> cornersAsString, Map<Integer, String> centerAsString) {
 
         List<Corner> left = new ArrayList<>(), right = new ArrayList<>();
