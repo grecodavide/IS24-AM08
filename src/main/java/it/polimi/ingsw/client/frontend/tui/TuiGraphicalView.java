@@ -24,6 +24,7 @@ public class TuiGraphicalView extends GraphicalView {
     private List<String> chat; // when someoneSentBroadcast/PrivateText, add to this. Then simply show when "chat" command is sent
     private String username;
     private final Scanner scanner;
+    private List<AvailableMatch> availableMatches;
 
     public TuiGraphicalView() throws IOException {
         this.printer = new TuiPrinter();
@@ -167,9 +168,10 @@ public class TuiGraphicalView extends GraphicalView {
     }
 
     public void chooseMatch() {
-        List<AvailableMatch> matches = new ArrayList<>(); // TODO: will be given by network
+        this.networkView.getAvailableMatches();
+        // TODO: wait for answer, until not null
         List<String> printableMatches = new ArrayList<>();
-        matches.forEach((match -> printableMatches.add(match.name() + "(" + match.currentPlayers() + "/" + match.maxPlayers() + ")")));
+        this.availableMatches.forEach((match -> printableMatches.add(match.name() + "(" + match.currentPlayers() + "/" + match.maxPlayers() + ")")));
         this.printer.printMessage(printableMatches);
 
         String userIn;
@@ -178,9 +180,9 @@ public class TuiGraphicalView extends GraphicalView {
         userIn = this.scanner.nextLine();
         try {
             Integer matchToJoin = Integer.valueOf(userIn);
-            // join matches.get(matchToJoin).name()
+            this.networkView.joinMatch(this.availableMatches.get(matchToJoin).name());
         } catch (NumberFormatException e) {
-            // create new match, with `userIn` as its name
+            this.networkView.createMatch(userIn);
         }
 
     }
