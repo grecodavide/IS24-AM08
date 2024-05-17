@@ -272,6 +272,13 @@ public class TuiGraphicalView extends GraphicalView {
     }
 
     /**
+     * Calls the method that prints the welcome screen in the middle of the tui view
+     */
+    public void printWelcomeScreen(){
+        this.printer.printWelcomeScreen();
+    }
+
+    /**
      * Infinite loop (until end of game) that acquires next instruction and executes it
      */
     public void start() {
