@@ -4,9 +4,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.jline.terminal.Terminal;
-
 import it.polimi.ingsw.client.frontend.ClientBoard;
 import it.polimi.ingsw.client.frontend.ShownCard;
 import it.polimi.ingsw.exceptions.CardException;
@@ -132,6 +130,15 @@ public class TuiPrinter {
         int termRows = this.getHeight();
         System.out.print(this.setPosition(1, termRows - infoLineOffset + 1) + customMessage + ": ");
         System.out.flush();
+    }
+
+    public void printMessage(List<String> message) {
+        int termRows = this.getHeight();
+        Integer offset = 0;
+        for (String line : message) {
+            System.out.println(this.setPosition(1, termRows - infoLineOffset - offset) + line);
+            offset++;
+        }
     }
 
     /**
