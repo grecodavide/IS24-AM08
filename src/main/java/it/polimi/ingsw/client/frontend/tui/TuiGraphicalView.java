@@ -9,9 +9,9 @@ import it.polimi.ingsw.client.frontend.ClientBoard;
 import it.polimi.ingsw.client.frontend.GraphicalViewInterface;
 import it.polimi.ingsw.client.network.NetworkView;
 import it.polimi.ingsw.gamemodel.PlayableCard;
-import it.polimi.ingsw.gamemodel.Player;
 import it.polimi.ingsw.gamemodel.Side;
 import it.polimi.ingsw.gamemodel.Symbol;
+import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.Pair;
 
 /**
@@ -25,11 +25,10 @@ public class TuiGraphicalView extends GraphicalViewInterface {
     private String username;
     private final Scanner scanner;
 
-    public TuiGraphicalView(NetworkView networkView, String username) throws IOException {
+    public TuiGraphicalView(NetworkView networkView) throws IOException {
         super(networkView);
         this.printer = new TuiPrinter();
         this.isConnected = true;
-        this.username = username;
         this.chat = new ArrayList<>();
         this.scanner = new Scanner(System.in);
     }
@@ -39,7 +38,7 @@ public class TuiGraphicalView extends GraphicalViewInterface {
     // --------------- //
 
     // extracts the username passed as string, form an instruction
-    private String getPassedUsername(String instruction, Integer startIndex) {
+    private String getInstructionTarget(String instruction, Integer startIndex) {
         if (startIndex == instruction.length()) {
             return this.username;
         } else {
@@ -74,7 +73,7 @@ public class TuiGraphicalView extends GraphicalViewInterface {
                 break;
 
             case "list", "l":
-                this.printer.printPlayerList(this.players);
+                this.printer.printMessage(this.players);
                 break;
 
             case "chat view", "cv":
@@ -84,11 +83,11 @@ public class TuiGraphicalView extends GraphicalViewInterface {
                 // TBA
                 break;
             case "show", "s":
-                user = getPassedUsername(line, argStartIndex);
+                user = getInstructionTarget(line, argStartIndex);
                 this.printer.printPlayerBoard(user, this.boards.get(user));
                 break;
             case "hand", "h":
-                user = getPassedUsername(line, argStartIndex);
+                user = getInstructionTarget(line, argStartIndex);
                 b = this.boards.get(user);
                 this.printer.printHand(user, b.getColor(), b.getHand());
                 break;
@@ -107,6 +106,27 @@ public class TuiGraphicalView extends GraphicalViewInterface {
 
     }
 
+
+    private String askIPAddress() {
+        this.printPrompt("Specify an IP address: ");
+        return this.scanner.nextLine();
+    }
+
+    private Integer askPort() {
+        this.printPrompt("Specify a Port: ");
+        String in;
+        Integer port;
+        while (true) {
+            in = this.scanner.nextLine();
+            try {
+                port = Integer.valueOf(in);
+                return port;
+            } catch (Exception e) {
+                this.printer.printMessage("Not a valid port! must be a number");
+            }
+        }
+    }
+
     // -------------- //
     // PUBLIC METHODS //
     // -------------- //
@@ -118,20 +138,60 @@ public class TuiGraphicalView extends GraphicalViewInterface {
 
     // order by: execution flow
 
-    // public void create
-    
-    /**
-     * Asks the user (not necessarily a {@link Player}) some kind of data, expecting an answer from stdin
-     * 
-     * @param prompt The prompt to show in order to make the request
-     * 
-     * @returns the user's answer
-     */
-    public String askData(String prompt) {
-        this.printer.clearTerminal();
-        this.printPrompt(prompt);
-        return this.scanner.nextLine();
+
+    public NetworkView setConnectionType() {
+        String userIn;
+        this.printPrompt("What connection type you want to establish? ");
+        userIn = this.scanner.nextLine();
+        boolean connectionSet = false;
+        String serverIP;
+        Integer port;
+        NetworkView networkView = null;
+
+        while (!connectionSet) {
+            switch (userIn) {
+                case "1", "TCP", "tcp", "socket":
+                    serverIP = this.askIPAddress();
+                    port = this.askPort();
+                    // networkView = ...
+                    connectionSet = true;
+                    break;
+
+                case "2", "RMI", "rmi", "remote":
+                    serverIP = this.askIPAddress();
+                    port = this.askPort();
+                    // networkView = ...
+                    connectionSet = true;
+                    break;
+
+                default:
+                    this.printer.printMessage("Not a valid connection type!");
+                    break;
+            }
+        }
+
+        return networkView;
     }
+
+    public void chooseMatch() {
+        List<AvailableMatch> matches = new ArrayList<>(); // TODO: will be given by network
+        List<String> printableMatches = new ArrayList<>();
+        matches.forEach((match -> printableMatches.add(match.name() + "(" + match.currentPlayers() + "/" + match.maxPlayers() + ")")));
+        this.printer.printMessage(printableMatches);
+
+        String userIn;
+
+        this.printPrompt("Specify a name to create a match, or a number to join one.");
+        userIn = this.scanner.nextLine();
+        try {
+            Integer matchToJoin = Integer.valueOf(userIn);
+            // join matches.get(matchToJoin).name()
+        } catch (NumberFormatException e) {
+            // create new match, with `userIn` as its name
+        }
+
+    }
+
 
 
     @Override
@@ -148,7 +208,7 @@ public class TuiGraphicalView extends GraphicalViewInterface {
     /**
      * Clears the tui and changes to `false` the `isConnected` flag
      */
-    public void quitGame(){
+    public void quitGame() {
         this.printer.clearTerminal();
         this.isConnected = false;
     }
@@ -156,38 +216,40 @@ public class TuiGraphicalView extends GraphicalViewInterface {
     /**
      * TBA
      */
-    public void placeCard(){
+    public void placeCard() {
         // TBA
     }
 
     /**
      * Calls the method that prints the list of players connected to the game
      */
-    public void printPlayerList(){
-        this.printer.printPlayerList(this.players);
+    public void printPlayerList() {
+        this.printer.printMessage(this.players);
     }
 
     /**
      * Calls the method that prints the board of a specific player
-     * @param line string representing the command given by the user.
-     *             It's used to extract the username of the desired player
+     * 
+     * @param line string representing the command given by the user. It's used to extract the username
+     *        of the desired player
      */
-    public void printPlayerBoard(String line){
+    public void printPlayerBoard(String line) {
         Integer argStartIndex = line.indexOf(" ");
-        String user = getPassedUsername(line, argStartIndex);
+        String user = getInstructionTarget(line, argStartIndex);
 
         this.printer.printPlayerBoard(user, this.boards.get(user));
     }
 
     /**
      * Calls the method that prints the hand-held cards of the player
-     * @param line string representing the command given by the user.
-     *             It's used to extract the username of the desired player
+     * 
+     * @param line string representing the command given by the user. It's used to extract the username
+     *        of the desired player
      *
      */
-    public void printHand(String line){
+    public void printHand(String line) {
         Integer argStartIndex = line.indexOf(" ");
-        String user = getPassedUsername(line, argStartIndex);
+        String user = getInstructionTarget(line, argStartIndex);
         ClientBoard clientBoard = this.boards.get(user);
 
         this.printer.printHand(user, clientBoard.getColor(), clientBoard.getHand());
@@ -196,7 +258,7 @@ public class TuiGraphicalView extends GraphicalViewInterface {
     /**
      * Calls the method that prints the objectives (secret and common) of the playing user
      */
-    public void printObjectives(){
+    public void printObjectives() {
         ClientBoard clientBoard = this.boards.get(this.username);
 
         this.printer.printObjectives(this.username, clientBoard.getColor(), clientBoard.getObjective(), this.visibleObjectives);
@@ -205,22 +267,23 @@ public class TuiGraphicalView extends GraphicalViewInterface {
     /**
      * Calls the method that prints the most recent chat messages
      */
-    public void printChat(){
+    public void printChat() {
         this.printer.printChat(this.chat);
     }
 
     /**
      * Calls the method that prints all the available commands to the user
      */
-    public void printHelp(){
+    public void printHelp() {
         this.printer.printHelp();
     }
 
     /**
      * Calls the method that prints the prompt-bar
+     * 
      * @param customMessage string representing the prompt-bar's brief indication
      */
-    public void printPrompt(String customMessage){
+    public void printPrompt(String customMessage) {
         this.printer.printPrompt(customMessage);
     }
 
@@ -234,7 +297,7 @@ public class TuiGraphicalView extends GraphicalViewInterface {
             printPrompt("Command");
             line = scanner.nextLine();
             this.printer.clearTerminal();
-            this.parseInstruction(line); //deprecated
+            this.parseInstruction(line); // deprecated
         }
         scanner.close();
     }

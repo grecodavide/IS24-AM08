@@ -136,7 +136,7 @@ public class TuiPrinter {
         int termRows = this.getHeight();
         Integer offset = 0;
         for (String line : message) {
-            System.out.println(this.setPosition(1, termRows - infoLineOffset - offset) + line);
+            System.out.println(this.setPosition(1, termRows - infoLineOffset - offset) + (offset + 1) + ". "+ line);
             offset++;
         }
     }
@@ -149,20 +149,6 @@ public class TuiPrinter {
     public void printMessage(String string) {
         int termRows = this.getHeight();
         System.out.println(this.setPosition(1, termRows - infoLineOffset) + string);
-    }
-
-    /**
-     * Prints the list of players with their associated number
-     * 
-     * @param players the list of players to print
-     */
-    public void printPlayerList(List<String> players) {
-        int termRows = this.getHeight();
-        Integer offset = 0;
-        for (String username : players) {
-            System.out.println(this.setPosition(1, termRows - infoLineOffset - offset) + (offset + 1) + ". " + username);
-            offset++;
-        }
     }
 
     /**
