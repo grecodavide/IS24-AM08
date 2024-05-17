@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.PatternSyntaxException;
 
+import it.polimi.ingsw.utils.AvailableMatch;
+import it.polimi.ingsw.utils.LeaderboardEntry;
 import org.junit.Test;
 
 import it.polimi.ingsw.client.network.RemoteViewInterface;
@@ -470,12 +472,12 @@ public class PlayerControllerRMITest {
     public void matchFinished() throws RemoteException, WrongStateException, AlreadyUsedUsernameException {
         this.initializeTwoPlayerFinishedMatch();
         Map<String, Object> args = view1.getLastCallArguments();
-        List<Pair<String, Boolean>> ranking = (List<Pair<String, Boolean>>) args.get("ranking");
+        List<LeaderboardEntry> ranking = (List<LeaderboardEntry>) args.get("ranking");
         List<Pair<Player, Boolean>> matchRaking = match.getPlayersFinalRanking();
 
         for (int i =0; i < ranking.size(); i++) {
-            assertEquals(matchRaking.get(i).first().getUsername(), ranking.get(i).first());
-            assertEquals(matchRaking.get(i).second(), ranking.get(i).second());
+            assertEquals(matchRaking.get(i).first().getUsername(), ranking.get(i).username());
+            assertEquals(matchRaking.get(i).second(), ranking.get(i).winner());
         }
     }
 
@@ -496,7 +498,7 @@ public class PlayerControllerRMITest {
         assertEquals(match.getDecksTopReigns().first(), ((Pair<Symbol, Symbol>) args.get("decksTopReigns")).first());
         assertEquals(match.getDecksTopReigns().second(), ((Pair<Symbol, Symbol>) args.get("decksTopReigns")).second());
         for (Player p : match.getPlayers()) {
-            assertEquals(p.getUsername(), pawns.get(p.getPawnColor()));
+            assertEquals(p.getPawnColor(), pawns.get(p.getUsername()));
             for (PlayableCard c : p.getBoard().getCurrentHand()) {
                 assertTrue(hands.get(p.getUsername()).contains(c));
             }
@@ -670,7 +672,7 @@ public class PlayerControllerRMITest {
             args.put("names", playersUsernames);
         }
 
-        public void matchStarted(Map<Color, String> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands, Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards, Pair<Symbol, Symbol> decksTopReigns) throws RemoteException {
+        public void matchStarted(Map<String, Color> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands, Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards, Pair<Symbol, Symbol> decksTopReigns) throws RemoteException {
             lastCall = "matchStarted";
             args = new HashMap<>();
             args.put("pawns", playersUsernamesAndPawns);
@@ -678,6 +680,11 @@ public class PlayerControllerRMITest {
             args.put("objectives", visibleObjectives);
             args.put("playable", visiblePlayableCards);
             args.put("decksTopReigns", decksTopReigns);
+        }
+
+        @Override
+        public void receiveAvailableMatches(List<AvailableMatch> availableMatchs) throws RemoteException {
+
         }
 
         public void someoneDrewInitialCard(String someoneUsername, InitialCard card) throws RemoteException {
@@ -706,13 +713,15 @@ public class PlayerControllerRMITest {
             args.put("name", someoneUsername);
         }
 
-        public void someonePlayedCard(String someoneUsername, Pair<Integer, Integer> coords, PlayableCard card, Side side, int points) throws RemoteException {
+        @Override
+        public void someonePlayedCard(String someoneUsername, Pair<Integer, Integer> coords, PlayableCard card, Side side, int points, Map<Symbol, Integer> availableResources) throws RemoteException {
             lastCall = "someonePlayedCard";
             args = new HashMap<>();
             args.put("name", someoneUsername);
             args.put("coords", coords);
             args.put("card", card);
             args.put("side", side);
+            args.put("resources", availableResources);
         }
 
         public void someoneDrewCard(String someoneUsername, DrawSource source, PlayableCard card, PlayableCard replacementCard, Symbol replacementReign) throws RemoteException {
@@ -737,7 +746,8 @@ public class PlayerControllerRMITest {
             args.put("name", someoneUsername);
         }
 
-        public void matchFinished(List<Pair<String, Boolean>> ranking) throws RemoteException {
+        @Override
+        public void matchFinished(List<LeaderboardEntry> ranking) throws RemoteException {
             lastCall = "matchFinished";
             args = new HashMap<>();
             args.put("ranking", ranking);
