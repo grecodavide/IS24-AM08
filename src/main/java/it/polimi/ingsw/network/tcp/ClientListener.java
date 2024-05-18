@@ -1,5 +1,8 @@
 package it.polimi.ingsw.network.tcp;
 
+import java.io.EOFException;
+import java.io.IOException;
+import java.net.Socket;
 import com.google.gson.JsonParseException;
 import it.polimi.ingsw.controllers.PlayerControllerTCP;
 import it.polimi.ingsw.exceptions.AlreadyUsedUsernameException;
@@ -15,10 +18,6 @@ import it.polimi.ingsw.network.messages.responses.ResponseMessage;
 import it.polimi.ingsw.server.Server;
 import it.polimi.ingsw.utils.MessageJsonParser;
 import it.polimi.ingsw.utils.Pair;
-
-import java.io.EOFException;
-import java.io.IOException;
-import java.net.Socket;
 
 /*
  * actual connection procedure:
@@ -67,6 +66,7 @@ public class ClientListener extends Thread {
 
             this.clientInteraction(); // init player controller
         } catch (Exception e) {
+            e.printStackTrace();
             System.out.println("Failed to create Listener thread");
             // e.printStackTrace();
         }

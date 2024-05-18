@@ -3,11 +3,8 @@ package it.polimi.ingsw.utils;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
 import org.junit.Test;
-
 import com.google.gson.JsonParseException;
-
 import it.polimi.ingsw.gamemodel.DrawSource;
 import it.polimi.ingsw.gamemodel.Side;
 import it.polimi.ingsw.network.messages.Message;

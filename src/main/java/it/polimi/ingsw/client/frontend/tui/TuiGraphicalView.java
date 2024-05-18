@@ -1,15 +1,16 @@
 package it.polimi.ingsw.client.frontend.tui;
 
 import java.io.IOException;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import it.polimi.ingsw.client.frontend.ClientBoard;
 import it.polimi.ingsw.client.frontend.GraphicalView;
 import it.polimi.ingsw.client.network.NetworkView;
-import it.polimi.ingsw.gamemodel.InitialCard;
-import it.polimi.ingsw.gamemodel.Objective;
-import it.polimi.ingsw.gamemodel.Side;
+import it.polimi.ingsw.client.network.NetworkViewTCP;
+import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.LeaderboardEntry;
 import it.polimi.ingsw.utils.Pair;
@@ -133,10 +134,11 @@ public class TuiGraphicalView extends GraphicalView {
 
     // order by: execution flow
 
-    public NetworkView setConnectionType() {
+    public NetworkView setConnectionType() throws Exception {
         String userIn;
         this.printPrompt("What connection type you want to establish? ");
         userIn = this.scanner.nextLine();
+        this.printer.clearTerminal();
         boolean connectionSet = false;
         String serverIP;
         Integer port;
@@ -146,8 +148,9 @@ public class TuiGraphicalView extends GraphicalView {
             switch (userIn) {
                 case "1", "TCP", "tcp", "socket":
                     serverIP = this.askIPAddress();
+                    this.printer.clearTerminal();
                     port = this.askPort();
-                    // networkView = ...
+                    networkView = new NetworkViewTCP(this, new Socket(serverIP, port));
                     connectionSet = true;
                     break;
 
@@ -163,6 +166,7 @@ public class TuiGraphicalView extends GraphicalView {
                     break;
             }
         }
+        this.printer.clearTerminal();
 
         return networkView;
     }
@@ -171,7 +175,8 @@ public class TuiGraphicalView extends GraphicalView {
         this.networkView.getAvailableMatches();
         // TODO: wait for answer, until not null
         List<String> printableMatches = new ArrayList<>();
-        this.availableMatches.forEach((match -> printableMatches.add(match.name() + "(" + match.currentPlayers() + "/" + match.maxPlayers() + ")")));
+        this.availableMatches
+                .forEach((match -> printableMatches.add(match.name() + "(" + match.currentPlayers() + "/" + match.maxPlayers() + ")")));
         this.printer.printMessage(printableMatches);
 
         String userIn;
@@ -182,7 +187,7 @@ public class TuiGraphicalView extends GraphicalView {
             Integer matchToJoin = Integer.valueOf(userIn);
             this.networkView.joinMatch(this.availableMatches.get(matchToJoin).name());
         } catch (NumberFormatException e) {
-            this.networkView.createMatch(userIn);
+            this.networkView.createMatch(userIn, 0); // TODO: maxPlayers
         }
 
     }
@@ -274,7 +279,7 @@ public class TuiGraphicalView extends GraphicalView {
     /**
      * Calls the method that prints the welcome screen in the middle of the tui view
      */
-    public void printWelcomeScreen(){
+    public void printWelcomeScreen() {
         this.printer.printWelcomeScreen();
     }
 
@@ -291,11 +296,6 @@ public class TuiGraphicalView extends GraphicalView {
             this.parseInstruction(line); // deprecated
         }
         scanner.close();
-    }
-
-    // will start when someone tries to start a TUI client
-    public static void main(String[] args) {
-        // TuiGraphicalView tui = new TuiGraphicalView(networkView, username);
     }
 
     @Override
@@ -360,14 +360,21 @@ public class TuiGraphicalView extends GraphicalView {
 
     @Override
     public void someoneJoined(String someoneUsername) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'someoneJoined'");
+        System.out.println("someone joined wohoo");
     }
 
     @Override
     public void someoneQuit(String someoneUsername) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'someoneQuit'");
+    }
+
+    @Override
+    public void matchStarted(Map<String, Color> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands,
+            Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards,
+            Pair<Symbol, Symbol> decksTopReign) {
+        super.matchStarted(playersUsernamesAndPawns, playersHands, visibleObjectives, visiblePlayableCards, decksTopReign);
+        System.out.println("match started wohoo");
     }
 
     @Override
@@ -386,6 +393,22 @@ public class TuiGraphicalView extends GraphicalView {
     public void someoneSentPrivateText(String someoneUsername, String text) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'someoneSentPrivateText'");
+    }
+
+    // will start when someone tries to start a TUI client
+    public static void main(String[] args) throws Exception {
+        TuiGraphicalView tui = new TuiGraphicalView();
+        Scanner scanner = new Scanner(System.in);
+        tui.setNetworkInterface(tui.setConnectionType());
+        tui.printer.clearTerminal();
+
+        tui.networkView.setUsername(scanner.nextLine());
+        if (scanner.nextLine().equals("create")) {
+            tui.createMatch("test", 2);
+        } else {
+            tui.joinMatch("test");
+        }
+        scanner.close();
     }
 
 }

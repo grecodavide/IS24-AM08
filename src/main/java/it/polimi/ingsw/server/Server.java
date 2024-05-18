@@ -1,5 +1,14 @@
 package it.polimi.ingsw.server;
 
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+
 import it.polimi.ingsw.controllers.PlayerControllerRMI;
 import it.polimi.ingsw.exceptions.AlreadyUsedUsernameException;
 import it.polimi.ingsw.exceptions.ChosenMatchException;
@@ -10,15 +19,6 @@ import it.polimi.ingsw.gamemodel.Objective;
 import it.polimi.ingsw.gamemodel.PlayableCard;
 import it.polimi.ingsw.network.tcp.TCPServer;
 import it.polimi.ingsw.utils.DeckCreator;
-
-import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
 
 public class Server extends UnicastRemoteObject implements ServerRMIInterface {
     private final Map<String, Match> matches;
@@ -117,12 +117,13 @@ public class Server extends UnicastRemoteObject implements ServerRMIInterface {
         int portRMI = Integer.parseInt(args[0]);
         int portTCP = Integer.parseInt(args[1]);
 
-        Scanner scanner = new Scanner(System.in);
         Server server = new Server(portRMI, portTCP);
-        String choice;
 
         server.startRMIServer();
         server.startTCPServer();
+
+        /* Scanner scanner = new Scanner(System.in);
+        String choice;
 
         do {
             choice = promptAndInput("What do you want to do?\n\t0: exit\n\t1: create match\n\t2: show matches\n", scanner);
@@ -141,7 +142,7 @@ public class Server extends UnicastRemoteObject implements ServerRMIInterface {
 
                 case "2" -> server.matches.keySet().forEach(System.out::println);
             }
-        } while (!choice.equals("0"));
+        } while (!choice.equals("0")); */
     }
 
 }
