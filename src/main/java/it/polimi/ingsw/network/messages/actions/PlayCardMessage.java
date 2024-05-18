@@ -8,9 +8,9 @@ import it.polimi.ingsw.utils.Pair;
  * If the action is successful, a {@link it.polimi.ingsw.network.messages.responses.SomeonePlayedCardMessage} response is sent to every client.
  */
 public final class PlayCardMessage extends ActionMessage {
-    private Integer x, y;
-    private Integer cardID;
-    private Side side;
+    private final Integer x, y;
+    private final Integer cardID;
+    private final Side side;
 
     /**
      * @return x coordinate of the played card
@@ -27,7 +27,7 @@ public final class PlayCardMessage extends ActionMessage {
     }
 
     /**
-     * @return id of teh played card
+     * @return id of the played card
      */
     public Integer getCardID() {
         return cardID;
@@ -39,6 +39,7 @@ public final class PlayCardMessage extends ActionMessage {
     public Side getSide() {
         return side;
     }
+
 
     public PlayCardMessage(String username, Pair<Integer, Integer> coords, Integer cardID, Side side) {
         super(username);

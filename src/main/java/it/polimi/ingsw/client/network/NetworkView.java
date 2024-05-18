@@ -31,7 +31,7 @@ public abstract class NetworkView implements RemoteViewInterface {
      * 
      * @param matchName The match's name
      */
-    public abstract void createMatch(String matchName);
+    public abstract void createMatch(String matchName, Integer maxPlayers);
     
     /**
      * Tries to join a match
