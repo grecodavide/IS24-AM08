@@ -125,7 +125,7 @@ public class NetworkViewRMI extends NetworkView {
     }
 
     @Override
-    public void createMatch(String matchName) {
+    public void createMatch(String matchName, Integer maxPlayers) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'createMatch'");
     }
