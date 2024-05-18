@@ -1,7 +1,7 @@
 package it.polimi.ingsw.client.frontend;
 
-import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import it.polimi.ingsw.client.network.NetworkView;
@@ -36,8 +36,8 @@ public abstract class GraphicalView {
      * 
      * @param matchName The match's name
      */
-    public void createMatch(String matchName) {
-        this.networkView.createMatch(matchName);
+    public void createMatch(String matchName, Integer maxPlayers) {
+        this.networkView.createMatch(matchName, maxPlayers);
     }
 
     /**
@@ -114,7 +114,10 @@ public abstract class GraphicalView {
 
     public void matchStarted(Map<String, Color> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands, Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards, Pair<Symbol, Symbol> decksTopReign) {
         this.players = new ArrayList<>();
+        this.clientBoards = new HashMap<>();
         Color curr;
+        playersUsernamesAndPawns.forEach((player, pawn) -> this.players.add(player));
+
         for (String username : playersUsernamesAndPawns.keySet()) {
             curr = playersUsernamesAndPawns.get(username);
             switch (curr) {
@@ -135,6 +138,8 @@ public abstract class GraphicalView {
                     break;
             }
         }
+        
+
         this.currentPlayer = this.players.get(0);
 
         playersHands.forEach((username, hand) -> this.clientBoards.put(
