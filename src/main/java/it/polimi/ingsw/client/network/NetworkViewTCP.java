@@ -130,7 +130,7 @@ public class NetworkViewTCP extends NetworkView {
     }
 
     @Override
-    public void getAvailableMatches() {
+    public void getAvailableMatches(){
         this.sendMessage(new GetAvailableMatchesMessage(this.username));
     }
 

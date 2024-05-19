@@ -198,7 +198,7 @@ public class TuiPrinter {
      */
     public void printPrompt(String customMessage) {
         int termRows = this.getHeight();
-        System.out.print(this.setPosition(1, termRows - infoLineOffset + 1) + customMessage + ": ");
+        System.out.print(this.setPosition(1, termRows - infoLineOffset + 1) + customMessage + " ");
         System.out.flush();
     }
 
