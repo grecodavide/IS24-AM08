@@ -151,6 +151,7 @@ public class ClientListener extends Thread {
     private void createPlayerController(String username, Match match) throws IOException, ClassNotFoundException, EOFException {
         try {
             this.playerController = new PlayerControllerTCP(username, match, this.io);
+            this.playerController.sendJoined();
         } catch (AlreadyUsedUsernameException | WrongStateException e) {
             ErrorMessage error = new ErrorMessage(e.getMessage(), e.getClass().getName());
             this.io.writeMsg(error);
