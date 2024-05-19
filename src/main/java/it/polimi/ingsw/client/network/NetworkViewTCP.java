@@ -121,9 +121,8 @@ public class NetworkViewTCP extends NetworkView {
     }
 
     @Override
-    public void createMatch(String matchName) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'createMatch'");
+    public void createMatch(String matchName, Integer maxPlayers) {
+        // TODO
     }
 
     @Override

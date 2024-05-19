@@ -46,12 +46,14 @@ public class PlayerControllerRMITest {
 
         try {
             player1 = new PlayerControllerRMI("player1", match);
+            player1.sendJoined();
         } catch (AlreadyUsedUsernameException | WrongStateException e) {
             fail("player1 init shouldn't throw exception: " + e.getMessage());
         }
 
         try {
             player2 = new PlayerControllerRMI("player1", match);
+            player2.sendJoined();
             // An exception is supposed to be thrown here
             fail("player 2 init should have thrown AlreadyUsedUsernameException");
         } catch (AlreadyUsedUsernameException e) {
@@ -64,6 +66,7 @@ public class PlayerControllerRMITest {
             // The given match is in NextTurnState, should be in WaitState
             initializeStartedMatch(2);
             player1 = new PlayerControllerRMI("player3", match);
+            player1.sendJoined();
             // An exception is supposed to be thrown here
             fail("player 3 init should have thrown WrongStateException");
         } catch (AlreadyUsedUsernameException e) {
@@ -79,12 +82,13 @@ public class PlayerControllerRMITest {
 
         try {
             player1 = new PlayerControllerRMI("player1", match);
+            player1.sendJoined();
             view1 = new TestView();
             player1.registerView(view1);
 
             // Verify that adding player2 triggers player1.someoneJoined and it calls the view method someoneJoined
             player2 = new PlayerControllerRMI("player2", match);
-
+            player2.sendJoined();
             String name = (String) view1.getLastCallArguments().get("name");
             assertEquals("someoneJoined: wrong last call in view1", "someoneJoined", view1.getLastCall());
             assertEquals("someoneJoined: wrong args in view1", "player2", name);
@@ -99,9 +103,11 @@ public class PlayerControllerRMITest {
 
         try {
             player1 = new PlayerControllerRMI("player1", match);
+            player1.sendJoined();
             view1 = new TestView();
             player1.registerView(view1);
             player2 = new PlayerControllerRMI("player2", match);
+            player2.sendJoined();
 
             // Verify that removing  player2 triggers player1.someoneQuit and it calls the view method someoneQuit
             match.removePlayer(player2.getPlayer());
@@ -120,9 +126,11 @@ public class PlayerControllerRMITest {
 
         try {
             player1 = new PlayerControllerRMI("player1", match);
+            player1.sendJoined();
             view1 = new TestView();
             player1.registerView(view1);
             player2 = new PlayerControllerRMI("player2", match);
+            player2.sendJoined();
             view2 = new TestView();
             player2.registerView(view2);
 
@@ -169,9 +177,11 @@ public class PlayerControllerRMITest {
 
         try {
             player1 = new PlayerControllerRMI("player1", match);
+            player1.sendJoined();
             view1 = new TestView();
             player1.registerView(view1);
             player2 = new PlayerControllerRMI("player2", match);
+            player2.sendJoined();
             view2 = new TestView();
             player2.registerView(view2);
 
@@ -211,9 +221,11 @@ public class PlayerControllerRMITest {
 
         try {
             player1 = new PlayerControllerRMI("player1", match);
+            player1.sendJoined();
             view1 = new TestView();
             player1.registerView(view1);
             player2 = new PlayerControllerRMI("player2", match);
+            player2.sendJoined();
             view2 = new TestView();
             player2.registerView(view2);
 
@@ -261,9 +273,11 @@ public class PlayerControllerRMITest {
 
         try {
             player1 = new PlayerControllerRMI("player1", match);
+            player1.sendJoined();
             view1 = new TestView();
             player1.registerView(view1);
             player2 = new PlayerControllerRMI("player2", match);
+            player2.sendJoined();
             view2 = new TestView();
             player2.registerView(view2);
 
@@ -305,9 +319,11 @@ public class PlayerControllerRMITest {
 
         try {
             player1 = new PlayerControllerRMI("player1", match);
+            player1.sendJoined();
             view1 = new TestView();
             player1.registerView(view1);
             player2 = new PlayerControllerRMI("player2", match);
+            player2.sendJoined();
             view2 = new TestView();
             player2.registerView(view2);
 
@@ -361,9 +377,11 @@ public class PlayerControllerRMITest {
 
         try {
             player1 = new PlayerControllerRMI("player1", match);
+            player1.sendJoined();
             view1 = new TestView();
             player1.registerView(view1);
             player2 = new PlayerControllerRMI("player2", match);
+            player2.sendJoined();
             view2 = new TestView();
             player2.registerView(view2);
 
@@ -422,9 +440,11 @@ public class PlayerControllerRMITest {
 
         try {
             player1 = new PlayerControllerRMI("player1", match);
+            player1.sendJoined();
             view1 = new TestView();
             player1.registerView(view1);
             player2 = new PlayerControllerRMI("player2", match);
+            player2.sendJoined();
             view2 = new TestView();
             player2.registerView(view2);
 
@@ -448,9 +468,11 @@ public class PlayerControllerRMITest {
 
         try {
             player1 = new PlayerControllerRMI("player1", match);
+            player1.sendJoined();
             view1 = new TestView();
             player1.registerView(view1);
             player2 = new PlayerControllerRMI("player2", match);
+            player2.sendJoined();
             view2 = new TestView();
             player2.registerView(view2);
 
@@ -514,7 +536,9 @@ public class PlayerControllerRMITest {
 
         try {
             player1 = new PlayerControllerRMI("player1", match);
+            player1.sendJoined();
             player2 = new PlayerControllerRMI("player2", match);
+            player2.sendJoined();
             view2 = new TestView();
 
             // Verify that registering a view to player2 triggers player.registerView and it calls the view method getLobbyInfo
@@ -585,10 +609,12 @@ public class PlayerControllerRMITest {
         match = new Match(maxPlayers, initialsDeck, resourcesDeck, goldsDeck, objectivesDeck);
 
         player1 = new PlayerControllerRMI("Oingo", match);
+        player1.sendJoined();
         view1 = new TestView();
         player1.registerView(view1);
 
         player2 = new PlayerControllerRMI("Boingo", match);
+        player2.sendJoined();
         view2 = new TestView();
         player2.registerView(view2);
 
@@ -622,10 +648,12 @@ public class PlayerControllerRMITest {
     private void addTwoPlayerWithView() {
         try {
             player1 = new PlayerControllerRMI("Oingo", match);
+            player1.sendJoined();
             view1 = new TestView();
             player1.registerView(view1);
 
             player2 = new PlayerControllerRMI("Boingo", match);
+            player2.sendJoined();
             view2 = new TestView();
             player2.registerView(view2);
         } catch (Exception e) {
