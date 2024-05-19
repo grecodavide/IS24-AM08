@@ -19,6 +19,7 @@ public abstract class GraphicalView {
     protected Map<DrawSource, PlayableCard> visiblePlayableCards;
     protected Pair<Symbol, Symbol> decksTopReign;
     private boolean lastTurn = false;
+    protected List<AvailableMatch> availableMatches;
 
     public boolean isLastTurn() { return this.lastTurn; }
 
@@ -142,16 +143,22 @@ public abstract class GraphicalView {
 
         this.currentPlayer = this.players.get(0);
 
-        playersHands.forEach((username, hand) -> this.clientBoards.put(
-            username, new ClientBoard(playersUsernamesAndPawns.get(username), hand))
-        );
+        playersHands.forEach((username, hand) -> {
+            this.clientBoards.put( username, new ClientBoard(playersUsernamesAndPawns.get(username), hand));
+            // this.clientBoards.get(username)
+        });
 
         this.visiblePlayableCards = visiblePlayableCards;
         this.visibleObjectives = visibleObjectives;
         this.decksTopReign = decksTopReign;
+        this.notifyMatchStarted();
     }
     
-    public abstract void receiveAvailableMatches(List<AvailableMatch> availableMatchs);
+    protected abstract void notifyMatchStarted();
+
+    public void receiveAvailableMatches(List<AvailableMatch> availableMatches) {
+        this.availableMatches = availableMatches;
+    }
 
     public abstract void giveInitialCard(InitialCard initialCard);
 

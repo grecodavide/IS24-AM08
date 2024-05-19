@@ -30,6 +30,7 @@ public class ClientBoard {
         this.points = 0;
 
         this.availableResources = new HashMap<>();
+        Symbol.getBasicResources().forEach((reign -> this.availableResources.put(reign, 0)));
     }
 
     public void setSecretObjective(Objective objective) {
@@ -37,16 +38,22 @@ public class ClientBoard {
     }
 
     public void placeCard(Pair<Integer, Integer> coords, PlayableCard card, Side side, Integer points, Map<Symbol, Integer> resources) {
+        this.hand.remove(card);
         this.placed.put(placementNumber, new ShownCard(card, side, coords));
         this.points = points;
         this.availableResources = resources;
         this.placementNumber++;
     }
 
+    public void drawCard(PlayableCard card) {
+        this.hand.add(card);
+    }
+
     public void placeInitial(InitialCard card, Side side) {
         this.placed.put(placementNumber, new ShownCard(card, side, new Pair<>(0, 0)));
         this.placementNumber++;
     }
+
 
 
     public Integer getPlacementNumber() {
