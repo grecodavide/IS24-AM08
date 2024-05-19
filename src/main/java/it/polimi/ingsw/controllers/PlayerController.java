@@ -1,11 +1,10 @@
 package it.polimi.ingsw.controllers;
 
-import it.polimi.ingsw.exceptions.*;
-import it.polimi.ingsw.gamemodel.*;
-import it.polimi.ingsw.utils.Pair;
-
-import java.rmi.RemoteException;
-import java.util.List;
+import it.polimi.ingsw.exceptions.AlreadyUsedUsernameException;
+import it.polimi.ingsw.exceptions.WrongStateException;
+import it.polimi.ingsw.gamemodel.Match;
+import it.polimi.ingsw.gamemodel.MatchObserver;
+import it.polimi.ingsw.gamemodel.Player;
 
 /**
  * Controller for a match player, the only agent needing a view and so a controller in this application.
@@ -33,13 +32,16 @@ public abstract sealed class PlayerController implements MatchObserver permits P
         this.player = new Player(username, match);
         this.match = match;
 
-        match.addPlayer(player);
-
-        // Subscribe to match this PlayerController as a MatchObserver
-        match.subscribeObserver(this);
     }
 
     public Player getPlayer() {
         return player;
+    }
+
+    public void sendJoined() throws AlreadyUsedUsernameException, WrongStateException {
+        // Subscribe to match this PlayerController as a MatchObserver
+        match.subscribeObserver(this);
+
+        this.match.addPlayer(this.player);
     }
 }

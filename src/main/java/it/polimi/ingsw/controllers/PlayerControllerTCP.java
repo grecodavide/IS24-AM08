@@ -16,8 +16,6 @@ public final class PlayerControllerTCP extends PlayerController {
 
         try {
             this.io = io;
-            Message joined = new SomeoneJoinedMessage(username, match.getPlayers(), match.getMaxPlayers());
-            this.io.writeMsg(joined);
         } catch (Exception e) {
             e.printStackTrace();
             // match.removePlayer(player);
