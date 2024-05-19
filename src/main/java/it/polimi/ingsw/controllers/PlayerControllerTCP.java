@@ -82,7 +82,7 @@ public final class PlayerControllerTCP extends PlayerController {
     @Override
     public void someonePlayedCard(Player someone, Pair<Integer, Integer> coords, PlayableCard card, Side side) {
         this.sendMessage(
-                new SomeonePlayedCardMessage(someone.getUsername(), coords, card.getId(), side, someone.getPoints()));
+                new SomeonePlayedCardMessage(someone.getUsername(), coords, card.getId(), side, someone.getPoints(), someone.getBoard().getAvailableResources()));
     }
 
     @Override
