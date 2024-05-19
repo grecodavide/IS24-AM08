@@ -30,87 +30,18 @@ public class TuiGraphicalView extends GraphicalView {
         this.isConnected = true;
         this.chat = new ArrayList<>();
         this.scanner = new Scanner(System.in);
+
+        this.setNetworkInterface(this.setConnectionType());
+        this.printer.clearTerminal();
+        this.printer.printPrompt("Choose Username:");
+        this.setUsername(scanner.nextLine());
+        this.chooseMatch(); // TODO: if fail, ask again for username and chooseMatch
     }
 
-    private void setUsername(String username) {
-        this.username = username;
-        this.networkView.setUsername(username);
-    }
 
-    // --------------- //
-    // PRIVATE METHODS //
-    // --------------- //
-
-    // // extracts the username passed as string, form an instruction
-    // private String getInstructionTarget(String instruction, Integer startIndex) {
-    //     if (startIndex == instruction.length()) {
-    //         return this.username;
-    //     } else {
-    //         String arg = instruction.substring(startIndex + 1);
-    //         // if the next element is a number, use it. Else directly search username
-    //         try {
-    //             return this.players.get(Integer.valueOf(arg) - 1);
-    //         } catch (NumberFormatException e) {
-    //             return arg;
-    //         }
-    //     }
-    // }
-
-    // // TO BE DELETED
-    // private void parseInstruction(String line) {
-    //     String instruction;
-    //     String user;
-    //     Integer argStartIndex;
-    //     ClientBoard b;
-    //     argStartIndex = line.indexOf(" ");
-    //     if (argStartIndex == -1) {
-    //         argStartIndex = line.length();
-    //     }
-    //     instruction = line.substring(0, argStartIndex);
-    //     switch (instruction) {
-    //         case "quit", "q":
-    //             this.printer.clearTerminal();
-    //             this.isConnected = false;
-    //             break;
-
-    //         case "place", "p":
-    //             break;
-
-    //         case "list", "l":
-    //             this.printer.printMessage(this.players);
-    //             break;
-
-    //         case "chat view", "cv":
-    //             this.printer.printChat(chat);
-    //             break;
-    //         case "chat send", "cs":
-    //             // TBA
-    //             break;
-    //         case "show", "s":
-    //             user = getInstructionTarget(line, argStartIndex);
-    //             this.printer.printPlayerBoard(user, this.clientBoards.get(user));
-    //             break;
-    //         case "hand", "h":
-    //             user = getInstructionTarget(line, argStartIndex);
-    //             b = this.clientBoards.get(user);
-    //             this.printer.printHand(user, b.getColor(), b.getHand());
-    //             break;
-    //         case "help", "-h":
-    //             this.printer.printHelp();
-    //             break;
-    //         case "objective", "o":
-    //             b = this.clientBoards.get(this.username);
-    //             this.printer.printObjectives(this.username, b.getColor(), b.getObjective(), this.visibleObjectives);
-    //             break;
-    //         default:
-    //             this.printer.clearTerminal();
-    //             this.printer.printMessage("No such command. Type 'help' to show help (TBA)");
-    //             break;
-    //     }
-
-    // }
-
-
+    ///////////////////////
+    // AUXILIARY METHODS //
+    ///////////////////////
     private String askIPAddress() {
         this.printer.printPrompt("Specify an IP address:");
         return this.scanner.nextLine();
@@ -131,12 +62,29 @@ public class TuiGraphicalView extends GraphicalView {
         }
     }
 
-    // -------------- //
-    // PUBLIC METHODS //
-    // -------------- //
+    private void setUsername(String username) {
+        this.username = username;
+        this.networkView.setUsername(username);
+    }
 
-    // order by: execution flow
-    public NetworkView setConnectionType() {
+    private boolean createMatch(String userIn) {
+        String matchName = userIn.substring(0, userIn.indexOf(" "));
+        if (matchName.length() == userIn.length()) {
+            this.printer.printMessage("No max players specified");
+        } else {
+            Integer maxPlayers;
+            try {
+                maxPlayers = Integer.valueOf(userIn.substring(matchName.length() + 1)); // mhh
+                this.networkView.createMatch(matchName, maxPlayers);
+                return true;
+            } catch (NumberFormatException ne) {
+                this.printer.printMessage("Not a number for max players!");
+            }
+        }
+        return false;
+    }
+
+    private NetworkView setConnectionType() {
         String userIn;
         this.printer.clearTerminal();
         boolean connectionSet = false;
@@ -181,24 +129,7 @@ public class TuiGraphicalView extends GraphicalView {
         return networkView;
     }
 
-    private boolean createMatch(String userIn) {
-        String matchName = userIn.substring(0, userIn.indexOf(" "));
-        if (matchName.length() == userIn.length()) {
-            this.printer.printMessage("No max players specified");
-        } else {
-            Integer maxPlayers;
-            try {
-                maxPlayers = Integer.valueOf(userIn.substring(matchName.length() + 1)); // mhh
-                this.networkView.createMatch(matchName, maxPlayers);
-                return true;
-            } catch (NumberFormatException ne) {
-                this.printer.printMessage("Not a number for max players!");
-            }
-        }
-        return false;
-    }
-
-    public void chooseMatch() {
+    private void chooseMatch() {
         this.printer.printMessage("Waiting for matches..");
         while (this.availableMatches == null) {
         }
@@ -228,122 +159,20 @@ public class TuiGraphicalView extends GraphicalView {
                     shouldLoop = false;
                 } catch (NumberFormatException e) {
                     this.createMatch(userIn);
+                    shouldLoop = false;
                 }
 
             }
         }
     }
 
-
-
-    // /**
-    //  * Clears the tui and changes to `false` the `isConnected` flag
-    //  */
-    // public void quitGame() {
-    //     this.printer.clearTerminal();
-    //     this.isConnected = false;
-    // }
-
-    // /**
-    //  * TBA
-    //  */
-    // public void placeCard() {
-    //     // TBA
-    // }
-
-    // /**
-    //  * Calls the method that prints the list of players connected to the game
-    //  */
-    // public void printPlayerList() {
-    //     this.printer.printMessage(this.players);
-    // }
-
-    // /**
-    //  * Calls the method that prints the board of a specific player
-    //  * 
-    //  * @param line string representing the command given by the user. It's used to extract the username
-    //  *        of the desired player
-    //  */
-    // public void printPlayerBoard(String line) {
-    //     Integer argStartIndex = line.indexOf(" ");
-    //     String user = getInstructionTarget(line, argStartIndex);
-
-    //     this.printer.printPlayerBoard(user, this.clientBoards.get(user));
-    // }
-
-    // /**
-    //  * Calls the method that prints the hand-held cards of the player
-    //  * 
-    //  * @param line string representing the command given by the user. It's used to extract the username
-    //  *        of the desired player
-    //  *
-    //  */
-    // public void printHand(String line) {
-    //     Integer argStartIndex = line.indexOf(" ");
-    //     String user = getInstructionTarget(line, argStartIndex);
-    //     ClientBoard clientBoard = this.clientBoards.get(user);
-
-    //     this.printer.printHand(user, clientBoard.getColor(), clientBoard.getHand());
-    // }
-
-    // /**
-    //  * Calls the method that prints the objectives (secret and common) of the playing user
-    //  */
-    // public void printObjectives() {
-    //     ClientBoard clientBoard = this.clientBoards.get(this.username);
-
-    //     this.printer.printObjectives(this.username, clientBoard.getColor(), clientBoard.getObjective(), this.visibleObjectives);
-    // }
-
-    // /**
-    //  * Calls the method that prints the most recent chat messages
-    //  */
-    // public void printChat() {
-    //     this.printer.printChat(this.chat);
-    // }
-
-    // /**
-    //  * Calls the method that prints all the available commands to the user
-    //  */
-    // public void printHelp() {
-    //     this.printer.printHelp();
-    // }
-
-    // /**
-    //  * Calls the method that prints the prompt-bar
-    //  * 
-    //  * @param customMessage string representing the prompt-bar's brief indication
-    //  */
-    // public void printPrompt(String customMessage) {
-    //     this.printer.printPrompt(customMessage);
-    // }
-
-    // /**
-    //  * Calls the method that prints the welcome screen in the middle of the tui view
-    //  */
-    // public void printWelcomeScreen() {
-    //     this.printer.printWelcomeScreen();
-    // }
-
-    // /**
-    //  * Infinite loop (until end of game) that acquires next instruction and executes it
-    //  */
-    // public void start() {
-    //     String line;
-    //     this.printer.clearTerminal();
-    //     while (this.isConnected) {
-    //         printPrompt("Command:");
-    //         line = scanner.nextLine();
-    //         this.printer.clearTerminal();
-    //         this.parseInstruction(line); // deprecated
-    //     }
-    //     scanner.close();
-    // }
+    ///////////////
+    // Game flow //
+    ///////////////
 
     @Override
     public void changePlayer() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'changePlayer'");
+        this.printer.printPlayerBoard(this.currentPlayer, this.clientBoards.get(this.currentPlayer));
     }
 
     @Override
@@ -360,8 +189,12 @@ public class TuiGraphicalView extends GraphicalView {
 
     @Override
     public void giveSecretObjectives(Pair<Objective, Objective> secretObjectives) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'giveSecretObjectives'");
+        // this.printer.printPrompt("Choose secret objective:");
+    }
+
+    @Override
+    public void someoneDrewSecretObjective(String someoneUsername) {
+        // this.printer.printPrompt(someoneUsername + " is choosing secret objectives");
     }
 
     @Override
@@ -376,11 +209,6 @@ public class TuiGraphicalView extends GraphicalView {
         throw new UnsupportedOperationException("Unimplemented method 'someoneSetInitialSide'");
     }
 
-    @Override
-    public void someoneDrewSecretObjective(String someoneUsername) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'someoneDrewSecretObjective'");
-    }
 
     @Override
     public void someoneChoseSecretObjective(String someoneUsername) {
@@ -432,16 +260,13 @@ public class TuiGraphicalView extends GraphicalView {
         this.printer.printPlayerBoard(this.currentPlayer, this.clientBoards.get(this.currentPlayer));
     }
 
+
     // will start when someone tries to start a TUI client
     public static void main(String[] args) throws Exception {
         TuiGraphicalView tui = new TuiGraphicalView();
-        Scanner scanner = new Scanner(System.in);
-        tui.setNetworkInterface(tui.setConnectionType());
-        tui.printer.clearTerminal();
-        tui.printer.clearTerminal();
-        tui.printer.printPrompt("Username: ");
-        tui.setUsername(scanner.nextLine());
-        tui.chooseMatch();
+        while (true) {
+            // tmp: dont close immediately
+        }
     }
 
 
