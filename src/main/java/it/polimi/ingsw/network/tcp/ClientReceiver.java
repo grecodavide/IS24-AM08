@@ -21,7 +21,6 @@ public class ClientReceiver implements Runnable {
     private NetworkViewTCP networkView;
     private Socket socket;
     private IOHandler io;
-    private String username;
     private Map<Integer, InitialCard> initialCards;
     private Map<Integer, ResourceCard> resourceCards;
     private Map<Integer, GoldCard> goldCards;
@@ -31,7 +30,6 @@ public class ClientReceiver implements Runnable {
         this.networkView = networkView;
         this.socket = socket;
         this.io = new IOHandler(socket);
-        this.username = networkView.getUsername();
         this.io = networkView.getIO();
 
         CardsManager cardsManager = CardsManager.getInstance();
@@ -52,7 +50,7 @@ public class ClientReceiver implements Runnable {
     private void parseMessage(String message) {
         try {
             ResponseMessage response = (ResponseMessage) io.stringToMsg(message);
-            username = response.getUsername();
+            String username = response.getUsername();
             switch (response) {
                 case AvailableMatchesMessage msg:
                     this.networkView.receiveAvailableMatches(msg.getMatches());
@@ -74,14 +72,14 @@ public class ClientReceiver implements Runnable {
                     break;
 
                 case SomeoneDrewInitialCardMessage msg:
-                    if (username.equals(this.username)) {
+                    if (username.equals(this.networkView.getUsername())) {
                         this.networkView.giveInitialCard(this.initialCards.get(msg.getInitialCardID()));
                     } else {
                         this.networkView.someoneDrewInitialCard(username, this.initialCards.get(msg.getInitialCardID()));
                     }
                     break;
                 case SomeoneDrewSecretObjectivesMessage msg:
-                    if (username.equals(this.username)) {
+                    if (username.equals(this.networkView.getUsername())) {
                         Pair<Objective, Objective> objs =
                                 new Pair<>(this.objectives.get(msg.getFirstID()), this.objectives.get(msg.getSecondID()));
                         this.networkView.giveSecretObjectives(objs);
@@ -131,7 +129,7 @@ public class ClientReceiver implements Runnable {
     private void sendError(String message) {
         try {
             ErrorMessage msg = (ErrorMessage)this.io.stringToMsg(message);
-            this.networkView.showError(msg.getMessage());
+            this.networkView.showError(msg.getMessage(), (Exception)(Object)Class.forName(msg.getError()) );
         } catch (Exception e) {
             // Nothing to do, received an invalid object
         }

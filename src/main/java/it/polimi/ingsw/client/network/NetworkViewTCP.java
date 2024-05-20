@@ -17,9 +17,10 @@ import it.polimi.ingsw.utils.Pair;
 public class NetworkViewTCP extends NetworkView {
     private IOHandler io;
 
-    public NetworkViewTCP(GraphicalView graphicalView, Socket socket) {
+    public NetworkViewTCP(GraphicalView graphicalView, String address, Integer port) {
         super(graphicalView);
         try {
+            Socket socket = new Socket(address, port);
             this.io = new IOHandler(socket);
             new Thread(new ClientReceiver(this, socket)).start();
         } catch (IOException e) {
@@ -175,7 +176,7 @@ public class NetworkViewTCP extends NetworkView {
     }
 
     @Override
-    public void showError(String cause) {
-        this.graphicalInterface.showError(cause);
+    public void showError(String cause, Exception exception) {
+        this.graphicalInterface.showError(cause, exception);
     }
 }

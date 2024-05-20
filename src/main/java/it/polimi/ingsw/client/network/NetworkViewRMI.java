@@ -173,7 +173,7 @@ public class NetworkViewRMI extends NetworkView {
     }
 
     @Override
-    public void showError(String cause) {
+    public void showError(String cause, Exception Exception) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'showError'");
     }

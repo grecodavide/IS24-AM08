@@ -1,7 +1,6 @@
 package it.polimi.ingsw.client.frontend.tui;
 
 import java.io.IOException;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -21,11 +20,11 @@ import it.polimi.ingsw.utils.Pair;
 public class TuiGraphicalView extends GraphicalView {
     private TuiPrinter printer; // init this, call getPlaced() and pass it to printer with foreach in someonePlayedCard to test
     private boolean isConnected;
-    private String username;
     private boolean matchCreator;
+    private boolean receivedError;
+
     private List<String> chat; // when someoneSentBroadcast/PrivateText, add to this. Then simply show when "chat" command is sent
     private final Scanner scanner;
-    private boolean receivedError;
 
     public TuiGraphicalView() throws IOException {
         this.printer = new TuiPrinter();
@@ -40,34 +39,8 @@ public class TuiGraphicalView extends GraphicalView {
         this.printer.printPrompt("Choose Username:");
         this.setUsername(scanner.nextLine());
 
-        // do it once, and if it fails then do it over again
         this.chooseMatch("Type a number to join a match, or a name followed by the max players to create one");
-        while (!isConnected) {
-            if (this.receivedError) {
-                this.receivedError = false;
-                this.handleMatchError();
-            } else {
-                this.printer.printPrompt("Waiting for response...");
-            }
-        }
-
-        this.printer.clearTerminal();
-        this.printer.printWelcomeScreen();
-    }
-
-
-    private void handleMatchError() {
-        String userIn;
-        if (this.matchCreator) {
-            this.chooseMatch("Could not create match. Try with another name! ");
-        } else {
-            this.printer.printPrompt("Could not join match. Do you want to change username? ");
-            userIn = this.askInput();
-            if (!userIn.equals("")) {
-                this.setUsername(userIn);
-            }
-            this.chooseMatch("Type a number to join a match, or a name followed by the max players to create one");
-        }
+        // TODO: add error handling
     }
 
 
@@ -94,10 +67,6 @@ public class TuiGraphicalView extends GraphicalView {
         }
     }
 
-    private void setUsername(String username) {
-        this.username = username;
-        this.networkView.setUsername(username);
-    }
 
     private boolean createMatch(String userIn) {
         this.matchCreator = true;
@@ -126,32 +95,28 @@ public class TuiGraphicalView extends GraphicalView {
         while (!connectionSet) {
             userIn = this.askInput();
             this.printer.clearTerminal();
-            try {
-                switch (userIn) {
-                    case "1", "TCP", "tcp", "socket":
-                        serverIP = this.askIPAddress();
-                        this.printer.clearTerminal();
-                        port = this.askPort();
-                        networkView = new NetworkViewTCP(this, new Socket(serverIP, port));
-                        connectionSet = true;
-                        break;
+            switch (userIn) {
+                case "1", "TCP", "tcp", "socket":
+                    serverIP = this.askIPAddress();
+                    this.printer.clearTerminal();
+                    port = this.askPort();
+                    networkView = new NetworkViewTCP(this, serverIP, port);
+                    connectionSet = true;
+                    break;
 
-                    case "2", "RMI", "rmi", "remote":
-                        serverIP = this.askIPAddress();
-                        this.printer.clearTerminal();
-                        port = this.askPort();
-                        // networkView = new NetworkViewRMI(this, new PlayerControllerRMI(this.username, match));
-                        connectionSet = true;
-                        break;
+                case "2", "RMI", "rmi", "remote":
+                    serverIP = this.askIPAddress();
+                    this.printer.clearTerminal();
+                    port = this.askPort();
+                    // networkView = new NetworkViewRMI(this, new PlayerControllerRMI(this.username, match));
+                    connectionSet = true;
+                    break;
 
-                    default:
-                        this.printer.printPrompt("Not a valid connection type! Specify a connection type.");
-                        break;
-                }
-
-            } catch (IOException e) {
-                // nothing to do here, loop over
+                default:
+                    this.printer.printPrompt("Not a valid connection type! Specify a connection type.");
+                    break;
             }
+
         }
         this.printer.clearTerminal();
         networkView.getAvailableMatches();
@@ -225,12 +190,36 @@ public class TuiGraphicalView extends GraphicalView {
 
     @Override
     public void giveInitialCard(InitialCard initialCard) {
-        this.printer.printPrompt("Choose initial objective:");
+        this.printer.clearTerminal();
+        this.printer.printInitialSideBySide(initialCard, 1);
+        this.printer.printPrompt("Choose initial card (b for back, front otherwise):");
+        String userIn = this.scanner.nextLine();
+        Side side;
+        if (userIn.equals("b")) {
+            side = Side.BACK;
+        } else {
+            side = Side.FRONT;
+        }
+
+        this.clientBoards.get(this.username).placeInitial(initialCard, side);
+        this.networkView.chooseInitialCardSide(side);
     }
 
     @Override
     public void giveSecretObjectives(Pair<Objective, Objective> secretObjectives) {
-        this.printer.printPrompt("Choose secret objective:");
+        this.printer.clearTerminal();
+        this.printer.printPlayerBoard(this.currentPlayer, this.clientBoards.get(this.currentPlayer));
+        this.printer.printPrompt("Choose secret objective (1 for first, second otherwise):");
+        String userIn = this.scanner.nextLine();
+        Objective objective;
+        if (userIn.equals("1")) {
+            objective = secretObjectives.first();
+        } else {
+            objective = secretObjectives.second();
+        }
+
+        this.clientBoards.get(this.username).setSecretObjective(objective);
+        this.networkView.chooseSecretObjective(objective);
     }
 
     @Override
@@ -240,21 +229,9 @@ public class TuiGraphicalView extends GraphicalView {
 
     @Override
     public void someoneDrewInitialCard(String someoneUsername, InitialCard card) {
-        this.printer.printPrompt(someoneUsername + " is drawing initial");
+        this.printer.printPrompt(someoneUsername + " is drawing initial card");
     }
 
-    @Override
-    public void someoneSetInitialSide(String someoneUsername, Side side) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'someoneSetInitialSide'");
-    }
-
-
-    @Override
-    public void someoneChoseSecretObjective(String someoneUsername) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'someoneChoseSecretObjective'");
-    }
 
     @Override
     public void notifyLastTurn() {
@@ -298,13 +275,18 @@ public class TuiGraphicalView extends GraphicalView {
 
     @Override
     protected void notifyMatchStarted() {
-        this.printer.printPlayerBoard(this.currentPlayer, this.clientBoards.get(this.currentPlayer));
+        // this.printer.printPlayerBoard(this.currentPlayer, this.clientBoards.get(this.currentPlayer));
     }
 
     @Override
-    public void showError(String cause) {
+    public void showError(String cause, Exception exception) {
         this.receivedError = true;
-        // this.printer.printMessage("ERROR: " + cause);
+        this.printer.printMessage("ERROR: " + cause + " " + exception.getClass());
+    }
+
+    @Override
+    public void makeMove() {
+        // this.networkView.playCard(coords, card, side);
     }
 
     // will start when someone tries to start a TUI client

@@ -2,6 +2,8 @@ package it.polimi.ingsw.client.frontend.tui;
 
 import java.io.IOException;
 import java.util.*;
+
+import it.polimi.ingsw.exceptions.InvalidResourceException;
 import org.jline.terminal.Terminal;
 import it.polimi.ingsw.client.frontend.ClientBoard;
 import it.polimi.ingsw.client.frontend.ShownCard;
@@ -109,6 +111,13 @@ public class TuiPrinter {
         System.out.println(this.setPosition((termCols - len) / 2, termRows - infoLineOffset) + out + "\033[0m");
     }
 
+    private int getDimStart(int max, int dim) {
+        int left = max - dim; // available space
+        if (left % 2 == 1)
+            left--;
+        return left / 2; // starting coord
+    }
+
     private void printWelcome(int x, int y) {
         List<String> welcomeString = new ArrayList<>();
 
@@ -127,7 +136,8 @@ public class TuiPrinter {
             System.out.println(welcomeString.get(i));
     }
 
-    private void printTitle(int x, int y) {
+    private void printTitleDeprecated(int x, int y) {
+        String white = "\033[0m", yellow = parser.getRightColor(Symbol.INKWELL);
         List<String> titleString = new ArrayList<>();
         String prefix = setPosition(x, y);
 
@@ -135,7 +145,7 @@ public class TuiPrinter {
                 + "   _____                                                                                                                                                                                       _____   ");
         prefix = setPosition(x, ++y);
         titleString.add(prefix
-                + "  ( ___ )-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------( ___ )  ");
+                + "  ( ___ )-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------( ___ )  " );
         prefix = setPosition(x, ++y);
         titleString.add(prefix
                 + "   |   |                                                                                                                                                                                       |   |   ");
@@ -185,16 +195,115 @@ public class TuiPrinter {
         titleString.add(prefix
                 + "  (_____)-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------(_____)  ");
 
+        System.out.println(yellow);
         for (int i = 0; i < titleString.size(); i++)
             System.out.println(titleString.get(i));
+        System.out.println(white);
     }
 
-    private int getDimStart(int max, int dim) {
-        int left = max - dim; // available space
-        if (left % 2 == 1)
-            left--;
-        return left / 2; // starting coord
+    private void printTitle(int x, int y) {
+        String white = "\033[0m", yellow = parser.getRightColor(Symbol.INKWELL);
+        List<String> titleString = new ArrayList<>();
+
+        String prefix = setPosition(x, y);
+        titleString.add(prefix + "  _____                                                                                                                                                                                                     _____  ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + " ( ___ )---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------( ___ ) ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + "  |   |                                                                                                                                                                                                     |   |  ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + "  |   |                                                                                                                                                                                                     |   |  ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + "  |   |                                                                                                                                                                                                     |   |  ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + "  |   |           ...                         ..                                             ...     ...                      s                                                  ..    .       .x+=:.       |   |  ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + "  |   |        xH88''~ .x8X                 dF                                            .=*8888n..'%888:                   :8                                            x .d88'    @88>    z'    ^%      |   |  ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + "  |   |      :8888   .f'8888Hf        u.   '88bu.                    uL   ..             X    |8888f '8888                  .88       x.    .        .u    .                5888R     %8P        .   <k     |   |  ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + "  |   |     :8888>  X8L  ^'''   ...ue888b  '*88888bu        .u     .@88b  @88R           88x. '8888X  8888>        u       :888ooo  .@88k  z88u    .d88B :@8c        u      '888R      .       .@8Ned8'     |   |  ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + "  |   |     X8888  X888h        888R Y888r   ^'*8888N    ud8888.  ''Y888k/'*P           '8888k 8888X  ''*8h.    us888u.  -*8888888 ~'8888 ^8888   ='8888f8888r    us888u.    888R    .@88u   .@^%8888'      |   |  ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + "  |   |     88888  |88888.      888R I888>  beWE '888L :888'8888.    Y888L               '8888 X888X .xH8    .@88 '8888'   8888      8888  888R     4888>'88'  .@88 '8888'   888R   ''888E' x88:  ')8b.     |   |  ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + "  |   |     88888   %88888      888R I888>  888E  888E d888 '88%'     8888                 '8' X888|:888X    9888  9888    8888      8888  888R     4888> '    9888  9888    888R     888E  8888N=*8888     |   |  ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + "  |   |     88888 '> '8888>     888R I888>  888E  888E 8888.+'        '888N               =~'  X888 X888X    9888  9888    8888      8888  888R     4888>      9888  9888    888R     888E   %8'    R88     |   |  ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + "  |   |     '8888L %  |888   | u8888cJ888   888E  888F 8888L       .u./'888&               :h. X8*' |888X    9888  9888   .8888Lu=   8888 ,888B .  .d888L .+   9888  9888    888R     888E    @8Wou 9%      |   |  ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + "  |   |      '8888  '-*''   /   '*888*P'   .888N..888  '8888c. .+ d888' Y888*'            X888xX'   '8888..: 9888  9888   ^%888*    '8888Y 8888'   ^'8888*'    9888  9888   .888B .   888&  .888888P'       |   |  ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + "  |   |        '888.      :'      'Y'       ''888*''    '88888%   ' 'Y   Y'             :~'888f     '*888*'  '888*''888'    'Y'      'Y'   'YP        'Y'      '888*''888'  ^*888%    R888' '   ^'F         |   |  ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + "  |   |          '''***~''                     ''         'YP'                              ''        '''     ^Y'   ^Y'                                         ^Y'   ^Y'     '%       ''                   |   |  ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + "  |   |                                                                                                                                                                                                     |   |  ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + "  |   |                                                                                                                                                                                                     |   |  ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + "  |___|                                                                                                                                                                                                     |___|  ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + " (_____)---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------(_____) ");
+
+        System.out.println(yellow);
+        for (int i = 0; i < titleString.size(); i++)
+            System.out.println(titleString.get(i));
+        System.out.println(white);
     }
+
+    private void printYouWinScreen(int x, int y){
+        List<String> winString = new ArrayList<>();
+
+        String prefix = setPosition(x, y);
+        winString.add(prefix + " '7MMF'   '7MF''7MMF' .g8'''bgd MMP''MM''YMM   .g8''8q. '7MM'''Mq.'YMM'   'MM' ");
+        prefix = setPosition(x, ++y);
+        winString.add(prefix + "   'MA     ,V    MM .dP'     'M P'   MM   '7 .dP'    'YM. MM   'MM. VMA   ,V   ");
+        prefix = setPosition(x, ++y);
+        winString.add(prefix + "    VM:   ,V     MM dM'       '      MM      dM'      'MM MM   ,M9   VMA ,V    ");
+        prefix = setPosition(x, ++y);
+        winString.add(prefix + "     MM.  M'     MM MM               MM      MM        MM MMmmdM9     VMMP     ");
+        prefix = setPosition(x, ++y);
+        winString.add(prefix + "     'MM A'      MM MM.              MM      MM.      ,MP MM  YM.      MM      ");
+        prefix = setPosition(x, ++y);
+        winString.add(prefix + "      :MM;       MM 'Mb.     ,'      MM      'Mb.    ,dP' MM   'Mb.    MM      ");
+        prefix = setPosition(x, ++y);
+        winString.add(prefix + "       VF      .JMML. ''bmmmd'     .JMML.      ''bmmd'' .JMML. .JMM. .JMML.    ");
+
+        for (int i = 0; i < winString.size(); i++)
+            System.out.println(winString.get(i));
+    }
+
+    private void printYouLoseScreen(int x, int y){
+        List<String> loseString = new ArrayList<>();
+
+        String prefix = setPosition(x, y);
+        loseString.add(prefix + " @@@ @@@   @@@@@@   @@@  @@@     @@@        @@@@@@    @@@@@@   @@@@@@@ ");
+        prefix = setPosition(x, ++y);
+        loseString.add(prefix + " @@@ @@@  @@@@@@@@  @@@  @@@     @@@       @@@@@@@@  @@@@@@@   @@@@@@@ ");
+        prefix = setPosition(x, ++y);
+        loseString.add(prefix + " @@ì ì@@  @@ì  @@@  @@ì  @@@     @@ì       @@ì  @@@  ì@@       @@ì     ");
+        prefix = setPosition(x, ++y);
+        loseString.add(prefix + " ì@ì @ìì  ì@ì  @ì@  ì@ì  @ì@     ì@ì       ì@ì  @ì@  ì@ì       ì@ì     ");
+        prefix = setPosition(x, ++y);
+        loseString.add(prefix + "  ì@ì@ì   @ì@  ì@ì  @ì@  ì@ì     @ìì       @ì@  ì@ì  ìì@@ìì    @ììì:ì  ");
+        prefix = setPosition(x, ++y);
+        loseString.add(prefix + "   @ììì   ì@ì  ììì  ì@ì  ììì     ììì       ì@ì  ììì   ìì@ììì   ììììì:  ");
+        prefix = setPosition(x, ++y);
+        loseString.add(prefix + "   ìì:    ìì:  ììì  ìì:  ììì     ìì:       ìì:  ììì       ì:ì  ìì:     ");
+        prefix = setPosition(x, ++y);
+        loseString.add(prefix + "   :ì:    :ì:  ì:ì  :ì:  ì:ì      :ì:      :ì:  ì:ì      ì:ì   :ì:     ");
+        prefix = setPosition(x, ++y);
+        loseString.add(prefix + "    ::    ::::: ::  ::::: ::     :: ::::   ::::: ::  :::: ::   :: :::: ");
+        prefix = setPosition(x, ++y);
+        loseString.add(prefix + "    :      : :  :    : :  :      : :: : :   : :  :   :: : :    : :: :: ");
+
+        for (int i = 0; i < loseString.size(); i++)
+            System.out.println(loseString.get(i));
+    }
+
 
     // -------------- //
     // PUBLIC METHODS //
@@ -309,13 +418,35 @@ public class TuiPrinter {
         last = (termCols - cardCols) / 2;
         System.out.println(parser.parseObjective(secret, new Pair<Integer, Integer>(last, 2)) + "\033[0m");
 
-        username = "Common objectives:";
-        System.out.println(this.setPosition((termCols - username.length()) / 2, 3 + cardRows) + username);
+        int verticalSpaceAlreadyUsedForSecretObjective = (7) + 1 + 1;
+        printCommonObjectives(visibles, verticalSpaceAlreadyUsedForSecretObjective);
 
-        last = (termCols - (visiblesSize) * (cardCols)) / 2 - spaces * (visiblesSize - 1) / 2;
+    }
 
-        System.out.println(parser.parseObjective(visibles.first(), new Pair<Integer, Integer>(last, 4 + cardRows)) + "\033[0m");
-        System.out.println(parser.parseObjective(visibles.second(), new Pair<Integer, Integer>(last + spaces, 4 + cardRows)) + "\033[0m");
+    /**
+     * Prints the objectives common for all players
+     * @param visibleObjectives pair of common objectives
+     * @param heightOffset offset lines from the top
+     */
+    public void printCommonObjectives(Pair<Objective, Objective> visibleObjectives, int heightOffset){
+        int yOffset = (heightOffset <= 0) ? 1 : heightOffset;
+
+        // common objectives STRING
+        String message = "Common objectives:";
+        int xCoord = getDimStart(this.terminal.getWidth(), message.length());
+        message = setPosition(xCoord, yOffset++) + message;
+        System.out.println(message);
+
+        // common objectives CARDS
+        int cardWidth = 18, spaceBetweenSides = 4;
+        xCoord = getDimStart(this.getWidth(), (2 * cardWidth) + spaceBetweenSides);
+
+        Pair<Integer, Integer> obj1Coord = new Pair<>(xCoord, yOffset);
+        Pair<Integer, Integer> obj2Coord = new Pair<>(xCoord + cardWidth + spaceBetweenSides, yOffset);
+        String obj1 = this.parser.parseObjective(visibleObjectives.first(), obj1Coord);
+        String obj2 = this.parser.parseObjective(visibleObjectives.second(), obj2Coord);
+
+        System.out.println(obj1 + obj2);
     }
 
     /**
@@ -357,9 +488,10 @@ public class TuiPrinter {
      */
     public void printWelcomeScreen() {
         int maxHeight = this.getHeight() - this.infoLineOffset;
-        int welcomeHeight = 5, welcomeWidth = 90; // width must be even (pari)
+        int welcomeHeight = 5, welcomeWidth = 88+2; // width must be even (pari)
         int spaceBetween = 3;
-        int titleHeight = 18, titleWidth = 198; // width must be even (pari)
+        int titleHeight = 21, titleWidth = 210+2; // width must be even (pari)
+//        int titleHeight = 18, titleWidth = 196+2; // width must be even (pari)
 
         int welcomeStartY = getDimStart(this.getHeight(), welcomeHeight + spaceBetween + titleHeight);
         int titleStartY = welcomeStartY + welcomeHeight + spaceBetween;
@@ -371,11 +503,37 @@ public class TuiPrinter {
     }
 
     /**
+     * Prints the end screen (win/lose) in the middle of the tui view
+     * @param isVictorious whether the player won or not
+     */
+    public void printEndScreen(Boolean isVictorious){
+        int maxHeight = this.getHeight() - this.infoLineOffset;
+        int maxWidth = this.getWidth() - 2;
+
+        int msgHeight, msgWidth;
+        int x, y;
+        if (isVictorious){
+            msgHeight = 7;
+            msgWidth = 78+2; // width must be even (pari)
+            x = getDimStart(maxWidth, msgWidth);
+            y = getDimStart(maxHeight, msgHeight);
+            printYouWinScreen(x, y);
+
+        } else {
+            msgHeight = 10;
+            msgWidth = 70+2; // width must be even (pari)
+            x = getDimStart(maxWidth, msgWidth);
+            y = getDimStart(maxHeight, msgHeight);
+            printYouLoseScreen(x, y);
+
+        }
+    }
+
+    /**
      * Prints the specified initial card front and back in the middle of the screen
      * 
      * @param initialCard initial card to print
      * @param heightOffset offset lines from the top
-     * @throws CardException
      */
     public void printInitialSideBySide(InitialCard initialCard, int heightOffset) {
 
@@ -390,28 +548,12 @@ public class TuiPrinter {
         try {
             faceup = this.parser.parseCard(initialCard, faceupCoord, null, true);
             facedown = this.parser.parseCard(initialCard, facedownCoord, null, false);
-            System.out.println(faceup);
-            System.out.println(facedown);
+            System.out.println(faceup + facedown);
         } catch (CardException e) {
             // TODO: handle exception
         }
 
 
     }
-
-    // TO BE DELETED -- HERE just for easy TESTING
-    public static void main(String[] args) throws IOException, CardException {
-        TuiPrinter pippo = new TuiPrinter();
-        pippo.printPrompt("AAAAAAAAAAAAAAAAAAAAAAAA");
-        // pippo.printWelcomeScreen();
-
-        Set<Symbol> set = new HashSet<>();
-        set.add(Symbol.FEATHER);
-        InitialCard initialCard =
-                new InitialCard(new CardFace(Symbol.FUNGUS, Symbol.ANIMAL, Symbol.PLANT, Symbol.INSECT, Collections.emptySet()),
-                        new CardFace(Symbol.FULL_CORNER, Symbol.EMPTY_CORNER, Symbol.FULL_CORNER, Symbol.EMPTY_CORNER, set));
-        pippo.printInitialSideBySide(initialCard, 0);
-
-    }
-
+    
 }
