@@ -5,27 +5,36 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import it.polimi.ingsw.client.network.NetworkView;
+import it.polimi.ingsw.exceptions.*;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.LeaderboardEntry;
 import it.polimi.ingsw.utils.Pair;
 
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 public abstract class GraphicalView {
     protected NetworkView networkView;
+    protected int chosenPort;
     protected Map<String, ClientBoard> clientBoards;
     protected List<String> players; // ordered by turn
-    protected String currentPlayer; // when we receive a 
+    protected String currentPlayer;
     protected Pair<Objective, Objective> visibleObjectives;
     protected Map<DrawSource, PlayableCard> visiblePlayableCards;
     protected Pair<Symbol, Symbol> decksTopReign;
     private boolean lastTurn = false;
     protected List<AvailableMatch> availableMatches;
 
-    public boolean isLastTurn() { return this.lastTurn; }
+    public boolean isLastTurn() {
+        return this.lastTurn;
+    }
 
     
     /**
-     * Displayes the user an error, when received
+     * Displays the user an error, when received
      * 
      * @param cause What went wrong
      */
@@ -42,26 +51,26 @@ public abstract class GraphicalView {
 
     /**
      * Tries to create a match
-     * 
+     *
      * @param matchName The match's name
      */
-    public void createMatch(String matchName, Integer maxPlayers) {
+    public void createMatch(String matchName, Integer maxPlayers) throws ChosenMatchException, RemoteException {
         this.networkView.createMatch(matchName, maxPlayers);
     }
 
     /**
      * Tries to join a match
-     * 
+     *
      * @param matchName the match's name
      */
-    public void joinMatch(String matchName) {
+    public void joinMatch(String matchName) throws ChosenMatchException, WrongStateException, AlreadyUsedUsernameException, RemoteException {
         this.networkView.joinMatch(matchName);
     }
 
     /**
      * Draws an initial card for the player.
      */
-    public void drawInitialCard() {
+    public void drawInitialCard() throws WrongStateException, WrongTurnException, RemoteException {
         this.networkView.drawInitialCard();
     }
 
@@ -70,15 +79,14 @@ public abstract class GraphicalView {
      *
      * @param side The side on which play the initial card drawn using {@link #drawInitialCard()}
      */
-    public void chooseInitialCardSide(Side side) {
+    public void chooseInitialCardSide(Side side) throws WrongStateException, WrongTurnException, RemoteException {
         this.networkView.chooseInitialCardSide(side);
     }
 
     /**
      * Draws two secret objectives.
-     *
      */
-    public void drawSecretObjectives() {
+    public void drawSecretObjectives() throws WrongStateException, WrongTurnException, RemoteException {
         this.networkView.drawSecretObjectives();
     }
 
@@ -87,7 +95,7 @@ public abstract class GraphicalView {
      *
      * @param objective The chosen objective
      */
-    public void chooseSecretObjective(Objective objective) {
+    public void chooseSecretObjective(Objective objective) throws WrongStateException, WrongTurnException, RemoteException, WrongChoiceException {
         this.networkView.chooseSecretObjective(objective);
     }
 
@@ -95,10 +103,10 @@ public abstract class GraphicalView {
      * Plays a card.
      *
      * @param coords The coordinates on which to place the card
-     * @param card The PlayableCard to play
-     * @param side The side on which to play the chosen card
+     * @param card   The PlayableCard to play
+     * @param side   The side on which to play the chosen card
      */
-    public void playCard(Pair<Integer, Integer> coords, PlayableCard card, Side side) {
+    public void playCard(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws WrongStateException, WrongTurnException, RemoteException, WrongChoiceException {
         this.networkView.playCard(coords, card, side);
     }
 
@@ -107,14 +115,14 @@ public abstract class GraphicalView {
      *
      * @param source The drawing source to draw the card from
      */
-    public void drawCard(DrawSource source) {
+    public void drawCard(DrawSource source) throws HandException, WrongStateException, WrongTurnException, RemoteException, WrongChoiceException {
         this.networkView.drawCard(source);
     }
 
     public abstract void changePlayer();
 
     private void nextPlayer() {
-        this.currentPlayer = this.players.get((this.players.indexOf(currentPlayer)+1)%this.players.size());
+        this.currentPlayer = this.players.get((this.players.indexOf(currentPlayer) + 1) % this.players.size());
         this.changePlayer();
     }
 
@@ -190,9 +198,9 @@ public abstract class GraphicalView {
 
     public void someoneDrewCard(String someoneUsername, DrawSource source, PlayableCard card, PlayableCard replacementCard, Symbol replacementCardReign) {
         if (source.equals(DrawSource.GOLDS_DECK)) {
-            this.decksTopReign = new Pair<Symbol,Symbol>(replacementCardReign, this.decksTopReign.second());
-        } else if(source.equals(DrawSource.RESOURCES_DECK)) {
-            this.decksTopReign = new Pair<Symbol,Symbol>(this.decksTopReign.first(), replacementCardReign);
+            this.decksTopReign = new Pair<Symbol, Symbol>(replacementCardReign, this.decksTopReign.second());
+        } else if (source.equals(DrawSource.RESOURCES_DECK)) {
+            this.decksTopReign = new Pair<Symbol, Symbol>(this.decksTopReign.first(), replacementCardReign);
         } else {
             visiblePlayableCards.put(source, replacementCard);
         }
