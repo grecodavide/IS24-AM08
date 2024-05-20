@@ -19,6 +19,8 @@ public abstract class NetworkView implements RemoteViewInterface {
     public NetworkView(GraphicalView graphicalViewInterface) {
         this.graphicalInterface = graphicalViewInterface;
     }
+
+    public abstract void showError(String cause);
     
     /**
      * Asks the server to send a list of {@link AvailableMatch}
