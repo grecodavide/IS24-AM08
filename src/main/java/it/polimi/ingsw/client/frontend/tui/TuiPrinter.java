@@ -1,9 +1,10 @@
 package it.polimi.ingsw.client.frontend.tui;
 
 import java.io.IOException;
-import java.util.*;
-
-import it.polimi.ingsw.exceptions.InvalidResourceException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.jline.terminal.Terminal;
 import it.polimi.ingsw.client.frontend.ClientBoard;
 import it.polimi.ingsw.client.frontend.ShownCard;
@@ -419,7 +420,7 @@ public class TuiPrinter {
         System.out.println(parser.parseObjective(secret, new Pair<Integer, Integer>(last, 2)) + "\033[0m");
 
         int verticalSpaceAlreadyUsedForSecretObjective = (7) + 1 + 1;
-        printCommonObjectives(visibles, verticalSpaceAlreadyUsedForSecretObjective);
+        printObjectivePair("Common objectives:", visibles, verticalSpaceAlreadyUsedForSecretObjective);
 
     }
 
@@ -428,11 +429,10 @@ public class TuiPrinter {
      * @param visibleObjectives pair of common objectives
      * @param heightOffset offset lines from the top
      */
-    public void printCommonObjectives(Pair<Objective, Objective> visibleObjectives, int heightOffset){
+    public void printObjectivePair(String message, Pair<Objective, Objective> visibleObjectives, int heightOffset){
         int yOffset = (heightOffset <= 0) ? 1 : heightOffset;
 
         // common objectives STRING
-        String message = "Common objectives:";
         int xCoord = getDimStart(this.terminal.getWidth(), message.length());
         message = setPosition(xCoord, yOffset++) + message;
         System.out.println(message);

@@ -37,6 +37,10 @@ public class ClientBoard {
         this.objective = objective;
     }
 
+    public void setInitialSide(Side side) {
+        this.placed.put(0, new ShownCard(this.placed.get(0).card(), side, this.placed.get(0).coords()));
+    }
+
     public void placeCard(Pair<Integer, Integer> coords, PlayableCard card, Side side, Integer points, Map<Symbol, Integer> resources) {
         this.hand.remove(card);
         this.placed.put(placementNumber, new ShownCard(card, side, coords));

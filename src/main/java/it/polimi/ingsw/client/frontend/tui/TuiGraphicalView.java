@@ -40,7 +40,8 @@ public class TuiGraphicalView extends GraphicalView {
         this.setUsername(scanner.nextLine());
 
         this.chooseMatch("Type a number to join a match, or a name followed by the max players to create one");
-        // TODO: add error handling
+        // TODO: error handling
+        this.printer.printWelcomeScreen();
     }
 
 
@@ -169,6 +170,10 @@ public class TuiGraphicalView extends GraphicalView {
     }
 
     private String askInput() {
+        try {
+            System.in.read(new byte[System.in.available()]);
+        } catch (Exception e) {
+        }
         String userIn = this.scanner.nextLine();
         this.printer.clearTerminal();
         return userIn;
@@ -190,10 +195,11 @@ public class TuiGraphicalView extends GraphicalView {
 
     @Override
     public void giveInitialCard(InitialCard initialCard) {
+        super.giveInitialCard(initialCard);
         this.printer.clearTerminal();
         this.printer.printInitialSideBySide(initialCard, 1);
         this.printer.printPrompt("Choose initial card (b for back, front otherwise):");
-        String userIn = this.scanner.nextLine();
+        String userIn = this.askInput();
         Side side;
         if (userIn.equals("b")) {
             side = Side.BACK;
@@ -201,16 +207,16 @@ public class TuiGraphicalView extends GraphicalView {
             side = Side.FRONT;
         }
 
-        this.clientBoards.get(this.username).placeInitial(initialCard, side);
         this.networkView.chooseInitialCardSide(side);
     }
 
+    // TODO: same objective ?????????
     @Override
     public void giveSecretObjectives(Pair<Objective, Objective> secretObjectives) {
         this.printer.clearTerminal();
-        this.printer.printPlayerBoard(this.currentPlayer, this.clientBoards.get(this.currentPlayer));
+        this.printer.printObjectivePair("Possible secret objectives:", visibleObjectives, 1);
         this.printer.printPrompt("Choose secret objective (1 for first, second otherwise):");
-        String userIn = this.scanner.nextLine();
+        String userIn = this.askInput();
         Objective objective;
         if (userIn.equals("1")) {
             objective = secretObjectives.first();
@@ -230,6 +236,7 @@ public class TuiGraphicalView extends GraphicalView {
     @Override
     public void someoneDrewInitialCard(String someoneUsername, InitialCard card) {
         this.printer.printPrompt(someoneUsername + " is drawing initial card");
+        super.someoneDrewInitialCard(someoneUsername, card);
     }
 
 
@@ -241,10 +248,11 @@ public class TuiGraphicalView extends GraphicalView {
 
     @Override
     public void someoneJoined(String someoneUsername) {
-        this.printer.clearTerminal();
         if (someoneUsername.equals(this.username)) {
             this.isConnected = true;
         } else {
+            this.printer.clearTerminal();
+            this.printer.printWelcomeScreen();
             this.printer.printMessage(someoneUsername + " joined the match!");
         }
     }

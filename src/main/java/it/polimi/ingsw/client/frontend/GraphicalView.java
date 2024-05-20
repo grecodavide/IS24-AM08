@@ -194,13 +194,18 @@ public abstract class GraphicalView {
         this.availableMatches = availableMatches;
     }
 
-    public abstract void giveInitialCard(InitialCard initialCard);
+    public void giveInitialCard(InitialCard initialCard) {
+        this.clientBoards.get(this.username).placeInitial(initialCard, Side.FRONT);
+    }
 
     public abstract void giveSecretObjectives(Pair<Objective, Objective> secretObjectives);
 
-    public abstract void someoneDrewInitialCard(String someoneUsername, InitialCard card);
+    public void someoneDrewInitialCard(String someoneUsername, InitialCard card) {
+        this.clientBoards.get(someoneUsername).placeInitial(card, Side.FRONT);
+    }
 
     public void someoneSetInitialSide(String someoneUsername, Side side) {
+        this.clientBoards.get(someoneUsername).setInitialSide(side);
         this.nextPlayer();
     }
 
