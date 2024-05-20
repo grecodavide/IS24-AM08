@@ -1,10 +1,8 @@
 package it.polimi.ingsw.client.frontend.tui;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
 import org.jline.terminal.Terminal;
 import it.polimi.ingsw.client.frontend.ClientBoard;
 import it.polimi.ingsw.client.frontend.ShownCard;
@@ -176,10 +174,10 @@ public class TuiPrinter {
     }
 
     private int getDimStart(int max, int dim){
-        int left = max - dim;
+        int left = max - dim; // available space
         if (left % 2 == 1)
             left--;
-        return left / 2;
+        return left / 2; // starting coord
     }
 
     // -------------- //
@@ -355,11 +353,44 @@ public class TuiPrinter {
         printTitle(titleStartX, titleStartY);
     }
 
+    /**
+     * Prints the specified initial card front and back in the middle of the screen
+     * @param initialCard initial card to print
+     * @param heightOffset offset lines from the top
+     * @throws CardException
+     */
+    public void printInitialSideBySide(InitialCard initialCard, int heightOffset) throws CardException {
+
+        int offset = (heightOffset <= 0) ? 1 : heightOffset;
+        String faceup, facedown;
+        int cardWidth = 18, spaceBetweenSides = 4;
+        int width = getDimStart(this.getWidth(), (2*cardWidth)+spaceBetweenSides);
+
+        Pair<Integer, Integer> faceupCoord = new Pair<>(width, offset);
+        Pair<Integer, Integer> facedownCoord = new Pair<>(width+cardWidth+spaceBetweenSides, offset);
+
+        faceup = this.parser.parseCard(initialCard, faceupCoord, null, true);
+        facedown = this.parser.parseCard(initialCard, facedownCoord, null, false);
+
+        System.out.println(faceup);
+        System.out.println(facedown);
+
+    }
+
     // TO BE DELETED -- HERE just for easy TESTING
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, CardException {
         TuiPrinter pippo = new TuiPrinter();
         pippo.printPrompt("AAAAAAAAAAAAAAAAAAAAAAAA");
-        pippo.printWelcomeScreen();
+//        pippo.printWelcomeScreen();
+
+        Set<Symbol> set = new HashSet<>();
+        set.add(Symbol.FEATHER);
+        InitialCard initialCard = new InitialCard(
+         new CardFace(Symbol.FUNGUS, Symbol.ANIMAL, Symbol.PLANT, Symbol.INSECT, Collections.emptySet()),
+         new CardFace(Symbol.FULL_CORNER, Symbol.EMPTY_CORNER, Symbol.FULL_CORNER, Symbol.EMPTY_CORNER, set)
+        );
+        pippo.printInitialSideBySide(initialCard, 0);
+
     }
 
 }
