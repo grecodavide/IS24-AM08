@@ -119,6 +119,11 @@ public class NetworkViewRMI extends NetworkView {
     }
 
     @Override
+    public void showError(String cause) {
+
+    }
+
+    @Override
     public void getAvailableMatches() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getAvailableMatches'");

@@ -1,9 +1,12 @@
 package it.polimi.ingsw.client.frontend.gui;
 
-import it.polimi.ingsw.client.frontend.GraphicalViewInterface;
+import it.polimi.ingsw.client.frontend.GraphicalView;
 import it.polimi.ingsw.client.network.NetworkView;
+import it.polimi.ingsw.gamemodel.InitialCard;
+import it.polimi.ingsw.gamemodel.Objective;
 import it.polimi.ingsw.gamemodel.PlayableCard;
 import it.polimi.ingsw.gamemodel.Side;
+import it.polimi.ingsw.utils.LeaderboardEntry;
 import it.polimi.ingsw.utils.Pair;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -17,43 +20,92 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.List;
 
-public class GraphicalViewGUI extends Application implements GraphicalViewInterface {
-    public static void main(String[] args) {
-        launch(args);
+public class GraphicalViewGUI extends GraphicalView {
+
+    GraphicalApplication app;
+
+    public GraphicalViewGUI(GraphicalApplication app) {
+        this.app = app;
     }
-
     @Override
-    public void start(Stage primaryStage) throws IOException {
-        FXMLLoader loader = new FXMLLoader(this.getClass().getResource("/fxml/connection.fxml"));
-        primaryStage.setTitle("Codex Naturalis");
-        StackPane root = new StackPane();
-        root.setId("pane");
-        root.getStylesheets().addAll(this.getClass().getResource("/css/style.css").toExternalForm());
-        VBox vbox = loader.<VBox>load();
-        vbox.setAlignment(Pos.CENTER);
-        root.getChildren().add(vbox);
-        primaryStage.setScene(new Scene(root, 1920, 1080));
-        primaryStage.show();
-    }
-
-    @Override
-    public void setNetworkInterface(NetworkView networkView) {
+    public void showError(String cause) {
 
     }
 
     @Override
-    public void sendError(String text) {
+    public void changePlayer() {
 
     }
 
     @Override
-    public void someonePlayedCard(String someoneUsername, Pair<Integer, Integer> coords, PlayableCard card, Side side) {
+    public void giveLobbyInfo(List<String> playersUsernames) {
 
     }
 
     @Override
-    public void cancelLastAction() {
+    protected void notifyMatchStarted() {
+
+    }
+
+    @Override
+    public void giveInitialCard(InitialCard initialCard) {
+
+    }
+
+    @Override
+    public void giveSecretObjectives(Pair<Objective, Objective> secretObjectives) {
+
+    }
+
+    @Override
+    public void someoneDrewInitialCard(String someoneUsername, InitialCard card) {
+
+    }
+
+    @Override
+    public void someoneSetInitialSide(String someoneUsername, Side side) {
+
+    }
+
+    @Override
+    public void someoneDrewSecretObjective(String someoneUsername) {
+
+    }
+
+    @Override
+    public void someoneChoseSecretObjective(String someoneUsername) {
+
+    }
+
+    @Override
+    public void notifyLastTurn() {
+
+    }
+
+    @Override
+    public void someoneJoined(String someoneUsername) {
+
+    }
+
+    @Override
+    public void someoneQuit(String someoneUsername) {
+
+    }
+
+    @Override
+    public void matchFinished(List<LeaderboardEntry> ranking) {
+
+    }
+
+    @Override
+    public void someoneSentBroadcastText(String someoneUsername, String text) {
+
+    }
+
+    @Override
+    public void someoneSentPrivateText(String someoneUsername, String text) {
 
     }
 }

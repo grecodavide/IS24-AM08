@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.StackPane?>
+
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<Tab xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+    <StackPane prefHeight="150.0" prefWidth="200.0">
+        <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="10.0"/>
+        </padding>
+        <Label alignment="BOTTOM_CENTER" style="&#10;" text="Points: 10" textAlignment="CENTER"
+               textFill="#9f9f9f" StackPane.alignment="TOP_LEFT">
+            <font>
+                <Font size="25.0"/>
+            </font>
+        </Label>
+        <Label alignment="CENTER" style="&#10;" text="10:10" textAlignment="CENTER" textFill="#9f9f9f"
+               StackPane.alignment="TOP_CENTER">
+            <font>
+                <Font size="25.0"/>
+            </font>
+        </Label>
+        <ScrollPane StackPane.alignment="CENTER" hvalue="0.5" vvalue="0.5" styleClass="scrollboard">
+            <Pane fx:id="playerboard" styleClass="playerboard" prefWidth="7960" prefHeight="5280"></Pane>
+        </ScrollPane>
+        <HBox alignment="BOTTOM_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+              minWidth="-Infinity" spacing="15.0" StackPane.alignment="BOTTOM_CENTER" >
+            <children>
+                <Pane fx:id="hand_card_1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                      minWidth="-Infinity" prefHeight="132.0" prefWidth="199.0"
+                      style="-fx-background-color: #888;"/>
+                <Pane fx:id="hand_card_2" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                      minWidth="-Infinity" prefHeight="132.0" prefWidth="199.0"
+                      style="-fx-background-color: #888;"/>
+                <Pane fx:id="hand_card_3" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                      minWidth="-Infinity" prefHeight="132.0" prefWidth="199.0"
+                      style="-fx-background-color: #888;"/>
+            </children>
+            <StackPane.margin>
+                <Insets>
+                    <bottom>40</bottom>
+                </Insets>
+            </StackPane.margin>
+        </HBox>
+    </StackPane>
+</Tab>

@@ -7,6 +7,7 @@
     -fx-accent-fg-color: #2c2119;
     -fx-third-bg-color: #f6f3e4;
 }
+
 #pane{
     -fx-background-image: url("../images/background.png");
     -fx-background-repeat: repeat;

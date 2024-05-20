@@ -1,37 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!--
-  Copyright (c) 2015, 2019, Gluon and/or its affiliates.
-  All rights reserved. Use is subject to license terms.
-
-  This file is available and licensed under the following licence:
-
-  Redistribution and use in source and binary forms, with or without
-  modification, are permitted provided that the following conditions
-  are met:
-
-  - Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-  - Redistributions in binary form must reproduce the above copyright
-    notice, this list of conditions and the following disclaimer in
-    the documentation and/or other materials provided with the distribution.
-  - Neither the name of Oracle Corporation nor the names of its
-    contributors may be used to endorse or promote products derived
-    from this software without specific prior written permission.
-
-  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
--->
-
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Tab?>
@@ -46,11 +14,12 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
+<?import javafx.scene.control.ScrollPane?>
 <VBox alignment="TOP_CENTER" maxHeight="1080.0" maxWidth="1920.0" minHeight="1080.0" minWidth="1920.0" prefHeight="1080.0" prefWidth="1920.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
   <children>
-    <AnchorPane maxHeight="-1.0" maxWidth="-1.0" prefHeight="372.0" prefWidth="707.0" VBox.vgrow="ALWAYS">
+    <AnchorPane id="pane" maxHeight="-1.0" maxWidth="-1.0" prefHeight="372.0" prefWidth="707.0" VBox.vgrow="ALWAYS">
       <children>
-            <TabPane layoutX="-56.0" layoutY="27.0" prefHeight="900.0" prefWidth="1600.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <TabPane id="MatchTabs" layoutX="-56.0" layoutY="27.0" prefHeight="900.0" prefWidth="1600.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
               <tabs>
                   <Tab text="Table">
                      <content>
@@ -92,81 +61,6 @@
                         </StackPane>
                      </content>
                   </Tab>
-                <Tab text="Me (Player1)">
-                  <content>
-                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                           <children>
-                              <Label alignment="BOTTOM_CENTER" layoutX="14.0" layoutY="14.0" style="&#10;" text="Points: 10" textAlignment="CENTER" textFill="#9f9f9f" wrapText="false">
-                                 <font>
-                                    <Font size="25.0" />
-                                 </font>
-                              </Label>
-                          <Label alignment="CENTER" layoutX="768.0" layoutY="14.0" style="&#10;" text="10:10" textAlignment="CENTER" textFill="#9f9f9f" wrapText="false">
-                            <font>
-                              <Font size="25.0" />
-                            </font>
-                          </Label>
-                              <Pane layoutX="1648.0" layoutY="841.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="132.0" prefWidth="199.0" style="-fx-background-color: #888;" AnchorPane.bottomAnchor="25.0" AnchorPane.rightAnchor="25.0" />
-                              <HBox layoutX="569.0" layoutY="760.0" AnchorPane.bottomAnchor="25.0">
-                                 <children>
-                                    <Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="132.0" prefWidth="199.0" style="-fx-background-color: #888;">
-                                       <HBox.margin>
-                                          <Insets left="10.0" />
-                                       </HBox.margin>
-                                    </Pane>
-                                    <Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="132.0" prefWidth="199.0" style="-fx-background-color: #888;">
-                                       <HBox.margin>
-                                          <Insets left="10.0" />
-                                       </HBox.margin>
-                                    </Pane>
-                                    <Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="132.0" prefWidth="199.0" style="-fx-background-color: #888;">
-                                       <HBox.margin>
-                                          <Insets left="10.0" />
-                                       </HBox.margin>
-                                    </Pane>
-                                 </children>
-                              </HBox>
-                           </children>
-                        </AnchorPane>
-                  </content>
-                     <content>
-                        <StackPane prefHeight="150.0" prefWidth="200.0">
-                           <children>
-                              <Label alignment="BOTTOM_CENTER" style="&#10;" text="Points: 10" textAlignment="CENTER" textFill="#9f9f9f" wrapText="false" StackPane.alignment="TOP_LEFT">
-                                 <font>
-                                    <Font size="25.0" />
-                                 </font>
-                              </Label>
-                              <Label alignment="CENTER" style="&#10;" text="10:10" textAlignment="CENTER" textFill="#9f9f9f" wrapText="false" StackPane.alignment="TOP_CENTER">
-                                 <font>
-                                    <Font size="25.0" />
-                                 </font>
-                              </Label>
-                              <Pane fx:id="secret_objective" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="132.0" prefWidth="199.0" style="-fx-background-color: #888;" StackPane.alignment="BOTTOM_RIGHT">
-                                 <StackPane.margin>
-                                    <Insets />
-                                 </StackPane.margin>
-                              </Pane>
-                              <HBox alignment="BOTTOM_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" spacing="15.0" StackPane.alignment="BOTTOM_CENTER">
-                                 <children>
-                                    <Pane fx:id="hand_card_1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="132.0" prefWidth="199.0" style="-fx-background-color: #888;" />
-                                    <Pane fx:id="hand_card_2" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="132.0" prefWidth="199.0" style="-fx-background-color: #888;" />
-                                    <Pane fx:id="hand_card_3" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="132.0" prefWidth="199.0" style="-fx-background-color: #888;" />
-                                 </children>
-                                 <StackPane.margin>
-                                    <Insets />
-                                 </StackPane.margin>
-                              </HBox>
-                           </children>
-                           <padding>
-                              <Insets bottom="20.0" left="20.0" right="20.0" top="10.0" />
-                           </padding>
-                        </StackPane>
-                     </content>
-                </Tab>
-                <Tab text="Player 2" />
-                  <Tab text="Player3" />
-                  <Tab text="Player4" />
               </tabs>
             </TabPane>
       </children>

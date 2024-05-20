@@ -9,43 +9,46 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.image.Image?>
-<VBox>
-    <children>
-        <VBox VBox.vgrow="always" alignment="CENTER" maxHeight="-Infinity">
+<?import javafx.scene.layout.StackPane?>
 
+<StackPane id="pane">
+    <children>
+        <VBox alignment="CENTER">
             <children>
-                <VBox spacing="10" alignment="CENTER" styleClass="connection-box" fillWidth="false" maxWidth="-Infinity">
-                    <ImageView preserveRatio="true" fitWidth="350">
-                        <Image
-                                url="@../images/codex-logo.png"
-                                backgroundLoading="true"
-                        />
-                    </ImageView>
-                    <VBox>
-                        <Label styleClass="input-label" text="Connect to a server"/>
-                        <TextField styleClass="input" text="127.0.0.1" maxWidth="500" />
-                    </VBox>
-                    <VBox>
-                        <Label styleClass="input-label" text="Username"/>
-                        <TextField styleClass="input" text="CodexPlayer" maxWidth="500" />
-                    </VBox>
-                    <VBox>
-                        <Label styleClass="input-label" text="Port"></Label>
-                        <TextField styleClass="input" text="42069" maxWidth="500"/>
-                    </VBox>
-                    <VBox>
-                    <Label styleClass="input-label" text="Connection type" />
-                        <HBox spacing="10" alignment="CENTER">
-                            <RadioButton text="RMI" styleClass="radio"></RadioButton>
-                            <RadioButton text="TCP" styleClass="radio"></RadioButton>
-                        </HBox>
-                    </VBox>
-                    <Button text="Connect" styleClass="button" />
-                    <padding>
-                        <Insets top="20" right="20" bottom="20" left="20" />
-                    </padding>
+                <VBox VBox.vgrow="always" alignment="CENTER" maxHeight="-Infinity">
+
+                    <children>
+                        <VBox spacing="10" alignment="CENTER" styleClass="connection-box" fillWidth="false"
+                              maxWidth="-Infinity">
+                            <ImageView preserveRatio="true" fitWidth="350">
+                                <Image
+                                        url="@../images/codex-logo.png"
+                                        backgroundLoading="true"
+                                />
+                            </ImageView>
+                            <VBox>
+                                <Label styleClass="input-label" text="Connect to a server"/>
+                                <TextField styleClass="input" text="127.0.0.1" maxWidth="500"/>
+                            </VBox>
+                            <VBox>
+                                <Label styleClass="input-label" text="Port"></Label>
+                                <TextField styleClass="input" text="42069" maxWidth="500"/>
+                            </VBox>
+                            <VBox>
+                                <Label styleClass="input-label" text="Connection type"/>
+                                <HBox spacing="10" alignment="CENTER">
+                                    <RadioButton id="RMI" text="RMI" styleClass="radio"></RadioButton>
+                                    <RadioButton id="TCP" text="TCP" styleClass="radio"></RadioButton>
+                                </HBox>
+                            </VBox>
+                            <Button id="connect-button" text="Connect" styleClass="button"/>
+                            <padding>
+                                <Insets top="20" right="20" bottom="20" left="20"/>
+                            </padding>
+                        </VBox>
+                    </children>
                 </VBox>
             </children>
         </VBox>
     </children>
-</VBox>
+</StackPane>

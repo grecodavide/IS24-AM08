@@ -15,6 +15,11 @@ public class NetworkViewTCP extends NetworkView {
     }
 
     @Override
+    public void showError(String cause) {
+
+    }
+
+    @Override
     public void giveLobbyInfo(List<String> playersUsernames) throws RemoteException {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'giveLobbyInfo'");
