@@ -12,10 +12,7 @@ import it.polimi.ingsw.controllers.PlayerControllerRMI;
 import it.polimi.ingsw.exceptions.AlreadyUsedUsernameException;
 import it.polimi.ingsw.exceptions.ChosenMatchException;
 import it.polimi.ingsw.exceptions.WrongStateException;
-import it.polimi.ingsw.gamemodel.InitialCard;
 import it.polimi.ingsw.gamemodel.Match;
-import it.polimi.ingsw.gamemodel.Objective;
-import it.polimi.ingsw.gamemodel.PlayableCard;
 import it.polimi.ingsw.network.tcp.TCPServer;
 import it.polimi.ingsw.utils.DeckCreator;
 
@@ -24,23 +21,6 @@ public class Server extends UnicastRemoteObject implements ServerRMIInterface {
 
     private final int portRMI;
     private final int portTCP;
-
-    // Cards to be used in matches
-    private static final Map<Integer, Objective> objectives = new HashMap<>();
-    private static final Map<Integer, PlayableCard> playableCards = new HashMap<>();
-    private static final Map<Integer, InitialCard> initialCards = new HashMap<>();
-
-    public static Objective getObjective(Integer id) {
-        return Server.objectives.get(id);
-    }
-
-    public static PlayableCard getPlayableCard(Integer id) {
-        return Server.playableCards.get(id);
-    }
-
-    public static InitialCard getiInitialCard(Integer id) {
-        return Server.initialCards.get(id);
-    }
 
     public Server(int portRMI, int portTCP) throws RemoteException {
         super();
@@ -113,8 +93,10 @@ public class Server extends UnicastRemoteObject implements ServerRMIInterface {
     }
 
     public static void main(String[] args) throws RemoteException {
-        int portRMI = Integer.parseInt(args[0]);
-        int portTCP = Integer.parseInt(args[1]);
+        // int portRMI = Integer.parseInt(args[0]);
+        // int portTCP = Integer.parseInt(args[1]);
+        int portRMI = 2222;
+        int portTCP = 9999;
 
         Server server = new Server(portRMI, portTCP);
 

@@ -20,7 +20,7 @@ public abstract class NetworkView implements RemoteViewInterface {
         this.graphicalInterface = graphicalViewInterface;
     }
 
-    public abstract void showError(String cause);
+    public abstract void showError(String cause, Exception Exception);
     
     /**
      * Asks the server to send a list of {@link AvailableMatch}
