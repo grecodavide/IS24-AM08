@@ -111,6 +111,13 @@ public class TuiPrinter {
         System.out.println(this.setPosition((termCols - len) / 2, termRows - infoLineOffset) + out + "\033[0m");
     }
 
+    private int getDimStart(int max, int dim) {
+        int left = max - dim; // available space
+        if (left % 2 == 1)
+            left--;
+        return left / 2; // starting coord
+    }
+
     private void printWelcome(int x, int y) {
         List<String> welcomeString = new ArrayList<>();
 
@@ -191,12 +198,56 @@ public class TuiPrinter {
             System.out.println(titleString.get(i));
     }
 
-    private int getDimStart(int max, int dim) {
-        int left = max - dim; // available space
-        if (left % 2 == 1)
-            left--;
-        return left / 2; // starting coord
+    private void printYouWinScreen(int x, int y){
+        List<String> winString = new ArrayList<>();
+
+        String prefix = setPosition(x, y);
+        winString.add(prefix + " '7MMF'   '7MF''7MMF' .g8'''bgd MMP''MM''YMM   .g8''8q. '7MM'''Mq.'YMM'   'MM' ");
+        prefix = setPosition(x, ++y);
+        winString.add(prefix + "   'MA     ,V    MM .dP'     'M P'   MM   '7 .dP'    'YM. MM   'MM. VMA   ,V   ");
+        prefix = setPosition(x, ++y);
+        winString.add(prefix + "    VM:   ,V     MM dM'       '      MM      dM'      'MM MM   ,M9   VMA ,V    ");
+        prefix = setPosition(x, ++y);
+        winString.add(prefix + "     MM.  M'     MM MM               MM      MM        MM MMmmdM9     VMMP     ");
+        prefix = setPosition(x, ++y);
+        winString.add(prefix + "     'MM A'      MM MM.              MM      MM.      ,MP MM  YM.      MM      ");
+        prefix = setPosition(x, ++y);
+        winString.add(prefix + "      :MM;       MM 'Mb.     ,'      MM      'Mb.    ,dP' MM   'Mb.    MM      ");
+        prefix = setPosition(x, ++y);
+        winString.add(prefix + "       VF      .JMML. ''bmmmd'     .JMML.      ''bmmd'' .JMML. .JMM. .JMML.    ");
+
+        for (int i = 0; i < winString.size(); i++)
+            System.out.println(winString.get(i));
     }
+
+    private void printYouLoseScreen(int x, int y){
+        List<String> loseString = new ArrayList<>();
+
+        String prefix = setPosition(x, y);
+        loseString.add(prefix + " @@@ @@@   @@@@@@   @@@  @@@     @@@        @@@@@@    @@@@@@   @@@@@@@ ");
+        prefix = setPosition(x, ++y);
+        loseString.add(prefix + " @@@ @@@  @@@@@@@@  @@@  @@@     @@@       @@@@@@@@  @@@@@@@   @@@@@@@ ");
+        prefix = setPosition(x, ++y);
+        loseString.add(prefix + " @@ì ì@@  @@ì  @@@  @@ì  @@@     @@ì       @@ì  @@@  ì@@       @@ì     ");
+        prefix = setPosition(x, ++y);
+        loseString.add(prefix + " ì@ì @ìì  ì@ì  @ì@  ì@ì  @ì@     ì@ì       ì@ì  @ì@  ì@ì       ì@ì     ");
+        prefix = setPosition(x, ++y);
+        loseString.add(prefix + "  ì@ì@ì   @ì@  ì@ì  @ì@  ì@ì     @ìì       @ì@  ì@ì  ìì@@ìì    @ììì:ì  ");
+        prefix = setPosition(x, ++y);
+        loseString.add(prefix + "   @ììì   ì@ì  ììì  ì@ì  ììì     ììì       ì@ì  ììì   ìì@ììì   ììììì:  ");
+        prefix = setPosition(x, ++y);
+        loseString.add(prefix + "   ìì:    ìì:  ììì  ìì:  ììì     ìì:       ìì:  ììì       ì:ì  ìì:     ");
+        prefix = setPosition(x, ++y);
+        loseString.add(prefix + "   :ì:    :ì:  ì:ì  :ì:  ì:ì      :ì:      :ì:  ì:ì      ì:ì   :ì:     ");
+        prefix = setPosition(x, ++y);
+        loseString.add(prefix + "    ::    ::::: ::  ::::: ::     :: ::::   ::::: ::  :::: ::   :: :::: ");
+        prefix = setPosition(x, ++y);
+        loseString.add(prefix + "    :      : :  :    : :  :      : :: : :   : :  :   :: : :    : :: :: ");
+
+        for (int i = 0; i < loseString.size(); i++)
+            System.out.println(loseString.get(i));
+    }
+
 
     // -------------- //
     // PUBLIC METHODS //
@@ -381,9 +432,9 @@ public class TuiPrinter {
      */
     public void printWelcomeScreen() {
         int maxHeight = this.getHeight() - this.infoLineOffset;
-        int welcomeHeight = 5, welcomeWidth = 90; // width must be even (pari)
+        int welcomeHeight = 5, welcomeWidth = 88+2; // width must be even (pari)
         int spaceBetween = 3;
-        int titleHeight = 18, titleWidth = 198; // width must be even (pari)
+        int titleHeight = 18, titleWidth = 196+2; // width must be even (pari)
 
         int welcomeStartY = getDimStart(this.getHeight(), welcomeHeight + spaceBetween + titleHeight);
         int titleStartY = welcomeStartY + welcomeHeight + spaceBetween;
@@ -395,11 +446,37 @@ public class TuiPrinter {
     }
 
     /**
+     * Prints the end screen (win/lose) in the middle of the tui view
+     * @param isVictorious whether the player won or not
+     */
+    public void printEndScreen(Boolean isVictorious){
+        int maxHeight = this.getHeight() - this.infoLineOffset;
+        int maxWidth = this.getWidth() - 2;
+
+        int msgHeight, msgWidth;
+        int x, y;
+        if (isVictorious){
+            msgHeight = 7;
+            msgWidth = 78+2; // width must be even (pari)
+            x = getDimStart(maxWidth, msgWidth);
+            y = getDimStart(maxHeight, msgHeight);
+            printYouWinScreen(x, y);
+
+        } else {
+            msgHeight = 10;
+            msgWidth = 70+2; // width must be even (pari)
+            x = getDimStart(maxWidth, msgWidth);
+            y = getDimStart(maxHeight, msgHeight);
+            printYouLoseScreen(x, y);
+
+        }
+    }
+
+    /**
      * Prints the specified initial card front and back in the middle of the screen
      * 
      * @param initialCard initial card to print
      * @param heightOffset offset lines from the top
-     * @throws CardException if needed
      */
     public void printInitialSideBySide(InitialCard initialCard, int heightOffset) {
 
@@ -445,7 +522,10 @@ public class TuiPrinter {
 //        pippo.printWelcomeScreen();
 //        pippo.printInitialSideBySide(initialCard, 0);
 //        pippo.printCommonObjectives(visibleObj, 0);
-        pippo.printObjectives("hello", Color.RED, objective1, visibleObj);
+//        pippo.printObjectives("hello", Color.RED, objective1, visibleObj);
+        pippo.printEndScreen(true);
+//        pippo.printEndScreen(false);
+
     }
 
 }
