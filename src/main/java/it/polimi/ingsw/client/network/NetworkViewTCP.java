@@ -173,4 +173,9 @@ public class NetworkViewTCP extends NetworkView {
     public void drawCard(DrawSource source) {
         this.sendMessage(new DrawCardMessage(this.username, source));
     }
+
+    @Override
+    public void showError(String cause) {
+        this.graphicalInterface.showError(cause);
+    }
 }

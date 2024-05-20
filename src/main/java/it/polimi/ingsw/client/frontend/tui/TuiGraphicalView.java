@@ -22,12 +22,16 @@ public class TuiGraphicalView extends GraphicalView {
     private TuiPrinter printer; // init this, call getPlaced() and pass it to printer with foreach in someonePlayedCard to test
     private boolean isConnected;
     private String username;
+    private boolean matchCreator;
     private List<String> chat; // when someoneSentBroadcast/PrivateText, add to this. Then simply show when "chat" command is sent
     private final Scanner scanner;
+    private boolean receivedError;
 
     public TuiGraphicalView() throws IOException {
         this.printer = new TuiPrinter();
-        this.isConnected = true;
+        this.isConnected = false;
+        this.receivedError = false;
+        this.matchCreator = false;
         this.chat = new ArrayList<>();
         this.scanner = new Scanner(System.in);
 
@@ -35,7 +39,35 @@ public class TuiGraphicalView extends GraphicalView {
         this.printer.clearTerminal();
         this.printer.printPrompt("Choose Username:");
         this.setUsername(scanner.nextLine());
-        this.chooseMatch(); // TODO: if fail, ask again for username and chooseMatch
+
+        // do it once, and if it fails then do it over again
+        this.chooseMatch("Type a number to join a match, or a name followed by the max players to create one");
+        while (!isConnected) {
+            if (this.receivedError) {
+                this.receivedError = false;
+                this.handleMatchError();
+            } else {
+                this.printer.printPrompt("Waiting for response...");
+            }
+        }
+
+        this.printer.clearTerminal();
+        this.printer.printWelcomeScreen();
+    }
+
+
+    private void handleMatchError() {
+        String userIn;
+        if (this.matchCreator) {
+            this.chooseMatch("Could not create match. Try with another name! ");
+        } else {
+            this.printer.printPrompt("Could not join match. Do you want to change username? ");
+            userIn = this.askInput();
+            if (!userIn.equals("")) {
+                this.setUsername(userIn);
+            }
+            this.chooseMatch("Type a number to join a match, or a name followed by the max players to create one");
+        }
     }
 
 
@@ -68,19 +100,16 @@ public class TuiGraphicalView extends GraphicalView {
     }
 
     private boolean createMatch(String userIn) {
-        String matchName = userIn.substring(0, userIn.indexOf(" "));
-        if (matchName.length() == userIn.length()) {
-            this.printer.printMessage("No max players specified");
-        } else {
-            Integer maxPlayers;
-            try {
-                maxPlayers = Integer.valueOf(userIn.substring(matchName.length() + 1)); // mhh
-                this.networkView.createMatch(matchName, maxPlayers);
-                return true;
-            } catch (NumberFormatException ne) {
-                this.printer.printMessage("Not a number for max players!");
-            }
+        this.matchCreator = true;
+        try {
+            String matchName = userIn.substring(0, userIn.indexOf(" "));
+            Integer maxPlayers = Integer.valueOf(userIn.substring(matchName.length() + 1)); // mhh
+            this.networkView.createMatch(matchName, maxPlayers);
+            return true;
+        } catch (NumberFormatException | StringIndexOutOfBoundsException e) {
+            this.printer.printMessage("No max players specified!");
         }
+
         return false;
     }
 
@@ -92,10 +121,10 @@ public class TuiGraphicalView extends GraphicalView {
         Integer port;
         NetworkView networkView = null;
 
+        this.printer.clearTerminal();
+        this.printer.printPrompt("What connection type you want to establish?");
         while (!connectionSet) {
-            this.printer.clearTerminal();
-            this.printer.printPrompt("What connection type you want to establish?");
-            userIn = this.scanner.nextLine();
+            userIn = this.askInput();
             this.printer.clearTerminal();
             try {
                 switch (userIn) {
@@ -109,13 +138,14 @@ public class TuiGraphicalView extends GraphicalView {
 
                     case "2", "RMI", "rmi", "remote":
                         serverIP = this.askIPAddress();
+                        this.printer.clearTerminal();
                         port = this.askPort();
-                        // networkView = ...
+                        // networkView = new NetworkViewRMI(this, new PlayerControllerRMI(this.username, match));
                         connectionSet = true;
                         break;
 
                     default:
-                        this.printer.printMessage("Not a valid connection type!");
+                        this.printer.printPrompt("Not a valid connection type! Specify a connection type.");
                         break;
                 }
 
@@ -129,30 +159,38 @@ public class TuiGraphicalView extends GraphicalView {
         return networkView;
     }
 
-    private void chooseMatch() {
+    private void chooseMatch(String prompt) {
         this.printer.printMessage("Waiting for matches..");
-        while (this.availableMatches == null) {
-        }
+        while (this.availableMatches == null);
+
         this.printer.clearTerminal();
         List<String> printableMatches = new ArrayList<>();
-        this.availableMatches
-                .forEach((match -> printableMatches.add(match.name() + "(" + match.currentPlayers() + "/" + match.maxPlayers() + ")")));
+        this.availableMatches.forEach(match -> {
+            String joinable;
+            if (match.currentPlayers() < match.maxPlayers())
+                joinable = "JOINABLE";
+            else
+                joinable = "NOT JOINABLE";
+
+            printableMatches.add(match.name() + "(" + match.currentPlayers() + "/" + match.maxPlayers() + ": " + joinable + ")");
+        });
 
         String userIn;
+        boolean shouldLoop = true;
 
         if (this.availableMatches.size() == 0) {
-            this.printer.printMessage("No matches available. Create one by specifying its name and max number of players!");
-            userIn = this.scanner.nextLine();
-            this.printer.clearTerminal();
-            this.createMatch(userIn);
-        } else {
-            this.printer.printMessage(printableMatches);
-            this.printer.printPrompt("Specify a name to create a match, or a number to join one, followed by the desired max players.");
-            userIn = this.scanner.nextLine();
-            this.printer.clearTerminal();
-            boolean shouldLoop = true;
-
             while (shouldLoop) {
+                prompt = "No matches available. Create one by specifying its name and max number of players!";
+                this.printer.printMessage(prompt);
+                userIn = this.askInput();
+                shouldLoop = !this.createMatch(userIn);
+            }
+        } else {
+            while (shouldLoop) {
+                this.printer.printMessage(printableMatches);
+                this.printer.printPrompt(prompt);
+                userIn = this.askInput();
+
                 try {
                     Integer matchToJoin = Integer.valueOf(userIn) - 1;
                     this.networkView.joinMatch(this.availableMatches.get(matchToJoin).name());
@@ -161,15 +199,19 @@ public class TuiGraphicalView extends GraphicalView {
                     this.createMatch(userIn);
                     shouldLoop = false;
                 }
-
             }
         }
+    }
+
+    private String askInput() {
+        String userIn = this.scanner.nextLine();
+        this.printer.clearTerminal();
+        return userIn;
     }
 
     ///////////////
     // Game flow //
     ///////////////
-
     @Override
     public void changePlayer() {
         this.printer.printPlayerBoard(this.currentPlayer, this.clientBoards.get(this.currentPlayer));
@@ -183,24 +225,22 @@ public class TuiGraphicalView extends GraphicalView {
 
     @Override
     public void giveInitialCard(InitialCard initialCard) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'giveInitialCard'");
+        this.printer.printPrompt("Choose initial objective:");
     }
 
     @Override
     public void giveSecretObjectives(Pair<Objective, Objective> secretObjectives) {
-        // this.printer.printPrompt("Choose secret objective:");
+        this.printer.printPrompt("Choose secret objective:");
     }
 
     @Override
     public void someoneDrewSecretObjective(String someoneUsername) {
-        // this.printer.printPrompt(someoneUsername + " is choosing secret objectives");
+        this.printer.printPrompt(someoneUsername + " is choosing secret objectives");
     }
 
     @Override
     public void someoneDrewInitialCard(String someoneUsername, InitialCard card) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'someoneDrewInitialCard'");
+        this.printer.printPrompt(someoneUsername + " is drawing initial");
     }
 
     @Override
@@ -224,8 +264,9 @@ public class TuiGraphicalView extends GraphicalView {
 
     @Override
     public void someoneJoined(String someoneUsername) {
+        this.printer.clearTerminal();
         if (someoneUsername.equals(this.username)) {
-            this.printer.printMessage("Correctly joined the match!");
+            this.isConnected = true;
         } else {
             this.printer.printMessage(someoneUsername + " joined the match!");
         }
@@ -260,6 +301,11 @@ public class TuiGraphicalView extends GraphicalView {
         this.printer.printPlayerBoard(this.currentPlayer, this.clientBoards.get(this.currentPlayer));
     }
 
+    @Override
+    public void showError(String cause) {
+        this.receivedError = true;
+        // this.printer.printMessage("ERROR: " + cause);
+    }
 
     // will start when someone tries to start a TUI client
     public static void main(String[] args) throws Exception {
@@ -268,6 +314,4 @@ public class TuiGraphicalView extends GraphicalView {
             // tmp: dont close immediately
         }
     }
-
-
 }

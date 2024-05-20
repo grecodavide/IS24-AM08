@@ -116,7 +116,7 @@ public class ClientListener extends Thread {
                             break;
                         case JoinMatchMessage joinMatchMessage:
                             match = this.server.getMatch(joinMatchMessage.getMatchName());
-
+                            username = joinMatchMessage.getUsername();
                             shouldLoop = false;
                             break;
                         default:

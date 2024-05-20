@@ -172,4 +172,10 @@ public class NetworkViewRMI extends NetworkView {
         throw new UnsupportedOperationException("Unimplemented method 'drawCard'");
     }
 
+    @Override
+    public void showError(String cause) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'showError'");
+    }
+
 }

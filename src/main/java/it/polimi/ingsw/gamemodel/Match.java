@@ -1,9 +1,8 @@
 package it.polimi.ingsw.gamemodel;
 
+import java.util.*;
 import it.polimi.ingsw.exceptions.*;
 import it.polimi.ingsw.utils.Pair;
-
-import java.util.*;
 
 /**
  * Represents the match played by {@link Player} instances, therefore implements a slice of game logic

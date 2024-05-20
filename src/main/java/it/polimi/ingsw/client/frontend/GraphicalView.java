@@ -142,18 +142,15 @@ public abstract class GraphicalView {
                 case Color.YELLOW:
                     this.players.set(3, username);
                     break;
-
                 default:
                     break;
             }
         }
         
-
         this.currentPlayer = this.players.get(0);
 
         playersHands.forEach((username, hand) -> {
             this.clientBoards.put( username, new ClientBoard(playersUsernamesAndPawns.get(username), hand));
-            // this.clientBoards.get(username)
         });
 
         this.visiblePlayableCards = visiblePlayableCards;
