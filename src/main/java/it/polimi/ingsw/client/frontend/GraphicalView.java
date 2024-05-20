@@ -23,6 +23,14 @@ public abstract class GraphicalView {
 
     public boolean isLastTurn() { return this.lastTurn; }
 
+    
+    /**
+     * Displayes the user an error, when received
+     * 
+     * @param cause What went wrong
+     */
+    public abstract void showError(String cause);
+
     /**
      * Sets the network interface to communicate
      *
