@@ -10,8 +10,8 @@ import it.polimi.ingsw.utils.LeaderboardEntry;
 import it.polimi.ingsw.utils.Pair;
 
 public class NetworkViewTCP extends NetworkView {
-    public NetworkViewTCP(GraphicalView graphicalView) {
-        super(graphicalView);
+    public NetworkViewTCP(GraphicalView graphicalView, String ipAddress, int port) {
+        super(graphicalView, ipAddress, port);
     }
 
     @Override

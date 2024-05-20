@@ -9,16 +9,14 @@ import it.polimi.ingsw.gamemodel.Match;
 import it.polimi.ingsw.gamemodel.Objective;
 import it.polimi.ingsw.gamemodel.PlayableCard;
 import it.polimi.ingsw.network.tcp.TCPServer;
+import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.DeckCreator;
 
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 public class Server extends UnicastRemoteObject implements ServerRMIInterface {
     private final Map<String, Match> matches;
@@ -39,7 +37,7 @@ public class Server extends UnicastRemoteObject implements ServerRMIInterface {
         return Server.playableCards.get(id);
     }
 
-    public static InitialCard getiInitialCard(Integer id) {
+    public static InitialCard getInitialCard(Integer id) {
         return Server.initialCards.get(id);
     }
 
@@ -53,8 +51,22 @@ public class Server extends UnicastRemoteObject implements ServerRMIInterface {
     }
 
     @Override
-    public List<String> getJoinableMatches() {
-        return matches.keySet().stream().filter(name -> !matches.get(name).isFull()).toList();
+    public List<AvailableMatch> getJoinableMatches() {
+        // List of names of matches that are not full (then joinable)
+        List<String> joinableMatches = matches.keySet().stream()
+                                        .filter(name -> !matches.get(name).isFull())
+                                        .toList();
+        List<AvailableMatch> result = new ArrayList<>();
+
+        for (String name : joinableMatches) {
+            Match match = matches.get(name);
+            int maxPlayers = match.getMaxPlayers();
+            int currentPlayers = match.getPlayers().size();
+
+            result.add(new AvailableMatch(name, maxPlayers, currentPlayers));
+        }
+
+        return result;
     }
 
     @Override

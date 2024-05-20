@@ -4,6 +4,7 @@ import it.polimi.ingsw.controllers.PlayerControllerRMI;
 import it.polimi.ingsw.exceptions.AlreadyUsedUsernameException;
 import it.polimi.ingsw.exceptions.ChosenMatchException;
 import it.polimi.ingsw.exceptions.WrongStateException;
+import it.polimi.ingsw.utils.AvailableMatch;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -17,12 +18,12 @@ import java.util.List;
  */
 public interface ServerRMIInterface extends Remote {
     /**
-     * Returns the unique names of the available matches (those not full yet).
+     * Returns the available matches (those not full yet) as {@link AvailableMatch} instances.
      *
      * @return The list of Match which are not full yet.
      * @throws RemoteException If the remote server is considered not to be reachable any more and cannot return as usual
      */
-    List<String> getJoinableMatches() throws RemoteException;
+    List<AvailableMatch> getJoinableMatches() throws RemoteException;
 
     /**
      * Lets the calling view join on a match with the given player username, if possible; gives back to the client
