@@ -2,6 +2,8 @@ package it.polimi.ingsw.client.frontend.tui;
 
 import java.io.IOException;
 import java.util.*;
+
+import it.polimi.ingsw.exceptions.InvalidResourceException;
 import org.jline.terminal.Terminal;
 import it.polimi.ingsw.client.frontend.ClientBoard;
 import it.polimi.ingsw.client.frontend.ShownCard;
@@ -309,13 +311,35 @@ public class TuiPrinter {
         last = (termCols - cardCols) / 2;
         System.out.println(parser.parseObjective(secret, new Pair<Integer, Integer>(last, 2)) + "\033[0m");
 
-        username = "Common objectives:";
-        System.out.println(this.setPosition((termCols - username.length()) / 2, 3 + cardRows) + username);
+        int verticalSpaceAlreadyUsedForSecretObjective = (7) + 1 + 1;
+        printCommonObjectives(visibles, verticalSpaceAlreadyUsedForSecretObjective);
 
-        last = (termCols - (visiblesSize) * (cardCols)) / 2 - spaces * (visiblesSize - 1) / 2;
+    }
 
-        System.out.println(parser.parseObjective(visibles.first(), new Pair<Integer, Integer>(last, 4 + cardRows)) + "\033[0m");
-        System.out.println(parser.parseObjective(visibles.second(), new Pair<Integer, Integer>(last + spaces, 4 + cardRows)) + "\033[0m");
+    /**
+     * Prints the objectives common for all players
+     * @param visibleObjectives pair of common objectives
+     * @param heightOffset offset lines from the top
+     */
+    public void printCommonObjectives(Pair<Objective, Objective> visibleObjectives, int heightOffset){
+        int yOffset = (heightOffset <= 0) ? 1 : heightOffset;
+
+        // common objectives STRING
+        String message = "Common objectives:";
+        int xCoord = getDimStart(this.terminal.getWidth(), message.length());
+        message = setPosition(xCoord, yOffset++) + message;
+        System.out.println(message);
+
+        // common objectives CARDS
+        int cardWidth = 18, spaceBetweenSides = 4;
+        xCoord = getDimStart(this.getWidth(), (2 * cardWidth) + spaceBetweenSides);
+
+        Pair<Integer, Integer> obj1Coord = new Pair<>(xCoord, yOffset);
+        Pair<Integer, Integer> obj2Coord = new Pair<>(xCoord + cardWidth + spaceBetweenSides, yOffset);
+        String obj1 = this.parser.parseObjective(visibleObjectives.first(), obj1Coord);
+        String obj2 = this.parser.parseObjective(visibleObjectives.second(), obj2Coord);
+
+        System.out.println(obj1 + obj2);
     }
 
     /**
@@ -375,7 +399,7 @@ public class TuiPrinter {
      * 
      * @param initialCard initial card to print
      * @param heightOffset offset lines from the top
-     * @throws CardException
+     * @throws CardException if needed
      */
     public void printInitialSideBySide(InitialCard initialCard, int heightOffset) {
 
@@ -390,8 +414,7 @@ public class TuiPrinter {
         try {
             faceup = this.parser.parseCard(initialCard, faceupCoord, null, true);
             facedown = this.parser.parseCard(initialCard, facedownCoord, null, false);
-            System.out.println(faceup);
-            System.out.println(facedown);
+            System.out.println(faceup + facedown);
         } catch (CardException e) {
             // TODO: handle exception
         }
@@ -400,18 +423,29 @@ public class TuiPrinter {
     }
 
     // TO BE DELETED -- HERE just for easy TESTING
-    public static void main(String[] args) throws IOException, CardException {
+    public static void main(String[] args) throws IOException, CardException, InvalidResourceException {
         TuiPrinter pippo = new TuiPrinter();
         pippo.printPrompt("AAAAAAAAAAAAAAAAAAAAAAAA");
-        // pippo.printWelcomeScreen();
+
+
 
         Set<Symbol> set = new HashSet<>();
         set.add(Symbol.FEATHER);
         InitialCard initialCard =
                 new InitialCard(new CardFace(Symbol.FUNGUS, Symbol.ANIMAL, Symbol.PLANT, Symbol.INSECT, Collections.emptySet()),
                         new CardFace(Symbol.FULL_CORNER, Symbol.EMPTY_CORNER, Symbol.FULL_CORNER, Symbol.EMPTY_CORNER, set));
-        pippo.printInitialSideBySide(initialCard, 0);
 
+        Objective objective1 = new Objective(2, new QuantityRequirement(Map.of(Symbol.INSECT, 3)));
+        Objective objective2 = new Objective(2, new PositionRequirement(Map.of(
+                new Pair<>(0, 0), Symbol.ANIMAL, new Pair<>(1, 1), Symbol.ANIMAL, new Pair<>(2, 2), Symbol.ANIMAL)));
+        Pair<Objective, Objective> visibleObj = new Pair<>(objective1, objective2);
+
+
+
+//        pippo.printWelcomeScreen();
+//        pippo.printInitialSideBySide(initialCard, 0);
+//        pippo.printCommonObjectives(visibleObj, 0);
+        pippo.printObjectives("hello", Color.RED, objective1, visibleObj);
     }
 
 }
