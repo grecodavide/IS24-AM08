@@ -136,7 +136,8 @@ public class TuiPrinter {
             System.out.println(welcomeString.get(i));
     }
 
-    private void printTitle(int x, int y) {
+    private void printTitleDeprecated(int x, int y) {
+        String white = "\033[0m", yellow = parser.getRightColor(Symbol.INKWELL);
         List<String> titleString = new ArrayList<>();
         String prefix = setPosition(x, y);
 
@@ -144,7 +145,7 @@ public class TuiPrinter {
                 + "   _____                                                                                                                                                                                       _____   ");
         prefix = setPosition(x, ++y);
         titleString.add(prefix
-                + "  ( ___ )-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------( ___ )  ");
+                + "  ( ___ )-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------( ___ )  " );
         prefix = setPosition(x, ++y);
         titleString.add(prefix
                 + "   |   |                                                                                                                                                                                       |   |   ");
@@ -194,8 +195,63 @@ public class TuiPrinter {
         titleString.add(prefix
                 + "  (_____)-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------(_____)  ");
 
+        System.out.println(yellow);
         for (int i = 0; i < titleString.size(); i++)
             System.out.println(titleString.get(i));
+        System.out.println(white);
+    }
+
+    private void printTitle(int x, int y) {
+        String white = "\033[0m", yellow = parser.getRightColor(Symbol.INKWELL);
+        List<String> titleString = new ArrayList<>();
+
+        String prefix = setPosition(x, y);
+        titleString.add(prefix + "  _____                                                                                                                                                                                                     _____  ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + " ( ___ )---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------( ___ ) ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + "  |   |                                                                                                                                                                                                     |   |  ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + "  |   |                                                                                                                                                                                                     |   |  ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + "  |   |                                                                                                                                                                                                     |   |  ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + "  |   |           ...                         ..                                             ...     ...                      s                                                  ..    .       .x+=:.       |   |  ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + "  |   |        xH88''~ .x8X                 dF                                            .=*8888n..'%888:                   :8                                            x .d88'    @88>    z'    ^%      |   |  ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + "  |   |      :8888   .f'8888Hf        u.   '88bu.                    uL   ..             X    |8888f '8888                  .88       x.    .        .u    .                5888R     %8P        .   <k     |   |  ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + "  |   |     :8888>  X8L  ^'''   ...ue888b  '*88888bu        .u     .@88b  @88R           88x. '8888X  8888>        u       :888ooo  .@88k  z88u    .d88B :@8c        u      '888R      .       .@8Ned8'     |   |  ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + "  |   |     X8888  X888h        888R Y888r   ^'*8888N    ud8888.  ''Y888k/'*P           '8888k 8888X  ''*8h.    us888u.  -*8888888 ~'8888 ^8888   ='8888f8888r    us888u.    888R    .@88u   .@^%8888'      |   |  ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + "  |   |     88888  |88888.      888R I888>  beWE '888L :888'8888.    Y888L               '8888 X888X .xH8    .@88 '8888'   8888      8888  888R     4888>'88'  .@88 '8888'   888R   ''888E' x88:  ')8b.     |   |  ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + "  |   |     88888   %88888      888R I888>  888E  888E d888 '88%'     8888                 '8' X888|:888X    9888  9888    8888      8888  888R     4888> '    9888  9888    888R     888E  8888N=*8888     |   |  ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + "  |   |     88888 '> '8888>     888R I888>  888E  888E 8888.+'        '888N               =~'  X888 X888X    9888  9888    8888      8888  888R     4888>      9888  9888    888R     888E   %8'    R88     |   |  ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + "  |   |     '8888L %  |888   | u8888cJ888   888E  888F 8888L       .u./'888&               :h. X8*' |888X    9888  9888   .8888Lu=   8888 ,888B .  .d888L .+   9888  9888    888R     888E    @8Wou 9%      |   |  ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + "  |   |      '8888  '-*''   /   '*888*P'   .888N..888  '8888c. .+ d888' Y888*'            X888xX'   '8888..: 9888  9888   ^%888*    '8888Y 8888'   ^'8888*'    9888  9888   .888B .   888&  .888888P'       |   |  ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + "  |   |        '888.      :'      'Y'       ''888*''    '88888%   ' 'Y   Y'             :~'888f     '*888*'  '888*''888'    'Y'      'Y'   'YP        'Y'      '888*''888'  ^*888%    R888' '   ^'F         |   |  ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + "  |   |          '''***~''                     ''         'YP'                              ''        '''     ^Y'   ^Y'                                         ^Y'   ^Y'     '%       ''                   |   |  ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + "  |   |                                                                                                                                                                                                     |   |  ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + "  |   |                                                                                                                                                                                                     |   |  ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + "  |___|                                                                                                                                                                                                     |___|  ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + " (_____)---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------(_____) ");
+
+        System.out.println(yellow);
+        for (int i = 0; i < titleString.size(); i++)
+            System.out.println(titleString.get(i));
+        System.out.println(white);
     }
 
     private void printYouWinScreen(int x, int y){
@@ -434,7 +490,8 @@ public class TuiPrinter {
         int maxHeight = this.getHeight() - this.infoLineOffset;
         int welcomeHeight = 5, welcomeWidth = 88+2; // width must be even (pari)
         int spaceBetween = 3;
-        int titleHeight = 18, titleWidth = 196+2; // width must be even (pari)
+        int titleHeight = 21, titleWidth = 210+2; // width must be even (pari)
+//        int titleHeight = 18, titleWidth = 196+2; // width must be even (pari)
 
         int welcomeStartY = getDimStart(this.getHeight(), welcomeHeight + spaceBetween + titleHeight);
         int titleStartY = welcomeStartY + welcomeHeight + spaceBetween;
@@ -498,34 +555,5 @@ public class TuiPrinter {
 
 
     }
-
-    // TO BE DELETED -- HERE just for easy TESTING
-    public static void main(String[] args) throws IOException, CardException, InvalidResourceException {
-        TuiPrinter pippo = new TuiPrinter();
-        pippo.printPrompt("AAAAAAAAAAAAAAAAAAAAAAAA");
-
-
-
-        Set<Symbol> set = new HashSet<>();
-        set.add(Symbol.FEATHER);
-        InitialCard initialCard =
-                new InitialCard(new CardFace(Symbol.FUNGUS, Symbol.ANIMAL, Symbol.PLANT, Symbol.INSECT, Collections.emptySet()),
-                        new CardFace(Symbol.FULL_CORNER, Symbol.EMPTY_CORNER, Symbol.FULL_CORNER, Symbol.EMPTY_CORNER, set));
-
-        Objective objective1 = new Objective(2, new QuantityRequirement(Map.of(Symbol.INSECT, 3)));
-        Objective objective2 = new Objective(2, new PositionRequirement(Map.of(
-                new Pair<>(0, 0), Symbol.ANIMAL, new Pair<>(1, 1), Symbol.ANIMAL, new Pair<>(2, 2), Symbol.ANIMAL)));
-        Pair<Objective, Objective> visibleObj = new Pair<>(objective1, objective2);
-
-
-
-//        pippo.printWelcomeScreen();
-//        pippo.printInitialSideBySide(initialCard, 0);
-//        pippo.printCommonObjectives(visibleObj, 0);
-//        pippo.printObjectives("hello", Color.RED, objective1, visibleObj);
-        pippo.printEndScreen(true);
-//        pippo.printEndScreen(false);
-
-    }
-
+    
 }
