@@ -1,5 +1,6 @@
 package it.polimi.ingsw.client.network;
 
+import java.rmi.RemoteException;
 import it.polimi.ingsw.client.frontend.GraphicalView;
 import it.polimi.ingsw.exceptions.*;
 import it.polimi.ingsw.gamemodel.DrawSource;
@@ -8,8 +9,6 @@ import it.polimi.ingsw.gamemodel.PlayableCard;
 import it.polimi.ingsw.gamemodel.Side;
 import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.Pair;
-
-import java.rmi.RemoteException;
 
 public abstract class NetworkView implements RemoteViewInterface {
     GraphicalView graphicalView;
@@ -39,6 +38,12 @@ public abstract class NetworkView implements RemoteViewInterface {
         this.username = username;
     }
 
+    public NetworkView(GraphicalView graphicalViewInterface) {
+        this.graphicalView = graphicalViewInterface;
+    }
+
+    public abstract void showError(String cause, Exception Exception);
+    
     /**
      * Asks the server to send a list of {@link AvailableMatch}
      */

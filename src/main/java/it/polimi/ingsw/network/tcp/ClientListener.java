@@ -1,24 +1,24 @@
 package it.polimi.ingsw.network.tcp;
 
+import java.io.EOFException;
+import java.io.IOException;
+import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 import com.google.gson.JsonParseException;
 import it.polimi.ingsw.controllers.PlayerControllerTCP;
 import it.polimi.ingsw.exceptions.AlreadyUsedUsernameException;
 import it.polimi.ingsw.exceptions.ChosenMatchException;
 import it.polimi.ingsw.exceptions.WrongStateException;
-import it.polimi.ingsw.gamemodel.Match;
-import it.polimi.ingsw.gamemodel.PlayableCard;
-import it.polimi.ingsw.gamemodel.Player;
+import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.network.messages.actions.*;
 import it.polimi.ingsw.network.messages.errors.ErrorMessage;
 import it.polimi.ingsw.network.messages.responses.AvailableMatchesMessage;
 import it.polimi.ingsw.network.messages.responses.ResponseMessage;
 import it.polimi.ingsw.server.Server;
+import it.polimi.ingsw.utils.CardsManager;
 import it.polimi.ingsw.utils.MessageJsonParser;
 import it.polimi.ingsw.utils.Pair;
-
-import java.io.EOFException;
-import java.io.IOException;
-import java.net.Socket;
 
 /*
  * actual connection procedure:
@@ -49,6 +49,8 @@ public class ClientListener extends Thread {
     private MessageJsonParser parser;
     private IOHandler io;
     private Server server;
+    private Map<Integer, Objective> objectives;
+    private Map<Integer, PlayableCard> playableCards;
 
     /**
      * Class constructor. Needs to have a reference to the server instance since it
@@ -64,6 +66,14 @@ public class ClientListener extends Thread {
             this.io = new IOHandler(this.socket);
             this.server = server;
             this.parser = new MessageJsonParser();
+
+            this.objectives = CardsManager.getInstance().getObjectives();
+            Map<Integer, ResourceCard> resources = CardsManager.getInstance().getResourceCards();
+            Map<Integer, GoldCard> golds = CardsManager.getInstance().getGoldCards();
+
+            this.playableCards = new HashMap<>();
+            resources.forEach((id, card) -> this.playableCards.put(id, (PlayableCard)card));
+            golds.forEach((id, card) -> this.playableCards.put(id, (PlayableCard)card));
 
             this.clientInteraction(); // init player controller
         } catch (Exception e) {
@@ -172,7 +182,7 @@ public class ClientListener extends Thread {
         if (msg != null) {
             switch (message) {
                 case ChooseSecretObjectiveMessage actionMsg:
-                    this.playerController.chooseSecretObjective(Server.getObjective(actionMsg.getObjectiveID()));
+                    this.playerController.chooseSecretObjective(this.objectives.get(actionMsg.getObjectiveID()));
                     break;
                 case ChooseInitialCardSideMessage actionMsg:
                     this.playerController.chooseInitialCardSide(actionMsg.getSide());
@@ -194,7 +204,7 @@ public class ClientListener extends Thread {
                     break;
                 case PlayCardMessage actionMsg:
                     Pair<Integer, Integer> coords = new Pair<Integer, Integer>(actionMsg.getX(), actionMsg.getY());
-                    PlayableCard card = Server.getPlayableCard(actionMsg.getCardID());
+                    PlayableCard card = this.playableCards.get(actionMsg.getCardID());
                     this.playerController.playCard(coords, card, actionMsg.getSide());
                     break;
                 default:

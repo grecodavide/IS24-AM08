@@ -1,5 +1,6 @@
 package it.polimi.ingsw.client.frontend;
 
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,11 +11,6 @@ import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.LeaderboardEntry;
 import it.polimi.ingsw.utils.Pair;
-
-import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 public abstract class GraphicalView {
     protected NetworkView networkView;
@@ -27,18 +23,23 @@ public abstract class GraphicalView {
     protected Pair<Symbol, Symbol> decksTopReign;
     private boolean lastTurn = false;
     protected List<AvailableMatch> availableMatches;
+    protected String username;
+
+    protected void setUsername(String username) {
+        this.username = username;
+        this.networkView.setUsername(username);
+    }
 
     public boolean isLastTurn() {
         return this.lastTurn;
     }
 
-    
     /**
      * Displays the user an error, when received
      * 
      * @param cause What went wrong
      */
-    public abstract void showError(String cause);
+    public abstract void showError(String cause, Exception exception);
 
     /**
      * Sets the network interface to communicate
@@ -121,15 +122,34 @@ public abstract class GraphicalView {
 
     public abstract void changePlayer();
 
-    private void nextPlayer() {
+    private void nextPlayer() throws RemoteException, WrongTurnException, WrongStateException {
         this.currentPlayer = this.players.get((this.players.indexOf(currentPlayer) + 1) % this.players.size());
+        if (this.currentPlayer == null)
+            this.currentPlayer = this.players.get(0);
+        else
+            this.currentPlayer = this.players.get((this.players.indexOf(currentPlayer) + 1) % this.players.size());
+
         this.changePlayer();
+
+        if (this.currentPlayer.equals(this.username)) {
+            if (this.clientBoards.get(this.username).getPlaced().isEmpty()) {
+                this.networkView.drawInitialCard();
+            } else if (this.clientBoards.get(this.username).getObjective() == null) {
+                this.networkView.drawSecretObjectives();
+            } else {
+                this.makeMove();
+            }
+        }
     }
+
+    public abstract void makeMove();
 
 
     public abstract void giveLobbyInfo(List<String> playersUsernames);
 
-    public void matchStarted(Map<String, Color> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands, Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards, Pair<Symbol, Symbol> decksTopReign) {
+    public void matchStarted(Map<String, Color> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands,
+            Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards,
+            Pair<Symbol, Symbol> decksTopReign) throws RemoteException, WrongStateException, WrongTurnException {
         this.players = new ArrayList<>();
         this.clientBoards = new HashMap<>();
         Color curr;
@@ -155,21 +175,22 @@ public abstract class GraphicalView {
                     break;
             }
         }
-        
 
-        this.currentPlayer = this.players.get(0);
+        this.currentPlayer = null;
 
         playersHands.forEach((username, hand) -> {
-            this.clientBoards.put( username, new ClientBoard(playersUsernamesAndPawns.get(username), hand));
-            // this.clientBoards.get(username)
+            this.clientBoards.put(username, new ClientBoard(playersUsernamesAndPawns.get(username), hand));
         });
 
         this.visiblePlayableCards = visiblePlayableCards;
         this.visibleObjectives = visibleObjectives;
         this.decksTopReign = decksTopReign;
+
         this.notifyMatchStarted();
+
+        this.nextPlayer();
     }
-    
+
     protected abstract void notifyMatchStarted();
 
     public void receiveAvailableMatches(List<AvailableMatch> availableMatches) {
@@ -182,13 +203,18 @@ public abstract class GraphicalView {
 
     public abstract void someoneDrewInitialCard(String someoneUsername, InitialCard card);
 
-    public abstract void someoneSetInitialSide(String someoneUsername, Side side);
+    public void someoneSetInitialSide(String someoneUsername, Side side) throws WrongTurnException, WrongStateException, RemoteException {
+        this.nextPlayer();
+    }
 
     public abstract void someoneDrewSecretObjective(String someoneUsername);
 
-    public abstract void someoneChoseSecretObjective(String someoneUsername);
+    public void someoneChoseSecretObjective(String someoneUsername)  throws WrongTurnException, WrongStateException, RemoteException {
+        this.nextPlayer();
+    }
 
-    public void someonePlayedCard(String someoneUsername, Pair<Integer, Integer> coords, PlayableCard card, Side side, int points, Map<Symbol, Integer> availableResources) {
+    public void someonePlayedCard(String someoneUsername, Pair<Integer, Integer> coords, PlayableCard card, Side side, int points,
+            Map<Symbol, Integer> availableResources) {
         if (points >= 20 && !this.lastTurn) {
             this.lastTurn = true;
             this.notifyLastTurn();
@@ -196,7 +222,8 @@ public abstract class GraphicalView {
         this.clientBoards.get(someoneUsername).placeCard(coords, card, side, points, availableResources);
     }
 
-    public void someoneDrewCard(String someoneUsername, DrawSource source, PlayableCard card, PlayableCard replacementCard, Symbol replacementCardReign) {
+    public void someoneDrewCard(String someoneUsername, DrawSource source, PlayableCard card, PlayableCard replacementCard,
+            Symbol replacementCardReign) throws WrongTurnException, WrongStateException, RemoteException {
         if (source.equals(DrawSource.GOLDS_DECK)) {
             this.decksTopReign = new Pair<Symbol, Symbol>(replacementCardReign, this.decksTopReign.second());
         } else if (source.equals(DrawSource.RESOURCES_DECK)) {
