@@ -1,20 +1,17 @@
 package it.polimi.ingsw.client.frontend.gui;
 
-import it.polimi.ingsw.client.frontend.gui.nodes.BoardPane;
+import it.polimi.ingsw.client.frontend.gui.scenes.PlayerTabController;
 import it.polimi.ingsw.client.frontend.gui.scenes.SceneController;
-import it.polimi.ingsw.client.network.NetworkViewRMI;
-import it.polimi.ingsw.client.network.NetworkViewTCP;
-import it.polimi.ingsw.gamemodel.*;
-import it.polimi.ingsw.utils.CardsManager;
+import it.polimi.ingsw.gamemodel.Card;
+import it.polimi.ingsw.gamemodel.PlayableCard;
+import it.polimi.ingsw.gamemodel.Side;
 import it.polimi.ingsw.utils.GuiUtil;
 import it.polimi.ingsw.utils.Pair;
 import javafx.application.Application;
-import javafx.collections.ObservableMap;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import java.io.IOException;
 
@@ -28,6 +25,7 @@ public class GraphicalApplication extends Application {
 
     @Override
     public void start(Stage primaryStage) throws IOException {
+        this.view = new GraphicalViewGUI(this);
         this.primaryStage = primaryStage;
         // Create a GraphicalViewGUI
         view = new GraphicalViewGUI(this);
@@ -48,13 +46,16 @@ public class GraphicalApplication extends Application {
      * Add a card to the specified player's board
      *
      * @param username Of the player to add the card to
-     * @param card     Card to add
-     * @param position Coordinates of the card
-     * @param side     Side of the card
      */
-    private void addToBoard(String username, PlayableCard card, Pair<Integer, Integer> position, Side side) {
-        BoardPane playerBoard = (BoardPane) primaryStage.getScene().lookup("#" + username + "-board");
-        playerBoard.addCard(position, card, side);
+    public void addToBoard(String username, Pair<Integer, Integer> coords, PlayableCard card, Side side) {
+        TabPane tabs = (TabPane) primaryStage.getScene().lookup("#matchTabs");
+        for (Tab tab : tabs.getTabs()) {
+            String user = (String) tab.getProperties().get("Username");
+            if (user != null && user.equals(username)) {
+                PlayerTabController controller = (PlayerTabController) tab.getProperties().get("Controller");
+                controller.placeCard(coords, card, side);
+            }
+        }
     }
 
     /**

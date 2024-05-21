@@ -11,6 +11,13 @@ public class SceneController {
     protected GraphicalViewGUI view;
     protected Stage stage;
 
+    /**
+     * Method to be called to do actions after the controller attributes are set
+     * @throws IOException
+     */
+    public void initializePostController() throws IOException{
+    }
+
     public void setGraphicalView(GraphicalViewGUI view) {
         this.view = view;
     }
@@ -26,9 +33,10 @@ public class SceneController {
         return result;
     }
 
-    protected void setControllerAttributes(FXMLLoader loader) {
+    protected void setControllerAttributes(FXMLLoader loader) throws IOException {
         SceneController controller = loader.getController();
         controller.setGraphicalView(view);
         controller.setStage(stage);
+        controller.initializePostController();
     }
 }

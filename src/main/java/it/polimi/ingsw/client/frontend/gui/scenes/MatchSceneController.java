@@ -17,7 +17,12 @@ public class MatchSceneController extends SceneController{
     @FXML
     TabPane matchTabs;
 
-    public void initialize() throws IOException {
+    public void initialize() {
+
+    }
+
+    @Override
+    public void initializePostController() throws IOException {
         String username;
         for (int i = 1; i < 3; i++) {
             username ="Player" + i;
@@ -27,6 +32,8 @@ public class MatchSceneController extends SceneController{
             setControllerAttributes(loader);
             t.setText(username);
             matchTabs.getTabs().add(t);
+            t.getProperties().put("Controller", loader.getController());
+            t.getProperties().put("Username", username);
             //BoardPane playerBoard = (BoardPane) namespace.get("playerboard");
             //playerBoard.setId(username + "-board");
         }
