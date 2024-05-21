@@ -19,18 +19,12 @@ import it.polimi.ingsw.utils.Pair;
 
 public class TuiGraphicalView extends GraphicalView {
     private TuiPrinter printer;
-    private boolean isConnected;
-    private boolean matchCreator;
-    private boolean receivedError;
 
     private List<String> chat; // when someoneSentBroadcast/PrivateText, add to this. Then simply show when "chat" command is sent
     private final Scanner scanner;
 
     public TuiGraphicalView() throws IOException {
         this.printer = new TuiPrinter();
-        this.isConnected = false;
-        this.receivedError = false;
-        this.matchCreator = false;
         this.chat = new ArrayList<>();
         this.scanner = new Scanner(System.in);
 
@@ -70,11 +64,10 @@ public class TuiGraphicalView extends GraphicalView {
 
 
     private boolean createMatch(String userIn) {
-        this.matchCreator = true;
         try {
             String matchName = userIn.substring(0, userIn.indexOf(" "));
             Integer maxPlayers = Integer.valueOf(userIn.substring(matchName.length() + 1)); // mhh
-            this.networkView.createMatch(matchName, maxPlayers);
+            super.createMatch(matchName, maxPlayers);
             return true;
         } catch (NumberFormatException | StringIndexOutOfBoundsException e) {
             this.printer.printMessage("No max players specified!");
@@ -159,7 +152,7 @@ public class TuiGraphicalView extends GraphicalView {
 
                 try {
                     Integer matchToJoin = Integer.valueOf(userIn) - 1;
-                    this.networkView.joinMatch(this.availableMatches.get(matchToJoin).name());
+                    super.joinMatch(this.availableMatches.get(matchToJoin).name());
                     shouldLoop = false;
                 } catch (NumberFormatException e) {
                     this.createMatch(userIn);
@@ -208,7 +201,7 @@ public class TuiGraphicalView extends GraphicalView {
             side = Side.FRONT;
         }
 
-        this.networkView.chooseInitialCardSide(side);
+        super.chooseInitialCardSide(side);
     }
 
     @Override
@@ -226,7 +219,7 @@ public class TuiGraphicalView extends GraphicalView {
         }
 
         this.clientBoards.get(this.username).setSecretObjective(objective);
-        this.networkView.chooseSecretObjective(objective);
+        super.chooseSecretObjective(objective);
     }
 
     @Override
@@ -236,7 +229,7 @@ public class TuiGraphicalView extends GraphicalView {
 
     @Override
     public void someoneDrewInitialCard(String someoneUsername, InitialCard card) {
-        this.printer.printPrompt(someoneUsername + " is drawing initial card");
+        this.printer.printPrompt(someoneUsername + " is choosing initial card side");
         super.someoneDrewInitialCard(someoneUsername, card);
     }
 
@@ -250,7 +243,6 @@ public class TuiGraphicalView extends GraphicalView {
     @Override
     public void someoneJoined(String someoneUsername) {
         if (someoneUsername.equals(this.username)) {
-            this.isConnected = true;
         } else {
             this.printer.clearTerminal();
             this.printer.printWelcomeScreen();
@@ -287,12 +279,6 @@ public class TuiGraphicalView extends GraphicalView {
         this.printer.clearTerminal();
         this.printer.printWelcomeScreen();
         this.printer.printMessage("The match has started!");
-    }
-
-    @Override
-    public void showError(String cause, Exception exception) {
-        this.receivedError = true;
-        this.printer.printMessage("ERROR: " + cause + " " + exception.getClass());
     }
 
     @Override
@@ -360,32 +346,33 @@ public class TuiGraphicalView extends GraphicalView {
             String userIn;
             while (source == null) {
                 this.printer.clearTerminal();
-                this.printer.printPrompt("From where do you want to draw? (TBA graphical representation)");
+                this.printer.printDrawingScreen(decksTopReign, visiblePlayableCards);
+                this.printer.printPrompt("From where do you want to draw?");
                 userIn = this.askInput();
                 switch (userIn) {
-                    case "1":
+                    case "G", "g":
                         source = DrawSource.GOLDS_DECK;
                         break;
-                    case "2":
+                    case "R", "r":
                         source = DrawSource.RESOURCES_DECK;
                         break;
-                    case "3":
+                    case "1":
                         source = DrawSource.FIRST_VISIBLE;
                         break;
-                    case "4":
+                    case "2":
                         source = DrawSource.SECOND_VISIBLE;
                         break;
-                    case "5":
+                    case "3":
                         source = DrawSource.THIRD_VISIBLE;
                         break;
-                    case "6":
+                    case "4":
                         source = DrawSource.FOURTH_VISIBLE;
                         break;
                     default:
                         break;
                 }
             }
-            this.networkView.drawCard(source);
+            super.drawCard(source);
         }
     }
 
