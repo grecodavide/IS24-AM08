@@ -1,24 +1,20 @@
 package it.polimi.ingsw.client.frontend.gui;
 
+import it.polimi.ingsw.client.frontend.gui.nodes.BoardPane;
 import it.polimi.ingsw.client.network.NetworkViewRMI;
 import it.polimi.ingsw.client.network.NetworkViewTCP;
-import it.polimi.ingsw.gamemodel.MatchState;
-import it.polimi.ingsw.gamemodel.Symbol;
+import it.polimi.ingsw.gamemodel.*;
+import it.polimi.ingsw.utils.CardsManager;
 import it.polimi.ingsw.utils.Pair;
 import javafx.application.Application;
 import javafx.collections.ObservableMap;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import java.io.IOException;
-import java.util.Stack;
 
 public class GraphicalApplication extends Application {
     private GraphicalViewGUI view;
@@ -66,6 +62,9 @@ public class GraphicalApplication extends Application {
         primaryStage.show();
     }
 
+    /**
+     * Connect to the specified NetworkView
+     */
     private void connect() {
         // TODO Define things better
         Scene currentScene = primaryStage.getScene();
@@ -78,13 +77,19 @@ public class GraphicalApplication extends Application {
         primaryStage.setScene(new Scene(new VBox(), 1000, 80));
     }
 
+    /**
+     * Build match stage, the stage where the game is shown
+     * @throws IOException
+     */
     private void showMatchStage() throws IOException {
+        // Get the match scene
         VBox root = getFromFXML("/fxml/match.fxml");
         applyCSS(root, "/css/match.css");
         Scene matchScene = new Scene(root, 1920, 1080);
         TabPane tabs = (TabPane) matchScene.lookup("#MatchTabs");
+        // Populate match tabs
         String username;
-        for (int i = 1; i < 2; i++) {
+        for (int i = 1; i < 3; i++) {
             username ="Player" + i;
             FXMLLoader loader = getLoader("/fxml/playertab.fxml");
             ObservableMap<String, Object> namespace = loader.getNamespace();
@@ -92,37 +97,56 @@ public class GraphicalApplication extends Application {
             Tab t = loader.load();
             t.setText(username);
             tabs.getTabs().add(t);
-            CheckBox c = new CheckBox();
-            Pane playerBoard = (Pane) namespace.get("playerboard");
+            BoardPane playerBoard = (BoardPane) namespace.get("playerboard");
             playerBoard.setId(username + "-board");
         }
         primaryStage.setScene(matchScene);
         for (int i = 0; i < 8; i++) {
-            addToBoard("Player1", new Pair<>(i, i), "/images/PlayableCards/ANIMAL-golds-back.png");
+            addToBoard("Player1", CardsManager.getInstance().getGoldCards().get(2), new Pair<>(i, i), Side.FRONT );
+        }
+        for (int i = 0; i < 3; i++) {
+            addToBoard("Player1", CardsManager.getInstance().getResourceCards().get(3), new Pair<>(-i, -i), Side.BACK);
         }
     }
 
-    private void addToBoard(String username, Pair<Integer, Integer> coords, String png) {
-        double card_w = 199;
-        double card_h = 132;
-        Pane playerBoard = (Pane) primaryStage.getScene().lookup("#" + username + "-board");
-        ImageView img = new ImageView(new Image(png));
-        img.setFitHeight(card_h);
-        img.setFitWidth(card_w);
-        img.setLayoutX(playerBoard.getWidth()/2 + coords.first() * card_w);
-        img.setLayoutY(playerBoard.getHeight()/2 - coords.second() * card_h);
-        System.out.println(playerBoard.getWidth());
-        playerBoard.getChildren().add(img);
+    /**
+     * Add a card to the specified player's board
+     * @param username Of the player to add the card to
+     * @param card Card to add
+     * @param position Coordinates of the card
+     * @param side Side of the card
+     */
+    private void addToBoard(String username, Card card, Pair<Integer, Integer> position, Side side) {
+        BoardPane playerBoard = (BoardPane) primaryStage.getScene().lookup("#" + username + "-board");
+        playerBoard.addCard(position, card, side);
     }
+
+    /**
+     * Get a node from the specified FXML path
+     * @param path file path of FXML
+     * @return The first node
+     * @param <T> Type of the node
+     * @throws IOException
+     */
     private <T>T getFromFXML(String path) throws IOException {
         FXMLLoader loader = this.getLoader(path);
         return loader.load();
     }
 
+    /**
+     * Get the loader from the specified path
+     * @param path file path of fxml
+     * @return loader
+     */
     private FXMLLoader getLoader(String path) {
         return new FXMLLoader(this.getClass().getResource(path));
     }
 
+    /**
+     * Applies the specified CSS to a javafx scene parent
+     * @param w The parent to apply the css to
+     * @param path Path of the css file
+     */
     private void applyCSS(javafx.scene.Parent w, String path) {
         w.getStylesheets().addAll(this.getClass().getResource(path).toExternalForm());
     }

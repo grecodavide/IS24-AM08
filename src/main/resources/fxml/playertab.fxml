@@ -11,6 +11,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.image.Image?>
+<?import it.polimi.ingsw.client.frontend.gui.nodes.BoardPane?>
 <Tab xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
     <StackPane prefHeight="150.0" prefWidth="200.0">
         <padding>
@@ -28,8 +29,8 @@
                 <Font size="25.0"/>
             </font>
         </Label>
-        <ScrollPane StackPane.alignment="CENTER" hvalue="0.5" vvalue="0.5" styleClass="scrollboard">
-            <Pane fx:id="playerboard" styleClass="playerboard" prefWidth="7960" prefHeight="5280"></Pane>
+        <ScrollPane StackPane.alignment="CENTER" hvalue="0.51" vvalue="0.53" styleClass="scrollboard">
+            <BoardPane fx:id="playerboard" styleClass="playerboard" prefWidth="7960" prefHeight="5280"></BoardPane>
         </ScrollPane>
         <HBox alignment="BOTTOM_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
               minWidth="-Infinity" spacing="15.0" StackPane.alignment="BOTTOM_CENTER" >
