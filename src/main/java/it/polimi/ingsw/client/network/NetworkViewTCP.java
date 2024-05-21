@@ -167,4 +167,8 @@ public class NetworkViewTCP extends NetworkView {
         throw new UnsupportedOperationException("Unimplemented method 'drawCard'");
     }
 
+    @Override
+    public void notifyError(Exception exception) {
+        this.graphicalView.notifyError(exception);
+    }
 }
