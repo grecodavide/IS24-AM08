@@ -302,10 +302,11 @@ public class TuiPrinter {
             System.out.println(loseString.get(i));
     }
 
-    private void printDeck(Pair<Integer, Integer> coord, Symbol reign){
+    private void printDeck(Pair<Integer, Integer> coord, Symbol reign, DrawSource deckType){
         if (reign == null)
             return;
         String bianco = "\033[0m";
+        int xx = 8, yy = 7+1;
 
         List<String> underCover = new ArrayList<>();
         int x = coord.first(), y = coord.second();
@@ -327,10 +328,15 @@ public class TuiPrinter {
         for (String s : underCover)
             System.out.println(s);
 
-        x = coord.first() + 1;
+        x = coord.first() + 2;
         y = coord.second() - 1;
         String topDeckCar = this.parser.getGenericBack(reign, new Pair<>(x, y));
         System.out.println(topDeckCar);
+
+        if (deckType == DrawSource.GOLDS_DECK)
+            System.out.println(setPosition(x+xx, y-1-1) + getCardIndex(deckType));
+        if (deckType == DrawSource.RESOURCES_DECK)
+            System.out.println(setPosition(x+xx, y+yy+1) + getCardIndex(deckType));
 
     }
 
@@ -357,25 +363,30 @@ public class TuiPrinter {
             String secondToPrint;
             String thirdToPrint;
             String fourthToPrint;
+            int xx = 8, yy = 6;
 
             if (firstG != null){
                 firstToPrint = this.parser.parseCard(firstG, firstCoord, null, true);
                 System.out.println(firstToPrint);
+                System.out.println(setPosition(firstCoord.first()+xx, firstCoord.second()-1-2) + getCardIndex(DrawSource.FIRST_VISIBLE));
                 System.out.println(bianco);
             }
             if (secondG != null){
                 secondToPrint = this.parser.parseCard(secondG, secondCoord, null, true);
                 System.out.println(secondToPrint);
+                System.out.println(setPosition(secondCoord.first()+xx, secondCoord.second()-1-2) + getCardIndex(DrawSource.SECOND_VISIBLE));
                 System.out.println(bianco);
             }
             if (thirdR != null){
                 thirdToPrint = this.parser.parseCard(thirdR, thirdCoord, null, true);
                 System.out.println(thirdToPrint);
+                System.out.println(setPosition(thirdCoord.first()+xx, thirdCoord.second()+yy+1+1) + getCardIndex(DrawSource.THIRD_VISIBLE));
                 System.out.println(bianco);
             }
             if (fourthR != null){
                 fourthToPrint = this.parser.parseCard(fourthR, fourthCoord, null, true);
                 System.out.println(fourthToPrint);
+                System.out.println(setPosition(fourthCoord.first()+xx, fourthCoord.second()+yy+1+1) + getCardIndex(DrawSource.FOURTH_VISIBLE));
                 System.out.println(bianco);
             }
 
@@ -383,6 +394,18 @@ public class TuiPrinter {
             throw new RuntimeException(e);
         }
 
+    }
+
+    private char getCardIndex(DrawSource drawSource){
+        return switch (drawSource){
+            case FIRST_VISIBLE -> '1';
+            case SECOND_VISIBLE -> '2';
+            case THIRD_VISIBLE -> '3';
+            case FOURTH_VISIBLE -> '4';
+            case GOLDS_DECK -> 'G';
+            case RESOURCES_DECK -> 'R';
+            default -> '0';
+        };
     }
 
     // PUBLIC METHODS //
@@ -664,8 +687,8 @@ public class TuiPrinter {
         int cardsStartX = deckStartX + deckWidth + xSpaceBetween;
         int cardsStartY = deckStartY;
 
-        printDeck(new Pair<>(deckStartX, deckStartY), decksTopReign.first());
-        printDeck(new Pair<>(deckStartX, deckStartY + deckHeight + ySpaceBetween), decksTopReign.second());
+        printDeck(new Pair<>(deckStartX, deckStartY), decksTopReign.first(), DrawSource.GOLDS_DECK);
+        printDeck(new Pair<>(deckStartX, deckStartY + deckHeight + ySpaceBetween), decksTopReign.second(), DrawSource.RESOURCES_DECK);
         printDeckVisibleCard(new Pair<>(cardsStartX, cardsStartY), visiblePlayableCards);
     }
     
