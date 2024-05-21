@@ -99,3 +99,8 @@
     -fx-background-insets : 2.0, 0.0, 0.0;
     -fx-background-radius : 2.0em;
 }
+
+.resources-count {
+    -fx-font-size: 30px;
+    -fx-text-fill: -fx-foreground-color;
+}
