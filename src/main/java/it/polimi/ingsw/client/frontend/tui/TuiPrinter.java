@@ -1,10 +1,9 @@
 package it.polimi.ingsw.client.frontend.tui;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import it.polimi.ingsw.exceptions.InvalidResourceException;
 import org.jline.terminal.Terminal;
 import it.polimi.ingsw.client.frontend.ClientBoard;
 import it.polimi.ingsw.client.frontend.ShownCard;
@@ -41,9 +40,7 @@ public class TuiPrinter {
         commandList.put(new Pair<>("objective", "o"), "show the objectives of the current player");
     }
 
-    // --------------- //
     // PRIVATE METHODS //
-    // --------------- //
 
     private Pair<Integer, Integer> sumCoords(Pair<Integer, Integer> op1, Pair<Integer, Integer> op2) {
         return new Pair<>(op1.first() + op2.first(), op1.second() + op2.second());
@@ -305,10 +302,90 @@ public class TuiPrinter {
             System.out.println(loseString.get(i));
     }
 
+    private void printDeck(Pair<Integer, Integer> coord, Symbol reign){
+        if (reign == null)
+            return;
+        String bianco = "\033[0m";
 
-    // -------------- //
+        List<String> underCover = new ArrayList<>();
+        int x = coord.first(), y = coord.second();
+
+        String prefix = setPosition(x, y);
+        underCover.add(prefix + "┌────────────────┐");
+        prefix = setPosition(x, ++y);
+        underCover.add(prefix + "│                │");
+        prefix = setPosition(x, ++y);
+        underCover.add(prefix + "│                │");
+        prefix = setPosition(x, ++y);
+        underCover.add(prefix + "│                │");
+        prefix = setPosition(x, ++y);
+        underCover.add(prefix + "│                │");
+        prefix = setPosition(x, ++y);
+        underCover.add(prefix + "└────────────────┘");
+
+        System.out.println(bianco);
+        for (String s : underCover)
+            System.out.println(s);
+
+        x = coord.first() + 1;
+        y = coord.second() - 1;
+        String topDeckCar = this.parser.getGenericBack(reign, new Pair<>(x, y));
+        System.out.println(topDeckCar);
+
+    }
+
+    private void printDeckVisibleCard(Pair<Integer, Integer> coord, Map<DrawSource, PlayableCard> visiblePlayableCards){
+        String bianco = "\033[0m";
+
+        // obtain card obj
+        PlayableCard firstG = visiblePlayableCards.get(DrawSource.FIRST_VISIBLE),
+                secondG = visiblePlayableCards.get(DrawSource.SECOND_VISIBLE),
+                thirdR = visiblePlayableCards.get(DrawSource.THIRD_VISIBLE),
+                fourthR = visiblePlayableCards.get(DrawSource.FOURTH_VISIBLE);
+
+        // obtain card coord
+        int x = coord.first(), y = coord.second();
+        int xOffset = 18 + 2, yOffset = 6 + 2;
+        Pair<Integer, Integer> firstCoord = new Pair<>(x, y),
+                secondCoord = new Pair<>(x + xOffset, y),
+                thirdCoord = new Pair<>(x, y + yOffset),
+                fourthCoord = new Pair<>(x + xOffset, y + yOffset);
+
+        // obtain card as string (if it exists)
+        try {
+            String firstToPrint;
+            String secondToPrint;
+            String thirdToPrint;
+            String fourthToPrint;
+
+            if (firstG != null){
+                firstToPrint = this.parser.parseCard(firstG, firstCoord, null, true);
+                System.out.println(firstToPrint);
+                System.out.println(bianco);
+            }
+            if (secondG != null){
+                secondToPrint = this.parser.parseCard(secondG, secondCoord, null, true);
+                System.out.println(secondToPrint);
+                System.out.println(bianco);
+            }
+            if (thirdR != null){
+                thirdToPrint = this.parser.parseCard(thirdR, thirdCoord, null, true);
+                System.out.println(thirdToPrint);
+                System.out.println(bianco);
+            }
+            if (fourthR != null){
+                fourthToPrint = this.parser.parseCard(fourthR, fourthCoord, null, true);
+                System.out.println(fourthToPrint);
+                System.out.println(bianco);
+            }
+
+        } catch (CardException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
     // PUBLIC METHODS //
-    // -------------- //
 
     /**
      * Clears the terminal
@@ -425,11 +502,11 @@ public class TuiPrinter {
     }
 
     /**
-     * Prints the objectives common for all players
-     * @param visibleObjectives pair of common objectives
+     * Prints a pair of objectives, with a brief description above them
+     * @param pairObjectives pair of objectives
      * @param heightOffset offset lines from the top
      */
-    public void printObjectivePair(String message, Pair<Objective, Objective> visibleObjectives, int heightOffset){
+    public void printObjectivePair(String message, Pair<Objective, Objective> pairObjectives, int heightOffset){
         int yOffset = (heightOffset <= 0) ? 1 : heightOffset;
 
         // common objectives STRING
@@ -443,8 +520,8 @@ public class TuiPrinter {
 
         Pair<Integer, Integer> obj1Coord = new Pair<>(xCoord, yOffset);
         Pair<Integer, Integer> obj2Coord = new Pair<>(xCoord + cardWidth + spaceBetweenSides, yOffset);
-        String obj1 = this.parser.parseObjective(visibleObjectives.first(), obj1Coord);
-        String obj2 = this.parser.parseObjective(visibleObjectives.second(), obj2Coord);
+        String obj1 = this.parser.parseObjective(pairObjectives.first(), obj1Coord);
+        String obj2 = this.parser.parseObjective(pairObjectives.second(), obj2Coord);
 
         System.out.println(obj1 + obj2);
     }
@@ -497,9 +574,10 @@ public class TuiPrinter {
         int titleStartY = welcomeStartY + welcomeHeight + spaceBetween;
         int welcomeStartX = getDimStart(this.getWidth(), welcomeWidth);
         int titleStartX = getDimStart(this.getWidth(), titleWidth);
+        int verticalOffset = -10;
 
-        printWelcome(welcomeStartX, welcomeStartY);
-        printTitle(titleStartX, titleStartY);
+        printWelcome(welcomeStartX, welcomeStartY + verticalOffset);
+        printTitle(titleStartX, titleStartY + verticalOffset);
     }
 
     /**
@@ -512,19 +590,20 @@ public class TuiPrinter {
 
         int msgHeight, msgWidth;
         int x, y;
+        int vericalOffset = -10;
         if (isVictorious){
             msgHeight = 7;
             msgWidth = 78+2; // width must be even (pari)
             x = getDimStart(maxWidth, msgWidth);
             y = getDimStart(maxHeight, msgHeight);
-            printYouWinScreen(x, y);
+            printYouWinScreen(x, y + vericalOffset);
 
         } else {
             msgHeight = 10;
             msgWidth = 70+2; // width must be even (pari)
             x = getDimStart(maxWidth, msgWidth);
             y = getDimStart(maxHeight, msgHeight);
-            printYouLoseScreen(x, y);
+            printYouLoseScreen(x, y + vericalOffset);
 
         }
     }
@@ -554,6 +633,40 @@ public class TuiPrinter {
         }
 
 
+    }
+
+    /**
+     * Prints a one-line message in the center of the screen
+     * @param message message to display
+     */
+    public void printCenteredMessage(String message){
+
+        int yOffset = getDimStart(this.terminal.getHeight(), 1);
+        int xCoord = getDimStart(this.terminal.getWidth(), message.length());
+
+        message = setPosition(xCoord, yOffset++) + message;
+        System.out.println(message);
+    }
+
+    /**
+     * Prints the drawing screen, containing the 2 decks and the 4 visible cards. Unavailable resources are not displayed.
+     * @param decksTopReign pair of the 2 top-deck cards
+     * @param visiblePlayableCards map of visible cards
+     */
+    public void printDrawingScreen(Pair<Symbol, Symbol> decksTopReign, Map<DrawSource, PlayableCard> visiblePlayableCards) {
+        int maxHeight = this.getHeight() - this.infoLineOffset;
+        int deckHeight = 6 + 2, deckWidth = 18 + 1; // width must be even (pari)
+        int xSpaceBetween = 12, ySpaceBetween = 0;
+        int cardsHeight = 6 + 2, cardsWidth = 18 + 2 + 18; // width must be even (pari)
+
+        int deckStartX = getDimStart(this.getWidth(), deckWidth + xSpaceBetween + cardsWidth);
+        int deckStartY = getDimStart(this.getHeight(), deckHeight + ySpaceBetween + cardsHeight);
+        int cardsStartX = deckStartX + deckWidth + xSpaceBetween;
+        int cardsStartY = deckStartY;
+
+        printDeck(new Pair<>(deckStartX, deckStartY), decksTopReign.first());
+        printDeck(new Pair<>(deckStartX, deckStartY + deckHeight + ySpaceBetween), decksTopReign.second());
+        printDeckVisibleCard(new Pair<>(cardsStartX, cardsStartY), visiblePlayableCards);
     }
     
 }
