@@ -9,6 +9,7 @@ import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.LeaderboardEntry;
 import it.polimi.ingsw.utils.Pair;
+import it.polimi.ingsw.utils.RequestStatus;
 
 public abstract class GraphicalView {
     protected NetworkView networkView;
@@ -21,6 +22,7 @@ public abstract class GraphicalView {
     private boolean lastTurn = false;
     protected List<AvailableMatch> availableMatches;
     protected String username;
+    protected RequestStatus lastRequestStatus;
 
     protected void setUsername(String username) {
         this.username = username;
@@ -31,12 +33,18 @@ public abstract class GraphicalView {
         return this.lastTurn;
     }
 
+    public void setLastRequestStatus(RequestStatus status) {
+        this.lastRequestStatus = status;
+    }
+
     /**
      * Displayes the user an error, when received
      * 
      * @param cause What went wrong
      */
-    public abstract void showError(String cause, Exception exception);
+    public void notifyError(Exception exception) {
+        this.setLastRequestStatus(RequestStatus.FAILED);
+    }
 
     /**
      * Sets the network interface to communicate
@@ -53,6 +61,7 @@ public abstract class GraphicalView {
      * @param matchName The match's name
      */
     public void createMatch(String matchName, Integer maxPlayers) {
+        this.setLastRequestStatus(RequestStatus.PENDING);
         this.networkView.createMatch(matchName, maxPlayers);
     }
 
@@ -62,6 +71,7 @@ public abstract class GraphicalView {
      * @param matchName the match's name
      */
     public void joinMatch(String matchName) {
+        this.setLastRequestStatus(RequestStatus.PENDING);
         this.networkView.joinMatch(matchName);
     }
 
@@ -69,6 +79,7 @@ public abstract class GraphicalView {
      * Draws an initial card for the player.
      */
     public void drawInitialCard() {
+        this.setLastRequestStatus(RequestStatus.PENDING);
         this.networkView.drawInitialCard();
     }
 
@@ -78,6 +89,7 @@ public abstract class GraphicalView {
      * @param side The side on which play the initial card drawn using {@link #drawInitialCard()}
      */
     public void chooseInitialCardSide(Side side) {
+        this.setLastRequestStatus(RequestStatus.PENDING);
         this.networkView.chooseInitialCardSide(side);
     }
 
@@ -86,6 +98,7 @@ public abstract class GraphicalView {
      *
      */
     public void drawSecretObjectives() {
+        this.setLastRequestStatus(RequestStatus.PENDING);
         this.networkView.drawSecretObjectives();
     }
 
@@ -95,6 +108,7 @@ public abstract class GraphicalView {
      * @param objective The chosen objective
      */
     public void chooseSecretObjective(Objective objective) {
+        this.setLastRequestStatus(RequestStatus.PENDING);
         this.networkView.chooseSecretObjective(objective);
     }
 
@@ -106,6 +120,7 @@ public abstract class GraphicalView {
      * @param side The side on which to play the chosen card
      */
     public void playCard(Pair<Integer, Integer> coords, PlayableCard card, Side side) {
+        this.setLastRequestStatus(RequestStatus.PENDING);
         this.networkView.playCard(coords, card, side);
     }
 
@@ -115,6 +130,7 @@ public abstract class GraphicalView {
      * @param source The drawing source to draw the card from
      */
     public void drawCard(DrawSource source) {
+        this.setLastRequestStatus(RequestStatus.PENDING);
         this.networkView.drawCard(source);
     }
 
@@ -138,6 +154,7 @@ public abstract class GraphicalView {
 
         this.changePlayer();
 
+        this.setLastRequestStatus(RequestStatus.PENDING);
         if (this.currentPlayer.equals(this.username)) {
             if (this.clientBoards.get(this.username).getPlaced().isEmpty()) {
                 this.networkView.drawInitialCard();
@@ -224,6 +241,7 @@ public abstract class GraphicalView {
      * @param availableMatches
      */
     public void receiveAvailableMatches(List<AvailableMatch> availableMatches) {
+        this.setLastRequestStatus(RequestStatus.SUCCESSFUL);
         this.availableMatches = availableMatches;
     }
 
@@ -234,6 +252,7 @@ public abstract class GraphicalView {
      * @param initialCard the player's initial card
      */
     public void giveInitialCard(InitialCard initialCard) {
+        this.setLastRequestStatus(RequestStatus.SUCCESSFUL);
         this.clientBoards.get(this.username).setInitial(initialCard);
     }
 
@@ -243,7 +262,9 @@ public abstract class GraphicalView {
      * 
      * @param secretObjectives the two objectives to choose from
      */
-    public abstract void giveSecretObjectives(Pair<Objective, Objective> secretObjectives);
+    public void giveSecretObjectives(Pair<Objective, Objective> secretObjectives) {
+        this.setLastRequestStatus(RequestStatus.SUCCESSFUL);
+    }
 
 
     /**
@@ -253,6 +274,9 @@ public abstract class GraphicalView {
      * @param card The card he drew
      */
     public void someoneDrewInitialCard(String someoneUsername, InitialCard card) {
+        if (this.username.equals(someoneUsername)) {
+            this.setLastRequestStatus(RequestStatus.SUCCESSFUL);
+        }
         this.clientBoards.get(someoneUsername).setInitial(card);
     }
 
@@ -265,6 +289,9 @@ public abstract class GraphicalView {
      * @param side Chosen side
      */
     public void someoneSetInitialSide(String someoneUsername, Side side) {
+        if (this.username.equals(someoneUsername)) {
+            this.setLastRequestStatus(RequestStatus.SUCCESSFUL);
+        }
         this.clientBoards.get(someoneUsername).placeInitial(side);
         this.nextPlayer();
     }
@@ -276,15 +303,23 @@ public abstract class GraphicalView {
      * 
      * @param someoneUsername Player who is choosing
      */
-    public abstract void someoneDrewSecretObjective(String someoneUsername);
+    public void someoneDrewSecretObjective(String someoneUsername) {
+        if (this.username.equals(someoneUsername)) {
+            this.setLastRequestStatus(RequestStatus.SUCCESSFUL);
+        }
+    }
 
     public void someoneChoseSecretObjective(String someoneUsername) {
+        if (this.username.equals(someoneUsername)) {
+            this.setLastRequestStatus(RequestStatus.SUCCESSFUL);
+        }
         this.nextPlayer();
     }
 
-    
+
     /**
-     * Actually places a card on the player's board (so the Player tried to place a card and it was a valid move)
+     * Actually places a card on the player's board (so the Player tried to place a card and it was a
+     * valid move)
      * 
      * @param someoneUsername The player who made the move
      * @param coords where he placed the card
@@ -295,6 +330,9 @@ public abstract class GraphicalView {
      */
     public void someonePlayedCard(String someoneUsername, Pair<Integer, Integer> coords, PlayableCard card, Side side, int points,
             Map<Symbol, Integer> availableResources) {
+        if (this.username.equals(someoneUsername)) {
+            this.setLastRequestStatus(RequestStatus.SUCCESSFUL);
+        }
         if (points >= 20 && !this.lastTurn) {
             this.lastTurn = true;
             this.notifyLastTurn();
@@ -302,18 +340,23 @@ public abstract class GraphicalView {
         this.clientBoards.get(someoneUsername).placeCard(coords, card, side, points, availableResources);
     }
 
-    
+
     /**
      * Handles the replacement of the last card drawn, and changes turn
      * 
      * @param someoneUsername Player who drew the card
      * @param source From where he drew the card
      * @param card The card he drew
-     * @param replacementCard The replacement card, which will be null if the {@link DrawSource} is a deck
-     * @param replacementCardReign The replacement card's reign, which will be null if the {@link DrawSource} is not a deck
+     * @param replacementCard The replacement card, which will be null if the {@link DrawSource} is a
+     *        deck
+     * @param replacementCardReign The replacement card's reign, which will be null if the
+     *        {@link DrawSource} is not a deck
      */
     public void someoneDrewCard(String someoneUsername, DrawSource source, PlayableCard card, PlayableCard replacementCard,
             Symbol replacementCardReign) {
+        if (this.username.equals(someoneUsername)) {
+            this.setLastRequestStatus(RequestStatus.SUCCESSFUL);
+        }
         if (source.equals(DrawSource.GOLDS_DECK)) {
             this.decksTopReign = new Pair<Symbol, Symbol>(replacementCardReign, this.decksTopReign.second());
         } else if (source.equals(DrawSource.RESOURCES_DECK)) {
@@ -330,21 +373,25 @@ public abstract class GraphicalView {
 
         this.nextPlayer();
     }
-    
+
     /**
      * Notifies the player that this is the last turn he can play
      */
     public abstract void notifyLastTurn();
 
-    
+
     /**
      * Notifies the player that someone joined the lobby
      * 
      * @param someoneUsername Player who joined
      */
-    public abstract void someoneJoined(String someoneUsername);
+    public void someoneJoined(String someoneUsername) {
+        if (this.username.equals(someoneUsername)) {
+            this.setLastRequestStatus(RequestStatus.SUCCESSFUL);
+        }
+    }
 
-    
+
     /**
      * Notifies the player that someone quit the lobby
      * 
@@ -352,7 +399,7 @@ public abstract class GraphicalView {
      */
     public abstract void someoneQuit(String someoneUsername);
 
-    
+
     /**
      * Shows the player the match's leaderboard after the game ended
      * 
@@ -360,21 +407,29 @@ public abstract class GraphicalView {
      */
     public abstract void matchFinished(List<LeaderboardEntry> ranking);
 
-    
+
     /**
      * Notifies that somoene sent a broadcast text
      * 
      * @param someoneUsername Player who sent the text
      * @param text Text he sent
      */
-    public abstract void someoneSentBroadcastText(String someoneUsername, String text);
+    public void someoneSentBroadcastText(String someoneUsername, String text) {
+        if (this.username.equals(someoneUsername)) {
+            this.setLastRequestStatus(RequestStatus.SUCCESSFUL);
+        }
+    }
 
-    
+
     /**
      * Notifies the player that someone sent him a private text
      * 
      * @param someoneUsername Player who sent the private text
      * @param text Text he sent
      */
-    public abstract void someoneSentPrivateText(String someoneUsername, String text);
+    public void someoneSentPrivateText(String someoneUsername, String text) {
+        if (this.username.equals(someoneUsername)) {
+            this.setLastRequestStatus(RequestStatus.SUCCESSFUL);
+        }
+    }
 }

@@ -176,7 +176,7 @@ public class NetworkViewTCP extends NetworkView {
     }
 
     @Override
-    public void showError(String cause, Exception exception) {
+    public void notifyError(Exception exception) {
         this.graphicalInterface.showError(cause, exception);
     }
 }
