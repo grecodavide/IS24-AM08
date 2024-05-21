@@ -12,6 +12,7 @@ import it.polimi.ingsw.client.network.NetworkViewTCP;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.LeaderboardEntry;
 import it.polimi.ingsw.utils.Pair;
+import it.polimi.ingsw.utils.RequestStatus;
 
 /**
  * TuiGraphicalView
@@ -159,6 +160,11 @@ public class TuiGraphicalView extends GraphicalView {
                     shouldLoop = false;
                 }
             }
+        }
+        
+        while (this.lastRequestStatus.equals(RequestStatus.PENDING)) { }
+        if (this.lastRequestStatus.equals(RequestStatus.FAILED)) {
+            this.chooseMatch("Something went wrong. Try again!");
         }
     }
 

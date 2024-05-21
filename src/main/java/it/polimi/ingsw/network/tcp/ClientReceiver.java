@@ -129,7 +129,7 @@ public class ClientReceiver implements Runnable {
     private void sendError(String message) {
         try {
             ErrorMessage msg = (ErrorMessage)this.io.stringToMsg(message);
-            this.networkView.showError(msg.getMessage(), (Exception)(Object)Class.forName(msg.getError()) );
+            this.networkView.notifyError(new Exception());
         } catch (Exception e) {
             // Nothing to do, received an invalid object
         }
