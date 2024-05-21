@@ -326,6 +326,7 @@ public abstract class GraphicalView {
             this.lastTurn = true;
             this.notifyLastTurn();
         }
+        this.clientBoards.get(someoneUsername).drawCard(card);
 
         this.nextPlayer();
     }
