@@ -3,13 +3,13 @@ package it.polimi.ingsw.client.frontend.tui;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
+import it.polimi.ingsw.client.frontend.ClientBoard;
 import it.polimi.ingsw.client.frontend.GraphicalView;
 import it.polimi.ingsw.client.network.NetworkView;
 import it.polimi.ingsw.client.network.NetworkViewTCP;
-import it.polimi.ingsw.gamemodel.InitialCard;
-import it.polimi.ingsw.gamemodel.Objective;
-import it.polimi.ingsw.gamemodel.Side;
+import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.LeaderboardEntry;
 import it.polimi.ingsw.utils.Pair;
 
@@ -18,7 +18,7 @@ import it.polimi.ingsw.utils.Pair;
  */
 
 public class TuiGraphicalView extends GraphicalView {
-    private TuiPrinter printer; // init this, call getPlaced() and pass it to printer with foreach in someonePlayedCard to test
+    private TuiPrinter printer;
     private boolean isConnected;
     private boolean matchCreator;
     private boolean receivedError;
@@ -179,6 +179,7 @@ public class TuiGraphicalView extends GraphicalView {
         return userIn;
     }
 
+
     ///////////////
     // Game flow //
     ///////////////
@@ -210,11 +211,11 @@ public class TuiGraphicalView extends GraphicalView {
         this.networkView.chooseInitialCardSide(side);
     }
 
-    // TODO: same objective ?????????
     @Override
     public void giveSecretObjectives(Pair<Objective, Objective> secretObjectives) {
         this.printer.clearTerminal();
-        this.printer.printObjectivePair("Possible secret objectives:", visibleObjectives, 1);
+        System.out.println(secretObjectives.first().getID() + " " + secretObjectives.second().getID());
+        this.printer.printObjectivePair("Possible secret objectives:", secretObjectives, 1);
         this.printer.printPrompt("Choose secret objective (1 for first, second otherwise):");
         String userIn = this.askInput();
         Objective objective;
@@ -259,8 +260,8 @@ public class TuiGraphicalView extends GraphicalView {
 
     @Override
     public void someoneQuit(String someoneUsername) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'someoneQuit'");
+        this.printer.clearTerminal();
+        this.printer.printMessage(someoneUsername + "Quit the match!");
     }
 
     @Override
@@ -283,7 +284,9 @@ public class TuiGraphicalView extends GraphicalView {
 
     @Override
     protected void notifyMatchStarted() {
-        // this.printer.printPlayerBoard(this.currentPlayer, this.clientBoards.get(this.currentPlayer));
+        this.printer.clearTerminal();
+        this.printer.printWelcomeScreen();
+        this.printer.printMessage("The match has started!");
     }
 
     @Override
@@ -294,7 +297,96 @@ public class TuiGraphicalView extends GraphicalView {
 
     @Override
     public void makeMove() {
-        // this.networkView.playCard(coords, card, side);
+        this.printer.clearTerminal();
+        ClientBoard board = this.clientBoards.get(this.username);
+        this.printer.printHand(this.username, board.getColor(), board.getHand());
+        this.printer.printAvailableResources(board.getAvailableResources(), 10);
+        Integer index = -1;
+        String userIn;
+
+        while (index == -1) {
+            this.printer.printPrompt("What card do you want to play? (1, 2, 3)");
+            userIn = this.askInput();
+            try {
+                index = Integer.valueOf(userIn)-1;
+                if (index < 0 || index > 2) {
+                    throw new NumberFormatException();
+                }
+            } catch (NumberFormatException e) {
+            }
+        }
+        this.printer.clearTerminal();
+        this.printer.printPrompt("Do you want to play it on the (b)ack side?");
+        userIn = this.askInput();
+        Side side;
+        switch (userIn) {
+            case "b":
+                side = Side.BACK;
+                break;
+
+            default:
+                side = Side.FRONT;
+                break;
+        }
+
+        Integer x = null, y = null;
+        Integer sepIndex;
+        while (x == null || y == null) {
+            this.printer.clearTerminal();
+            this.printer.printPlayerBoard(this.username, board);
+            this.printer.printPrompt("Specify coordinates for card (e.g. 2,2)");
+            userIn = this.askInput();
+            sepIndex = userIn.indexOf(",");
+            if (sepIndex != -1) {
+                try {
+                    x = Integer.valueOf(userIn.substring(0, sepIndex));
+                    y = Integer.valueOf(userIn.substring(sepIndex + 1, userIn.length()));
+                } catch (Exception e) {
+                }
+            }
+        }
+
+        this.playCard(new Pair<Integer, Integer>(x, y), board.getHand().get(index), side);
+    }
+
+    @Override
+    public void someonePlayedCard(String someoneUsername, Pair<Integer, Integer> coords, PlayableCard card, Side side, int points,
+            Map<Symbol, Integer> availableResources) {
+        super.someonePlayedCard(someoneUsername, coords, card, side, points, availableResources);
+        this.printer.printPlayerBoard(someoneUsername, this.clientBoards.get(someoneUsername));
+
+        if (someoneUsername.equals(this.username)) {
+            DrawSource source = null;
+            String userIn;
+            while (source == null) {
+                this.printer.clearTerminal();
+                this.printer.printPrompt("From where do you want to draw? (TBA graphical representation)");
+                userIn = this.askInput();
+                switch (userIn) {
+                    case "1":
+                        source = DrawSource.GOLDS_DECK;
+                        break;
+                    case "2":
+                        source = DrawSource.RESOURCES_DECK;
+                        break;
+                    case "3":
+                        source = DrawSource.FIRST_VISIBLE;
+                        break;
+                    case "4":
+                        source = DrawSource.SECOND_VISIBLE;
+                        break;
+                    case "5":
+                        source = DrawSource.THIRD_VISIBLE;
+                        break;
+                    case "6":
+                        source = DrawSource.FOURTH_VISIBLE;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            this.networkView.drawCard(source);
+        }
     }
 
     // will start when someone tries to start a TUI client

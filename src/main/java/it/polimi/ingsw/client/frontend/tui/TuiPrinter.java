@@ -97,7 +97,7 @@ public class TuiPrinter {
         System.out.println(this.setPosition((termCols - out.length()) / 4, termRows - infoLineOffset) + out);
     }
 
-    private void printAvailableResources(Map<Symbol, Integer> availableResources) {
+    public void printAvailableResources(Map<Symbol, Integer> availableResources, Integer verticalOffset) {
         int termRows = this.getHeight(), termCols = this.getWidth();
         String out = "";
         String spaces = "    ";
@@ -109,7 +109,7 @@ public class TuiPrinter {
             out += parser.getRightColor(resource) + parser.getRightIcon(resource) + ": " + availableResources.get(resource) + spaces;
         }
 
-        System.out.println(this.setPosition((termCols - len) / 2, termRows - infoLineOffset) + out + "\033[0m");
+        System.out.println(this.setPosition((termCols - len) / 2, verticalOffset) + out + "\033[0m");
     }
 
     private int getDimStart(int max, int dim) {
@@ -365,7 +365,7 @@ public class TuiPrinter {
                 e.printStackTrace();
             }
         }
-        this.printAvailableResources(board.getAvailableResources());
+        this.printAvailableResources(board.getAvailableResources(), this.getHeight() - infoLineOffset);
         this.printPoints(username, board.getColor(), board.getPoints());
     }
 
