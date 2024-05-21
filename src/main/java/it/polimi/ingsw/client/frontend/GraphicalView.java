@@ -31,7 +31,6 @@ public abstract class GraphicalView {
         return this.lastTurn;
     }
 
-
     /**
      * Displayes the user an error, when received
      * 
@@ -119,8 +118,18 @@ public abstract class GraphicalView {
         this.networkView.drawCard(source);
     }
 
+
+
+    /**
+     * Method used to show the turn has changed
+     */
     public abstract void changePlayer();
 
+
+    /**
+     * Goes to the next turn, making sure that the current player is set and that he plays the right
+     * turn (choose initial card/objective, or make a move)
+     */
     private void nextPlayer() {
         if (this.currentPlayer == null)
             this.currentPlayer = this.players.get(0);
@@ -140,11 +149,25 @@ public abstract class GraphicalView {
         }
     }
 
+
+    /**
+     * Ask the user to make a play. Must call {@link GraphicalView#playCard(Pair, PlayableCard, Side)}
+     */
     public abstract void makeMove();
 
 
     public abstract void giveLobbyInfo(List<String> playersUsernames);
 
+
+    /**
+     * Starts match on the client side, setting all variables to their initial values
+     * 
+     * @param playersUsernamesAndPawns Map containing all players' pawns, indexed by their username
+     * @param playersHands Map containing all the players' hands, indexed by their username
+     * @param visibleObjectives The two objectives common to every player
+     * @param visiblePlayableCards The four cards that can be drawn, visible to everyone
+     * @param decksTopReign the reigns of the two decks' top
+     */
     public void matchStarted(Map<String, Color> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands,
             Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards,
             Pair<Symbol, Symbol> decksTopReign) {
@@ -188,33 +211,88 @@ public abstract class GraphicalView {
         this.nextPlayer();
     }
 
+
+    /**
+     * Method that shows the user that the match has started
+     */
     protected abstract void notifyMatchStarted();
 
+
+    /**
+     * Sets the available matches received from server
+     * 
+     * @param availableMatches
+     */
     public void receiveAvailableMatches(List<AvailableMatch> availableMatches) {
         this.availableMatches = availableMatches;
     }
 
+
+    /**
+     * Give the user its initial card
+     * 
+     * @param initialCard the player's initial card
+     */
     public void giveInitialCard(InitialCard initialCard) {
-        this.clientBoards.get(this.username).placeInitial(initialCard, Side.FRONT);
+        this.clientBoards.get(this.username).setInitial(initialCard);
     }
 
+
+    /**
+     * Gives the player two secret objectives to choose from
+     * 
+     * @param secretObjectives the two objectives to choose from
+     */
     public abstract void giveSecretObjectives(Pair<Objective, Objective> secretObjectives);
 
+
+    /**
+     * Notifies other players that someone drew the initial card
+     * 
+     * @param someoneUsername Player who drew the initial
+     * @param card The card he drew
+     */
     public void someoneDrewInitialCard(String someoneUsername, InitialCard card) {
-        this.clientBoards.get(someoneUsername).placeInitial(card, Side.FRONT);
+        this.clientBoards.get(someoneUsername).setInitial(card);
     }
 
+
+    /**
+     * Effectively place the initial card on the player's board, on the right side. Note that the card
+     * must have already been set
+     * 
+     * @param someoneUsername Player who chose the initial card's side
+     * @param side Chosen side
+     */
     public void someoneSetInitialSide(String someoneUsername, Side side) {
-        this.clientBoards.get(someoneUsername).setInitialSide(side);
+        this.clientBoards.get(someoneUsername).placeInitial(side);
         this.nextPlayer();
     }
 
+
+    /**
+     * Notifies other players that someone is choosing the secret objective. They should not know from
+     * which objective he is choosing, so they are not passed
+     * 
+     * @param someoneUsername Player who is choosing
+     */
     public abstract void someoneDrewSecretObjective(String someoneUsername);
 
     public void someoneChoseSecretObjective(String someoneUsername) {
         this.nextPlayer();
     }
 
+    
+    /**
+     * Actually places a card on the player's board (so the Player tried to place a card and it was a valid move)
+     * 
+     * @param someoneUsername The player who made the move
+     * @param coords where he placed the card
+     * @param card the placed card
+     * @param side the side the card was placed on
+     * @param points the total points of the player after he placed the card
+     * @param availableResources the available resources of the player after he placed the card
+     */
     public void someonePlayedCard(String someoneUsername, Pair<Integer, Integer> coords, PlayableCard card, Side side, int points,
             Map<Symbol, Integer> availableResources) {
         if (points >= 20 && !this.lastTurn) {
@@ -224,6 +302,16 @@ public abstract class GraphicalView {
         this.clientBoards.get(someoneUsername).placeCard(coords, card, side, points, availableResources);
     }
 
+    
+    /**
+     * Handles the replacement of the last card drawn, and changes turn
+     * 
+     * @param someoneUsername Player who drew the card
+     * @param source From where he drew the card
+     * @param card The card he drew
+     * @param replacementCard The replacement card, which will be null if the {@link DrawSource} is a deck
+     * @param replacementCardReign The replacement card's reign, which will be null if the {@link DrawSource} is not a deck
+     */
     public void someoneDrewCard(String someoneUsername, DrawSource source, PlayableCard card, PlayableCard replacementCard,
             Symbol replacementCardReign) {
         if (source.equals(DrawSource.GOLDS_DECK)) {
@@ -241,16 +329,51 @@ public abstract class GraphicalView {
 
         this.nextPlayer();
     }
-
+    
+    /**
+     * Notifies the player that this is the last turn he can play
+     */
     public abstract void notifyLastTurn();
 
+    
+    /**
+     * Notifies the player that someone joined the lobby
+     * 
+     * @param someoneUsername Player who joined
+     */
     public abstract void someoneJoined(String someoneUsername);
 
+    
+    /**
+     * Notifies the player that someone quit the lobby
+     * 
+     * @param someoneUsername Player who quit
+     */
     public abstract void someoneQuit(String someoneUsername);
 
+    
+    /**
+     * Shows the player the match's leaderboard after the game ended
+     * 
+     * @param ranking Ranking of players
+     */
     public abstract void matchFinished(List<LeaderboardEntry> ranking);
 
+    
+    /**
+     * Notifies that somoene sent a broadcast text
+     * 
+     * @param someoneUsername Player who sent the text
+     * @param text Text he sent
+     */
     public abstract void someoneSentBroadcastText(String someoneUsername, String text);
 
+    
+    /**
+     * Notifies the player that someone sent him a private text
+     * 
+     * @param someoneUsername Player who sent the private text
+     * @param text Text he sent
+     */
     public abstract void someoneSentPrivateText(String someoneUsername, String text);
 }
