@@ -121,49 +121,85 @@ public class NetworkViewRMI extends NetworkView {
 
     // Methods called by the GraphicalView
     @Override
-    public void getAvailableMatches() throws RemoteException {
-        List<AvailableMatch> matches =  server.getJoinableMatches();
-        this.receiveAvailableMatches(matches);
+    public void getAvailableMatches() {
+        try {
+            List<AvailableMatch> matches = server.getJoinableMatches();
+            this.receiveAvailableMatches(matches);
+        } catch (Exception e) {
+            this.graphicalView.notifyError(e);
+        }
     }
 
     @Override
-    public void joinMatch(String matchName) throws ChosenMatchException, WrongStateException, AlreadyUsedUsernameException, RemoteException {
-        controller = server.joinMatch(matchName, this.username);
+    public void joinMatch(String matchName) {
+        try {
+            controller = server.joinMatch(matchName, this.username);
+        } catch (Exception e) {
+            this.graphicalView.notifyError(e);
+        }
     }
 
     @Override
-    public void createMatch(String matchName, Integer maxPlayers) throws ChosenMatchException, RemoteException {
-        server.createMatch(matchName, maxPlayers);
+    public void createMatch(String matchName, Integer maxPlayers) {
+        try {
+            server.createMatch(matchName, maxPlayers);
+        } catch (Exception e) {
+            this.graphicalView.notifyError(e);
+        }
     }
 
     @Override
-    public void drawInitialCard() throws WrongStateException, WrongTurnException, RemoteException {
-        controller.drawInitialCard();
+    public void drawInitialCard() {
+        try {
+            controller.drawInitialCard();
+        } catch (Exception e) {
+            this.graphicalView.notifyError(e);
+        }
     }
 
     @Override
-    public void chooseInitialCardSide(Side side) throws WrongStateException, WrongTurnException, RemoteException {
-        controller.chooseInitialCardSide(side);
+    public void chooseInitialCardSide(Side side) {
+        try {
+            controller.chooseInitialCardSide(side);
+        } catch (Exception e) {
+            this.graphicalView.notifyError(e);
+        }
     }
 
     @Override
-    public void drawSecretObjectives() throws WrongStateException, WrongTurnException, RemoteException {
-        controller.drawSecretObjectives();
+    public void drawSecretObjectives() {
+        try {
+            controller.drawSecretObjectives();
+        } catch (Exception e) {
+            this.graphicalView.notifyError(e);
+        }
     }
 
     @Override
-    public void chooseSecretObjective(Objective objective) throws WrongStateException, WrongTurnException, RemoteException, WrongChoiceException {
-        controller.chooseSecretObjective(objective);
+    public void chooseSecretObjective(Objective objective) {
+        try {
+            controller.chooseSecretObjective(objective);
+        } catch (Exception e) {
+            this.graphicalView.notifyError(e);
+        }
     }
 
     @Override
-    public void playCard(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws WrongStateException, WrongTurnException, RemoteException, WrongChoiceException {
-        controller.playCard(coords, card, side);
+    public void playCard(Pair<Integer, Integer> coords, PlayableCard card, Side side) {
+        try {
+            controller.playCard(coords, card, side);
+        } catch (Exception e) {
+            this.graphicalView.notifyError(e);
+        }
     }
 
     @Override
-    public void drawCard(DrawSource source) throws HandException, WrongStateException, WrongTurnException, RemoteException, WrongChoiceException {
-        controller.drawCard(source);
+    public void drawCard(DrawSource source) {
+        try {
+            controller.drawCard(source);
+        } catch (Exception e) {
+            this.graphicalView.notifyError(e);
+        }
     }
 
 }

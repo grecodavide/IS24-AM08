@@ -36,11 +36,9 @@ public abstract class NetworkView implements RemoteViewInterface {
         this.username = username;
     }
 
-    public NetworkView(GraphicalView graphicalViewInterface) {
-        this.graphicalView = graphicalViewInterface;
+    public NetworkView(GraphicalView graphicalView) {
+        this.graphicalView = graphicalView;
     }
-
-    public abstract void notifyError(Exception Exception);
     
     /**
      * Asks the server to send a list of {@link AvailableMatch}
