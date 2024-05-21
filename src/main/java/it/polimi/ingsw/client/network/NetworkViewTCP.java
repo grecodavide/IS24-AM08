@@ -54,80 +54,80 @@ public class NetworkViewTCP extends NetworkView {
     public void matchStarted(Map<String, Color> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands,
             Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards,
             Pair<Symbol, Symbol> decksTopReign) {
-        this.graphicalInterface.matchStarted(playersUsernamesAndPawns, playersHands, visibleObjectives, visiblePlayableCards,
+        this.graphicalView.matchStarted(playersUsernamesAndPawns, playersHands, visibleObjectives, visiblePlayableCards,
                 decksTopReign);
     }
 
     @Override
     public void receiveAvailableMatches(List<AvailableMatch> availableMatchs) {
-        this.graphicalInterface.receiveAvailableMatches(availableMatchs);
+        this.graphicalView.receiveAvailableMatches(availableMatchs);
     }
 
     @Override
     public void giveInitialCard(InitialCard initialCard) {
-        this.graphicalInterface.giveInitialCard(initialCard);
+        this.graphicalView.giveInitialCard(initialCard);
     }
 
     @Override
     public void giveSecretObjectives(Pair<Objective, Objective> secretObjectives) {
-        this.graphicalInterface.giveSecretObjectives(secretObjectives);
+        this.graphicalView.giveSecretObjectives(secretObjectives);
     }
 
     @Override
     public void someoneDrewInitialCard(String someoneUsername, InitialCard card) {
-        this.graphicalInterface.someoneDrewInitialCard(someoneUsername, card);
+        this.graphicalView.someoneDrewInitialCard(someoneUsername, card);
     }
 
     @Override
     public void someoneSetInitialSide(String someoneUsername, Side side) {
-        this.graphicalInterface.someoneSetInitialSide(someoneUsername, side);
+        this.graphicalView.someoneSetInitialSide(someoneUsername, side);
     }
 
     @Override
     public void someoneDrewSecretObjective(String someoneUsername) {
-        this.graphicalInterface.someoneDrewSecretObjective(someoneUsername);
+        this.graphicalView.someoneDrewSecretObjective(someoneUsername);
     }
 
     @Override
     public void someoneChoseSecretObjective(String someoneUsername) {
-        this.graphicalInterface.someoneChoseSecretObjective(someoneUsername);
+        this.graphicalView.someoneChoseSecretObjective(someoneUsername);
     }
 
     @Override
     public void someonePlayedCard(String someoneUsername, Pair<Integer, Integer> coords, PlayableCard card, Side side, int points,
             Map<Symbol, Integer> availableResources) {
-        this.graphicalInterface.someonePlayedCard(someoneUsername, coords, card, side, points, availableResources);
+        this.graphicalView.someonePlayedCard(someoneUsername, coords, card, side, points, availableResources);
     }
 
     @Override
     public void someoneDrewCard(String someoneUsername, DrawSource source, PlayableCard card, PlayableCard replacementCard,
             Symbol replacementCardReign) {
-        this.graphicalInterface.someoneDrewCard(someoneUsername, source, card, replacementCard, replacementCardReign);
+        this.graphicalView.someoneDrewCard(someoneUsername, source, card, replacementCard, replacementCardReign);
     }
 
     @Override
     public void someoneJoined(String someoneUsername) {
-        this.graphicalInterface.someoneJoined(someoneUsername);
+        this.graphicalView.someoneJoined(someoneUsername);
     }
 
     @Override
     public void someoneQuit(String someoneUsername) {
-        this.graphicalInterface.someoneQuit(someoneUsername);
+        this.graphicalView.someoneQuit(someoneUsername);
     }
 
     @Override
     public void matchFinished(List<LeaderboardEntry> ranking) {
-        this.graphicalInterface.matchFinished(ranking);
+        this.graphicalView.matchFinished(ranking);
     }
 
     @Override
     public void someoneSentBroadcastText(String someoneUsername, String text) {
-        this.graphicalInterface.someoneSentBroadcastText(someoneUsername, text);
+        this.graphicalView.someoneSentBroadcastText(someoneUsername, text);
     }
 
     @Override
     public void someoneSentPrivateText(String someoneUsername, String text) {
-        this.graphicalInterface.someoneSentPrivateText(someoneUsername, text);
+        this.graphicalView.someoneSentPrivateText(someoneUsername, text);
     }
 
     @Override
@@ -175,8 +175,7 @@ public class NetworkViewTCP extends NetworkView {
         this.sendMessage(new DrawCardMessage(this.username, source));
     }
 
-    @Override
     public void notifyError(Exception exception) {
-        this.graphicalInterface.notifyError(exception);
+        this.graphicalView.notifyError(exception);
     }
 }

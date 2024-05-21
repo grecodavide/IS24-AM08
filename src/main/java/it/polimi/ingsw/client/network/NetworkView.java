@@ -9,18 +9,16 @@ import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.Pair;
 
 public abstract class NetworkView implements RemoteViewInterface {
-    GraphicalView graphicalInterface;
+    GraphicalView graphicalView;
     protected String username;
 
     public void setUsername(String username) {
         this.username = username;
     }
 
-    public NetworkView(GraphicalView graphicalViewInterface) {
-        this.graphicalInterface = graphicalViewInterface;
+    public NetworkView(GraphicalView graphicalView) {
+        this.graphicalView = graphicalView;
     }
-
-    public abstract void notifyError(Exception Exception);
     
     /**
      * Asks the server to send a list of {@link AvailableMatch}
