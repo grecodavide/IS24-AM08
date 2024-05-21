@@ -1,7 +1,10 @@
 package it.polimi.ingsw.client.frontend.gui.nodes;
 
 import it.polimi.ingsw.gamemodel.Card;
+import it.polimi.ingsw.gamemodel.InitialCard;
+import it.polimi.ingsw.gamemodel.PlayableCard;
 import it.polimi.ingsw.gamemodel.Side;
+import it.polimi.ingsw.utils.GuiUtil;
 import it.polimi.ingsw.utils.Pair;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -17,8 +20,18 @@ public class BoardPane extends Pane {
         super();
     }
 
-    public void addCard(Pair<Integer, Integer> position, Card card, Side side) {
-        ImageView img = new ImageView(new Image("/images/PlayableCards/ANIMAL-golds-back.png"));
+    public void addCard(Pair<Integer, Integer> position, PlayableCard card, Side side) {
+        ImageView img = new ImageView(new Image(GuiUtil.getImagePath(card, side)));
+        displayCard(position, img);
+    }
+
+    public void addCard(Pair<Integer, Integer> position, InitialCard card, Side side) {
+        ImageView img = new ImageView(new Image(GuiUtil.getImagePath(card, side)));
+        displayCard(position, img);
+    }
+
+    private void displayCard(Pair<Integer, Integer> position, ImageView img) {
+        img.getStyleClass().add("gamecard");
         img.setFitWidth(cardWidth);
         img.setFitHeight(cardHeight);
         Pair<Double, Double> coords = convertCoordinates(position);
