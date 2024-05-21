@@ -11,7 +11,7 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.layout.StackPane?>
 
-<StackPane id="pane">
+<StackPane fx:controller="it.polimi.ingsw.client.frontend.gui.scenes.ConnectionSceneController" id="pane" xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <VBox alignment="CENTER">
             <children>
@@ -37,11 +37,11 @@
                             <VBox>
                                 <Label styleClass="input-label" text="Connection type"/>
                                 <HBox spacing="10" alignment="CENTER">
-                                    <RadioButton id="RMI" text="RMI" styleClass="radio"></RadioButton>
-                                    <RadioButton id="TCP" text="TCP" styleClass="radio"></RadioButton>
+                                    <RadioButton fx:id="RMIButton" text="RMI" styleClass="radio"></RadioButton>
+                                    <RadioButton fx:id="TCPButton" text="TCP" styleClass="radio"></RadioButton>
                                 </HBox>
                             </VBox>
-                            <Button id="connect-button" text="Connect" styleClass="button"/>
+                            <Button fx:id="connectButton" text="Connect" styleClass="button"/>
                             <padding>
                                 <Insets top="20" right="20" bottom="20" left="20"/>
                             </padding>

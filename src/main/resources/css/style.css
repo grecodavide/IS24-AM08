@@ -69,3 +69,8 @@
     -fx-text-fill: -fx-accent-bg-color;
     -fx-border-color: -fx-accent-bg-color;
 }
+
+.gamecard {
+    -fx-background-radius: 20;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 0);
+}
