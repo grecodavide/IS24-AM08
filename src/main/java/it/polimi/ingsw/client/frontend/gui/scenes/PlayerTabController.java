@@ -6,6 +6,7 @@ import it.polimi.ingsw.utils.CardsManager;
 import it.polimi.ingsw.utils.Pair;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 
@@ -19,8 +20,11 @@ public class PlayerTabController extends SceneController{
     Pane handCard3;
     @FXML
     BoardPane playerBoard;
+    @FXML
+    ScrollPane scroll;
 
     public void initialize() {
+        scroll.getStyleClass().clear();
         handCard1.setOnMouseClicked((e) -> {testBoard();});
     }
 

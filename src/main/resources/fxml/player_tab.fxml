@@ -26,7 +26,7 @@
                 <Font size="25.0"/>
             </font>
         </Label>
-        <ScrollPane StackPane.alignment="CENTER" hvalue="0.51" vvalue="0.53" styleClass="scrollboard">
+        <ScrollPane fx:id="scroll" StackPane.alignment="CENTER" hvalue="0.51" vvalue="0.53" styleClass="scrollboard">
             <BoardPane fx:id="playerBoard" styleClass="playerboard" prefWidth="7960" prefHeight="5280"></BoardPane>
         </ScrollPane>
         <HBox alignment="BOTTOM_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"

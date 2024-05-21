@@ -40,6 +40,7 @@
     -fx-font-size: 30px;
     -fx-focus-color: transparent;
 }
+
 .radio .radio {
     -fx-background-image: null;
     -fx-background-color: -fx-third-bg-color;

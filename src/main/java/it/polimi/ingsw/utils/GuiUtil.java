@@ -19,7 +19,7 @@ public class GuiUtil {
      */
     public static String playableCardsPath = "/images/playable_cards";
     public static String objectivesPath = "/images/objectives";
-    public static String initialsPath = "/images/InitialCards";
+    public static String initialsPath = "/images/initial_cards";
 
     public static <T>T getFromFXML(String path) throws IOException {
         FXMLLoader loader = GuiUtil.getLoader(path);
@@ -46,7 +46,7 @@ public class GuiUtil {
 
     public static String getImagePath(PlayableCard card, Side side) {
         if (side.equals(Side.FRONT)) {
-            return playableCardsPath + card.getId() + ".png";
+            return playableCardsPath + "/" + card.getId() + ".png";
         } else {
             switch (card){
                 case GoldCard goldCard -> {

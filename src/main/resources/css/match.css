@@ -27,6 +27,7 @@
 .tab-pane .tab {
     -fx-background-color: transparent;
 }
+
 .tab-pane:focused .tab-header-area .headers-region .tab:selected .focus-indicator {
     -fx-border-width: 0;
     -fx-border-insets: 0 0 0 0;
@@ -34,9 +35,10 @@
 }
 
 .scroll-pane .viewport {
-    -fx-background-image: url("../images/background.png");
-    -fx-background-repeat: repeat;
-    -fx-background-position: center center;
+    -fx-background-color: transparent;
+    -fx-faint-focus-color: transparent;
+    -fx-border-color: background;
+    -fx-background-insets: -1.4, 0, 1, 2;
 }
 
 .playerboard {
@@ -46,12 +48,18 @@
 /* Scrollbar theming*/
 .scroll-bar:horizontal .track,
 .scroll-bar:vertical .track{
-    -fx-background-color: -fx-third-bg-color;
+    -fx-background-color: transparent;
     -fx-border-color : transparent;
     -fx-background-radius : 0.0em;
     -fx-border-radius :2.0em;
 }
-
+.scroll-bar:horizontal .track-background,
+.scroll-bar:vertical .track-background{
+    -fx-background-image: url("../images/background.png");
+    -fx-background-repeat: repeat;
+    -fx-background-position: center center;
+    -fx-padding: 0;
+}
 .scroll-bar:vertical .increment-button ,
 .scroll-bar:vertical .decrement-button {
     -fx-background-color :transparent;
