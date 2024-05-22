@@ -2,12 +2,11 @@ package it.polimi.ingsw.client.frontend.tui;
 
 import java.io.IOException;
 import java.util.*;
-
-import it.polimi.ingsw.exceptions.InvalidResourceException;
 import org.jline.terminal.Terminal;
 import it.polimi.ingsw.client.frontend.ClientBoard;
 import it.polimi.ingsw.client.frontend.ShownCard;
 import it.polimi.ingsw.exceptions.CardException;
+import it.polimi.ingsw.exceptions.InvalidResourceException;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.Pair;
@@ -629,7 +628,7 @@ public class TuiPrinter {
             msgWidth = 78+2; // width must be even (pari)
             x = getDimStart(maxWidth, msgWidth);
             y = getDimStart(maxHeight, msgHeight);
-            printYouWinScreen(x, y + vericalOffset);
+            printYouWinScreen(x, y + verticalOffset);
 
         } else {
             msgHeight = 10;
