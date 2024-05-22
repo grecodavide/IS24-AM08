@@ -9,6 +9,7 @@ import it.polimi.ingsw.client.frontend.ClientBoard;
 import it.polimi.ingsw.client.frontend.ShownCard;
 import it.polimi.ingsw.exceptions.CardException;
 import it.polimi.ingsw.gamemodel.*;
+import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.Pair;
 import it.polimi.ingsw.utils.TUICardParser;
 
@@ -701,16 +702,54 @@ public class TuiPrinter {
         printDeckVisibleCard(new Pair<>(cardsStartX, cardsStartY), visiblePlayableCards);
     }
 
-    // TODO: implement printMatcheslobby
-    // * Prints the list of matches (joinable or not) in the center of the screen 
-    public void printMatchesLobby(){
+    /**
+     * Prints the list of matches (joinable or not) in the center of the screen
+     * @param availableMatches list of available matches
+     * @param heightOffset offset lines from the top 
+     */
+    public void printMatchesLobby(List<AvailableMatch> availableMatches, int heightOffset){
+        int yCoord = (heightOffset > 0) ? heightOffset : 1;
+        int maxWidth = 38+2;
+        int xCoord = getDimStart(getWidth(), maxWidth); 
+        String prefix = setPosition(xCoord, yCoord);
+            
+        // define the border template
+        StringBuffer upperBorder    = new StringBuffer("╔");
+        upperBorder.append(repeatChar('═', maxWidth-2));
+        upperBorder.append("╗");
+        StringBuffer middleBorder  = new StringBuffer("╠");
+        middleBorder.append(repeatChar('═', maxWidth-2));
+        middleBorder.append("╣");
+        StringBuffer lowerBorder    = new StringBuffer("╚");
+        lowerBorder.append(repeatChar('═', maxWidth-2));
+        lowerBorder.append("╝");
 
+        // print upper and middle border
+        System.out.println(prefix + upperBorder.toString());
+        prefix = setPosition(xCoord, ++yCoord);
+        System.out.println(prefix + "║ \033[1mMatches                        Slots\033[0m ║");            // manually adjust according to maxWidth
+        prefix = setPosition(xCoord, ++yCoord);
+        System.out.println(prefix + middleBorder.toString());
+        prefix = setPosition(xCoord, ++yCoord);
+        
+        // print list of players
+        for (AvailableMatch match : availableMatches){
+
+            String white = "\033[0m";
+            String color = (match.maxPlayers() == match.currentPlayers()) ? "\033[31m" : "\033[35m";
+            
+            System.out.printf("%s║ %s%-31s %s/%s%s  ║", prefix, color, match.name().toString(), match.currentPlayers().toString(), match.maxPlayers().toString(), white);     // manually adjust according to maxWidth
+            prefix = setPosition(xCoord, ++yCoord);
+        }
+
+        // print lower border
+        System.out.print(prefix + lowerBorder.toString());
     }
 
     /**
      * Prints the scoreboard at the end of the match
      * @param playerToPoints map from player name as string, to total points as integer
-     * @param heightOffset offset from the top of the cli
+     * @param heightOffset offset lines from the top
      */
     public void printScoreboard(Map<String, Integer> playerToPoints, int heightOffset){
         int yCoord = (heightOffset > 0) ? heightOffset : 1;
@@ -749,5 +788,5 @@ public class TuiPrinter {
         // print lower border
         System.out.print(prefix + lowerBorder.toString());
     }
-    
+
 }
