@@ -623,7 +623,7 @@ public class TuiPrinter {
 
         int msgHeight, msgWidth;
         int x, y;
-        int vericalOffset = -10;
+        int verticalOffset = -10;
         if (isVictorious){
             msgHeight = 7;
             msgWidth = 78+2; // width must be even (pari)
@@ -636,7 +636,7 @@ public class TuiPrinter {
             msgWidth = 70+2; // width must be even (pari)
             x = getDimStart(maxWidth, msgWidth);
             y = getDimStart(maxHeight, msgHeight);
-            printYouLoseScreen(x, y + vericalOffset);
+            printYouLoseScreen(x, y + verticalOffset);
 
         }
     }
@@ -671,14 +671,38 @@ public class TuiPrinter {
     /**
      * Prints a one-line message in the center of the screen
      * @param message message to display
+     * @param heightOffset
      */
-    public void printCenteredMessage(String message){
+    public void printCenteredMessage(String message, int heightOffset){
+        int maxWidth = message.length();
+        if (maxWidth > getWidth() - 4)
+            return;
 
-        int yOffset = getDimStart(this.terminal.getHeight(), 1);
-        int xCoord = getDimStart(this.terminal.getWidth(), message.length());
+        String resetStyle = "\033[0m", style = "\033[1m";
 
-        message = setPosition(xCoord, yOffset++) + message;
-        System.out.println(message);
+        // int yCoord = getDimStart(this.terminal.getHeight(), 3);
+        int yCoord = (heightOffset > 0) ? heightOffset : getDimStart(this.terminal.getHeight(), 3);
+        int xCoord = getDimStart(this.terminal.getWidth(), maxWidth + 4);
+        String prefix = setPosition(xCoord, yCoord);
+
+        // define the border template
+        StringBuffer upperBorder    = new StringBuffer("╔");
+        upperBorder.append(repeatChar('═', maxWidth+2));
+        upperBorder.append("╗");
+        StringBuffer center  = new StringBuffer("║ ");
+        center.append(style + message + resetStyle);
+        center.append(" ║");
+        StringBuffer lowerBorder    = new StringBuffer("╚");
+        lowerBorder.append(repeatChar('═', maxWidth+2));
+        lowerBorder.append("╝");
+
+        // print 
+        System.out.println(prefix + upperBorder.toString());
+        prefix = setPosition(xCoord, ++yCoord);
+        System.out.println(prefix + center.toString());
+        prefix = setPosition(xCoord, ++yCoord);
+        System.out.println(prefix + lowerBorder.toString());
+
     }
 
     /**
@@ -788,5 +812,97 @@ public class TuiPrinter {
         // print lower border
         System.out.print(prefix + lowerBorder.toString());
     }
+
+    // ! delete main before pushing origin (here for debugging)
+
+    
+    public static void main(String[] args) throws IOException, CardException, InvalidResourceException {
+        TuiPrinter pippo = new TuiPrinter();
+        pippo.printPrompt("AAAAAAAAAAAAAAAAAAAAAAAA");
+
+        Pair<Integer, Integer> coordACASO = new Pair<>(20, 20);
+
+        Set<Symbol> set = new HashSet<>();
+        set.add(Symbol.FEATHER);
+        InitialCard initialCard =
+                new InitialCard(new CardFace(Symbol.FUNGUS, Symbol.ANIMAL, Symbol.PLANT, Symbol.INSECT, Collections.emptySet()),
+                        new CardFace(Symbol.FULL_CORNER, Symbol.EMPTY_CORNER, Symbol.FULL_CORNER, Symbol.EMPTY_CORNER, set));
+
+        Objective objective1 = new Objective(2, new QuantityRequirement(Map.of(Symbol.INSECT, 3)));
+        Objective objective2 = new Objective(2, new PositionRequirement(Map.of(
+                new Pair<>(0, 0), Symbol.ANIMAL, new Pair<>(1, 1), Symbol.ANIMAL, new Pair<>(2, 2), Symbol.ANIMAL)));
+        Pair<Objective, Objective> visibleObj = new Pair<>(objective1, objective2);
+
+        Map<DrawSource, PlayableCard> mappina = new HashMap<>();
+        int points = 7;
+        Symbol reign = Symbol.INSECT;
+        Symbol topLeft = Symbol.PARCHMENT;
+        Symbol topRight = Symbol.INSECT;
+        Symbol bottomLeft = Symbol.EMPTY_CORNER;
+        Symbol bottomRight = Symbol.FUNGUS;
+        ResourceCard resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);
+        mappina.put(DrawSource.FIRST_VISIBLE, resourceCard);
+
+        reign = Symbol.FUNGUS;
+        topLeft = Symbol.EMPTY_CORNER;
+        topRight = Symbol.FEATHER;
+        bottomLeft = Symbol.PLANT;
+        bottomRight = Symbol.FUNGUS;
+        resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);
+        mappina.put(DrawSource.SECOND_VISIBLE, resourceCard);
+
+        points = 0;
+        reign = Symbol.FUNGUS;
+        topLeft = Symbol.FUNGUS;
+        topRight = Symbol.INSECT;
+        bottomLeft = Symbol.PARCHMENT;
+        bottomRight = Symbol.EMPTY_CORNER;
+        resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);
+        mappina.put(DrawSource.THIRD_VISIBLE, resourceCard);
+
+        reign = Symbol.FUNGUS;
+        topLeft = Symbol.INKWELL;
+        topRight = Symbol.FUNGUS;
+        bottomLeft = Symbol.EMPTY_CORNER;
+        bottomRight = Symbol.ANIMAL;
+        resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);
+        mappina.put(DrawSource.FOURTH_VISIBLE, resourceCard);
+
+
+        Map<String, Integer> scoreMap = new HashMap<>();
+        scoreMap.put("Pippo", 15);
+        scoreMap.put("Topolino", 21);
+        scoreMap.put("Paperino", 2);
+        scoreMap.put("Minnie", 8);
+        scoreMap.put("Clarabella", 17);
+        scoreMap.put("Paperon de Paperoni", 1);
+
+
+        List<AvailableMatch> matcheList = new ArrayList<>();
+        matcheList.add(new AvailableMatch("Hyrule", 6, 4));
+        matcheList.add(new AvailableMatch("Morio-cho", 4, 4));
+        matcheList.add(new AvailableMatch("Gotham", 1, 0));
+
+
+        // pippo.printWelcomeScreen();
+        // pippo.printInitialSideBySide(initialCard, 0);
+        // pippo.printCommonObjectives(visibleObj, 0);
+        // pippo.printObjectives("hello", Color.RED, objective1, visibleObj);
+        // pippo.printEndScreen(true);
+        // pippo.printEndScreen(false);
+        // pippo.printDeck(coordACASO, Symbol.PLANT);
+        // pippo.printDeckVisibleCard(coordACASO, mappina);
+        // pippo.printDrawingScreen(new Pair<>(Symbol.PLANT, Symbol.ANIMAL), mappina);
+        // pippo.printScoreboard(scoreMap, 60);
+        pippo.printMatchesLobby(matcheList, 5);
+        // pippo.printHelp();
+
+        pippo.printCenteredMessage("Scegli il tuo match!", 1);
+        pippo.printCenteredMessage("sto al centro", 0);
+
+    }
+    
+ 
+
 
 }
