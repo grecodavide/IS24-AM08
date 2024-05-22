@@ -6,6 +6,7 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 import it.polimi.ingsw.controllers.PlayerControllerRMI;
+import it.polimi.ingsw.controllers.PlayerControllerRMIInterface;
 import it.polimi.ingsw.exceptions.AlreadyUsedUsernameException;
 import it.polimi.ingsw.exceptions.ChosenMatchException;
 import it.polimi.ingsw.exceptions.WrongStateException;
@@ -49,15 +50,18 @@ public class Server extends UnicastRemoteObject implements ServerRMIInterface {
     }
 
     @Override
-    public PlayerControllerRMI joinMatch(String matchName, String username) throws RemoteException, ChosenMatchException, WrongStateException, AlreadyUsedUsernameException {
+    public PlayerControllerRMIInterface joinMatch(String matchName, String username) throws RemoteException, ChosenMatchException, WrongStateException, AlreadyUsedUsernameException {
         if (!matches.containsKey(matchName))
             throw new ChosenMatchException("The chosen match doesn't exist");
         if (matches.get(matchName).isFull())
             throw new ChosenMatchException("The chosen match is already full");
 
         Match chosenMatch = matches.get(matchName);
+        PlayerControllerRMI controller = new PlayerControllerRMI(username, chosenMatch);
 
-        return new PlayerControllerRMI(username, chosenMatch);
+        UnicastRemoteObject.exportObject(controller, portRMI);
+
+        return controller;
     }
 
     @Override

@@ -19,7 +19,8 @@ import it.polimi.ingsw.utils.Pair;
  */
 public interface RemoteViewInterface extends Remote {
     /**
-     * Updates the list of players in the lobby before the start of the match
+     * Gives to the remote object the list of players in the lobby at the moment.
+     * It's used before the start of the match.
      *
      * @param playersUsernames list of usernames
      */
@@ -39,14 +40,6 @@ public interface RemoteViewInterface extends Remote {
      * @throws RemoteException If the remote object is considered not to be reachable any more and cannot return as usual
      */
     void matchStarted(Map<String, Color> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands, Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards, Pair<Symbol, Symbol> decksTopReigns) throws RemoteException;
-
-    
-    /**
-     * Gives the graphical view a list of available matches
-     * 
-     * @param availableMatchs The available matches
-     */
-    void receiveAvailableMatches(List<AvailableMatch> availableMatchs) throws RemoteException;
 
     /**
      * Gives to the remote object an initial card to show it in the view.

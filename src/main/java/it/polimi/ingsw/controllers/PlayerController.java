@@ -25,13 +25,10 @@ public abstract sealed class PlayerController implements MatchObserver permits P
      *
      * @param username The username of the new player of the Match
      * @param match    The match to which this PlayerClass must pertain
-     * @throws AlreadyUsedUsernameException If the username is already taken by another player of the same match
-     * @throws WrongStateException          If a new player cannot be added on the current state of the Match
      */
-    public PlayerController(String username, Match match) throws AlreadyUsedUsernameException, WrongStateException {
+    public PlayerController(String username, Match match) {
         this.player = new Player(username, match);
         this.match = match;
-
     }
 
     public Player getPlayer() {

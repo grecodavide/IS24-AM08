@@ -1,6 +1,6 @@
 package it.polimi.ingsw.server;
 
-import it.polimi.ingsw.controllers.PlayerControllerRMI;
+import it.polimi.ingsw.controllers.PlayerControllerRMIInterface;
 import it.polimi.ingsw.exceptions.AlreadyUsedUsernameException;
 import it.polimi.ingsw.exceptions.ChosenMatchException;
 import it.polimi.ingsw.exceptions.WrongStateException;
@@ -37,7 +37,7 @@ public interface ServerRMIInterface extends Remote {
      * @throws AlreadyUsedUsernameException If the given username is already taken
      * @throws WrongStateException          If the match is in a state during which doesn't allow players to join any more
      */
-    PlayerControllerRMI joinMatch(String matchName, String username) throws RemoteException, ChosenMatchException, AlreadyUsedUsernameException, WrongStateException;
+    PlayerControllerRMIInterface joinMatch(String matchName, String username) throws RemoteException, ChosenMatchException, AlreadyUsedUsernameException, WrongStateException;
 
     /**
      * Lets the calling view create a new match.

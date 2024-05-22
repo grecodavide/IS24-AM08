@@ -12,9 +12,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import it.polimi.ingsw.server.Server;
+
 /**
  * Subclass of {@link PlayerController} that implements its abstract methods through RMI interactions.
- * Each instance of this class is supposed to be sent through {@link it.polimi.ingsw.server.Server#joinMatch(String, String)})
+ * Each instance of this class is supposed to be sent through {@link Server#joinMatch(String, String)})
  * to an RMI View, this latter will then send its View instance to the PlayerController object, calling
  * {@link #registerView(RemoteViewInterface)} on it.
  */
@@ -33,7 +35,6 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
      */
     public PlayerControllerRMI(String username, Match match) throws AlreadyUsedUsernameException, WrongStateException {
         super(username, match);
-
     }
 
     /**
