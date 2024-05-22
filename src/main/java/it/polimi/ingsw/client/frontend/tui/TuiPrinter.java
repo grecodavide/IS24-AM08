@@ -40,7 +40,7 @@ public class TuiPrinter {
         commandList.put(new Pair<>("objective", "o"), "show the objectives of the current player");
     }
 
-    // PRIVATE METHODS //
+    //! PRIVATE METHODS //
 
     private Pair<Integer, Integer> sumCoords(Pair<Integer, Integer> op1, Pair<Integer, Integer> op2) {
         return new Pair<>(op1.first() + op2.first(), op1.second() + op2.second());
@@ -95,7 +95,8 @@ public class TuiPrinter {
     }
 
     public void printAvailableResources(Map<Symbol, Integer> availableResources, Integer verticalOffset) {
-        int termRows = this.getHeight(), termCols = this.getWidth();
+        // int termRows = this.getHeight(); 
+        int termCols = this.getWidth();
         String out = "";
         String spaces = "    ";
         Integer len = availableResources.keySet().size() * (5 + spaces.length()); // icon, space, :, space, number
@@ -408,7 +409,15 @@ public class TuiPrinter {
         };
     }
 
-    // PUBLIC METHODS //
+    private String repeatChar(char c, int times){
+
+        StringBuilder s = new StringBuilder();
+        for (int i = 0; i < times; i++)
+            s.append(c);
+        return s.toString();
+    }
+
+    //! PUBLIC METHODS //
 
     /**
      * Clears the terminal
@@ -507,8 +516,8 @@ public class TuiPrinter {
      */
     public void printObjectives(String username, Color color, Objective secret, Pair<Objective, Objective> visibles) {
         int termCols = this.getWidth();
-        Integer visiblesSize = 2;
-        Integer spaces = 4;
+        // Integer visiblesSize = 2;
+        // Integer spaces = 4;
         Integer strlen;
 
         strlen = ("Your secret objective").length();
@@ -571,13 +580,13 @@ public class TuiPrinter {
      * Prints a list of available commands
      */
     public void printHelp() {
-        String prefix = "Command used to";
+        // String prefix = "Command used to";
+        String prefix = "";
         int maxLen = this.getHeight() - infoLineOffset + 1;
         int y = maxLen - this.commandList.size();
 
         for (Pair<String, String> command : this.commandList.keySet()) {
-            System.out.printf("%s%-15s %2s: %s %s", this.setPosition(1, y), command.first() + ",", command.second(), prefix,
-                    this.commandList.get(command));
+            System.out.printf("%s%-15s %2s: %s %s", this.setPosition(1, y), command.first(), command.second(), prefix, this.commandList.get(command));
             y++;
 
         }
@@ -587,11 +596,11 @@ public class TuiPrinter {
      * Prints the welcome screen in the middle of the tui view
      */
     public void printWelcomeScreen() {
-        int maxHeight = this.getHeight() - this.infoLineOffset;
+        // int maxHeight = this.getHeight() - this.infoLineOffset;
         int welcomeHeight = 5, welcomeWidth = 88+2; // width must be even (pari)
         int spaceBetween = 3;
         int titleHeight = 21, titleWidth = 210+2; // width must be even (pari)
-//        int titleHeight = 18, titleWidth = 196+2; // width must be even (pari)
+        // int titleHeight = 18, titleWidth = 196+2; // deprecated title screen
 
         int welcomeStartY = getDimStart(this.getHeight(), welcomeHeight + spaceBetween + titleHeight);
         int titleStartY = welcomeStartY + welcomeHeight + spaceBetween;
@@ -677,7 +686,7 @@ public class TuiPrinter {
      * @param visiblePlayableCards map of visible cards
      */
     public void printDrawingScreen(Pair<Symbol, Symbol> decksTopReign, Map<DrawSource, PlayableCard> visiblePlayableCards) {
-        int maxHeight = this.getHeight() - this.infoLineOffset;
+        // int maxHeight = this.getHeight() - this.infoLineOffset;
         int deckHeight = 6 + 2, deckWidth = 18 + 1; // width must be even (pari)
         int xSpaceBetween = 12, ySpaceBetween = 0;
         int cardsHeight = 6 + 2, cardsWidth = 18 + 2 + 18; // width must be even (pari)
@@ -690,6 +699,55 @@ public class TuiPrinter {
         printDeck(new Pair<>(deckStartX, deckStartY), decksTopReign.first(), DrawSource.GOLDS_DECK);
         printDeck(new Pair<>(deckStartX, deckStartY + deckHeight + ySpaceBetween), decksTopReign.second(), DrawSource.RESOURCES_DECK);
         printDeckVisibleCard(new Pair<>(cardsStartX, cardsStartY), visiblePlayableCards);
+    }
+
+    // TODO: implement printMatcheslobby
+    // * Prints the list of matches (joinable or not) in the center of the screen 
+    public void printMatchesLobby(){
+
+    }
+
+    /**
+     * Prints the scoreboard at the end of the match
+     * @param playerToPoints map from player name as string, to total points as integer
+     * @param heightOffset offset from the top of the cli
+     */
+    public void printScoreboard(Map<String, Integer> playerToPoints, int heightOffset){
+        int yCoord = (heightOffset > 0) ? heightOffset : 1;
+        int maxWidth = 38+2;
+        int xCoord = getDimStart(getWidth(), maxWidth); 
+        String prefix = setPosition(xCoord, yCoord);
+        
+        // ? order the players by points
+        // ? bold + color for the current player?
+        
+        // define the border template
+        StringBuffer upperBorder    = new StringBuffer("╔");
+        upperBorder.append(repeatChar('═', maxWidth-2));
+        upperBorder.append("╗");
+        StringBuffer middleBorder  = new StringBuffer("╠");
+        middleBorder.append(repeatChar('═', maxWidth-2));
+        middleBorder.append("╣");
+        StringBuffer lowerBorder    = new StringBuffer("╚");
+        lowerBorder.append(repeatChar('═', maxWidth-2));
+        lowerBorder.append("╝");
+
+        // print upper and middle border
+        System.out.println(prefix + upperBorder.toString());
+        prefix = setPosition(xCoord, ++yCoord);
+        System.out.println(prefix + "║ \033[1mPlayer                         Score\033[0m ║");            // manually adjust according to maxWidth
+        prefix = setPosition(xCoord, ++yCoord);
+        System.out.println(prefix + middleBorder.toString());
+        prefix = setPosition(xCoord, ++yCoord);
+        
+        // print list of players
+        for (String s : playerToPoints.keySet()){
+            System.out.printf("%s║ %-31s%4s  ║", prefix, s, playerToPoints.get(s).toString());     // manually adjust according to maxWidth
+            prefix = setPosition(xCoord, ++yCoord);    
+        }
+
+        // print lower border
+        System.out.print(prefix + lowerBorder.toString());
     }
     
 }
