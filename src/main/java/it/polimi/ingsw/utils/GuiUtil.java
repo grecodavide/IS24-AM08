@@ -1,22 +1,12 @@
 package it.polimi.ingsw.utils;
 
 import it.polimi.ingsw.client.frontend.gui.GraphicalApplication;
-import it.polimi.ingsw.client.frontend.gui.scenes.SceneController;
 import it.polimi.ingsw.gamemodel.*;
 import javafx.fxml.FXMLLoader;
-import org.controlsfx.control.spreadsheet.SpreadsheetCellEditor;
 
 import java.io.IOException;
 
 public class GuiUtil {
-
-    /**
-     * Get a node from the specified FXML path
-     * @param path file path of FXML
-     * @return The first node
-     * @param <T> Type of the node
-     * @throws IOException
-     */
     public static String playableCardsPath = "/images/playable_cards";
     public static String objectivesPath = "/images/objectives";
     public static String initialsPath = "/images/initial_cards";
@@ -45,19 +35,15 @@ public class GuiUtil {
     }
 
     public static String getImagePath(PlayableCard card, Side side) {
+        String reign = card.getReign().toString().toUpperCase();
+
         if (side.equals(Side.FRONT)) {
             return playableCardsPath + "/" + card.getId() + ".png";
         } else {
-            switch (card){
-                case GoldCard goldCard -> {
-                    return playableCardsPath + "/" + goldCard.getReign().toString().toUpperCase()
-                            + "-golds-back.png";
-                }
-                case ResourceCard resourceCard -> {
-                    return playableCardsPath + "/" + resourceCard.getReign().toString().toUpperCase()
-                            + "-resources-back.png";
-                }
-            }
+            return switch (card){
+                case GoldCard ignored -> playableCardsPath + "/" + reign + "-golds-back.png";
+                case ResourceCard ignored -> playableCardsPath + "/" + reign + "-resources-back.png";
+            };
         }
     }
 

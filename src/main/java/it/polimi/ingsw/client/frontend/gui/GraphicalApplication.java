@@ -2,7 +2,6 @@ package it.polimi.ingsw.client.frontend.gui;
 
 import it.polimi.ingsw.client.frontend.gui.scenes.PlayerTabController;
 import it.polimi.ingsw.client.frontend.gui.scenes.SceneController;
-import it.polimi.ingsw.gamemodel.Card;
 import it.polimi.ingsw.gamemodel.PlayableCard;
 import it.polimi.ingsw.gamemodel.Side;
 import it.polimi.ingsw.utils.GuiUtil;
@@ -27,8 +26,7 @@ public class GraphicalApplication extends Application {
     public void start(Stage primaryStage) throws IOException {
         this.view = new GraphicalViewGUI(this);
         this.primaryStage = primaryStage;
-        // Create a GraphicalViewGUI
-        view = new GraphicalViewGUI(this);
+
         // Load initial screen
         primaryStage.setTitle("Codex Naturalis");
         // Load FXML layout
