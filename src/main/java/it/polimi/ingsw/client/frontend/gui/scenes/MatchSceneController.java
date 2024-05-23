@@ -1,24 +1,23 @@
 package it.polimi.ingsw.client.frontend.gui.scenes;
 
-import it.polimi.ingsw.client.frontend.gui.nodes.BoardPane;
-import it.polimi.ingsw.gamemodel.Side;
-import it.polimi.ingsw.utils.CardsManager;
 import it.polimi.ingsw.utils.GuiUtil;
-import it.polimi.ingsw.utils.Pair;
 import javafx.collections.ObservableMap;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
 
 import java.io.IOException;
 
-public class MatchSceneController extends SceneController{
+public class MatchSceneController extends SceneController {
     @FXML
     TabPane matchTabs;
+    @FXML
+    AnchorPane matchPane;
 
     public void initialize() {
-
     }
 
     @Override
@@ -34,9 +33,12 @@ public class MatchSceneController extends SceneController{
             matchTabs.getTabs().add(t);
             t.getProperties().put("Controller", loader.getController());
             t.getProperties().put("Username", username);
+            //BoardPane playerBoard = (HBox chatPane = this.loadScene("/fxml/chat.fxml");
+            //playerBoard.setId(username + "-board");
         }
-        view.initializeSceneControllers();
+
+        // Add the chat
+        HBox chatPane = this.loadScene("/fxml/chat.fxml");
+        matchPane.getChildren().add(chatPane);
     }
-
-
 }

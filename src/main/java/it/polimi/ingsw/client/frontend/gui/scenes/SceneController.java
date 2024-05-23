@@ -7,7 +7,7 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
-public class SceneController {
+public abstract class SceneController {
     protected GraphicalViewGUI view;
     protected Stage stage;
 
@@ -17,6 +17,8 @@ public class SceneController {
      */
     public void initializePostController() throws IOException{
     }
+
+    public abstract void initialize() throws IOException;
 
     public void setGraphicalView(GraphicalViewGUI view) {
         this.view = view;

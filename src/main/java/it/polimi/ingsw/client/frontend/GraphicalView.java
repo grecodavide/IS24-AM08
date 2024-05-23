@@ -25,7 +25,7 @@ public abstract class GraphicalView {
 
     
     /**
-     * Displayes the user an error, when received
+     * Displays the user an error, when received
      * 
      * @param cause What went wrong
      */
