@@ -161,11 +161,9 @@ public abstract class GraphicalView {
 
         if (this.currentPlayer.equals(this.username)) {
             if (this.clientBoards.get(this.username).getPlaced().isEmpty()) {
-                this.networkView.drawInitialCard();
-                this.setLastRequestStatus(RequestStatus.PENDING);
+                this.drawInitialCard();
             } else if (this.clientBoards.get(this.username).getObjective() == null) {
-                this.setLastRequestStatus(RequestStatus.PENDING);
-                this.networkView.drawSecretObjectives();
+                this.drawSecretObjectives();
             } else {
                 this.makeMove();
             }

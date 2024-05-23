@@ -1,6 +1,5 @@
 package it.polimi.ingsw.client.frontend.tui;
 
-import java.text.NumberFormat;
 import java.util.List;
 import java.util.Scanner;
 import it.polimi.ingsw.client.frontend.ClientBoard;
@@ -110,7 +109,7 @@ public class GraphicalViewTUI extends GraphicalView {
 
     private Side chooseCardSide(PlayableCard card) {
         this.printer.clearTerminal();
-        this.printer.showCard(card);
+        this.printer.printPlayableFrontAndBack(card, 0);
         String userIn = this.askUser("Choose side (b for back, default to front)");
         switch (userIn) {
             case "b":
