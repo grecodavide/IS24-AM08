@@ -12,8 +12,8 @@ import javafx.scene.layout.Pane;
 
 
 public class BoardPane extends Pane {
-    public static double cardWidth = 199;
-    public static double cardHeight = 132;
+    public static double cardWidth = CardView.cardWidth;
+    public static double cardHeight = CardView.cardHeight;
     public static double cardBorderW = 44.8;
     public static double cardBorderH = 52.6;
     public BoardPane() {
@@ -21,23 +21,20 @@ public class BoardPane extends Pane {
     }
 
     public void addCard(Pair<Integer, Integer> position, PlayableCard card, Side side) {
-        ImageView img = new ImageView(new Image(GuiUtil.getImagePath(card, side)));
-        displayCard(position, img);
+        CardView c = new CardView();
+        displayCard(position, c);
     }
 
     public void addCard(Pair<Integer, Integer> position, InitialCard card, Side side) {
-        ImageView img = new ImageView(new Image(GuiUtil.getImagePath(card, side)));
-        displayCard(position, img);
+        CardView c = new CardView(card, side);
+        displayCard(position, c);
     }
 
-    private void displayCard(Pair<Integer, Integer> position, ImageView img) {
-        img.getStyleClass().add("gamecard");
-        img.setFitWidth(cardWidth);
-        img.setFitHeight(cardHeight);
+    private void displayCard(Pair<Integer, Integer> position, CardView c) {
         Pair<Double, Double> coords = convertCoordinates(position);
-        img.setLayoutX(coords.first());
-        img.setLayoutY(coords.second());
-        this.getChildren().add(img);
+        c.setLayoutX(coords.first());
+        c.setLayoutY(coords.second());
+        this.getChildren().add(c);
     }
 
     public Pair<Double, Double> convertCoordinates(Pair<Integer, Integer> coords) {
