@@ -129,6 +129,7 @@ public class ClientReceiver implements Runnable {
     private void sendError(String message) {
         try {
             ErrorMessage msg = (ErrorMessage)this.io.stringToMsg(message);
+
             this.networkView.notifyError(new Exception());
         } catch (Exception e) {
             // Nothing to do, received an invalid object
@@ -141,11 +142,16 @@ public class ClientReceiver implements Runnable {
         while (!this.socket.isClosed() && this.socket.isConnected()) {
             try {
                 message = this.io.readMsg();
-                this.parseMessage(message);
+                final String finalMessage = message;
+                new Thread(() -> {
+                    this.parseMessage(finalMessage);
+                }).start();
             } catch (IOException | ClassNotFoundException e) {
                 // TODO: something bad happened
             }
         }
+
+        System.out.println("cacca");
     }
 
 }

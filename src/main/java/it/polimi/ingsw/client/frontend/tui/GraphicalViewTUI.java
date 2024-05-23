@@ -1,15 +1,13 @@
 package it.polimi.ingsw.client.frontend.tui;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import it.polimi.ingsw.client.frontend.ClientBoard;
 import it.polimi.ingsw.client.frontend.GraphicalView;
 import it.polimi.ingsw.client.network.NetworkViewRMI;
 import it.polimi.ingsw.client.network.NetworkViewTCP;
-import it.polimi.ingsw.gamemodel.InitialCard;
-import it.polimi.ingsw.gamemodel.Objective;
-import it.polimi.ingsw.gamemodel.PlayableCard;
-import it.polimi.ingsw.gamemodel.Side;
+import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.LeaderboardEntry;
 import it.polimi.ingsw.utils.Pair;
 import it.polimi.ingsw.utils.RequestStatus;
@@ -273,9 +271,9 @@ public class GraphicalViewTUI extends GraphicalView {
         }
 
         super.chooseInitialCardSide(side);
-        // if (!this.getServerResponse()) {
-        //     this.giveInitialCard(initialCard);
-        // }
+        if (!this.getServerResponse()) {
+            this.giveInitialCard(initialCard);
+        }
     }
 
     @Override
@@ -305,9 +303,9 @@ public class GraphicalViewTUI extends GraphicalView {
         }
 
         super.chooseSecretObjective(objective);
-        // if (!this.getServerResponse()) {
-        //     this.giveSecretObjectives(secretObjectives);
-        // }
+        if (!this.getServerResponse()) {
+            this.giveSecretObjectives(secretObjectives);
+        }
     }
 
     @Override
@@ -324,9 +322,57 @@ public class GraphicalViewTUI extends GraphicalView {
         Pair<Integer, Integer> coords = this.chooseCoords(board);
 
         super.playCard(coords, card, side);
-        // if (!this.getServerResponse()) {
-        //     this.makeMove();
-        // }
+        if (!this.getServerResponse()) {
+            this.makeMove();
+        }
+
+    }
+
+    @Override
+    public void someonePlayedCard(String someoneUsername, Pair<Integer, Integer> coords, PlayableCard card, Side side, int points,
+            Map<Symbol, Integer> availableResources) {
+        super.someonePlayedCard(someoneUsername, coords, card, side, points, availableResources);
+
+        this.printer.clearTerminal();
+        if (this.username.equals(someoneUsername)) {
+            this.printer.printDrawingScreen(decksTopReign, visiblePlayableCards);
+            DrawSource source = null;
+            String userIn, prompt = "Choose a draw source: ";
+            while (source == null) {
+                userIn = askUser(prompt);
+                switch (userIn) {
+                    case "G", "g":
+                        source = DrawSource.GOLDS_DECK;
+                        break;
+                    case "R", "r":
+                        source = DrawSource.RESOURCES_DECK;
+                        break;
+                    case "1":
+                        source = DrawSource.FIRST_VISIBLE;
+                        break;
+                    case "2":
+                        source = DrawSource.SECOND_VISIBLE;
+                        break;
+                    case "3":
+                        source = DrawSource.THIRD_VISIBLE;
+                        break;
+                    case "4":
+                        source = DrawSource.FOURTH_VISIBLE;
+                        break;
+                    default:
+                        prompt = "Not a valid source! Try again.";
+                        break;
+                }
+            }
+
+            super.drawCard(source);
+            if (!getServerResponse()) {
+                this.someonePlayedCard(someoneUsername, coords, card, side, points, availableResources);
+            }
+        } else {
+            this.printer.printCenteredMessage(someoneUsername + " is drawing a card!", 0);
+        }
+
     }
 
     @Override

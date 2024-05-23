@@ -114,6 +114,7 @@ public abstract class GraphicalView {
      */
     public void chooseSecretObjective(Objective objective) {
         this.setLastRequestStatus(RequestStatus.PENDING);
+        this.clientBoards.get(this.username).setSecretObjective(objective);
         this.networkView.chooseSecretObjective(objective);
     }
 
