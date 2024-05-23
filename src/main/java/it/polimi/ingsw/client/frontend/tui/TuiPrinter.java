@@ -536,7 +536,7 @@ public class TuiPrinter {
     /**
      * Prints a pair of objectives, with a brief description above them
      * @param pairObjectives pair of objectives
-     * @param heightOffset offset lines from the top
+     * @param heightOffset offset lines from the top (default is 1)
      */
     public void printObjectivePair(String message, Pair<Objective, Objective> pairObjectives, int heightOffset){
         int yOffset = (heightOffset <= 0) ? 1 : heightOffset;
@@ -644,7 +644,7 @@ public class TuiPrinter {
      * Prints the specified initial card front and back in the middle of the screen
      * 
      * @param initialCard initial card to print
-     * @param heightOffset offset lines from the top
+     * @param heightOffset offset lines from the top (default is 1)
      */
     public void printInitialSideBySide(InitialCard initialCard, int heightOffset) {
 
@@ -661,16 +661,38 @@ public class TuiPrinter {
             facedown = this.parser.parseCard(initialCard, facedownCoord, null, false);
             System.out.println(faceup + facedown);
         } catch (CardException e) {
-            // TODO: handle exception
+            // TODO: handle exception ?
         }
+    }
 
+    /**
+     * Prints the specified initial card front and back in the middle of the screen
+     * 
+     * @param playableCard gold/resource card to print
+     * @param heightOffset offset lines from the top. For default (y-centered) must be 0
+     */
+    public void printPlayableFrontAndBack(PlayableCard playableCard, int heightOffset){
+        int yCoord = (heightOffset > 0) ? heightOffset : getDimStart(getHeight()-1, 6);
+        int cardWidth = 18, spaceBetweenSides = 4;
+        int xCoord = getDimStart(getWidth(), cardWidth + spaceBetweenSides + cardWidth);
 
+        String faceUp, faceDown;
+        Pair<Integer, Integer> faceupCoord = new Pair<>(xCoord, yCoord);
+        Pair<Integer, Integer> facedownCoord = new Pair<>(xCoord + cardWidth + spaceBetweenSides, yCoord);
+
+        try {
+           faceUp = this.parser.parseCard(playableCard, faceupCoord, null, true);
+           faceDown = this.parser.parseCard(playableCard, facedownCoord, null, false);
+           System.out.println(faceUp + faceDown);
+        } catch (Exception e) {
+            // TODO: handle exception ?
+        }
     }
 
     /**
      * Prints a one-line message in the center of the screen
      * @param message message to display
-     * @param heightOffset
+     * @param heightOffset offset lines from the top. For default (y-centered) must be 0
      */
     public void printCenteredMessage(String message, int heightOffset){
         int maxWidth = message.length();
@@ -725,10 +747,12 @@ public class TuiPrinter {
         printDeckVisibleCard(new Pair<>(cardsStartX, cardsStartY), visiblePlayableCards);
     }
 
+    // TODO: add index to print lobby 
+    // TODO: refactor print lobby with two lists 
     /**
      * Prints the list of matches (joinable or not) in the center of the screen
      * @param availableMatches list of available matches
-     * @param heightOffset offset lines from the top 
+     * @param heightOffset offset lines from the top (default is 1)
      */
     public void printMatchesLobby(List<AvailableMatch> availableMatches, int heightOffset){
         int yCoord = (heightOffset > 0) ? heightOffset : 1;
@@ -772,7 +796,7 @@ public class TuiPrinter {
     /**
      * Prints the scoreboard at the end of the match
      * @param playerToPoints map from player name as string, to total points as integer
-     * @param heightOffset offset lines from the top
+     * @param heightOffset offset lines from the top (default is 1)
      */
     public void printScoreboard(Map<String, Integer> playerToPoints, int heightOffset){
         int yCoord = (heightOffset > 0) ? heightOffset : 1;
@@ -811,97 +835,5 @@ public class TuiPrinter {
         // print lower border
         System.out.print(prefix + lowerBorder.toString());
     }
-
-    // ! delete main before pushing origin (here for debugging)
-
-    
-    public static void main(String[] args) throws IOException, CardException, InvalidResourceException {
-        TuiPrinter pippo = new TuiPrinter();
-        pippo.printPrompt("AAAAAAAAAAAAAAAAAAAAAAAA");
-
-        Pair<Integer, Integer> coordACASO = new Pair<>(20, 20);
-
-        Set<Symbol> set = new HashSet<>();
-        set.add(Symbol.FEATHER);
-        InitialCard initialCard =
-                new InitialCard(new CardFace(Symbol.FUNGUS, Symbol.ANIMAL, Symbol.PLANT, Symbol.INSECT, Collections.emptySet()),
-                        new CardFace(Symbol.FULL_CORNER, Symbol.EMPTY_CORNER, Symbol.FULL_CORNER, Symbol.EMPTY_CORNER, set));
-
-        Objective objective1 = new Objective(2, new QuantityRequirement(Map.of(Symbol.INSECT, 3)));
-        Objective objective2 = new Objective(2, new PositionRequirement(Map.of(
-                new Pair<>(0, 0), Symbol.ANIMAL, new Pair<>(1, 1), Symbol.ANIMAL, new Pair<>(2, 2), Symbol.ANIMAL)));
-        Pair<Objective, Objective> visibleObj = new Pair<>(objective1, objective2);
-
-        Map<DrawSource, PlayableCard> mappina = new HashMap<>();
-        int points = 7;
-        Symbol reign = Symbol.INSECT;
-        Symbol topLeft = Symbol.PARCHMENT;
-        Symbol topRight = Symbol.INSECT;
-        Symbol bottomLeft = Symbol.EMPTY_CORNER;
-        Symbol bottomRight = Symbol.FUNGUS;
-        ResourceCard resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);
-        mappina.put(DrawSource.FIRST_VISIBLE, resourceCard);
-
-        reign = Symbol.FUNGUS;
-        topLeft = Symbol.EMPTY_CORNER;
-        topRight = Symbol.FEATHER;
-        bottomLeft = Symbol.PLANT;
-        bottomRight = Symbol.FUNGUS;
-        resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);
-        mappina.put(DrawSource.SECOND_VISIBLE, resourceCard);
-
-        points = 0;
-        reign = Symbol.FUNGUS;
-        topLeft = Symbol.FUNGUS;
-        topRight = Symbol.INSECT;
-        bottomLeft = Symbol.PARCHMENT;
-        bottomRight = Symbol.EMPTY_CORNER;
-        resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);
-        mappina.put(DrawSource.THIRD_VISIBLE, resourceCard);
-
-        reign = Symbol.FUNGUS;
-        topLeft = Symbol.INKWELL;
-        topRight = Symbol.FUNGUS;
-        bottomLeft = Symbol.EMPTY_CORNER;
-        bottomRight = Symbol.ANIMAL;
-        resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);
-        mappina.put(DrawSource.FOURTH_VISIBLE, resourceCard);
-
-
-        Map<String, Integer> scoreMap = new HashMap<>();
-        scoreMap.put("Pippo", 15);
-        scoreMap.put("Topolino", 21);
-        scoreMap.put("Paperino", 2);
-        scoreMap.put("Minnie", 8);
-        scoreMap.put("Clarabella", 17);
-        scoreMap.put("Paperon de Paperoni", 1);
-
-
-        List<AvailableMatch> matcheList = new ArrayList<>();
-        matcheList.add(new AvailableMatch("Hyrule", 6, 4));
-        matcheList.add(new AvailableMatch("Morio-cho", 4, 4));
-        matcheList.add(new AvailableMatch("Gotham", 1, 0));
-
-
-        // pippo.printWelcomeScreen();
-        // pippo.printInitialSideBySide(initialCard, 0);
-        // pippo.printCommonObjectives(visibleObj, 0);
-        // pippo.printObjectives("hello", Color.RED, objective1, visibleObj);
-        // pippo.printEndScreen(true);
-        // pippo.printEndScreen(false);
-        // pippo.printDeck(coordACASO, Symbol.PLANT);
-        // pippo.printDeckVisibleCard(coordACASO, mappina);
-        // pippo.printDrawingScreen(new Pair<>(Symbol.PLANT, Symbol.ANIMAL), mappina);
-        // pippo.printScoreboard(scoreMap, 60);
-        pippo.printMatchesLobby(matcheList, 5);
-        // pippo.printHelp();
-
-        pippo.printCenteredMessage("Scegli il tuo match!", 1);
-        pippo.printCenteredMessage("sto al centro", 0);
-
-    }
-    
- 
-
 
 }
