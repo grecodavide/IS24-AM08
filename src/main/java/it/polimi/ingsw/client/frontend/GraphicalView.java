@@ -22,7 +22,7 @@ public abstract class GraphicalView {
     private boolean lastTurn = false;
     protected List<AvailableMatch> availableMatches;
     protected String username;
-    protected LastRequest lastRequest;
+    protected final LastRequest lastRequest;
 
     public GraphicalView() {
         this.lastRequest = new LastRequest();

@@ -273,19 +273,19 @@ public class GraphicalViewTUI extends GraphicalView {
         }
 
         super.chooseInitialCardSide(side);
-        if (!this.getServerResponse()) {
-            this.giveInitialCard(initialCard);
-        }
+        // if (!this.getServerResponse()) {
+        //     this.giveInitialCard(initialCard);
+        // }
     }
 
     @Override
     public void someoneSetInitialSide(String someoneUsername, Side side) {
-        super.someoneSetInitialSide(someoneUsername, side);
         this.printer.clearTerminal();
         if (this.username.equals(someoneUsername)) {
             this.printer.printPlayerBoard(this.username, this.clientBoards.get(this.username));
             this.printer.printMessage("Correctly played card! waiting for others to choose theirs");
         }
+        super.someoneSetInitialSide(someoneUsername, side);
     }
 
     @Override
@@ -305,9 +305,9 @@ public class GraphicalViewTUI extends GraphicalView {
         }
 
         super.chooseSecretObjective(objective);
-        if (!this.getServerResponse()) {
-            this.giveSecretObjectives(secretObjectives);
-        }
+        // if (!this.getServerResponse()) {
+        //     this.giveSecretObjectives(secretObjectives);
+        // }
     }
 
     @Override
@@ -324,9 +324,9 @@ public class GraphicalViewTUI extends GraphicalView {
         Pair<Integer, Integer> coords = this.chooseCoords(board);
 
         super.playCard(coords, card, side);
-        if (!this.getServerResponse()) {
-            this.makeMove();
-        }
+        // if (!this.getServerResponse()) {
+        //     this.makeMove();
+        // }
     }
 
     @Override
