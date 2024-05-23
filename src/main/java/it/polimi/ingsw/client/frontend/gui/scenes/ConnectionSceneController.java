@@ -11,6 +11,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
 import java.io.IOException;
@@ -36,7 +37,7 @@ public class ConnectionSceneController extends SceneController {
         // Add callback for the button
         connectButton.setOnAction(event -> {
             try {
-                this.showMatch();
+                this.showLobby();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -63,5 +64,12 @@ public class ConnectionSceneController extends SceneController {
         GuiUtil.applyCSS(root, "/css/match.css");
         Scene matchScene = new Scene(root, 1920, 1080);
         stage.setScene(matchScene);
+    }
+
+    private void showLobby() throws IOException {
+        StackPane root = this.loadScene("/fxml/lobby.fxml");
+        GuiUtil.applyCSS(root, "/css/style.css");
+        Scene lobbyScene = new Scene(root, 1800, 1080);
+        stage.setScene(lobbyScene);
     }
 }

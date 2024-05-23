@@ -34,9 +34,8 @@ public class MatchSceneController extends SceneController{
             matchTabs.getTabs().add(t);
             t.getProperties().put("Controller", loader.getController());
             t.getProperties().put("Username", username);
-            //BoardPane playerBoard = (BoardPane) namespace.get("playerboard");
-            //playerBoard.setId(username + "-board");
         }
+        view.initializeSceneControllers();
     }
 
 
