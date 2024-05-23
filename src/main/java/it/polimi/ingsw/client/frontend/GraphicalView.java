@@ -22,7 +22,12 @@ public abstract class GraphicalView {
     private boolean lastTurn = false;
     protected List<AvailableMatch> availableMatches;
     protected String username;
-    protected RequestStatus lastRequestStatus;
+    protected LastRequest lastRequest;
+
+    public GraphicalView() {
+        this.lastRequest = new LastRequest();
+        this.lastRequest.setStatus(RequestStatus.PENDING);
+    }
 
     protected void setUsername(String username) {
         this.username = username;
@@ -34,7 +39,7 @@ public abstract class GraphicalView {
     }
 
     public void setLastRequestStatus(RequestStatus status) {
-        this.lastRequestStatus = status;
+        this.lastRequest.setStatus(status);
     }
 
     /**
@@ -154,11 +159,12 @@ public abstract class GraphicalView {
 
         this.changePlayer();
 
-        this.setLastRequestStatus(RequestStatus.PENDING);
         if (this.currentPlayer.equals(this.username)) {
             if (this.clientBoards.get(this.username).getPlaced().isEmpty()) {
                 this.networkView.drawInitialCard();
+                this.setLastRequestStatus(RequestStatus.PENDING);
             } else if (this.clientBoards.get(this.username).getObjective() == null) {
+                this.setLastRequestStatus(RequestStatus.PENDING);
                 this.networkView.drawSecretObjectives();
             } else {
                 this.makeMove();
@@ -304,9 +310,6 @@ public abstract class GraphicalView {
      * @param someoneUsername Player who is choosing
      */
     public void someoneDrewSecretObjective(String someoneUsername) {
-        if (this.username.equals(someoneUsername)) {
-            this.setLastRequestStatus(RequestStatus.SUCCESSFUL);
-        }
     }
 
     public void someoneChoseSecretObjective(String someoneUsername) {
