@@ -1,5 +1,6 @@
 package it.polimi.ingsw.client.frontend.tui;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -8,6 +9,7 @@ import it.polimi.ingsw.client.frontend.GraphicalView;
 import it.polimi.ingsw.client.network.NetworkViewRMI;
 import it.polimi.ingsw.client.network.NetworkViewTCP;
 import it.polimi.ingsw.gamemodel.*;
+import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.LeaderboardEntry;
 import it.polimi.ingsw.utils.Pair;
 import it.polimi.ingsw.utils.RequestStatus;
@@ -151,19 +153,30 @@ public class GraphicalViewTUI extends GraphicalView {
     }
 
 
-
-    // TODO: show again list of availableMatches
-    private void parseMatchDecision(String prompt) {
+    private void parseMatchDecision(String prompt, List<AvailableMatch> joinables, List<AvailableMatch> notJoinables) {
         String userIn;
         boolean requestSent = false;
         Integer splitIndex;
 
         while (!requestSent) {
+            if (!joinables.isEmpty() || !notJoinables.isEmpty()) {
+                this.printer.printMatchesLobby(joinables, notJoinables, 0);
+            }
             userIn = this.askUser(prompt);
             splitIndex = userIn.indexOf(" ");
             if (splitIndex == -1) {
                 // join
                 requestSent = true;
+                try {
+                    Integer index = Integer.valueOf(userIn) - 1;
+                    if (index >= 0 && index < joinables.size()) {
+                        this.joinMatch(joinables.get(index).name());
+                    } else {
+                        prompt = "Not a valid index! Try again.";
+                    }
+                } catch (Exception e) {
+                    prompt = "Not a number! Try again.";
+                }
                 this.joinMatch(userIn);
             } else {
                 // create
@@ -220,7 +233,7 @@ public class GraphicalViewTUI extends GraphicalView {
 
     private void setMatch() throws InterruptedException {
         String prompt;
-
+        List<AvailableMatch> joinables = new ArrayList<>(), notJoinables = new ArrayList<>();
         this.setUsername(this.askUser("Choose username:"));
 
         this.lastRequest.setStatus(RequestStatus.PENDING);
@@ -236,10 +249,16 @@ public class GraphicalViewTUI extends GraphicalView {
         if (this.availableMatches.size() == 0) {
             prompt = "No matches available. Create one by typing match name and max players (e.g. MatchTest 2):";
         } else {
-            this.printer.printMatchesLobby(this.availableMatches, 1); // not to be centered!
+            this.availableMatches.forEach(match -> {
+                if (match.currentPlayers() < match.maxPlayers()) {
+                    joinables.add(match);
+                } else {
+                    notJoinables.add(match);
+                }
+            });
             prompt = "Join a match by typing its name, or create one by typing its name and max players (e.g. MatchTest 2)";
         }
-        this.parseMatchDecision(prompt);
+        this.parseMatchDecision(prompt, joinables, notJoinables);
 
         if (!this.getServerResponse()) {
             this.printer.clearTerminal();
@@ -247,7 +266,16 @@ public class GraphicalViewTUI extends GraphicalView {
             this.setMatch();
         } else {
             this.printer.clearTerminal();
-            this.printer.printCenteredMessage("Everything went fine!", 1);
+            this.printer.printCenteredMessage("Waiting for other players...", 1);
+        }
+    }
+
+    @Override
+    public void someoneJoined(String someoneUsername) {
+        super.someoneJoined(someoneUsername);
+        if (!this.username.equals(someoneUsername)) {
+            this.printer.clearTerminal();
+            this.printer.printCenteredMessage(someoneUsername + " joined the match!", 1);
         }
     }
 
@@ -376,12 +404,6 @@ public class GraphicalViewTUI extends GraphicalView {
     }
 
     @Override
-    public void giveLobbyInfo(List<String> playersUsernames) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'giveLobbyInfo'");
-    }
-
-    @Override
     protected void notifyMatchStarted() {
         this.printer.printCenteredMessage("Match started!", 1);
     }
@@ -404,6 +426,12 @@ public class GraphicalViewTUI extends GraphicalView {
         throw new UnsupportedOperationException("Unimplemented method 'matchFinished'");
     }
 
+    @Override
+    public void giveLobbyInfo(List<String> playersUsernames) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'giveLobbyInfo'");
+    }
+
     public static void main(String[] args) {
         GraphicalViewTUI tui = new GraphicalViewTUI();
         tui.startInterface();
@@ -411,4 +439,5 @@ public class GraphicalViewTUI extends GraphicalView {
 
         }
     }
+
 }

@@ -200,8 +200,15 @@ public class TuiPrinter {
         System.out.println(white);
     }
 
-    private void printTitle(int x, int y) {
-        String white = "\033[0m", yellow = parser.getRightColor(Symbol.INKWELL);
+    private void printTitle(int x, int y, boolean isLittle){
+        if (isLittle)
+            printLittleTitle(x, y);
+        else
+            printBigTitle(x, y);
+    }
+
+    private void printBigTitle(int x, int y) {
+        String white = "\033[0m", yellow = parser.getRightColor(Symbol.INKWELL), bold = "\033[1m";
         List<String> titleString = new ArrayList<>();
 
         String prefix = setPosition(x, y);
@@ -247,7 +254,28 @@ public class TuiPrinter {
         prefix = setPosition(x, ++y);
         titleString.add(prefix + " (_____)---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------(_____) ");
 
-        System.out.println(yellow);
+        System.out.println(bold + yellow);
+        for (int i = 0; i < titleString.size(); i++)
+            System.out.println(titleString.get(i));
+        System.out.println(white);
+    }
+
+    private void printLittleTitle(int x, int y){
+        String white = "\033[0m", yellow = parser.getRightColor(Symbol.INKWELL), bold = "\033[1m";
+        List<String> titleString = new ArrayList<>();
+        
+        String prefix = setPosition(x, y);
+        titleString.add(prefix + "    ______                __                         _   __            __                               __   _         ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + "   / ____/  ____     ____/ /  ___     _  __         / | / /  ____ _   / /_   __  __   _____   ____ _   / /  (_)  _____ ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + "  / /      / __ \\   / __  /  / _ \\   | |/_/        /  |/ /  / __  /  / __/  / / / /  / ___/  / __  /  / /  / /  / ___/ ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + " / /___   / /_/ /  / /_/ /  /  __/  _>  <         / /|  /  / /_/ /  / /_   / /_/ /  / /     / /_/ /  / /  / /  (__  )  ");
+        prefix = setPosition(x, ++y);
+        titleString.add(prefix + " \\____/   \\____/   \\__,_/   \\___/  /_/|_|        /_/ |_/   \\__,_/   \\__/   \\__,_/  /_/      \\__,_/  /_/  /_/  /____/   ");
+
+        System.out.println(bold + yellow);
         for (int i = 0; i < titleString.size(); i++)
             System.out.println(titleString.get(i));
         System.out.println(white);
@@ -596,20 +624,30 @@ public class TuiPrinter {
      * Prints the welcome screen in the middle of the tui view
      */
     public void printWelcomeScreen() {
-        // int maxHeight = this.getHeight() - this.infoLineOffset;
+        
+        // get title and welcome sizes 
         int welcomeHeight = 5, welcomeWidth = 88+2; // width must be even (pari)
         int spaceBetween = 3;
         int titleHeight = 21, titleWidth = 210+2; // width must be even (pari)
-        // int titleHeight = 18, titleWidth = 196+2; // deprecated title screen
-
+        int verticalOffset = -10;
+        
+        boolean isLittle = (this.terminal.getWidth() < titleWidth || this.terminal.getHeight() < welcomeHeight - verticalOffset + titleHeight) ? true : false;
+        if (isLittle){
+            titleHeight = 5;
+            titleWidth = 118 + 2;
+            verticalOffset = -1;
+        }
+        
+        // get coordinates 
         int welcomeStartY = getDimStart(this.getHeight(), welcomeHeight + spaceBetween + titleHeight);
         int titleStartY = welcomeStartY + welcomeHeight + spaceBetween;
+
         int welcomeStartX = getDimStart(this.getWidth(), welcomeWidth);
         int titleStartX = getDimStart(this.getWidth(), titleWidth);
-        int verticalOffset = -10;
-
+        
+        // print welcome and title 
         printWelcome(welcomeStartX, welcomeStartY + verticalOffset);
-        printTitle(titleStartX, titleStartY + verticalOffset);
+        printTitle(titleStartX, titleStartY + verticalOffset, isLittle);
     }
 
     /**
@@ -747,16 +785,15 @@ public class TuiPrinter {
         printDeckVisibleCard(new Pair<>(cardsStartX, cardsStartY), visiblePlayableCards);
     }
 
-    // TODO: add index to print lobby 
-    // TODO: refactor print lobby with two lists 
+    // TODO: fix setMatch() call of this method in GraphicalViewTUI
     /**
-     * Prints the list of matches (joinable or not) in the center of the screen
+     * Prints the list of matches (joinable or not) in the center of the screen. It can print a maximum of 99 matches.
      * @param availableMatches list of available matches
      * @param heightOffset offset lines from the top (default is 1)
      */
-    public void printMatchesLobby(List<AvailableMatch> availableMatches, int heightOffset){
+    public void printMatchesLobby(List<AvailableMatch> joinableMatches, List<AvailableMatch> unavailableMatches, int heightOffset){
         int yCoord = (heightOffset > 0) ? heightOffset : 1;
-        int maxWidth = 38+2;
+        int maxWidth = 43+2;
         int xCoord = getDimStart(getWidth(), maxWidth); 
         String prefix = setPosition(xCoord, yCoord);
             
@@ -774,19 +811,30 @@ public class TuiPrinter {
         // print upper and middle border
         System.out.println(prefix + upperBorder.toString());
         prefix = setPosition(xCoord, ++yCoord);
-        System.out.println(prefix + "║ \033[1mMatches                        Slots\033[0m ║");            // manually adjust according to maxWidth
+        System.out.println(prefix + "║      \033[1mMatches                        Slots\033[0m ║");            // manually adjust according to maxWidth
         prefix = setPosition(xCoord, ++yCoord);
         System.out.println(prefix + middleBorder.toString());
         prefix = setPosition(xCoord, ++yCoord);
         
-        // print list of players
-        for (AvailableMatch match : availableMatches){
 
-            String white = "\033[0m";
-            String color = (match.maxPlayers() == match.currentPlayers()) ? "\033[31m" : "\033[35m";
-            
-            System.out.printf("%s║ %s%-31s %s/%s%s  ║", prefix, color, match.name().toString(), match.currentPlayers().toString(), match.maxPlayers().toString(), white);     // manually adjust according to maxWidth
+        // print list of joinable matches
+        String white = "\033[0m", color = "\033[32m";
+        int matchIndex = 1;
+        for (AvailableMatch m1 : joinableMatches){
+
+            // color = (match.maxPlayers() == match.currentPlayers()) ? "\033[31m" : "\033[35m";
+            System.out.printf("%s║ [%02d] %s%-31s %s/%s%s  ║", prefix, matchIndex, color, m1.name().toString(), m1.currentPlayers().toString(), m1.maxPlayers().toString(), white);     // manually adjust according to maxWidth
             prefix = setPosition(xCoord, ++yCoord);
+            matchIndex++;
+        }
+
+        // print list of unavailable matches
+        color = "\033[31m";
+        for (AvailableMatch m2 : unavailableMatches){
+
+            System.out.printf("%s║ [%02d] %s%-31s %s/%s%s  ║", prefix, matchIndex, color, m2.name().toString(), m2.currentPlayers().toString(), m2.maxPlayers().toString(), white);     // manually adjust according to maxWidth
+            prefix = setPosition(xCoord, ++yCoord);
+            matchIndex++;
         }
 
         // print lower border
