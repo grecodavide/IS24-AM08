@@ -102,7 +102,7 @@
     -fx-background-color: -fx-third-bg-color;
 }
 .button:hover {
-    -fx-background-color: -fx-secondary-bg-color;
+    -fx-background-color: -fx-secondary-container;
     -fx-text-fill: -fx-accent-bg-color;
     -fx-border-color: -fx-accent-bg-color;
 }
@@ -131,7 +131,7 @@
 }
 .scroll-bar:horizontal .track-background,
 .scroll-bar:vertical .track-background{
-    -fx-background-image: -fx-third-bg-color;
+    -fx-background-color: -fx-third-bg-color;
 }
 .scroll-bar:vertical .increment-button ,
 .scroll-bar:vertical .decrement-button {

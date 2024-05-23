@@ -35,16 +35,24 @@ public class GuiUtil {
     }
 
     public static String getImagePath(PlayableCard card, Side side) {
-        String reign = card.getReign().toString().toUpperCase();
-
         if (side.equals(Side.FRONT)) {
             return playableCardsPath + "/" + card.getId() + ".png";
         } else {
             return switch (card){
-                case GoldCard ignored -> playableCardsPath + "/" + reign + "-golds-back.png";
-                case ResourceCard ignored -> playableCardsPath + "/" + reign + "-resources-back.png";
+                case GoldCard ignored -> getGoldsBack(card.getReign());
+                case ResourceCard ignored -> getResourcesBack(card.getReign());
             };
         }
+    }
+
+    public static String getResourcesBack(Symbol symbol) {
+        String reign = symbol.toString().toUpperCase();
+        return playableCardsPath + "/" + reign + "-resources-back.png";
+    }
+
+    public static String getGoldsBack(Symbol symbol) {
+        String reign = symbol.toString().toUpperCase();
+        return playableCardsPath + "/" + reign + "-golds-back.png";
     }
 
     public static String getImagePath(InitialCard card, Side side) {

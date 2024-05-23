@@ -15,6 +15,7 @@
 <?import javafx.scene.text.Font?>
 
 <?import javafx.scene.control.ScrollPane?>
+<?import it.polimi.ingsw.client.frontend.gui.nodes.CardView?>
 <VBox fx:controller="it.polimi.ingsw.client.frontend.gui.scenes.MatchSceneController" alignment="TOP_CENTER" maxHeight="1080.0" maxWidth="1920.0" minHeight="1080.0" minWidth="1920.0" prefHeight="1080.0" prefWidth="1920.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
   <children>
     <AnchorPane fx:id="matchPane" id="pane" maxHeight="-1.0" maxWidth="-1.0" prefHeight="372.0" prefWidth="707.0" VBox.vgrow="ALWAYS">
@@ -36,22 +37,17 @@
                                     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="ALWAYS" />
                                  </rowConstraints>
                                  <children>
-                                    <Pane fx:id="gold_deck" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="132.0" prefWidth="199.0" style="-fx-background-color: #888;" GridPane.hgrow="NEVER" GridPane.vgrow="NEVER" />
-                                    <Pane fx:id="resource_deck" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="132.0" prefWidth="199.0" style="-fx-background-color: #888;" GridPane.hgrow="NEVER" GridPane.rowIndex="1" GridPane.vgrow="NEVER" />
-                                    <Pane fx:id="first_visible" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="132.0" prefWidth="199.0" style="-fx-background-color: #888;" GridPane.columnIndex="1" GridPane.hgrow="NEVER" GridPane.vgrow="NEVER" />
-                                    <Pane fx:id="third_visible" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="132.0" prefWidth="199.0" style="-fx-background-color: #888;" GridPane.columnIndex="1" GridPane.hgrow="NEVER" GridPane.rowIndex="1" GridPane.vgrow="NEVER" />
-                                    <Pane fx:id="second_visible" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="132.0" prefWidth="199.0" style="-fx-background-color: #888;" GridPane.columnIndex="2" GridPane.hgrow="NEVER" GridPane.vgrow="NEVER" />
-                                    <Pane fx:id="fourth_visible" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="132.0" prefWidth="199.0" style="-fx-background-color: #888;" GridPane.columnIndex="2" GridPane.hgrow="NEVER" GridPane.rowIndex="1" GridPane.vgrow="NEVER" />
-                                 </children>
+                                     <CardView fx:id="goldsDeck" GridPane.hgrow="NEVER" GridPane.vgrow="NEVER" />
+                                     <CardView fx:id="resourcesDeck" GridPane.hgrow="NEVER" GridPane.rowIndex="1" GridPane.vgrow="NEVER" />
+                                     <CardView fx:id="firstVisible" GridPane.columnIndex="1" GridPane.hgrow="NEVER" GridPane.vgrow="NEVER" />
+                                     <CardView fx:id="secondVisible" GridPane.columnIndex="1" GridPane.hgrow="NEVER" GridPane.rowIndex="1" GridPane.vgrow="NEVER" />
+                                     <CardView fx:id="thirdVisible" GridPane.columnIndex="2" GridPane.hgrow="NEVER" GridPane.vgrow="NEVER" />
+                                     <CardView fx:id="fourthVisible" GridPane.columnIndex="2" GridPane.hgrow="NEVER" GridPane.rowIndex="1" GridPane.vgrow="NEVER" />                         </children>
                               </GridPane>
                               <HBox alignment="BOTTOM_CENTER" prefHeight="100.0" prefWidth="200.0" spacing="15.0">
                                  <children>
-                                    <Pane fx:id="first_objective" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="132.0" prefWidth="199.0" style="-fx-background-color: #888;" />
-                                    <Pane fx:id="second_objective" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="132.0" prefWidth="199.0" style="-fx-background-color: #888;">
-                                       <HBox.margin>
-                                          <Insets />
-                                       </HBox.margin>
-                                    </Pane>
+                                    <CardView fx:id="firstObjective" />
+                                    <CardView fx:id="secondObjective" />
                                  </children>
                               </HBox>
                            </children>

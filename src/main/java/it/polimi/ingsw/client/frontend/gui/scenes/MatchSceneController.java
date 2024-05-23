@@ -1,5 +1,7 @@
 package it.polimi.ingsw.client.frontend.gui.scenes;
 
+import it.polimi.ingsw.client.frontend.gui.nodes.CardView;
+
 import it.polimi.ingsw.utils.GuiUtil;
 import javafx.collections.ObservableMap;
 import javafx.fxml.FXML;
@@ -11,7 +13,15 @@ import javafx.scene.layout.HBox;
 
 import java.io.IOException;
 
-public class MatchSceneController extends SceneController {
+public class MatchSceneController extends SceneController{
+    public CardView goldsDeck;
+    public CardView resourcesDeck;
+    public CardView firstVisible;
+    public CardView secondVisible;
+    public CardView thirdVisible;
+    public CardView fourthVisible;
+    public CardView firstObjective;
+    public CardView secondObjective;
     @FXML
     TabPane matchTabs;
     @FXML
