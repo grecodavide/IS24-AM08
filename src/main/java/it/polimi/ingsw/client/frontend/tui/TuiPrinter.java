@@ -714,14 +714,14 @@ public class TuiPrinter {
         int cardWidth = 18, spaceBetweenSides = 4;
         int xCoord = getDimStart(getWidth(), cardWidth + spaceBetweenSides + cardWidth);
 
-        String faceUp, faceDown;
+        String faceUp, faceDown, bianco = "\033[0m";
         Pair<Integer, Integer> faceupCoord = new Pair<>(xCoord, yCoord);
         Pair<Integer, Integer> facedownCoord = new Pair<>(xCoord + cardWidth + spaceBetweenSides, yCoord);
 
         try {
            faceUp = this.parser.parseCard(playableCard, faceupCoord, null, true);
            faceDown = this.parser.parseCard(playableCard, facedownCoord, null, false);
-           System.out.println(faceUp + faceDown);
+           System.out.println(faceUp + faceDown + bianco);
         } catch (Exception e) {
             // TODO: handle exception ?
         }
@@ -832,9 +832,8 @@ public class TuiPrinter {
         color = "\033[31m";
         for (AvailableMatch m2 : unavailableMatches){
 
-            System.out.printf("%s║ [%02d] %s%-31s %s/%s%s  ║", prefix, matchIndex, color, m2.name().toString(), m2.currentPlayers().toString(), m2.maxPlayers().toString(), white);     // manually adjust according to maxWidth
+            System.out.printf("%s║ [--] %s%-31s %s/%s%s  ║", prefix, color, m2.name().toString(), m2.currentPlayers().toString(), m2.maxPlayers().toString(), white);     // manually adjust according to maxWidth
             prefix = setPosition(xCoord, ++yCoord);
-            matchIndex++;
         }
 
         // print lower border
