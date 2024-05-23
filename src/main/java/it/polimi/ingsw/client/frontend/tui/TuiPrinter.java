@@ -785,6 +785,7 @@ public class TuiPrinter {
         printDeckVisibleCard(new Pair<>(cardsStartX, cardsStartY), visiblePlayableCards);
     }
 
+    // TODO: fix setMatch() call of this method in GraphicalViewTUI
     /**
      * Prints the list of matches (joinable or not) in the center of the screen. It can print a maximum of 99 matches.
      * @param availableMatches list of available matches
@@ -817,7 +818,7 @@ public class TuiPrinter {
         
 
         // print list of joinable matches
-        String white = "\033[0m", color = "\033[35m";
+        String white = "\033[0m", color = "\033[32m";
         int matchIndex = 1;
         for (AvailableMatch m1 : joinableMatches){
 
