@@ -714,14 +714,14 @@ public class TuiPrinter {
         int cardWidth = 18, spaceBetweenSides = 4;
         int xCoord = getDimStart(getWidth(), cardWidth + spaceBetweenSides + cardWidth);
 
-        String faceUp, faceDown;
+        String faceUp, faceDown, bianco = "\033[0m";
         Pair<Integer, Integer> faceupCoord = new Pair<>(xCoord, yCoord);
         Pair<Integer, Integer> facedownCoord = new Pair<>(xCoord + cardWidth + spaceBetweenSides, yCoord);
 
         try {
            faceUp = this.parser.parseCard(playableCard, faceupCoord, null, true);
            faceDown = this.parser.parseCard(playableCard, facedownCoord, null, false);
-           System.out.println(faceUp + faceDown);
+           System.out.println(faceUp + faceDown + bianco);
         } catch (Exception e) {
             // TODO: handle exception ?
         }
