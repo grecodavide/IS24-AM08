@@ -15,15 +15,17 @@ import it.polimi.ingsw.utils.Pair;
 import it.polimi.ingsw.utils.RequestStatus;
 
 /**
- * TuiGraphicalView
+ * Class that handles client game loop from TUI
  */
-
 public class GraphicalViewTUI extends GraphicalView {
     private final TuiPrinter printer;
     private final Scanner scanner;
+    private String lastError;
+    private boolean ongoing;
 
     public GraphicalViewTUI() {
         super();
+        this.ongoing = true;
         try {
             this.printer = new TuiPrinter();
         } catch (Exception e) {
@@ -82,11 +84,11 @@ public class GraphicalViewTUI extends GraphicalView {
 
     }
 
-
     private PlayableCard chooseCardFromHand(ClientBoard board) {
         List<PlayableCard> hand = board.getHand();
 
         this.printer.printHand(this.username, board.getColor(), hand);
+        this.printer.printAvailableResources(board.getAvailableResources(), 7);
         String userIn = this.askUser("Choose card to play (1, 2, 3)");
 
         PlayableCard card = null;
@@ -119,7 +121,6 @@ public class GraphicalViewTUI extends GraphicalView {
         }
     }
 
-
     private Pair<Integer, Integer> chooseCoords(ClientBoard board) {
         String prompt = "Choose coordinates for card (e.g. 1,1)";
         String userIn;
@@ -151,7 +152,6 @@ public class GraphicalViewTUI extends GraphicalView {
 
         return new Pair<Integer, Integer>(x, y);
     }
-
 
     private void parseMatchDecision(String prompt, List<AvailableMatch> joinables, List<AvailableMatch> notJoinables) {
         String userIn;
@@ -345,7 +345,7 @@ public class GraphicalViewTUI extends GraphicalView {
     public void makeMove() {
         this.printer.clearTerminal();
         if (this.lastRequest.getStatus().equals(RequestStatus.FAILED)) {
-            this.printer.printMessage("Something went wrong! try again.");
+            this.printer.printMessage(lastError + " Try again.");
         }
         ClientBoard board = this.clientBoards.get(this.username);
         PlayableCard card = this.chooseCardFromHand(board);
@@ -356,7 +356,6 @@ public class GraphicalViewTUI extends GraphicalView {
         if (!this.getServerResponse()) {
             this.makeMove();
         }
-
     }
 
     @Override
@@ -413,20 +412,23 @@ public class GraphicalViewTUI extends GraphicalView {
 
     @Override
     public void notifyLastTurn() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'notifyLastTurn'");
+        this.printer.printMessage("This is the last turn! play carefully");
     }
 
     @Override
     public void someoneQuit(String someoneUsername) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'someoneQuit'");
+        this.printer.printCenteredMessage(someoneUsername + " quit!", 0);
     }
 
     @Override
     public void matchFinished(List<LeaderboardEntry> ranking) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'matchFinished'");
+        this.printer.clearTerminal();
+        ranking.forEach(entry -> {
+            if (this.username.equals(entry.username())) {
+                this.printer.printEndScreen(entry.winner());
+            }
+        });
+        this.ongoing = false;
     }
 
     @Override
@@ -435,10 +437,16 @@ public class GraphicalViewTUI extends GraphicalView {
         throw new UnsupportedOperationException("Unimplemented method 'giveLobbyInfo'");
     }
 
+    @Override
+    public void notifyError(Exception exception) {
+        super.notifyError(exception);
+        lastError = exception.getMessage();
+    }
+
     public static void main(String[] args) {
         GraphicalViewTUI tui = new GraphicalViewTUI();
         tui.startInterface();
-        while (true) {
+        while (tui.ongoing) {
 
         }
     }
