@@ -344,6 +344,9 @@ public class GraphicalViewTUI extends GraphicalView {
     @Override
     public void makeMove() {
         this.printer.clearTerminal();
+        if (this.lastRequest.getStatus().equals(RequestStatus.FAILED)) {
+            this.printer.printMessage("Something went wrong! try again.");
+        }
         ClientBoard board = this.clientBoards.get(this.username);
         PlayableCard card = this.chooseCardFromHand(board);
         Side side = this.chooseCardSide(card);
@@ -363,10 +366,10 @@ public class GraphicalViewTUI extends GraphicalView {
 
         this.printer.clearTerminal();
         if (this.username.equals(someoneUsername)) {
-            this.printer.printDrawingScreen(decksTopReign, visiblePlayableCards);
             DrawSource source = null;
             String userIn, prompt = "Choose a draw source: ";
             while (source == null) {
+                this.printer.printDrawingScreen(decksTopReign, visiblePlayableCards);
                 userIn = askUser(prompt);
                 switch (userIn) {
                     case "G", "g":
