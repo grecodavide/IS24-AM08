@@ -30,6 +30,7 @@ replay_pid*
 target/
 .settings/
 .idea/
+.run/
 
 .project
 src/main/resources/graphics/
