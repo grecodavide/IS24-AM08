@@ -10,7 +10,9 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import java.io.IOException;
 
@@ -24,8 +26,8 @@ public class GraphicalApplication extends Application {
 
     @Override
     public void start(Stage primaryStage) throws IOException {
-        this.view = new GraphicalViewGUI(this);
         this.primaryStage = primaryStage;
+        this.view = new GraphicalViewGUI(primaryStage);
 
         // Load initial screen
         primaryStage.setTitle("Codex Naturalis");
@@ -40,21 +42,6 @@ public class GraphicalApplication extends Application {
         primaryStage.show();
     }
 
-    /**
-     * Add a card to the specified player's board
-     *
-     * @param username Of the player to add the card to
-     */
-    public void addToBoard(String username, Pair<Integer, Integer> coords, PlayableCard card, Side side) {
-        TabPane tabs = (TabPane) primaryStage.getScene().lookup("#matchTabs");
-        for (Tab tab : tabs.getTabs()) {
-            String user = (String) tab.getProperties().get("Username");
-            if (user != null && user.equals(username)) {
-                PlayerTabController controller = (PlayerTabController) tab.getProperties().get("Controller");
-                controller.placeCard(coords, card, side);
-            }
-        }
-    }
 
     /**
      * Get a node from the specified FXML path and set the values of a SceneController
