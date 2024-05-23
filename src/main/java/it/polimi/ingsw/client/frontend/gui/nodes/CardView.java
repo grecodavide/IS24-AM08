@@ -71,8 +71,8 @@ public class CardView extends Rectangle {
     }
 
     private void addProperties(String imagePath) {
-        super.setArcHeight(16);
-        super.setArcWidth(16);
+        super.setArcHeight(20);
+        super.setArcWidth(20);
         ImagePattern pattern = new ImagePattern(
                 new Image(imagePath)
         );

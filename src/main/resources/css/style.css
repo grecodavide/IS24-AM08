@@ -76,7 +76,17 @@
 
     -fx-padding: 12px 20px;
 }
+.iconbutton {
+    -fx-text-fill: -fx-accent-fg-color;
+    -fx-font-size: 20px;
+    -fx-background-color: -fx-accent-bg-color;
 
+    -fx-border-color: -fx-primary-border-color;
+    -fx-border-width: 3px;
+    -fx-background-radius: 99999px;
+
+    -fx-padding: 5px 5px;
+}
 .title {
     -fx-font-size: 40px;
     -fx-text-fill: -fx-foreground-color;

@@ -13,7 +13,7 @@
 
 <HBox fx:id="chatPane" alignment="CENTER_RIGHT" prefHeight="200.0" prefWidth="300.0" AnchorPane.rightAnchor="0.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.polimi.ingsw.client.frontend.gui.scenes.ChatPaneController">
     <children>
-        <Button fx:id="showChatBtn" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="66.0" prefWidth="43.0" text="&lt;">
+        <Button fx:id="showChatBtn" styleClass="icon-button" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="50.0" prefWidth="50.0">
             <font>
                 <Font size="21.0" />
             </font>
@@ -34,7 +34,7 @@
                         </Button>
                     </children>
                 </HBox>
-                <TextFlow fx:id="chatHistoryText" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="710.0" prefWidth="440.0" style="-fx-background-color: white;" StackPane.alignment="BOTTOM_CENTER">
+                <TextFlow fx:id="chatHistoryText" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="710.0" prefWidth="440.0" style="-fx-background-color: transparent;" StackPane.alignment="BOTTOM_CENTER">
                     <StackPane.margin>
                         <Insets bottom="55.0" left="10.0" right="10.0" top="15.0" />
                     </StackPane.margin>

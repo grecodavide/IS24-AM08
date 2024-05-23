@@ -21,7 +21,7 @@ public class BoardPane extends Pane {
     }
 
     public void addCard(Pair<Integer, Integer> position, PlayableCard card, Side side) {
-        CardView c = new CardView();
+        CardView c = new CardView(card, side);
         displayCard(position, c);
     }
 
