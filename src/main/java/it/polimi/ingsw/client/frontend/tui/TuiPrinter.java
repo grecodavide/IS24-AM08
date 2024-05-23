@@ -832,9 +832,8 @@ public class TuiPrinter {
         color = "\033[31m";
         for (AvailableMatch m2 : unavailableMatches){
 
-            System.out.printf("%s║ [%02d] %s%-31s %s/%s%s  ║", prefix, matchIndex, color, m2.name().toString(), m2.currentPlayers().toString(), m2.maxPlayers().toString(), white);     // manually adjust according to maxWidth
+            System.out.printf("%s║ [--] %s%-31s %s/%s%s  ║", prefix, color, m2.name().toString(), m2.currentPlayers().toString(), m2.maxPlayers().toString(), white);     // manually adjust according to maxWidth
             prefix = setPosition(xCoord, ++yCoord);
-            matchIndex++;
         }
 
         // print lower border
