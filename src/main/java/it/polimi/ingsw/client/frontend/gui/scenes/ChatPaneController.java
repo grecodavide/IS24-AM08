@@ -19,6 +19,8 @@ import java.util.Map;
 
 // TODO: to finish implementation
 public class ChatPaneController extends SceneController {
+    public ScrollPane chatHistoryScrollPane;
+    public VBox chatContainer;
     @FXML
     private Button sendMessageBtn;
     @FXML
@@ -50,7 +52,7 @@ public class ChatPaneController extends SceneController {
     @Override
     public void initialize() {
         chatHistory = new HashMap<>();
-
+        chatHistoryScrollPane.getStyleClass().clear();
         isVisible = false;
         chatPane.setTranslateX(460);
         setIconStatus(false);

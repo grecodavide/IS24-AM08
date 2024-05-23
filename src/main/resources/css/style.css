@@ -182,3 +182,54 @@
     -fx-background-insets : 2.0, 0.0, 0.0;
     -fx-background-radius : 2.0em;
 }
+
+
+
+/* Style the MenuButton */
+.menu-button {
+  -fx-background-color: -fx-secondary-container;
+  -fx-text-fill: -fx-foreground-color;
+  -fx-font-weight: bold;
+  -fx-padding: 5px 10px;
+  -fx-cursor: hand;
+}
+/*
+.menu-button:hover {
+  -fx-background-color: #e0e0e0;
+}
+*/
+/* Style the arrow button inside the MenuButton */
+.menu-button > .arrow {
+  -fx-fill: black;
+}
+
+/* Style the popup menu itself */
+.menu-button .menu {
+  -fx-background-color: -fx-secondary-container;    /* White background for menu */
+  -fx-border-color: gray;       /* Light gray border */
+  -fx-border-radius: 5px;       /* Rounded corners */
+}
+
+/* Style the menu items */
+.menu-button .menu-item {
+  -fx-text-fill: black;         /* Black text color for menu items */
+  -fx-padding: 5px 15px;        /* Padding around menu item text */
+  -fx-background-color: -fx-secondary-container;
+}
+
+/* Style the menu item when hovered */
+.menu-button .menu-item:hover {
+  -fx-background-color: -fx-accent-bg-color; /* Light gray on hover */
+  -fx-text-fill: -fx-accent-fg-color;
+}
+
+.message-input {
+    -fx-text-fill: -fx-foreground-color;
+    -fx-background-color: -fx-third-bg-color;
+    -fx-font-size: 20px;
+    -fx-accent: -fx-accent-bg-color;
+}
+
+.chat-container {
+    -fx-background-color: #e4dcb6AA;
+}

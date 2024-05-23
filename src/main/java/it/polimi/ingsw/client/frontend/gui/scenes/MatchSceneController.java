@@ -2,6 +2,7 @@ package it.polimi.ingsw.client.frontend.gui.scenes;
 
 import it.polimi.ingsw.client.frontend.gui.nodes.CardView;
 
+import it.polimi.ingsw.gamemodel.Symbol;
 import it.polimi.ingsw.utils.GuiUtil;
 import javafx.collections.ObservableMap;
 import javafx.fxml.FXML;
@@ -50,5 +51,13 @@ public class MatchSceneController extends SceneController{
         // Add the chat
         HBox chatPane = this.loadScene("/fxml/chat.fxml");
         matchPane.getChildren().add(chatPane);
+    }
+
+    public void setGoldsDeckReign(Symbol reign) {
+        this.goldsDeck.setGoldsCardBack(reign);
+    }
+
+    public void setResourcesDeckReign(Symbol reign) {
+        this.resourcesDeck.setGoldsCardBack(reign);
     }
 }

@@ -11,6 +11,10 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.TextFlow?>
 
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
 <HBox fx:id="chatPane" alignment="CENTER_RIGHT" prefHeight="200.0" prefWidth="300.0" AnchorPane.rightAnchor="0.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.polimi.ingsw.client.frontend.gui.scenes.ChatPaneController">
     <children>
         <Button fx:id="showChatBtn" styleClass="icon-button" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="50.0" prefWidth="50.0">
@@ -18,35 +22,43 @@
                 <Font size="21.0" />
             </font>
         </Button>
-        <StackPane alignment="TOP_RIGHT" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="820.0" prefWidth="460.0" style="-fx-background-color: #8888;">
-            <children>
-                <HBox alignment="BOTTOM_CENTER" prefWidth="460.0" StackPane.alignment="BOTTOM_RIGHT">
-                    <children>
-                        <TextField fx:id="chatInputText" alignment="BOTTOM_CENTER" prefWidth="370.0">
-                            <HBox.margin>
-                                <Insets bottom="15.0" left="10.0" right="10.0" />
-                            </HBox.margin>
-                        </TextField>
-                        <Button fx:id="sendMessageBtn" mnemonicParsing="false" prefWidth="60.0" text="Send">
-                            <HBox.margin>
-                                <Insets bottom="15.0" right="10.0" />
-                            </HBox.margin>
-                        </Button>
-                    </children>
-                </HBox>
-                <TextFlow fx:id="chatHistoryText" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="710.0" prefWidth="440.0" style="-fx-background-color: transparent;" StackPane.alignment="BOTTOM_CENTER">
-                    <StackPane.margin>
-                        <Insets bottom="55.0" left="10.0" right="10.0" top="15.0" />
-                    </StackPane.margin>
-                </TextFlow>
-            <MenuButton fx:id="chatSelectorBar" alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefWidth="440.0" text="Global" StackPane.alignment="TOP_CENTER">
-               <StackPane.margin>
-                  <Insets top="10.0" />
-               </StackPane.margin>
-               <items>
-               </items>
+        <VBox fx:id="chatContainer" alignment="TOP_RIGHT" minHeight="1080" prefWidth="460.0" styleClass="chat-container">
+            <MenuButton fx:id="chatSelectorBar" alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity"
+                        minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefWidth="440.0"
+                        text="Global" StackPane.alignment="TOP_CENTER">
+                <items>
+                </items>
             </MenuButton>
-            </children>
-        </StackPane>
+            <ScrollPane fx:id="chatHistoryScrollPane" minHeight="800" fitToWidth="true">
+                <TextFlow fx:id="chatHistoryText" prefHeight="710.0" prefWidth="440.0"
+                          style="-fx-background-color: transparent;" StackPane.alignment="BOTTOM_CENTER">
+                </TextFlow>
+                <StackPane.margin>
+                    <Insets bottom="55.0" left="10.0" right="10.0" top="15.0"/>
+                </StackPane.margin>
+            </ScrollPane>
+            <HBox alignment="BASELINE_CENTER" prefWidth="460.0">
+                <TextField fx:id="chatInputText" styleClass="message-input" alignment="BASELINE_LEFT"
+                           prefWidth="370.0">
+                    <HBox.margin>
+                        <Insets bottom="15.0" left="10.0" right="10.0"/>
+                    </HBox.margin>
+                </TextField>
+                <Button alignment="CENTER" fx:id="sendMessageBtn" styleClass="iconbutton"
+                        mnemonicParsing="false" prefWidth="60.0">
+                    <HBox.margin>
+                        <Insets bottom="15.0" right="10.0"/>
+                    </HBox.margin>
+                    <graphic>
+                        <ImageView fitHeight="20" preserveRatio="true">
+                            <Image
+                                url="@../images/icons/send.png"
+                                backgroundLoading="true"
+                            />
+                        </ImageView>
+                    </graphic>
+                </Button>
+            </HBox>
+        </VBox>
     </children>
 </HBox>
