@@ -13,9 +13,10 @@ import it.polimi.ingsw.utils.RequestStatus;
 
 public abstract class GraphicalView {
     protected NetworkView networkView;
+    protected int chosenPort;
     protected Map<String, ClientBoard> clientBoards;
     protected List<String> players; // ordered by turn
-    protected String currentPlayer; // when we receive a
+    protected String currentPlayer;
     protected Pair<Objective, Objective> visibleObjectives;
     protected Map<DrawSource, PlayableCard> visiblePlayableCards;
     protected Pair<Symbol, Symbol> decksTopReign;
@@ -62,7 +63,7 @@ public abstract class GraphicalView {
 
     /**
      * Tries to create a match
-     * 
+     *
      * @param matchName The match's name
      */
     public void createMatch(String matchName, Integer maxPlayers) {
@@ -72,7 +73,7 @@ public abstract class GraphicalView {
 
     /**
      * Tries to join a match
-     * 
+     *
      * @param matchName the match's name
      */
     public void joinMatch(String matchName) {
@@ -100,7 +101,6 @@ public abstract class GraphicalView {
 
     /**
      * Draws two secret objectives.
-     *
      */
     public void drawSecretObjectives() {
         this.setLastRequestStatus(RequestStatus.PENDING);
@@ -122,8 +122,8 @@ public abstract class GraphicalView {
      * Plays a card.
      *
      * @param coords The coordinates on which to place the card
-     * @param card The PlayableCard to play
-     * @param side The side on which to play the chosen card
+     * @param card   The PlayableCard to play
+     * @param side   The side on which to play the chosen card
      */
     public void playCard(Pair<Integer, Integer> coords, PlayableCard card, Side side) {
         this.setLastRequestStatus(RequestStatus.PENDING);
@@ -240,16 +240,10 @@ public abstract class GraphicalView {
     protected abstract void notifyMatchStarted();
 
 
-    /**
-     * Sets the available matches received from server
-     * 
-     * @param availableMatches
-     */
     public void receiveAvailableMatches(List<AvailableMatch> availableMatches) {
         this.setLastRequestStatus(RequestStatus.SUCCESSFUL);
         this.availableMatches = availableMatches;
     }
-
 
     /**
      * Give the user its initial card
@@ -270,7 +264,6 @@ public abstract class GraphicalView {
     public void giveSecretObjectives(Pair<Objective, Objective> secretObjectives) {
         this.setLastRequestStatus(RequestStatus.SUCCESSFUL);
     }
-
 
     /**
      * Notifies other players that someone drew the initial card
@@ -309,6 +302,9 @@ public abstract class GraphicalView {
      * @param someoneUsername Player who is choosing
      */
     public void someoneDrewSecretObjective(String someoneUsername) {
+        if (this.username.equals(someoneUsername)) {
+            this.setLastRequestStatus(RequestStatus.SUCCESSFUL);
+        }
     }
 
     public void someoneChoseSecretObjective(String someoneUsername) {

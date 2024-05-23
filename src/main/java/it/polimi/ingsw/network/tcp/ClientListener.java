@@ -77,9 +77,7 @@ public class ClientListener extends Thread {
 
             this.clientInteraction(); // init player controller
         } catch (Exception e) {
-            e.printStackTrace();
             System.out.println("Failed to create Listener thread");
-            // e.printStackTrace();
         }
     }
 

@@ -8,12 +8,13 @@ import java.util.stream.Collectors;
 import it.polimi.ingsw.client.network.RemoteViewInterface;
 import it.polimi.ingsw.exceptions.*;
 import it.polimi.ingsw.gamemodel.*;
+import it.polimi.ingsw.server.Server;
 import it.polimi.ingsw.utils.LeaderboardEntry;
 import it.polimi.ingsw.utils.Pair;
 
 /**
  * Subclass of {@link PlayerController} that implements its abstract methods through RMI interactions.
- * Each instance of this class is supposed to be sent through {@link it.polimi.ingsw.server.Server#joinMatch(String, String)})
+ * Each instance of this class is supposed to be sent through {@link Server#joinMatch(String, String)})
  * to an RMI View, this latter will then send its View instance to the PlayerController object, calling
  * {@link #registerView(RemoteViewInterface)} on it.
  */
@@ -32,7 +33,6 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
      */
     public PlayerControllerRMI(String username, Match match) throws AlreadyUsedUsernameException, WrongStateException {
         super(username, match);
-
     }
 
     /**
@@ -458,8 +458,8 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
         } else {
             try {
                 List<LeaderboardEntry> ranking = match.getPlayersFinalRanking()
-                    .stream()
-                    .map(p -> createLeaderboardEntry(p.first(), p.second())).collect(Collectors.toList());
+                        .stream()
+                        .map(p -> createLeaderboardEntry(p.first(), p.second())).collect(Collectors.toList());
                 view.matchFinished(ranking);
             } catch (RemoteException e) {
                 onConnectionError();

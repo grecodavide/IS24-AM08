@@ -48,12 +48,6 @@ public interface RemoteViewInterface extends Remote {
      */
     void receiveAvailableMatches(List<AvailableMatch> availableMatchs) throws RemoteException;
 
-    /**
-     * Gives to the remote object an initial card to show it in the view.
-     *
-     * @param initialCard Initial card to give
-     * @throws RemoteException If the remote object is considered not to be reachable any more and cannot return as usual
-     */
     void giveInitialCard(InitialCard initialCard) throws RemoteException;
 
     /**

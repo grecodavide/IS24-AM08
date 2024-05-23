@@ -1,13 +1,13 @@
 package it.polimi.ingsw.server;
 
-import it.polimi.ingsw.controllers.PlayerControllerRMI;
-import it.polimi.ingsw.exceptions.AlreadyUsedUsernameException;
-import it.polimi.ingsw.exceptions.ChosenMatchException;
-import it.polimi.ingsw.exceptions.WrongStateException;
-
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
+import it.polimi.ingsw.controllers.PlayerControllerRMIInterface;
+import it.polimi.ingsw.exceptions.AlreadyUsedUsernameException;
+import it.polimi.ingsw.exceptions.ChosenMatchException;
+import it.polimi.ingsw.exceptions.WrongStateException;
+import it.polimi.ingsw.utils.AvailableMatch;
 
 /**
  * RMI interface used to declare all and only the methods callable on a remote Server instance implementing this
@@ -17,12 +17,12 @@ import java.util.List;
  */
 public interface ServerRMIInterface extends Remote {
     /**
-     * Returns the unique names of the available matches (those not full yet).
+     * Returns the available matches (those not full yet) as {@link AvailableMatch} instances.
      *
      * @return The list of Match which are not full yet.
      * @throws RemoteException If the remote server is considered not to be reachable any more and cannot return as usual
      */
-    List<String> getJoinableMatches() throws RemoteException;
+    List<AvailableMatch> getJoinableMatches() throws RemoteException;
 
     /**
      * Lets the calling view join on a match with the given player username, if possible; gives back to the client
@@ -36,7 +36,7 @@ public interface ServerRMIInterface extends Remote {
      * @throws AlreadyUsedUsernameException If the given username is already taken
      * @throws WrongStateException          If the match is in a state during which doesn't allow players to join any more
      */
-    PlayerControllerRMI joinMatch(String matchName, String username) throws RemoteException, ChosenMatchException, AlreadyUsedUsernameException, WrongStateException;
+    PlayerControllerRMIInterface joinMatch(String matchName, String username) throws RemoteException, ChosenMatchException, AlreadyUsedUsernameException, WrongStateException;
 
     /**
      * Lets the calling view create a new match.

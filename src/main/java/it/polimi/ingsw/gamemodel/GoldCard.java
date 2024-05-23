@@ -1,12 +1,11 @@
 package it.polimi.ingsw.gamemodel;
 
-import it.polimi.ingsw.exceptions.InvalidResourceException;
-import it.polimi.ingsw.utils.Pair;
-
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import it.polimi.ingsw.exceptions.InvalidResourceException;
+import it.polimi.ingsw.utils.Pair;
 
 
 /**

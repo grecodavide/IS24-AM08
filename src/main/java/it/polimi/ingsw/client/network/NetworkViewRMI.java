@@ -4,25 +4,28 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.List;
-import java.util.Map;
 import it.polimi.ingsw.client.frontend.GraphicalView;
 import it.polimi.ingsw.controllers.PlayerControllerRMIInterface;
-import it.polimi.ingsw.gamemodel.*;
+import it.polimi.ingsw.gamemodel.DrawSource;
+import it.polimi.ingsw.gamemodel.Objective;
+import it.polimi.ingsw.gamemodel.PlayableCard;
+import it.polimi.ingsw.gamemodel.Side;
 import it.polimi.ingsw.server.ServerRMIInterface;
 import it.polimi.ingsw.utils.AvailableMatch;
-import it.polimi.ingsw.utils.LeaderboardEntry;
 import it.polimi.ingsw.utils.Pair;
 
 public class NetworkViewRMI extends NetworkView {
+
     private final ServerRMIInterface server;
     private PlayerControllerRMIInterface controller;
 
     public NetworkViewRMI(GraphicalView graphicalView, String ipAddress, int port) throws RemoteException {
-        super(graphicalView);
+        super(graphicalView, ipAddress, port);
 
         // Try to get a remote Server instance from the network
-        Registry registry = LocateRegistry.getRegistry(port);
+        Registry registry = LocateRegistry.getRegistry(ipAddress, port);
         try {
             this.server = (ServerRMIInterface) registry.lookup("CodexNaturalisRMIServer");
         } catch (NotBoundException e) {
@@ -32,97 +35,12 @@ public class NetworkViewRMI extends NetworkView {
         }
     }
 
-    // Methods called by PlayerControllerRMI
-    @Override
-    public void receiveAvailableMatches(List<AvailableMatch> availableMatches) {
-        graphicalView.receiveAvailableMatches(availableMatches);
-    }
-
-    @Override
-    public void giveLobbyInfo(List<String> playersUsernames) throws RemoteException {
-        graphicalView.giveLobbyInfo(playersUsernames);
-    }
-
-    @Override
-    public void matchStarted(Map<String, Color> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands,
-                             Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards,
-                             Pair<Symbol, Symbol> decksTopReigns) throws RemoteException {
-        graphicalView.matchStarted(playersUsernamesAndPawns, playersHands, visibleObjectives, visiblePlayableCards, decksTopReigns);
-    }
-
-    @Override
-    public void giveInitialCard(InitialCard initialCard) throws RemoteException {
-        graphicalView.giveInitialCard(initialCard);
-    }
-
-    @Override
-    public void giveSecretObjectives(Pair<Objective, Objective> secretObjectives) {
-        graphicalView.giveSecretObjectives(secretObjectives);
-    }
-
-    @Override
-    public void someoneDrewInitialCard(String someoneUsername, InitialCard card) {
-        graphicalView.someoneDrewInitialCard(someoneUsername, card);
-    }
-
-    @Override
-    public void someoneSetInitialSide(String someoneUsername, Side side) {
-        graphicalView.someoneSetInitialSide(someoneUsername, side);
-    }
-
-    @Override
-    public void someoneDrewSecretObjective(String someoneUsername) {
-        graphicalView.someoneDrewSecretObjective(someoneUsername);
-    }
-
-    @Override
-    public void someoneChoseSecretObjective(String someoneUsername) {
-        graphicalView.someoneChoseSecretObjective(someoneUsername);
-    }
-
-    @Override
-    public void someonePlayedCard(String someoneUsername, Pair<Integer, Integer> coords, PlayableCard card, Side side, int points,
-                                  Map<Symbol, Integer> availableResources) {
-        graphicalView.someonePlayedCard(someoneUsername, coords, card, side, points, availableResources);
-    }
-
-    @Override
-    public void someoneDrewCard(String someoneUsername, DrawSource source, PlayableCard card, PlayableCard replacementCard,
-                                Symbol replacementCardReign) {
-        graphicalView.someoneDrewCard(someoneUsername, source, card, replacementCard, replacementCardReign);
-    }
-
-    @Override
-    public void someoneJoined(String someoneUsername) {
-        graphicalView.someoneJoined(someoneUsername);
-    }
-
-    @Override
-    public void someoneQuit(String someoneUsername) {
-        graphicalView.someoneQuit(someoneUsername);
-    }
-
-    @Override
-    public void matchFinished(List<LeaderboardEntry> ranking) {
-        graphicalView.matchFinished(ranking);
-    }
-
-    @Override
-    public void someoneSentBroadcastText(String someoneUsername, String text) {
-        graphicalView.someoneSentBroadcastText(someoneUsername, text);
-    }
-
-    @Override
-    public void someoneSentPrivateText(String someoneUsername, String text) {
-        graphicalView.someoneSentPrivateText(someoneUsername, text);
-    }
-
     // Methods called by the GraphicalView
     @Override
     public void getAvailableMatches() {
         try {
-            // List<String> matches = server.getJoinableMatches();
-            // this.receiveAvailableMatches(matches);
+            List<AvailableMatch> matches = server.getJoinableMatches();
+            this.receiveAvailableMatches(matches);
         } catch (Exception e) {
             this.graphicalView.notifyError(e);
         }
@@ -132,6 +50,10 @@ public class NetworkViewRMI extends NetworkView {
     public void joinMatch(String matchName) {
         try {
             controller = server.joinMatch(matchName, this.username);
+
+            UnicastRemoteObject.exportObject(this, 0);
+
+            controller.registerView(this);
         } catch (Exception e) {
             this.graphicalView.notifyError(e);
         }

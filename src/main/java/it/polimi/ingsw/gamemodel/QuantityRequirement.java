@@ -1,9 +1,8 @@
 package it.polimi.ingsw.gamemodel;
 
-import it.polimi.ingsw.exceptions.InvalidResourceException;
-
 import java.util.EnumSet;
 import java.util.Map;
+import it.polimi.ingsw.exceptions.InvalidResourceException;
 
 /**
  * This class handles requirements involving relative positioning of cards, e.g. three red cards placed in the top right corner of each other

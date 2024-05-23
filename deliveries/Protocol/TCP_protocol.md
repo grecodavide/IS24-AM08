@@ -113,8 +113,8 @@ Responses always have the following parameter:
 
 Response can either be:
 - [AvailableMatches](#AvailableMatches)
-- [PlayerJoined](#PlayerJoined)
-- [PlayerQuit](#PlayerQuit)
+- [SomeoneJoined](#SomeoneJoined)
+- [SomeoneQuit](#SomeoneQuit)
 - [SomeoneSentText](#SomeoneSentText)
 - [MatchStarted](#MatchStarted)
 - [SomeoneDrewInitialCard](#SomeoneDrewInitialCard)
@@ -140,7 +140,7 @@ Match is a Json object the following parameters:
 | `joinedPlayers` | Integer | Number of players that currently joined the match |
 | `maxPlayers`    | Integer | Maximum amount of players that can join the match |
 
-### PlayerJoined
+### SomeoneJoined
 This response is sent when a player joins the current match.
 
 | Parameter     |  Type   | Description                                       |
@@ -149,7 +149,7 @@ This response is sent when a player joins the current match.
 | `joinedPlayers` | Integer | Number of players currently in the match |
 | `maxPlayers`    | Integer | Maximum amount of players the match can hold |
 
-### PlayerQuit
+### SomeoneQuit
 This response is sent when a player quits the current match.
 
 | Parameter     |  Type   | Description                                       |

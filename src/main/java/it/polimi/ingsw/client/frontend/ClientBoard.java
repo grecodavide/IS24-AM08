@@ -38,11 +38,6 @@ public class ClientBoard {
         this.objective = objective;
     }
 
-    public void placeInitial(Side side) {
-        this.placed.put(placementNumber, new ShownCard(this.initialCard, side, new Pair<>(0, 0)));
-        this.placementNumber++;
-    }
-
     public void placeCard(Pair<Integer, Integer> coords, PlayableCard card, Side side, Integer points, Map<Symbol, Integer> resources) {
         this.hand.remove(card);
         this.placed.put(placementNumber, new ShownCard(card, side, coords));
@@ -58,6 +53,12 @@ public class ClientBoard {
     public void setInitial(InitialCard card) {
         this.initialCard = card;
     }
+
+    public void placeInitial(Side side) {
+        this.placed.put(placementNumber, new ShownCard(this.initialCard, side, new Pair<>(0, 0)));
+        this.placementNumber++;
+    }
+
 
     public Integer getPlacementNumber() {
         return placementNumber;

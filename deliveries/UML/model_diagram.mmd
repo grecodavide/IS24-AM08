@@ -119,6 +119,7 @@ classDiagram
         + GoldCard(CardFace front, Symbol reign, int points, Symbol multiplier, QuantityRequirement req)
         + getMultiplier() Symbol
         + getRequirement() QuantityRequirement
+        + getPoints() int
         + calculatePoints(Board board, Pair~Integer, Integer~ coord) int
     }
 
@@ -132,13 +133,15 @@ classDiagram
         - reqs : Map~Symbol, Integer~
 
         + QuantityRequirement(Map~Symbol, Integer~ reqs)
+        + getReqs() Map~Symbol, Integer~
         + timesMet(Board board) int
     }
 
     class PositionRequirement {
-        - reqs: Map&ltPair&ltInteger, Integer&gt, Color&gt
+        - reqs: Map&ltPair&ltInteger, Integer&gt, Symbol&gt
 
-        + PositionRequirement(Map&ltPair&ltInteger, Integer&gt, Color&gt reqs)
+        + PositionRequirement(Map&ltPair&ltInteger, Integer&gt, Symbol&gt reqs)
+        + getReqs() Map&ltPair&ltInteger, Integer&gt, Symbol&gt
         + timesMet(Board board) int
     }
     
