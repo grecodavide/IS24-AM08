@@ -121,8 +121,8 @@ public class NetworkViewRMI extends NetworkView {
     @Override
     public void getAvailableMatches() {
         try {
-            List<AvailableMatch> matches = server.getJoinableMatches();
-            this.receiveAvailableMatches(matches);
+            // List<String> matches = server.getJoinableMatches();
+            // this.receiveAvailableMatches(matches);
         } catch (Exception e) {
             this.graphicalView.notifyError(e);
         }
