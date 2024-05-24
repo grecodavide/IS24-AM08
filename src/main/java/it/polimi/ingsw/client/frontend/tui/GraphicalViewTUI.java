@@ -6,8 +6,10 @@ import java.util.Map;
 import java.util.Scanner;
 import it.polimi.ingsw.client.frontend.ClientBoard;
 import it.polimi.ingsw.client.frontend.GraphicalView;
+import it.polimi.ingsw.client.frontend.ShownCard;
 import it.polimi.ingsw.client.network.NetworkViewRMI;
 import it.polimi.ingsw.client.network.NetworkViewTCP;
+import it.polimi.ingsw.exceptions.CardException;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.LeaderboardEntry;
@@ -87,8 +89,8 @@ public class GraphicalViewTUI extends GraphicalView {
     private PlayableCard chooseCardFromHand(ClientBoard board) {
         List<PlayableCard> hand = board.getHand();
 
-        this.printer.printHand(this.username, board.getColor(), hand);
-        this.printer.printAvailableResources(board.getAvailableResources(), 7);
+        this.printer.printPlayerBoard(this.username, board);
+        this.printer.printHandAtBottom(this.username, board.getColor(), hand);
         String userIn = this.askUser("Choose card to play (1, 2, 3)");
 
         PlayableCard card = null;
@@ -101,7 +103,8 @@ public class GraphicalViewTUI extends GraphicalView {
                 }
             } catch (NumberFormatException e) {
                 this.printer.clearTerminal();
-                this.printer.printHand(this.username, board.getColor(), hand);
+                this.printer.printPlayerBoard(this.username, board);
+                this.printer.printHandAtBottom(this.username, board.getColor(), hand);
                 userIn = this.askUser("Not a valid number! try again");
             }
         }
@@ -351,6 +354,18 @@ public class GraphicalViewTUI extends GraphicalView {
         PlayableCard card = this.chooseCardFromHand(board);
         Side side = this.chooseCardSide(card);
         Pair<Integer, Integer> coords = this.chooseCoords(board);
+
+        try {
+            this.printer.clearTerminal();
+            this.printer.printPlayerBoard(this.username, board);
+            this.printer.printCard(new ShownCard(card, side, coords));
+            String userIn = this.askUser("Are you sure? (n to abort)");
+            if (userIn.equals("n")) {
+                this.makeMove();
+                return;
+            }
+        } catch (CardException e) {
+        }
 
         super.playCard(coords, card, side);
         if (!this.getServerResponse()) {

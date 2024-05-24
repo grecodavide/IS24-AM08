@@ -1,12 +1,14 @@
 package it.polimi.ingsw.client.frontend.tui;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.jline.terminal.Terminal;
 import it.polimi.ingsw.client.frontend.ClientBoard;
 import it.polimi.ingsw.client.frontend.ShownCard;
 import it.polimi.ingsw.exceptions.CardException;
-import it.polimi.ingsw.exceptions.InvalidResourceException;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.Pair;
@@ -80,7 +82,7 @@ public class TuiPrinter {
         return c + username + "\033[0m";
     }
 
-    private void printCard(ShownCard card) throws CardException {
+    public void printCard(ShownCard card) throws CardException {
         if (card.coords().equals(new Pair<>(0, 0)))
             System.out.println(parser.parseCard(card.card(), getAbsoluteCoords(card.coords()), null, card.side() == Side.FRONT));
         else
@@ -881,6 +883,28 @@ public class TuiPrinter {
 
         // print lower border
         System.out.print(prefix + lowerBorder.toString());
+    }
+
+    public void printHandAtBottom(String username, Color color, List<PlayableCard> hand) {
+        int termCols = this.getWidth();
+        Integer handSize = hand.size();
+        Integer spaces = 4;
+        Integer strlen = (username + "'s Hand").length();
+
+        username = this.parseUsername(username, color) + "'s Hand:";
+
+        Integer last = (termCols - (handSize) * (cardCols)) / 2 - spaces * (handSize - 1) / 2;
+        Integer row = this.getHeight()-TuiPrinter.cardRows-3;
+
+        System.out.println(this.setPosition((termCols - strlen) / 2, 1) + username);
+        for (PlayableCard card : hand) {
+            try {
+                System.out.println(parser.parseCard(card, new Pair<Integer, Integer>(last, row), null, true) + "\033[0m");
+                last += cardCols + spaces;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 }
