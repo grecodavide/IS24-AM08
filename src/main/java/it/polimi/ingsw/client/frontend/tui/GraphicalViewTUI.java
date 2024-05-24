@@ -86,12 +86,17 @@ public class GraphicalViewTUI extends GraphicalView {
 
     }
 
+    private String printHand(String prompt, ClientBoard board) {
+        this.printer.clearTerminal();
+        this.printer.printPlayerBoard(this.username, board);
+        this.printer.printHandAtBottom(board.getHand());
+        return this.askUser(prompt);
+    }
+
     private PlayableCard chooseCardFromHand(ClientBoard board) {
         List<PlayableCard> hand = board.getHand();
 
-        this.printer.printPlayerBoard(this.username, board);
-        this.printer.printHandAtBottom(this.username, board.getColor(), hand);
-        String userIn = this.askUser("Choose card to play (1, 2, 3)");
+        String userIn = this.printHand("Choose card to play (1, 2, 3):", board);
 
         PlayableCard card = null;
         Integer maxValue = hand.size();
@@ -102,10 +107,7 @@ public class GraphicalViewTUI extends GraphicalView {
                     card = hand.get(index);
                 }
             } catch (NumberFormatException e) {
-                this.printer.clearTerminal();
-                this.printer.printPlayerBoard(this.username, board);
-                this.printer.printHandAtBottom(this.username, board.getColor(), hand);
-                userIn = this.askUser("Not a valid number! try again");
+                userIn = this.printHand("Not a valid number! try again", board);
             }
         }
 
@@ -344,12 +346,22 @@ public class GraphicalViewTUI extends GraphicalView {
         this.printer.printPlayerBoard(this.currentPlayer, this.clientBoards.get(this.currentPlayer));
     }
 
+    // TO BE CHECKED: does the last turn message appear?
     @Override
     public void makeMove() {
+        List<String> messages = new ArrayList<>();
+
         this.printer.clearTerminal();
         if (this.lastRequest.getStatus().equals(RequestStatus.FAILED)) {
-            this.printer.printMessage(lastError + " Try again.");
+            messages.add(lastError + " Try again.");
         }
+        if (this.lastTurn) {
+            messages.add("This is the last turn! play carefully");
+        }
+        if (!messages.isEmpty()) {
+            this.printer.printMessage(messages);
+        }
+
         ClientBoard board = this.clientBoards.get(this.username);
         PlayableCard card = this.chooseCardFromHand(board);
         Side side = this.chooseCardSide(card);
@@ -364,8 +376,7 @@ public class GraphicalViewTUI extends GraphicalView {
                 this.makeMove();
                 return;
             }
-        } catch (CardException e) {
-        }
+        } catch (CardException e) { }
 
         super.playCard(coords, card, side);
         if (!this.getServerResponse()) {
@@ -423,11 +434,6 @@ public class GraphicalViewTUI extends GraphicalView {
     @Override
     protected void notifyMatchStarted() {
         this.printer.printCenteredMessage("Match started!", 1);
-    }
-
-    @Override
-    public void notifyLastTurn() {
-        this.printer.printMessage("This is the last turn! play carefully");
     }
 
     @Override

@@ -20,7 +20,7 @@ public abstract class GraphicalView {
     protected Pair<Objective, Objective> visibleObjectives;
     protected Map<DrawSource, PlayableCard> visiblePlayableCards;
     protected Pair<Symbol, Symbol> decksTopReign;
-    private boolean lastTurn = false;
+    protected boolean lastTurn = false;
     protected List<AvailableMatch> availableMatches;
     protected String username;
     protected final LastRequest lastRequest;
@@ -158,7 +158,6 @@ public abstract class GraphicalView {
         else
             this.currentPlayer = this.players.get((this.players.indexOf(currentPlayer) + 1) % this.players.size());
 
-        this.changePlayer();
 
         if (this.currentPlayer.equals(this.username)) {
             if (this.clientBoards.get(this.username).getPlaced().isEmpty()) {
@@ -168,6 +167,8 @@ public abstract class GraphicalView {
             } else {
                 this.makeMove();
             }
+        } else {
+            this.changePlayer();
         }
     }
 
@@ -375,7 +376,9 @@ public abstract class GraphicalView {
     /**
      * Notifies the player that this is the last turn he can play
      */
-    public abstract void notifyLastTurn();
+    public void notifyLastTurn() {
+        this.lastTurn = true;
+    }
 
 
     /**

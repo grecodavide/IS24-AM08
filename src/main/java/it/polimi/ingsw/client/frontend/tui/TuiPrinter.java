@@ -469,7 +469,7 @@ public class TuiPrinter {
         int termRows = this.getHeight();
         Integer offset = 0;
         for (String line : message) {
-            System.out.println(this.setPosition(1, termRows - infoLineOffset - offset) + (offset + 1) + ". " + line);
+            System.out.println(this.setPosition(1, termRows - infoLineOffset - offset) + line);
             offset++;
         }
     }
@@ -519,13 +519,8 @@ public class TuiPrinter {
         int termCols = this.getWidth();
         Integer handSize = hand.size();
         Integer spaces = 4;
-        Integer strlen = (username + "'s Hand").length();
-
-        username = this.parseUsername(username, color) + "'s Hand:";
 
         Integer last = (termCols - (handSize) * (cardCols)) / 2 - spaces * (handSize - 1) / 2;
-
-        System.out.println(this.setPosition((termCols - strlen) / 2, 1) + username);
         for (PlayableCard card : hand) {
             try {
                 System.out.println(parser.parseCard(card, new Pair<Integer, Integer>(last, 2), null, true) + "\033[0m");
@@ -885,18 +880,14 @@ public class TuiPrinter {
         System.out.print(prefix + lowerBorder.toString());
     }
 
-    public void printHandAtBottom(String username, Color color, List<PlayableCard> hand) {
+    public void printHandAtBottom(List<PlayableCard> hand) {
         int termCols = this.getWidth();
         Integer handSize = hand.size();
         Integer spaces = 4;
-        Integer strlen = (username + "'s Hand").length();
-
-        username = this.parseUsername(username, color) + "'s Hand:";
 
         Integer last = (termCols - (handSize) * (cardCols)) / 2 - spaces * (handSize - 1) / 2;
         Integer row = this.getHeight()-TuiPrinter.cardRows-3;
 
-        System.out.println(this.setPosition((termCols - strlen) / 2, 1) + username);
         for (PlayableCard card : hand) {
             try {
                 System.out.println(parser.parseCard(card, new Pair<Integer, Integer>(last, row), null, true) + "\033[0m");
