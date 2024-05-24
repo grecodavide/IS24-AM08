@@ -19,7 +19,6 @@ public final class PlayerControllerTCP extends PlayerController {
             this.io = io;
         } catch (Exception e) {
             e.printStackTrace();
-            // match.removePlayer(player);
         }
     }
 
@@ -33,6 +32,7 @@ public final class PlayerControllerTCP extends PlayerController {
 
     private void connectionError() {
         match.removePlayer(player);
+        match.unsubscribeObserver(this);
     }
 
     private ErrorMessage createErrorMessage(Exception e) {

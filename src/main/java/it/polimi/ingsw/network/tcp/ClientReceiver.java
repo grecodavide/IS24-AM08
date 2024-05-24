@@ -150,8 +150,6 @@ public class ClientReceiver implements Runnable {
                 // TODO: something bad happened
             }
         }
-
-        System.out.println("cacca");
     }
 
 }

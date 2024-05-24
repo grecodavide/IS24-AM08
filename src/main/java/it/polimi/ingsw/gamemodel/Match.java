@@ -728,6 +728,10 @@ public class Match {
         observers.add(observer);
     }
 
+    public void unsubscribeObserver(MatchObserver observer) {
+        observers.remove(observer);
+    }
+
     /**
      * Notifies all match observers that the match has started.
      * It's called by WaitState methods after the match setup, that's why it needs to be protected.

@@ -18,12 +18,6 @@ import it.polimi.ingsw.utils.Pair;
  * rather values representing them (e.g. Player's username).
  */
 public interface RemoteViewInterface extends Remote {
-    /**
-     * Updates the list of players in the lobby before the start of the match
-     *
-     * @param playersUsernames list of usernames
-     */
-    void giveLobbyInfo(List<String> playersUsernames) throws RemoteException;
 
     /**
      * Notifies that the match has just started.

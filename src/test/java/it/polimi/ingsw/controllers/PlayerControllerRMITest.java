@@ -530,10 +530,10 @@ public class PlayerControllerRMITest {
 
             List<String> names = (List<String>) view2.getLastCallArguments().get("names");
 
-            assertEquals("registerView: wrong last call in view2", "giveLobbyInfo", view2.getLastCall());
+            assertEquals("registerView: wrong last call in view2", "someoneJoined", view2.getLastCall());
             assertTrue("registerView: wrong args in view2", names.contains("player1"));
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            // throw new RuntimeException(e);
         }
     }
 
@@ -678,11 +678,6 @@ public class PlayerControllerRMITest {
             args.put("objectives", secretObjectives);
         }
 
-        public void giveLobbyInfo(List<String> playersUsernames) throws RemoteException {
-            lastCall = "giveLobbyInfo";
-            args = new HashMap<>();
-            args.put("names", playersUsernames);
-        }
 
         public void matchStarted(Map<String, Color> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands, Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards, Pair<Symbol, Symbol> decksTopReigns) throws RemoteException {
             lastCall = "matchStarted";

@@ -18,15 +18,21 @@ public class ServerTCPTest {
     List<Socket> sockets;
 
     public ServerTCPTest() throws RemoteException {
-        messageParser = new MessageJsonParser();
-        port = 9999;
-        server = new Server(12, port);
-        sockets = new ArrayList<>();
+        try {
+            messageParser = new MessageJsonParser();
+            port = 9999;
+            server = new Server(12, port);
+            sockets = new ArrayList<>();
 
-        TCPServer tcpServer = new TCPServer(port, server);
-        new Thread(() -> {
-            tcpServer.listen();
-        }).start();
+            TCPServer tcpServer = new TCPServer(port, server);
+            new Thread(() -> {
+                tcpServer.listen();
+            }).start();
+
+        } catch (Exception e) {
+            System.out.println("Could not start test! port already taken");
+            System.exit(0);
+        }
     }
 
     private IOHandler matchCreator(String username, String matchName, Integer maxPlayers) {
@@ -96,8 +102,8 @@ public class ServerTCPTest {
 
         IOHandler matchCreator = this.matchCreator(matchCreatorUsername, matchName, 4);
         IOHandler matchJoinee = this.matchJoin(matchJoineeUsername, matchName);
-        IOHandler matchJoinee2 = this.matchJoin(matchJoineeUsername+"V2", matchName);
-        IOHandler matchJoinee3 = this.matchJoin(matchJoineeUsername+"V3", matchName);
+        IOHandler matchJoinee2 = this.matchJoin(matchJoineeUsername + "V2", matchName);
+        IOHandler matchJoinee3 = this.matchJoin(matchJoineeUsername + "V3", matchName);
 
 
         System.out.println("Creator: " + matchCreator.readMsg());

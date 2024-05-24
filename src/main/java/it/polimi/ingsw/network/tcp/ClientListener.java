@@ -77,8 +77,14 @@ public class ClientListener extends Thread {
 
             this.clientInteraction(); // init player controller
         } catch (Exception e) {
-            System.out.println("Failed to create Listener thread");
+            this.sendError("Failed to create Listener thread");
         }
+    }
+
+    private void sendError(String prompt) {
+        try {
+            this.io.writeMsg(new ErrorMessage(prompt, new Exception().getClass().getName()));
+        } catch (Exception e) { }
     }
 
     /**

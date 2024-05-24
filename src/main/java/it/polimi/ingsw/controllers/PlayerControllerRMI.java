@@ -50,7 +50,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
             this.view = view;
 
             List<String> playersUsernames = match.getPlayers().stream().map(Player::getUsername).toList();
-            view.giveLobbyInfo(playersUsernames);
+            view.someoneJoined(this.player.getUsername(), playersUsernames);
         }
     }
 

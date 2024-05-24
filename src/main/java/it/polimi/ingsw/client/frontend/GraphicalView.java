@@ -179,9 +179,6 @@ public abstract class GraphicalView {
     public abstract void makeMove();
 
 
-    public abstract void giveLobbyInfo(List<String> playersUsernames);
-
-
     /**
      * Starts match on the client side, setting all variables to their initial values
      * 

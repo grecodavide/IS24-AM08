@@ -24,10 +24,15 @@ public class GraphicalViewTUI extends GraphicalView {
     private final Scanner scanner;
     private String lastError;
     private boolean ongoing;
+    private boolean playingTurn;
+
+    private boolean objectiveChosen;
 
     public GraphicalViewTUI() {
         super();
         this.ongoing = true;
+        this.playingTurn = false;
+        this.objectiveChosen = false;
         try {
             this.printer = new TuiPrinter();
         } catch (Exception e) {
@@ -38,17 +43,14 @@ public class GraphicalViewTUI extends GraphicalView {
     }
 
     private void startInterface() {
-        new Thread(() -> {
-            this.printer.clearTerminal();
-            this.setNetwork();
-            this.printer.clearTerminal();
-            try {
-                this.setMatch();
-            } catch (InterruptedException e) {
-                // TODO: handle exception
-            }
-
-        }).start();
+        this.printer.clearTerminal();
+        this.setNetwork();
+        this.printer.clearTerminal();
+        try {
+            this.setMatch();
+        } catch (InterruptedException e) {
+            // TODO: handle exception
+        }
     }
 
     ///////////////////////
@@ -151,7 +153,7 @@ public class GraphicalViewTUI extends GraphicalView {
                     prompt = "Y coordinate is not a number! Try again.";
                 }
             } else {
-                prompt = "Y coordinate not specified! Try again.";
+                prompt = "Not a valid format! try again.";
             }
         }
 
@@ -232,7 +234,7 @@ public class GraphicalViewTUI extends GraphicalView {
                         prompt = "Not a valid connection type! Choose connection type (1 for TCP, 2 for RMI)";
                         break;
                 }
-            } catch (Exception e) { 
+            } catch (Exception e) {
                 this.printer.clearTerminal();
                 this.printer.printMessage("Could not connect! Try again");
                 this.setNetwork();
@@ -241,6 +243,7 @@ public class GraphicalViewTUI extends GraphicalView {
     }
 
 
+    // TODO: error handling causes getAvailableMatches to block
     private void setMatch() throws InterruptedException {
         String prompt;
         List<AvailableMatch> joinables = new ArrayList<>(), notJoinables = new ArrayList<>();
@@ -248,6 +251,7 @@ public class GraphicalViewTUI extends GraphicalView {
 
         this.lastRequest.setStatus(RequestStatus.PENDING);
         this.networkView.getAvailableMatches();
+
         if (!this.getServerResponse()) {
             this.printer.clearTerminal();
             this.printer.printCenteredMessage("Could not receive availbale matches, try again!", 1);
@@ -345,25 +349,73 @@ public class GraphicalViewTUI extends GraphicalView {
         super.chooseSecretObjective(objective);
         if (!this.getServerResponse()) {
             this.giveSecretObjectives(secretObjectives);
+            return;
         }
+
+        this.objectiveChosen = true;
     }
 
+
+    // TODO: implement a way to understand if player is choosing secret objective
+    @Override
+    public void someoneChoseSecretObjective(String someoneUsername) {
+        super.someoneChoseSecretObjective(someoneUsername);
+    }
+
+
+    // TODO: try to give the user the possibility to perform action, until it's their turn
     @Override
     public void changePlayer() {
-        this.printer.printPlayerBoard(this.currentPlayer, this.clientBoards.get(this.currentPlayer));
+        this.printer.clearTerminal();
+        ClientBoard board = this.clientBoards.get(this.currentPlayer);
+
+        new Thread(() -> {
+            if (board.getPlaced().isEmpty()) { // choosing initial side
+                this.printer.printCenteredMessage(this.currentPlayer + " is choosing initial side!", 0);
+            } else if (!objectiveChosen) { // choosing objective
+                this.printer.printCenteredMessage(this.currentPlayer + " is choosing secret objective!", 0);
+            } else {
+                this.printer.printCenteredMessage(this.currentPlayer + " is playing a card!", 0);
+            }
+        }).start();
+        // new Thread(() -> {
+        // this.printer.clearTerminal();
+        // this.printer.printPlayerBoard(this.currentPlayer, this.clientBoards.get(this.currentPlayer));
+        // ClientBoard board = this.clientBoards.get(this.username);
+        // if (board.getObjective() != null) { // if null it's still too early for this
+        // this.playingTurn = false;
+        // String userIn;
+        // while (!this.playingTurn) {
+        // userIn = this.askUser("Type 'o' to show objectives, 'b' to see your board.");
+        // switch (userIn) {
+        // case "o":
+        // this.printer.printObjectives(this.username, board.getColor(), board.getObjective(),
+        // this.visibleObjectives);
+        // break;
+        // case "b":
+        // this.printer.printPlayerBoard(this.username, board);
+        // break;
+        // default:
+        // this.printer.printPlayerBoard(this.currentPlayer, this.clientBoards.get(this.currentPlayer));
+        // break;
+        // }
+        // }
+        // }
+        // }).start();
     }
 
     // TO BE CHECKED: does the last turn message appear?
     @Override
     public void makeMove() {
         List<String> messages = new ArrayList<>();
+        this.playingTurn = true;
 
         this.printer.clearTerminal();
         if (this.lastRequest.getStatus().equals(RequestStatus.FAILED)) {
             messages.add(lastError + " Try again.");
         }
         if (this.lastTurn) {
-            messages.add("This is the last turn! play carefully");
+            messages.add("This is the last turn! Play carefully");
         }
         if (!messages.isEmpty()) {
             this.printer.printMessage(messages);
@@ -459,12 +511,6 @@ public class GraphicalViewTUI extends GraphicalView {
             }
         });
         this.ongoing = false;
-    }
-
-    @Override
-    public void giveLobbyInfo(List<String> playersUsernames) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'giveLobbyInfo'");
     }
 
     @Override

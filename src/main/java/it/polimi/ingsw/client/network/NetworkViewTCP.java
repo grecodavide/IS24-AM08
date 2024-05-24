@@ -43,12 +43,6 @@ public class NetworkViewTCP extends NetworkView {
     }
 
     @Override
-    public void giveLobbyInfo(List<String> playersUsernames) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'giveLobbyInfo'");
-    }
-
-    @Override
     public void matchStarted(Map<String, Color> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands,
             Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards,
             Pair<Symbol, Symbol> decksTopReign) {

@@ -104,11 +104,6 @@ public abstract class NetworkView implements RemoteViewInterface {
     }
 
     @Override
-    public void giveLobbyInfo(List<String> playersUsernames) {
-        graphicalView.giveLobbyInfo(playersUsernames);
-    }
-
-    @Override
     public void matchStarted(Map<String, Color> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands,
                              Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards,
                              Pair<Symbol, Symbol> decksTopReigns) throws RemoteException {
