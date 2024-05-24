@@ -35,7 +35,8 @@ public class ChatPaneController extends SceneController {
     private MenuButton chatSelectorBar;
 
     private boolean isVisible;
-    private Map<MenuItem, String> chatHistory;
+    private Map<String, MenuItem> playersItems = new HashMap<>();
+    private MenuItem broadcastItem;
 
     private void changeVisibility() {
         TranslateTransition tt = new TranslateTransition(Duration.millis(200), chatPane);
@@ -51,7 +52,6 @@ public class ChatPaneController extends SceneController {
 
     @Override
     public void initialize() {
-        chatHistory = new HashMap<>();
         chatHistoryScrollPane.getStyleClass().clear();
         isVisible = false;
         chatPane.setTranslateX(460);
@@ -63,9 +63,17 @@ public class ChatPaneController extends SceneController {
         }));
 
         sendMessageBtn.setOnMouseClicked(mouseEvent -> {
-            addMessage("TestUsername", chatInputText.getText());
+            addBroadcastMessage("TestUsername", chatInputText.getText());
         });
 
+        broadcastItem = new MenuItem("Broadcast");
+        broadcastItem.getProperties().put("history", "");
+        chatSelectorBar.getItems().add(broadcastItem);
+        broadcastItem.setOnAction(actionEvent -> {
+            chatSelectorBar.setText("Broadcast");
+            chatHistoryText.getChildren().clear();
+            chatHistoryText.getChildren().add(new Text((String)broadcastItem.getProperties().get("history")));
+        });
         addPlayer("ciao");
         addPlayer("ei");
 
@@ -86,20 +94,22 @@ public class ChatPaneController extends SceneController {
 
     public void addPlayer(String playerUsername) {
         MenuItem newItem = new MenuItem(playerUsername);
-        chatHistory.put(newItem, "");
+        playersItems.put(playerUsername, newItem);
+        newItem.getProperties().put("history", "");
         newItem.setOnAction(actionEvent -> {
+            chatSelectorBar.setText(playerUsername);
             chatHistoryText.getChildren().clear();
-            chatHistoryText.getChildren().add(new Text(chatHistory.get(newItem)));
+            chatHistoryText.getChildren().add(new Text((String)newItem.getProperties().get("history")));
         });
-
         chatSelectorBar.getItems().add(newItem);
     }
 
-    public void addMessage(String username, String message) {
-        if (!chatInputText.getText().isBlank()) {
+    public void addBroadcastMessage(String username, String message) {
             // Add message to the graphical chat
-            Text textMessage = new Text(username + ": " + message + "\n");
-            chatHistoryText.getChildren().add(textMessage);
-        }
+            String textMessage = username + ": " + message + "\n";
+
+            String history = broadcastItem.getProperties().get("history") + textMessage;
+            broadcastItem.getProperties().put("history", history);
+            chatHistoryText.getChildren().add(new Text(textMessage));
     }
 }
