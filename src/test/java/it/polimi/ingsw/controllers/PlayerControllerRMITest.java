@@ -747,7 +747,7 @@ public class PlayerControllerRMITest {
             args.put("replReign", replacementReign);
         }
 
-        public void someoneJoined(String someoneUsername) throws RemoteException {
+        public void someoneJoined(String someoneUsername, List<String> joinedPlayers) throws RemoteException {
             lastCall = "someoneJoined";
             args = new HashMap<>();
             args.put("name", someoneUsername);

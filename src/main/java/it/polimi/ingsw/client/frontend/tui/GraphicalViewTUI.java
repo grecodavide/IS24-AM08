@@ -215,10 +215,11 @@ public class GraphicalViewTUI extends GraphicalView {
             }
         }
 
-        userIn = this.askUser("Choose connection type (1 for TCP, 2 for RMI)");
+        String prompt = "Choose connection type (1 for TCP, 2 for RMI)";
 
         this.networkView = null;
         while (this.networkView == null) {
+            userIn = this.askUser(prompt);
             try {
                 switch (userIn) {
                     case "1", "tcp", "TCP":
@@ -228,9 +229,13 @@ public class GraphicalViewTUI extends GraphicalView {
                         this.setNetworkInterface(new NetworkViewRMI(this, IPAddr, port));
                         break;
                     default:
+                        prompt = "Not a valid connection type! Choose connection type (1 for TCP, 2 for RMI)";
                         break;
                 }
-            } catch (Exception e) {
+            } catch (Exception e) { 
+                this.printer.clearTerminal();
+                this.printer.printMessage("Could not connect! Try again");
+                this.setNetwork();
             }
         }
     }
@@ -269,18 +274,20 @@ public class GraphicalViewTUI extends GraphicalView {
             this.printer.clearTerminal();
             this.printer.printCenteredMessage("Something went wrong.. Try again!", 1);
             this.setMatch();
-        } else {
-            this.printer.clearTerminal();
-            this.printer.printCenteredMessage("Waiting for other players...", 1);
         }
     }
 
     @Override
-    public void someoneJoined(String someoneUsername) {
-        super.someoneJoined(someoneUsername);
+    public void someoneJoined(String someoneUsername, List<String> joinedPlayers) {
+        super.someoneJoined(someoneUsername, joinedPlayers);
+        this.printer.clearTerminal();
         if (!this.username.equals(someoneUsername)) {
-            this.printer.clearTerminal();
             this.printer.printCenteredMessage(someoneUsername + " joined the match!", 1);
+        } else {
+            this.printer.printCenteredMessage("Joined match!", 0);
+            joinedPlayers.add("Joined players:");
+            this.printer.printMessage(joinedPlayers);
+            this.printer.printPrompt("");
         }
     }
 
@@ -376,7 +383,8 @@ public class GraphicalViewTUI extends GraphicalView {
                 this.makeMove();
                 return;
             }
-        } catch (CardException e) { }
+        } catch (CardException e) {
+        }
 
         super.playCard(coords, card, side);
         if (!this.getServerResponse()) {
@@ -392,6 +400,7 @@ public class GraphicalViewTUI extends GraphicalView {
         this.printer.clearTerminal();
         if (this.username.equals(someoneUsername)) {
             DrawSource source = null;
+            this.printer.printAvailableResources(availableResources, 0);
             String userIn, prompt = "Choose a draw source: ";
             while (source == null) {
                 this.printer.printDrawingScreen(decksTopReign, visiblePlayableCards);

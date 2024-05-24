@@ -221,7 +221,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
             onUnregisteredView();
         } else {
             try {
-                view.someoneJoined(someone.getUsername());
+                view.someoneJoined(someone.getUsername(), null);
             } catch (RemoteException e) {
                 onConnectionError();
             }

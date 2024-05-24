@@ -158,8 +158,8 @@ public abstract class NetworkView implements RemoteViewInterface {
     }
 
     @Override
-    public void someoneJoined(String someoneUsername) {
-        graphicalView.someoneJoined(someoneUsername);
+    public void someoneJoined(String someoneUsername, List<String> joinedPlayers) {
+        graphicalView.someoneJoined(someoneUsername, joinedPlayers);
     }
 
     @Override

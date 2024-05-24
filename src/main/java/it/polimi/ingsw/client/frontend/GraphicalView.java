@@ -386,7 +386,7 @@ public abstract class GraphicalView {
      * 
      * @param someoneUsername Player who joined
      */
-    public void someoneJoined(String someoneUsername) {
+    public void someoneJoined(String someoneUsername, List<String> joinedPlayers) {
         if (this.username.equals(someoneUsername)) {
             this.setLastRequestStatus(RequestStatus.SUCCESSFUL);
         }

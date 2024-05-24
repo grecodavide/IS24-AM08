@@ -120,7 +120,7 @@ public interface RemoteViewInterface extends Remote {
      * @param someoneUsername
      * @throws RemoteException
      */
-    void someoneJoined(String someoneUsername) throws RemoteException;
+    void someoneJoined(String someoneUsername, List<String> joinedPlayers) throws RemoteException;
 
     /**
      * @param someoneUsername

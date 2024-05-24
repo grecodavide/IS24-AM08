@@ -15,15 +15,11 @@ import it.polimi.ingsw.utils.Pair;
 public class NetworkViewTCP extends NetworkView {
     private IOHandler io;
 
-    public NetworkViewTCP(GraphicalView graphicalView, String address, Integer port) {
+    public NetworkViewTCP(GraphicalView graphicalView, String address, Integer port) throws IOException {
         super(graphicalView, address, port);
-        try {
-            Socket socket = new Socket(address, port);
-            this.io = new IOHandler(socket);
-            new Thread(new ClientReceiver(this, socket)).start();
-        } catch (IOException e) {
-            // TODO: if here, there was a connection problem. handle properly
-        }
+        Socket socket = new Socket(address, port);
+        this.io = new IOHandler(socket);
+        new Thread(new ClientReceiver(this, socket)).start();
     }
 
     public void notifyError(Exception exception) {
@@ -56,8 +52,7 @@ public class NetworkViewTCP extends NetworkView {
     public void matchStarted(Map<String, Color> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands,
             Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards,
             Pair<Symbol, Symbol> decksTopReign) {
-        this.graphicalView.matchStarted(playersUsernamesAndPawns, playersHands, visibleObjectives, visiblePlayableCards,
-                decksTopReign);
+        this.graphicalView.matchStarted(playersUsernamesAndPawns, playersHands, visibleObjectives, visiblePlayableCards, decksTopReign);
     }
 
     @Override
