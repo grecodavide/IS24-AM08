@@ -284,12 +284,12 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
      * @param side    The chosen initial card side
      */
     @Override
-    public void someoneSetInitialSide(Player someone, Side side) {
+    public void someoneSetInitialSide(Player someone, Side side, Map<Symbol, Integer> availableResources) {
         if (view == null) {
             onUnregisteredView();
         } else {
             try {
-                view.someoneSetInitialSide(someone.getUsername(), side);
+                view.someoneSetInitialSide(someone.getUsername(), side, availableResources);
             } catch (RemoteException e) {
                 onConnectionError();
             }

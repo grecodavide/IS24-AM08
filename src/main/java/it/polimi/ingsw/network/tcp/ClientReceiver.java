@@ -88,7 +88,7 @@ public class ClientReceiver implements Runnable {
                     }
                     break;
                 case SomeoneSetInitialSideMessage msg:
-                    this.networkView.someoneSetInitialSide(username, msg.getSide());
+                    this.networkView.someoneSetInitialSide(username, msg.getSide(), msg.getAvailableResources());
                     break;
                 case SomeoneChoseSecretObjectiveMessage msg:
                     this.networkView.someoneChoseSecretObjective(username);

@@ -1,17 +1,21 @@
 package it.polimi.ingsw.gamemodel;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.*;
-
 import javax.management.RuntimeErrorException;
-
-import it.polimi.ingsw.exceptions.*;
+import org.junit.Test;
+import it.polimi.ingsw.exceptions.AlreadyUsedUsernameException;
+import it.polimi.ingsw.exceptions.InvalidResourceException;
+import it.polimi.ingsw.exceptions.WrongChoiceException;
+import it.polimi.ingsw.exceptions.WrongStateException;
 import it.polimi.ingsw.network.messages.Message;
 import it.polimi.ingsw.network.messages.responses.MatchStartedMessage;
 import it.polimi.ingsw.utils.MessageJsonParser;
 import it.polimi.ingsw.utils.Pair;
-import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 public class MatchTest {
 
@@ -276,7 +280,7 @@ public class MatchTest {
             // Verify that Match doesn't throw a WrongStateException if the current state is in the right state
             // i.e. ChooseInitialSideState
             try {
-                match.setInitialSide(side);
+                match.setInitialSide(side, null);
             } catch (WrongStateException e) {
                 fail("Exception thrown even if in ChooseInitialSideState" + e.getMessage());
             }

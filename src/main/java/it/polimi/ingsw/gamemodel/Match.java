@@ -553,7 +553,7 @@ public class Match {
      * @param side the side to put the initial card on
      * @throws WrongStateException if called while in a state that doesn't allow choosing the initial card side
      */
-    protected void setInitialSide(Side side) throws WrongStateException {
+    protected void setInitialSide(Side side, Map<Symbol, Integer> availableResources) throws WrongStateException {
         currentState.chooseInitialSide();
 
         try {
@@ -565,7 +565,7 @@ public class Match {
         currentGivenInitialCard = null;
 
         // Notify observers and trigger state transition
-        notifyObservers(observer -> observer.someoneSetInitialSide(currentPlayer, side));
+        notifyObservers(observer -> observer.someoneSetInitialSide(currentPlayer, side, availableResources));
         currentState.transition();
     }
 

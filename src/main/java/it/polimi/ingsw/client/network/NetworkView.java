@@ -131,8 +131,8 @@ public abstract class NetworkView implements RemoteViewInterface {
     }
 
     @Override
-    public void someoneSetInitialSide(String someoneUsername, Side side) {
-        graphicalView.someoneSetInitialSide(someoneUsername, side);
+    public void someoneSetInitialSide(String someoneUsername, Side side, Map<Symbol, Integer> availableResources) {
+        graphicalView.someoneSetInitialSide(someoneUsername, side, availableResources);
     }
 
     @Override

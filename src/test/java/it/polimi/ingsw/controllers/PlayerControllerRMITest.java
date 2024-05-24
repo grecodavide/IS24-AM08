@@ -706,11 +706,12 @@ public class PlayerControllerRMITest {
             args.put("card", card);
         }
 
-        public void someoneSetInitialSide(String someoneUsername, Side side) throws RemoteException {
+        public void someoneSetInitialSide(String someoneUsername, Side side, Map<Symbol, Integer> availableResources) throws RemoteException {
             lastCall = "someoneSetInitialSide";
             args = new HashMap<>();
             args.put("name", someoneUsername);
             args.put("side", side);
+            args.put("availableResources", availableResources);
         }
 
         public void someoneDrewSecretObjective(String someoneUsername) throws RemoteException {

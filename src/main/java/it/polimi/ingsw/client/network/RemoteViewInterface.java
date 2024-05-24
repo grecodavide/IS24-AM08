@@ -74,7 +74,7 @@ public interface RemoteViewInterface extends Remote {
      * @param side            The chosen side
      * @throws RemoteException If the remote object is considered not to be reachable any more and cannot return as usual
      */
-    void someoneSetInitialSide(String someoneUsername, Side side) throws RemoteException;
+    void someoneSetInitialSide(String someoneUsername, Side side, Map<Symbol, Integer> availableResources) throws RemoteException;
 
     /**
      * Notifies that someone (it may or may not be the receiving View instance) has drawn a pair of secret objectives.

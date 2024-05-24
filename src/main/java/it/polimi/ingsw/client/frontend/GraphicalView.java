@@ -286,11 +286,11 @@ public abstract class GraphicalView {
      * @param someoneUsername Player who chose the initial card's side
      * @param side Chosen side
      */
-    public void someoneSetInitialSide(String someoneUsername, Side side) {
+    public void someoneSetInitialSide(String someoneUsername, Side side, Map<Symbol, Integer> availableResources) {
         if (this.username.equals(someoneUsername)) {
             this.setLastRequestStatus(RequestStatus.SUCCESSFUL);
         }
-        this.clientBoards.get(someoneUsername).placeInitial(side);
+        this.clientBoards.get(someoneUsername).placeInitial(side, availableResources);
         this.nextPlayer();
     }
 

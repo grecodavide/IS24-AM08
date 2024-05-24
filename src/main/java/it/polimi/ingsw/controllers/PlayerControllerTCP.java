@@ -1,5 +1,6 @@
 package it.polimi.ingsw.controllers;
 
+import java.util.Map;
 import it.polimi.ingsw.exceptions.*;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.network.messages.Message;
@@ -60,8 +61,8 @@ public final class PlayerControllerTCP extends PlayerController {
     }
 
     @Override
-    public void someoneSetInitialSide(Player someone, Side side) {
-        this.sendMessage(new SomeoneSetInitialSideMessage(someone.getUsername(), side));
+    public void someoneSetInitialSide(Player someone, Side side, Map<Symbol, Integer> availableResources) {
+        this.sendMessage(new SomeoneSetInitialSideMessage(someone.getUsername(), side, availableResources));
     }
 
     @Override

@@ -308,13 +308,13 @@ public class GraphicalViewTUI extends GraphicalView {
     }
 
     @Override
-    public void someoneSetInitialSide(String someoneUsername, Side side) {
+    public void someoneSetInitialSide(String someoneUsername, Side side, Map<Symbol, Integer> availableResources) {
         this.printer.clearTerminal();
         if (this.username.equals(someoneUsername)) {
             this.printer.printPlayerBoard(this.username, this.clientBoards.get(this.username));
             this.printer.printMessage("Correctly played card! waiting for others to choose theirs");
         }
-        super.someoneSetInitialSide(someoneUsername, side);
+        super.someoneSetInitialSide(someoneUsername, side, availableResources);
     }
 
     @Override
