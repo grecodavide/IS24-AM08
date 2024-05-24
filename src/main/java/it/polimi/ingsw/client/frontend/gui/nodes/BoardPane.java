@@ -1,14 +1,18 @@
 package it.polimi.ingsw.client.frontend.gui.nodes;
 
-import it.polimi.ingsw.gamemodel.Card;
-import it.polimi.ingsw.gamemodel.InitialCard;
-import it.polimi.ingsw.gamemodel.PlayableCard;
-import it.polimi.ingsw.gamemodel.Side;
+import it.polimi.ingsw.gamemodel.*;
+import it.polimi.ingsw.utils.CardsManager;
 import it.polimi.ingsw.utils.GuiUtil;
 import it.polimi.ingsw.utils.Pair;
+import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Pane;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class BoardPane extends Pane {
@@ -16,13 +20,17 @@ public class BoardPane extends Pane {
     public static double cardHeight = CardView.cardHeight;
     public static double cardBorderW = 44.8;
     public static double cardBorderH = 52.6;
+    public List<Pair<Integer, Integer>> takenSpots = new ArrayList<>();
+    private List<Node> temporaryDragAreas = new ArrayList<>();
     public BoardPane() {
         super();
     }
 
     public void addCard(Pair<Integer, Integer> position, PlayableCard card, Side side) {
         CardView c = new CardView(card, side);
+        c.getProperties().put("gameCoords", position);
         displayCard(position, c);
+        takenSpots.add(position);
     }
 
     public void addCard(Pair<Integer, Integer> position, InitialCard card, Side side) {
@@ -44,4 +52,6 @@ public class BoardPane extends Pane {
         double h = boardHeight/2 - (coords.second() * (cardHeight - cardBorderH));
         return new Pair<>(w, h);
     }
+
+
 }

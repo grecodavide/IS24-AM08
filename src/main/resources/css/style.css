@@ -233,3 +233,16 @@
 .chat-container {
     -fx-background-color: #e4dcb6AA;
 }
+
+.place-spot {
+    -fx-background-color: #e4dcb699;
+}
+
+
+.place-spot-hover {
+    -fx-background-color: -fx-accent-bg-color;
+}
+
+#pointsCounter {
+    -fx-font-size: 30px;
+}

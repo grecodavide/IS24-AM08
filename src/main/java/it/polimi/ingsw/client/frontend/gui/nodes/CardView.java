@@ -7,10 +7,15 @@ import it.polimi.ingsw.gamemodel.Side;
 import it.polimi.ingsw.gamemodel.Symbol;
 import it.polimi.ingsw.utils.GuiUtil;
 import javafx.scene.image.Image;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
+
+import java.util.HashMap;
 
 public class CardView extends Pane {
     public static double cardWidth = 199;
@@ -22,18 +27,22 @@ public class CardView extends Pane {
     public Pane topRightCorner;
     public Pane bottomLeftCorner;
     public Pane bottomRightCorner;
+    public double startX;
+    public double startY;
+    private Image image;
 
     public CardView() {
         super();
         String imagePath = noCardPath;
-        System.out.println(imagePath);
         this.getProperties().put("Card", null);
+        this.getProperties().put("Side", null);
         this.addProperties(imagePath);
     }
     public CardView(InitialCard card, Side side) {
         super();
         String imagePath = GuiUtil.getImagePath(card, side);
         this.getProperties().put("Card", card);
+        this.getProperties().put("Side", side);
         this.addProperties(imagePath);
     }
 
@@ -41,6 +50,7 @@ public class CardView extends Pane {
         super();
         String imagePath = GuiUtil.getImagePath(card, side);
         this.getProperties().put("Card", card);
+        this.getProperties().put("Side", side);
         this.addProperties(imagePath);
     }
 
@@ -52,6 +62,7 @@ public class CardView extends Pane {
     public void setCard(InitialCard card, Side side) {
         String imagePath = GuiUtil.getImagePath(card, side);
         this.getProperties().put("Card", card);
+        this.getProperties().put("Side", side);
         this.addProperties(imagePath);
     }
 
@@ -63,6 +74,7 @@ public class CardView extends Pane {
     public void setCard(PlayableCard card, Side side) {
         String imagePath = GuiUtil.getImagePath(card, side);
         this.getProperties().put("Card", card);
+        this.getProperties().put("Side", side);
         this.addProperties(imagePath);
     }
 
@@ -73,6 +85,7 @@ public class CardView extends Pane {
     public void setResourcesCardBack(Symbol reign) {
         String imagePath;
         this.getProperties().put("Card", null);
+        this.getProperties().put("Side", Side.BACK);
         if (reign != null) {
             imagePath = GuiUtil.getResourcesBack(reign);
         } else {
@@ -88,6 +101,7 @@ public class CardView extends Pane {
     public void setGoldsCardBack(Symbol reign) {
         String imagePath;
         this.getProperties().put("Card", null);
+        this.getProperties().put("Side", Side.BACK);
         if (reign != null) {
             imagePath = GuiUtil.getGoldsBack(reign);
         } else {
@@ -106,14 +120,17 @@ public class CardView extends Pane {
         Rectangle rect = new Rectangle(cardWidth, cardHeight);
         rect.setArcHeight(20);
         rect.setArcWidth(20);
+        image = new Image(imagePath);
         ImagePattern pattern = new ImagePattern(
-                new Image(imagePath)
+                image
         );
         rect.setFill(pattern);
         super.getChildren().add(rect);
         super.getStyleClass().add("game-card");
         addCorners();
+
     }
+
 
     /**
      * Add corners to the card
