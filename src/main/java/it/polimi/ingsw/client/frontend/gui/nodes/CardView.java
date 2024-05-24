@@ -13,7 +13,7 @@ import javafx.scene.shape.Rectangle;
 public class CardView extends Rectangle {
     public static double cardWidth = 199;
     public static double cardHeight = 132;
-    public static String noCardPath = "/images/background2.png";
+    public static String noCardPath = "/images/no_resource2.png";
 
     public CardView() {
         super(cardWidth, cardHeight);
