@@ -25,14 +25,13 @@ public class GraphicalViewTUI extends GraphicalView {
     private String lastError;
     private boolean ongoing;
     private boolean playingTurn;
-
-    private boolean objectiveChosen;
+    private List<String> playersWithObjective;
 
     public GraphicalViewTUI() {
         super();
         this.ongoing = true;
         this.playingTurn = false;
-        this.objectiveChosen = false;
+        this.playersWithObjective = new ArrayList<>();
         try {
             this.printer = new TuiPrinter();
         } catch (Exception e) {
@@ -352,7 +351,6 @@ public class GraphicalViewTUI extends GraphicalView {
             return;
         }
 
-        this.objectiveChosen = true;
     }
 
 
@@ -360,6 +358,7 @@ public class GraphicalViewTUI extends GraphicalView {
     @Override
     public void someoneChoseSecretObjective(String someoneUsername) {
         super.someoneChoseSecretObjective(someoneUsername);
+        this.playersWithObjective.add(someoneUsername);
     }
 
 
@@ -372,37 +371,14 @@ public class GraphicalViewTUI extends GraphicalView {
         new Thread(() -> {
             if (board.getPlaced().isEmpty()) { // choosing initial side
                 this.printer.printCenteredMessage(this.currentPlayer + " is choosing initial side!", 0);
-            } else if (!objectiveChosen) { // choosing objective
+            } else if (!this.playersWithObjective.contains(this.currentPlayer)) { // choosing objective
                 this.printer.printCenteredMessage(this.currentPlayer + " is choosing secret objective!", 0);
             } else {
                 this.printer.printCenteredMessage(this.currentPlayer + " is playing a card!", 0);
             }
         }).start();
-        // new Thread(() -> {
-        // this.printer.clearTerminal();
-        // this.printer.printPlayerBoard(this.currentPlayer, this.clientBoards.get(this.currentPlayer));
-        // ClientBoard board = this.clientBoards.get(this.username);
-        // if (board.getObjective() != null) { // if null it's still too early for this
-        // this.playingTurn = false;
-        // String userIn;
-        // while (!this.playingTurn) {
-        // userIn = this.askUser("Type 'o' to show objectives, 'b' to see your board.");
-        // switch (userIn) {
-        // case "o":
-        // this.printer.printObjectives(this.username, board.getColor(), board.getObjective(),
-        // this.visibleObjectives);
-        // break;
-        // case "b":
-        // this.printer.printPlayerBoard(this.username, board);
-        // break;
-        // default:
-        // this.printer.printPlayerBoard(this.currentPlayer, this.clientBoards.get(this.currentPlayer));
-        // break;
-        // }
-        // }
-        // }
-        // }).start();
     }
+
 
     // TO BE CHECKED: does the last turn message appear?
     @Override
