@@ -375,10 +375,33 @@ public class GraphicalViewTUI extends GraphicalView {
                 this.printer.printCenteredMessage(this.currentPlayer + " is choosing secret objective!", 0);
             } else {
                 this.printer.printCenteredMessage(this.currentPlayer + " is playing a card!", 0);
+                this.startPlayerControls();
             }
         }).start();
     }
 
+    private void startPlayerControls() {
+        new Thread(() -> {
+            String userIn;
+            ClientBoard board = this.clientBoards.get(this.username);
+            ClientBoard currentBoard = this.clientBoards.get(this.currentPlayer);
+            while (!this.playingTurn) {
+                userIn = this.askUser("'o' to see objectives, 'h' to see hand, 'b' to see board, empty to go back");
+                switch (userIn) {
+                    case "o":
+                        this.printer.printObjectives(this.username, board.getColor(), board.getObjective(), this.visibleObjectives);
+                        break;
+                    case "h":
+                        this.printer.printHand(this.username, board.getColor(), board.getHand());
+                    case "b":
+                        this.printer.printPlayerBoard(this.username, board);
+                    default:
+                        this.printer.printPlayerBoard(this.currentPlayer, currentBoard);
+                        break;
+                }
+            }
+        }).start();
+    }
 
     // TO BE CHECKED: does the last turn message appear?
     @Override
@@ -461,11 +484,11 @@ public class GraphicalViewTUI extends GraphicalView {
             super.drawCard(source);
             if (!getServerResponse()) {
                 this.someonePlayedCard(someoneUsername, coords, card, side, points, availableResources);
+            } else {
+                this.printer.printCenteredMessage(someoneUsername + " is drawing a card!", 0);
+                this.startPlayerControls();
             }
-        } else {
-            this.printer.printCenteredMessage(someoneUsername + " is drawing a card!", 0);
         }
-
     }
 
     @Override
