@@ -24,13 +24,11 @@ public class GraphicalViewTUI extends GraphicalView {
     private final Scanner scanner;
     private String lastError;
     private boolean ongoing;
-    private boolean playingTurn;
     private List<String> playersWithObjective;
 
     public GraphicalViewTUI() {
         super();
         this.ongoing = true;
-        this.playingTurn = false;
         this.playersWithObjective = new ArrayList<>();
         try {
             this.printer = new TuiPrinter();
@@ -45,11 +43,7 @@ public class GraphicalViewTUI extends GraphicalView {
         this.printer.clearTerminal();
         this.setNetwork();
         this.printer.clearTerminal();
-        try {
-            this.setMatch();
-        } catch (InterruptedException e) {
-            // TODO: handle exception
-        }
+        this.setMatch();
     }
 
     ///////////////////////
@@ -242,8 +236,8 @@ public class GraphicalViewTUI extends GraphicalView {
     }
 
 
-    // TODO: error handling causes getAvailableMatches to block
-    private void setMatch() throws InterruptedException {
+    // FIXME: error handling causes getAvailableMatches to block. Problem is the name never gets changed remotely
+    private void setMatch() {
         String prompt;
         List<AvailableMatch> joinables = new ArrayList<>(), notJoinables = new ArrayList<>();
         this.setUsername(this.askUser("Choose username:"));
@@ -354,15 +348,19 @@ public class GraphicalViewTUI extends GraphicalView {
     }
 
 
-    // TODO: implement a way to understand if player is choosing secret objective
     @Override
     public void someoneChoseSecretObjective(String someoneUsername) {
         super.someoneChoseSecretObjective(someoneUsername);
         this.playersWithObjective.add(someoneUsername);
+
+        if (this.playersWithObjective.size() == this.players.size() && !this.username.equals(this.currentPlayer)) {
+            this.printer.clearTerminal();
+            this.printer.printCenteredMessage(this.currentPlayer + " is playing his turn!", 0);
+            // FIXME: give player control
+        }
     }
 
 
-    // TODO: try to give the user the possibility to perform action, until it's their turn
     @Override
     public void changePlayer() {
         this.printer.clearTerminal();
@@ -375,39 +373,16 @@ public class GraphicalViewTUI extends GraphicalView {
                 this.printer.printCenteredMessage(this.currentPlayer + " is choosing secret objective!", 0);
             } else {
                 this.printer.printCenteredMessage(this.currentPlayer + " is playing a card!", 0);
-                this.startPlayerControls();
             }
         }).start();
     }
 
-    private void startPlayerControls() {
-        new Thread(() -> {
-            String userIn;
-            ClientBoard board = this.clientBoards.get(this.username);
-            ClientBoard currentBoard = this.clientBoards.get(this.currentPlayer);
-            while (!this.playingTurn) {
-                userIn = this.askUser("'o' to see objectives, 'h' to see hand, 'b' to see board, empty to go back");
-                switch (userIn) {
-                    case "o":
-                        this.printer.printObjectives(this.username, board.getColor(), board.getObjective(), this.visibleObjectives);
-                        break;
-                    case "h":
-                        this.printer.printHand(this.username, board.getColor(), board.getHand());
-                    case "b":
-                        this.printer.printPlayerBoard(this.username, board);
-                    default:
-                        this.printer.printPlayerBoard(this.currentPlayer, currentBoard);
-                        break;
-                }
-            }
-        }).start();
-    }
 
     // TO BE CHECKED: does the last turn message appear?
     @Override
     public void makeMove() {
+        // FIXME: remove player control
         List<String> messages = new ArrayList<>();
-        this.playingTurn = true;
 
         this.printer.clearTerminal();
         if (this.lastRequest.getStatus().equals(RequestStatus.FAILED)) {
@@ -448,8 +423,8 @@ public class GraphicalViewTUI extends GraphicalView {
             Map<Symbol, Integer> availableResources) {
         super.someonePlayedCard(someoneUsername, coords, card, side, points, availableResources);
 
-        this.printer.clearTerminal();
         if (this.username.equals(someoneUsername)) {
+            this.printer.clearTerminal();
             DrawSource source = null;
             this.printer.printAvailableResources(availableResources, 0);
             String userIn, prompt = "Choose a draw source: ";
@@ -484,16 +459,10 @@ public class GraphicalViewTUI extends GraphicalView {
             super.drawCard(source);
             if (!getServerResponse()) {
                 this.someonePlayedCard(someoneUsername, coords, card, side, points, availableResources);
-            } else {
-                this.printer.printCenteredMessage(someoneUsername + " is drawing a card!", 0);
-                this.startPlayerControls();
+                return;
             }
+            // FIXME: give player controls
         }
-    }
-
-    @Override
-    protected void notifyMatchStarted() {
-        this.printer.printCenteredMessage("Match started!", 1);
     }
 
     @Override
@@ -515,8 +484,13 @@ public class GraphicalViewTUI extends GraphicalView {
     @Override
     public void notifyError(Exception exception) {
         super.notifyError(exception);
-        lastError = exception.getMessage();
+        this.lastError = exception.getMessage();
     }
+
+    @Override
+    protected void notifyMatchStarted() {
+    }
+
 
     public static void main(String[] args) {
         GraphicalViewTUI tui = new GraphicalViewTUI();
@@ -525,5 +499,4 @@ public class GraphicalViewTUI extends GraphicalView {
 
         }
     }
-
 }
