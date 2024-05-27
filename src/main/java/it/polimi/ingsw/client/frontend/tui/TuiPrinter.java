@@ -82,12 +82,14 @@ public class TuiPrinter {
         return c + username + "\033[0m";
     }
 
-    public void printCard(ShownCard card) throws CardException {
-        if (card.coords().equals(new Pair<>(0, 0)))
-            System.out.println(parser.parseCard(card.card(), getAbsoluteCoords(card.coords()), null, card.side() == Side.FRONT));
-        else
-            System.out.println(parser.parseCard(card.card(), getAbsoluteCoords(card.coords()), card.coords(), card.side() == Side.FRONT));
-        System.out.println("\033[0m");
+    public void printCard(ShownCard card) {
+        try {
+            if (card.coords().equals(new Pair<>(0, 0)))
+                System.out.println(parser.parseCard(card.card(), getAbsoluteCoords(card.coords()), null, card.side() == Side.FRONT));
+            else
+                System.out.println(parser.parseCard(card.card(), getAbsoluteCoords(card.coords()), card.coords(), card.side() == Side.FRONT));
+            System.out.println("\033[0m");
+        } catch (CardException e) { }
     }
 
     private void printPoints(String username, Color color, Integer points) {
@@ -498,11 +500,7 @@ public class TuiPrinter {
         }
         Map<Integer, ShownCard> placed = board.getPlaced();
         for (Integer turn : placed.keySet()) {
-            try {
-                this.printCard(placed.get(turn));
-            } catch (CardException e) {
-                e.printStackTrace();
-            }
+            this.printCard(placed.get(turn));
         }
         this.printAvailableResources(board.getAvailableResources(), this.getHeight() - infoLineOffset);
         this.printPoints(username, board.getColor(), board.getPoints());

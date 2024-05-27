@@ -1,5 +1,6 @@
 package it.polimi.ingsw.client.frontend.tui;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -9,12 +10,19 @@ import it.polimi.ingsw.client.frontend.GraphicalView;
 import it.polimi.ingsw.client.frontend.ShownCard;
 import it.polimi.ingsw.client.network.NetworkViewRMI;
 import it.polimi.ingsw.client.network.NetworkViewTCP;
-import it.polimi.ingsw.exceptions.CardException;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.LeaderboardEntry;
 import it.polimi.ingsw.utils.Pair;
 import it.polimi.ingsw.utils.RequestStatus;
+
+/*
+ * TODO: - Implement correctly the messages: have a list of strings, containing all messages to be
+ * shown - When a text gets sent, add it to list of messages - Come up with a decent enough prompt -
+ * Show current player name (either as a message, or in a corner) - Can be done but not necessary:
+ * add a view with objectives, hand etc all in one place - Method to show chat - Method to write to
+ * chat - Debug what happens when it fails to join match (getAvailableMatches gets stuck)
+ */
 
 /**
  * Class that handles client game loop from TUI
@@ -25,11 +33,17 @@ public class GraphicalViewTUI extends GraphicalView {
     private String lastError;
     private boolean ongoing;
     private List<String> playersWithObjective;
+    private final PlayerControls playerControls;
+
+    private List<String> chat;
 
     public GraphicalViewTUI() {
         super();
         this.ongoing = true;
         this.playersWithObjective = new ArrayList<>();
+        this.playerControls = new PlayerControls();
+        this.playerControls.disable();
+        this.chat = new ArrayList<>();
         try {
             this.printer = new TuiPrinter();
         } catch (Exception e) {
@@ -44,12 +58,16 @@ public class GraphicalViewTUI extends GraphicalView {
         this.setNetwork();
         this.printer.clearTerminal();
         this.setMatch();
+        new Thread(() -> {
+            this.startPlayerControls();
+        }).start();
     }
 
     ///////////////////////
     // AUXILIARY METHODS //
     ///////////////////////
     private String askUser(String prompt) {
+        this.clearStdin();
         this.printer.printPrompt(prompt);
         String userIn = this.scanner.nextLine();
         this.printer.clearTerminal();
@@ -81,7 +99,7 @@ public class GraphicalViewTUI extends GraphicalView {
 
     }
 
-    private String printHand(String prompt, ClientBoard board) {
+    private synchronized String printHand(String prompt, ClientBoard board) {
         this.printer.clearTerminal();
         this.printer.printPlayerBoard(this.username, board);
         this.printer.printHandAtBottom(board.getHand());
@@ -193,6 +211,96 @@ public class GraphicalViewTUI extends GraphicalView {
         }
     }
 
+    private void clearStdin() {
+        try {
+            System.in.read(new byte[System.in.available()]);
+        } catch (IOException e) {
+        }
+    }
+
+    private void parsePlayerControl() {
+        ClientBoard board = this.clientBoards.get(this.username);
+        ClientBoard currentPlayerBoard = this.clientBoards.get(this.currentPlayer);
+        String userIn, player;
+
+        userIn = scanner.nextLine();
+        this.printer.clearTerminal();
+        switch (userIn) {
+            case "o":
+                this.printer.printObjectives(username, board.getColor(), board.getObjective(), this.visibleObjectives);
+                break;
+            case "h":
+                this.printer.printHand(this.username, board.getColor(), board.getHand());
+                break;
+            case "b":
+                this.printer.printPlayerBoard(this.username, board);
+                break;
+
+            case "1":
+                player = this.players.get(0);
+                this.printer.printPlayerBoard(player, this.clientBoards.get(player));
+                break;
+            case "2":
+                player = this.players.get(1);
+                this.printer.printPlayerBoard(player, this.clientBoards.get(player));
+                break;
+            case "3":
+                if (this.players.size() > 2) {
+                    player = this.players.get(2);
+                    this.printer.printPlayerBoard(player, this.clientBoards.get(player));
+                    break;
+                }
+            case "4":
+                if (this.players.size() > 3) {
+                    player = this.players.get(3);
+                    this.printer.printPlayerBoard(player, this.clientBoards.get(player));
+                    break;
+                }
+
+            default:
+                this.printer.printPlayerBoard(this.currentPlayer, currentPlayerBoard);
+                break;
+        }
+        this.printer.printPrompt("Prova o");
+    }
+
+    // not working
+    private void startPlayerControls() {
+        while (this.ongoing) {
+            synchronized (this.playerControls) {
+                if (this.playerControls.isEnabled()) {
+                    try {
+                        if (System.in.available() > 0) {
+                            this.parsePlayerControl();
+                        } else {
+                            Thread.sleep(200);
+                        }
+                    } catch (InterruptedException | IOException e) {
+                    }
+                } else {
+                    try {
+                        this.playerControls.wait();
+                    } catch (InterruptedException e) {
+                    }
+                }
+
+            }
+        }
+    }
+
+    private void givePlayerControls() {
+        synchronized (this.playerControls) {
+            this.playerControls.enable();
+            this.printer.printPrompt("Prova o");
+            this.playerControls.notifyAll();
+        }
+    }
+
+    private void removePlayerControls() {
+        this.playerControls.disable();
+        this.clearStdin();
+    }
+
     ////////////////////////
     // PRE MATCH METHODS //
     ///////////////////////
@@ -236,7 +344,7 @@ public class GraphicalViewTUI extends GraphicalView {
     }
 
 
-    // FIXME: error handling causes getAvailableMatches to block. Problem is the name never gets changed remotely
+    // FIXME: error handling causes getAvailableMatches to block. Name never gets changed on Server??
     private void setMatch() {
         String prompt;
         List<AvailableMatch> joinables = new ArrayList<>(), notJoinables = new ArrayList<>();
@@ -250,6 +358,8 @@ public class GraphicalViewTUI extends GraphicalView {
             this.printer.printCenteredMessage("Could not receive availbale matches, try again!", 1);
             this.setMatch();
             return;
+        } else {
+            this.printer.clearTerminal();
         }
 
         this.printer.clearTerminal();
@@ -271,6 +381,8 @@ public class GraphicalViewTUI extends GraphicalView {
             this.printer.clearTerminal();
             this.printer.printCenteredMessage("Something went wrong.. Try again!", 1);
             this.setMatch();
+        } else {
+            this.printer.clearTerminal();
         }
     }
 
@@ -310,6 +422,8 @@ public class GraphicalViewTUI extends GraphicalView {
         super.chooseInitialCardSide(side);
         if (!this.getServerResponse()) {
             this.giveInitialCard(initialCard);
+        } else {
+            this.printer.clearTerminal();
         }
     }
 
@@ -344,7 +458,6 @@ public class GraphicalViewTUI extends GraphicalView {
             this.giveSecretObjectives(secretObjectives);
             return;
         }
-
     }
 
 
@@ -353,14 +466,15 @@ public class GraphicalViewTUI extends GraphicalView {
         super.someoneChoseSecretObjective(someoneUsername);
         this.playersWithObjective.add(someoneUsername);
 
-        if (this.playersWithObjective.size() == this.players.size() && !this.username.equals(this.currentPlayer)) {
-            this.printer.clearTerminal();
-            this.printer.printCenteredMessage(this.currentPlayer + " is playing his turn!", 0);
-            // FIXME: give player control
-        }
+        // if (this.playersWithObjective.size() == this.players.size() &&
+        // !this.username.equals(this.currentPlayer)) {
+        // this.printer.clearTerminal();
+        // this.givePlayerControls();
+        // }
     }
 
 
+    // gets called only on others, never on current player
     @Override
     public void changePlayer() {
         this.printer.clearTerminal();
@@ -372,7 +486,9 @@ public class GraphicalViewTUI extends GraphicalView {
             } else if (!this.playersWithObjective.contains(this.currentPlayer)) { // choosing objective
                 this.printer.printCenteredMessage(this.currentPlayer + " is choosing secret objective!", 0);
             } else {
-                this.printer.printCenteredMessage(this.currentPlayer + " is playing a card!", 0);
+                if (!this.playerControls.isEnabled()) {
+                    this.givePlayerControls();
+                }
             }
         }).start();
     }
@@ -381,10 +497,9 @@ public class GraphicalViewTUI extends GraphicalView {
     // TO BE CHECKED: does the last turn message appear?
     @Override
     public void makeMove() {
-        // FIXME: remove player control
-        List<String> messages = new ArrayList<>();
+        this.removePlayerControls();
 
-        this.printer.clearTerminal();
+        List<String> messages = new ArrayList<>();
         if (this.lastRequest.getStatus().equals(RequestStatus.FAILED)) {
             messages.add(lastError + " Try again.");
         }
@@ -400,21 +515,20 @@ public class GraphicalViewTUI extends GraphicalView {
         Side side = this.chooseCardSide(card);
         Pair<Integer, Integer> coords = this.chooseCoords(board);
 
-        try {
-            this.printer.clearTerminal();
-            this.printer.printPlayerBoard(this.username, board);
-            this.printer.printCard(new ShownCard(card, side, coords));
-            String userIn = this.askUser("Are you sure? (n to abort)");
-            if (userIn.equals("n")) {
-                this.makeMove();
-                return;
-            }
-        } catch (CardException e) {
+        this.printer.clearTerminal();
+        this.printer.printPlayerBoard(this.username, board);
+        this.printer.printCard(new ShownCard(card, side, coords));
+        String userIn = this.askUser("Are you sure? (n to abort)");
+        if (userIn.equals("n")) {
+            this.makeMove();
+            return;
         }
 
         super.playCard(coords, card, side);
         if (!this.getServerResponse()) {
             this.makeMove();
+        } else {
+            this.printer.clearTerminal();
         }
     }
 
@@ -461,7 +575,6 @@ public class GraphicalViewTUI extends GraphicalView {
                 this.someonePlayedCard(someoneUsername, coords, card, side, points, availableResources);
                 return;
             }
-            // FIXME: give player controls
         }
     }
 
@@ -488,7 +601,29 @@ public class GraphicalViewTUI extends GraphicalView {
     }
 
     @Override
-    protected void notifyMatchStarted() {
+    protected void notifyMatchStarted() {}
+
+
+    @Override
+    public void someoneSentPrivateText(String someoneUsername, String text) {
+        super.someoneSentPrivateText(someoneUsername, text);
+
+        if (this.username.equals(someoneUsername)) {
+            this.chat.add("(me): " + text);
+        } else {
+            this.chat.add("(" + someoneUsername + "): " + text);
+        }
+    }
+
+    @Override
+    public void someoneSentBroadcastText(String someoneUsername, String text) {
+        super.someoneSentBroadcastText(someoneUsername, text);
+
+        if (this.username.equals(someoneUsername)) {
+            this.chat.add("[me]: " + text);
+        } else {
+            this.chat.add("[" + someoneUsername + "]: " + text);
+        }
     }
 
 
@@ -499,4 +634,5 @@ public class GraphicalViewTUI extends GraphicalView {
 
         }
     }
+
 }
