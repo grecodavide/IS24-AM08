@@ -10,6 +10,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -38,6 +39,13 @@ public class GraphicalApplication extends Application {
         // Create the connection scene
         Scene connectionScene = new Scene(root, 1920, 1080);
         // Show the window
+        /*
+        // Fullscreen
+        primaryStage.setFullScreen(true);
+        primaryStage.setMaximized(true);
+        primaryStage.setResizable(false);
+        primaryStage.setFullScreenExitHint("");
+         */
         primaryStage.setScene(connectionScene);
         primaryStage.show();
     }
