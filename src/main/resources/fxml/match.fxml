@@ -16,6 +16,9 @@
 
 <?import javafx.scene.control.ScrollPane?>
 <?import it.polimi.ingsw.client.frontend.gui.nodes.CardView?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<?import it.polimi.ingsw.client.frontend.gui.nodes.PlateauPane?>
 <VBox fx:controller="it.polimi.ingsw.client.frontend.gui.scenes.MatchSceneController" alignment="TOP_CENTER" maxHeight="1080.0" maxWidth="1920.0" minHeight="1080.0" minWidth="1920.0" prefHeight="1080.0" prefWidth="1920.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
   <children>
     <AnchorPane fx:id="matchPane" id="pane" maxHeight="-1.0" maxWidth="-1.0" prefHeight="372.0" prefWidth="707.0" VBox.vgrow="ALWAYS">
@@ -24,6 +27,7 @@
               <tabs>
                   <Tab text="Table">
                      <content>
+                         <HBox alignment="CENTER">
                         <StackPane prefHeight="150.0" prefWidth="200.0">
                            <children>
                               <GridPane alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="307.0" prefWidth="683.0">
@@ -52,9 +56,19 @@
                               </HBox>
                            </children>
                            <padding>
-                              <Insets bottom="20.0" left="20.0" right="20.0" top="10.0" />
+                              <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                            </padding>
                         </StackPane>
+                             <PlateauPane fx:id="plateauPane" prefWidth="500" prefHeight="1000">
+                                 <ImageView fitHeight="800" fitWidth="400">
+                                     <Image url="@../images/plateau-score.png"
+                                            backgroundLoading="true"/>
+                                 </ImageView>
+                                 <HBox.margin>
+                                     <Insets top="20"/>
+                                 </HBox.margin>
+                             </PlateauPane>
+                         </HBox>
                      </content>
                   </Tab>
               </tabs>

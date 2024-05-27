@@ -2,6 +2,8 @@ package it.polimi.ingsw.client.frontend.gui.scenes;
 
 import it.polimi.ingsw.client.frontend.gui.nodes.CardView;
 
+import it.polimi.ingsw.client.frontend.gui.nodes.PlateauPane;
+import it.polimi.ingsw.gamemodel.Color;
 import it.polimi.ingsw.gamemodel.Symbol;
 import it.polimi.ingsw.utils.GuiUtil;
 import javafx.collections.ObservableMap;
@@ -11,6 +13,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 
 import java.io.IOException;
 
@@ -23,6 +26,8 @@ public class MatchSceneController extends SceneController{
     public CardView fourthVisible;
     public CardView firstObjective;
     public CardView secondObjective;
+    public PlateauPane plateauPane;
+    public int count = 0;
     @FXML
     TabPane matchTabs;
     @FXML
@@ -44,6 +49,7 @@ public class MatchSceneController extends SceneController{
             matchTabs.getTabs().add(t);
             t.getProperties().put("Controller", loader.getController());
             t.getProperties().put("Username", username);
+            plateauPane.setColor(username, Color.values()[i]);
             //BoardPane playerBoard = (HBox chatPane = this.loadScene("/fxml/chat.fxml");
             //playerBoard.setId(username + "-board");
         }

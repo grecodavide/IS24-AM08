@@ -5,11 +5,13 @@ import it.polimi.ingsw.gamemodel.*;
 import javafx.fxml.FXMLLoader;
 
 import java.io.IOException;
+import java.util.Locale;
 
 public class GuiUtil {
     public static String playableCardsPath = "/images/playable_cards";
     public static String objectivesPath = "/images/objectives";
     public static String initialsPath = "/images/initial_cards";
+    public static String pawnsPath = "/images/pawn_colors";
 
     public static <T>T getFromFXML(String path) throws IOException {
         FXMLLoader loader = GuiUtil.getLoader(path);
@@ -64,6 +66,10 @@ public class GuiUtil {
             return objectivesPath + "/" + obj.getID() + ".png";
         else
             return objectivesPath + "/objectives-back.png";
+    }
+
+    public static String getPawnImagePath(Color color) {
+        return pawnsPath + "/" + color.toString().toLowerCase(Locale.ROOT) + "-pawn.png";
     }
 
 }
