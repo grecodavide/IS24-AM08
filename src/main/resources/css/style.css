@@ -246,3 +246,7 @@
 #pointsCounter {
     -fx-font-size: 30px;
 }
+
+.state-title {
+    -fx-font-size: 45px;
+}

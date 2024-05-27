@@ -1,10 +1,7 @@
 package it.polimi.ingsw.client.frontend.gui.nodes;
 
 
-import it.polimi.ingsw.gamemodel.InitialCard;
-import it.polimi.ingsw.gamemodel.PlayableCard;
-import it.polimi.ingsw.gamemodel.Side;
-import it.polimi.ingsw.gamemodel.Symbol;
+import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.GuiUtil;
 import javafx.scene.image.Image;
 import javafx.scene.input.ClipboardContent;
@@ -47,6 +44,14 @@ public class CardView extends Pane {
     }
 
     public CardView(PlayableCard card, Side side) {
+        super();
+        String imagePath = GuiUtil.getImagePath(card, side);
+        this.getProperties().put("Card", card);
+        this.getProperties().put("Side", side);
+        this.addProperties(imagePath);
+    }
+
+    public CardView(Objective card, Side side) {
         super();
         String imagePath = GuiUtil.getImagePath(card, side);
         this.getProperties().put("Card", card);

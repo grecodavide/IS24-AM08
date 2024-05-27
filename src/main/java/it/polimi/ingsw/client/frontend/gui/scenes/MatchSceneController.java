@@ -47,8 +47,9 @@ public class MatchSceneController extends SceneController{
             setControllerAttributes(loader);
             t.setText(username);
             matchTabs.getTabs().add(t);
+            PlayerTabController controller = loader.getController();
+            controller.setUsername(username);
             t.getProperties().put("Controller", loader.getController());
-            t.getProperties().put("Username", username);
             plateauPane.setColor(username, Color.values()[i]);
             //BoardPane playerBoard = (HBox chatPane = this.loadScene("/fxml/chat.fxml");
             //playerBoard.setId(username + "-board");

@@ -10,13 +10,13 @@
 <?import javafx.scene.text.Font?>
 <?import it.polimi.ingsw.client.frontend.gui.nodes.BoardPane?>
 <?import it.polimi.ingsw.client.frontend.gui.nodes.CardView?>
-<Tab fx:controller="it.polimi.ingsw.client.frontend.gui.scenes.PlayerTabController" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
-    <StackPane prefHeight="150.0" prefWidth="200.0">
+<Tab fx:id="playerTab" fx:controller="it.polimi.ingsw.client.frontend.gui.scenes.PlayerTabController" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+    <StackPane fx:id="rootPane" prefHeight="150.0" prefWidth="200.0" >
         <padding>
             <Insets bottom="20.0" left="20.0" right="40.0" top="10.0"/>
         </padding>
         <ScrollPane fx:id="scroll" StackPane.alignment="CENTER" hvalue="0.51" vvalue="0.53" styleClass="scrollboard">
-            <BoardPane fx:id="playerBoard" styleClass="playerboard" prefWidth="7960" prefHeight="5280"></BoardPane>
+            <BoardPane fx:id="playerBoard" styleClass="playerboard" prefWidth="7960" prefHeight="5280" />
         </ScrollPane>
         <VBox StackPane.alignment="TOP_LEFT" maxHeight="-Infinity" minHeight="-Infinity">
             <Label fx:id="pointsCounter" text="Points: 10" textAlignment="CENTER">
@@ -24,6 +24,7 @@
             <HBox fx:id="resourcesCounter">
             </HBox>
         </VBox>
+        <Label fx:id="stateTitle" styleClass="state-title" StackPane.alignment="TOP_CENTER" />
         <HBox alignment="BOTTOM_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
               minWidth="-Infinity" spacing="15.0" StackPane.alignment="BOTTOM_CENTER" >
             <children>

@@ -2,16 +2,17 @@ package it.polimi.ingsw.client.frontend.gui.scenes;
 
 import it.polimi.ingsw.client.frontend.gui.nodes.BoardPane;
 import it.polimi.ingsw.client.frontend.gui.nodes.CardView;
-import it.polimi.ingsw.gamemodel.PlayableCard;
-import it.polimi.ingsw.gamemodel.Side;
-import it.polimi.ingsw.gamemodel.Symbol;
+import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.CardsManager;
 import it.polimi.ingsw.utils.Pair;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Tab;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.ClipboardContent;
@@ -20,6 +21,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 
 public class PlayerTabController extends SceneController{
+    public StackPane rootPane;
+    public Tab playerTab;
     private String username;
     @FXML
     CardView handCard1;
@@ -42,6 +46,9 @@ public class PlayerTabController extends SceneController{
     HBox resourcesCounter;
     @FXML
     Label pointsCounter;
+    @FXML
+    Label stateTitle;
+    HBox actionContainer;
     private List<Node> temporaryDragAreas = new ArrayList<>();
 
     public void initialize() {
@@ -60,6 +67,12 @@ public class PlayerTabController extends SceneController{
             res.put(s, 0);
         }
         setResources(res);
+
+    }
+
+    @Override
+    public void initializePostController() {
+        someoneDrewSecretObjective();
     }
 
     public void testBoard() {
@@ -111,6 +124,7 @@ public class PlayerTabController extends SceneController{
      * @param card CardView to add attributes
      */
     private void initializeHandCard(CardView card) {
+        card.setCursor(Cursor.OPEN_HAND);
         card.setOnDragDetected(event -> {
             // Set Dragboard content
             Dragboard dragboard = card.startDragAndDrop(TransferMode.MOVE);
@@ -123,11 +137,13 @@ public class PlayerTabController extends SceneController{
             dragboard.setDragViewOffsetY(CardView.cardHeight/2);
             this.createDragArea((PlayableCard) card.getProperties().get("Card"), (Side) card.getProperties().get("Side"));
             card.setVisible(false);
+            card.setCursor(Cursor.CLOSED_HAND);
             event.consume();
         });
         card.setOnDragDone(event -> {
             this.removeDragAreas();
             card.setVisible(true);
+            card.setCursor(Cursor.OPEN_HAND);
             event.consume();
         });
     }
@@ -208,6 +224,60 @@ public class PlayerTabController extends SceneController{
             playerBoard.getChildren().remove(n);
         }
         temporaryDragAreas.clear();
+    }
+
+    public void giveSecretObjectives(Pair<Objective, Objective> objectives) {
+        stateTitle.setText("Choose your secret objective");
+        CardView first = new CardView(objectives.first(), Side.FRONT);
+        CardView second = new CardView(objectives.second(), Side.FRONT);
+        createCardChoiceContainer(first, second);
+        // TODO define what to do on mouse click
+    }
+    public void someoneDrewSecretObjective() {
+        stateTitle.setText(username + " is choosing the secret objective");
+        CardView first = new CardView(CardsManager.getInstance().getObjectives().get(1), Side.BACK);
+        CardView second = new CardView(CardsManager.getInstance().getObjectives().get(1), Side.BACK);
+        createCardChoiceContainer(first, second);
+        // TODO define what to do on mouse click
+    }
+
+    public void giveInitialCard(InitialCard card) {
+        stateTitle.setText("Choose your card");
+        CardView front = new CardView(card, Side.FRONT);
+        CardView back = new CardView(card, Side.BACK);
+        createCardChoiceContainer(front, back);
+        // TODO define what to do on mouse click
+        front.setCursor(Cursor.HAND);
+        front.setOnMouseClicked((e) -> {
+
+        });
+    }
+
+    public void someoneDrewInitialCard(InitialCard card) {
+        stateTitle.setText(username + " is choosing the initial card side...");
+        CardView front = new CardView(card, Side.FRONT);
+        CardView back = new CardView(card, Side.BACK);
+        createCardChoiceContainer(front, back);
+    }
+
+    private void createCardChoiceContainer(CardView front, CardView back) {
+        actionContainer = new HBox();
+        // Add CardViews
+        actionContainer.getChildren().add(front);
+        actionContainer.getChildren().add(back);
+        // Set container properties
+        actionContainer.setMaxHeight(Double.NEGATIVE_INFINITY);
+        actionContainer.setMaxWidth(Double.NEGATIVE_INFINITY);
+        actionContainer.setSpacing(30);
+        // Set alignment and add to the rootPane
+        actionContainer.setAlignment(Pos.BASELINE_CENTER);
+        rootPane.getChildren().add(actionContainer);
+        StackPane.setAlignment(actionContainer, Pos.CENTER);
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+        playerTab.getProperties().put("Username", username);
     }
 
 }
