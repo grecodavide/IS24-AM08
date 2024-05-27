@@ -15,7 +15,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.image.Image?>
-<HBox fx:id="chatPane" alignment="CENTER_RIGHT" prefHeight="200.0" prefWidth="300.0" AnchorPane.rightAnchor="0.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.polimi.ingsw.client.frontend.gui.scenes.ChatPaneController">
+<HBox fx:id="chatPane" styleClass="main-container" alignment="CENTER_RIGHT" prefHeight="200.0" prefWidth="300.0" AnchorPane.rightAnchor="0.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.polimi.ingsw.client.frontend.gui.scenes.ChatPaneController">
     <children>
         <Button fx:id="showChatBtn" styleClass="icon-button" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="50.0" prefWidth="50.0">
             <font>

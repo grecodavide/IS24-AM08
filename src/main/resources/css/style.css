@@ -1,3 +1,12 @@
+@font-face {
+    font-family: 'FrakturNo2';
+    src: url('../images/fonts/FrakturNo2/FrakturNo2.ttf');
+}
+@font-face {
+    font-family: 'Cyntho Next';
+    src: url('../images/fonts/cyntho-next/CynthoNextRegular.ttf');
+}
+
 * {
     -fx-foreground-color: #412714;
     -fx-primary-container: #e4dcb6;
@@ -6,6 +15,10 @@
     -fx-accent-bg-color: #a49849;
     -fx-accent-fg-color: #2c2119;
     -fx-third-bg-color: #f6f3e4;
+}
+
+.main-container {
+    -fx-font-family: 'Cyntho Next';
 }
 
 #pane{
@@ -88,6 +101,7 @@
     -fx-padding: 5px 5px;
 }
 .title {
+    -fx-font-family: 'FrakturNo2';
     -fx-font-size: 40px;
     -fx-text-fill: -fx-foreground-color;
 }

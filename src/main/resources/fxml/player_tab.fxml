@@ -10,7 +10,7 @@
 <?import javafx.scene.text.Font?>
 <?import it.polimi.ingsw.client.frontend.gui.nodes.BoardPane?>
 <?import it.polimi.ingsw.client.frontend.gui.nodes.CardView?>
-<Tab fx:id="playerTab" fx:controller="it.polimi.ingsw.client.frontend.gui.scenes.PlayerTabController" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+<Tab styleClass="main-container" fx:id="playerTab" fx:controller="it.polimi.ingsw.client.frontend.gui.scenes.PlayerTabController" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
     <StackPane fx:id="rootPane" prefHeight="150.0" prefWidth="200.0" >
         <padding>
             <Insets bottom="20.0" left="20.0" right="40.0" top="10.0"/>

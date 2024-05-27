@@ -1,7 +1,10 @@
 @import "style.css";
 
 .tab-header-area .tab-header-background {
-    -fx-background-color: -fx-secondary-container;
+        -fx-background-image: url("../images/secondary-bgup.png");
+        -fx-background-repeat: repeat;
+        -fx-background-position: center center;
+        -fx-background-size: fit;
 }
 .tab-pane .tab:selected {
     -fx-background-color: -fx-accent-bg-color;

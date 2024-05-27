@@ -11,7 +11,7 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.Pane?>
 
-<StackPane id="pane" fx:controller="it.polimi.ingsw.client.frontend.gui.scenes.LobbySceneController" xmlns:fx="http://javafx.com/fxml/1">
+<StackPane styleClass="main-container" id="pane" fx:controller="it.polimi.ingsw.client.frontend.gui.scenes.LobbySceneController" xmlns:fx="http://javafx.com/fxml/1">
     <VBox alignment="CENTER" VBox.vgrow="always" maxHeight="-Infinity" maxWidth="600" styleClass="connection-box">
         <Label alignment="TOP_CENTER" text="Join a match" styleClass="title"/>
         <ScrollPane fx:id="lobbyScrollPane" hbarPolicy="NEVER" fitToWidth="true" maxHeight="250">
