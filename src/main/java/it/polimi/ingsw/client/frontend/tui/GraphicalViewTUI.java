@@ -178,12 +178,22 @@ public class GraphicalViewTUI extends GraphicalView {
     private void parsePlayerControl() {
         ClientBoard board = this.clientBoards.get(this.username);
         ClientBoard currentPlayerBoard = this.clientBoards.get(this.currentPlayer);
-        String userIn;
+        String userIn, command, argument, player;
 
         userIn = this.inputHandler.getNextLine();
         this.printer.clearTerminal();
         this.printer.printChat(this.chat);
-        switch (userIn) {
+
+        int splitIndex = userIn.indexOf(" ");
+        if (splitIndex == -1) {
+            command = userIn;
+            argument = "";
+        } else {
+            command = userIn.substring(0, splitIndex);
+            argument = userIn.substring(splitIndex + 1);
+        }
+
+        switch (command) {
             case "o":
                 this.printer.printObjectives(username, board.getColor(), board.getObjective(), this.visibleObjectives);
                 break;
@@ -191,16 +201,50 @@ public class GraphicalViewTUI extends GraphicalView {
                 this.printer.printHand(this.username, board.getColor(), board.getHand());
                 break;
             case "b":
+                switch (argument) {
+                    case "1":
+                        player = this.players.get(0);
+                        this.printer.printPlayerBoard(player, this.clientBoards.get(player));
+                        break;
+                    case "2":
+                        player = this.players.get(1);
+                        this.printer.printPlayerBoard(player, this.clientBoards.get(player));
+                        break;
+                    case "3":
+                        if (this.players.size() > 2) {
+                            player = this.players.get(2);
+                            this.printer.printPlayerBoard(player, this.clientBoards.get(player));
+                        }
+                        break;
+                    case "4":
+                        if (this.players.size() > 3) {
+                            player = this.players.get(3);
+                            this.printer.printPlayerBoard(player, this.clientBoards.get(player));
+                        }
+                        break;
+
+                    default:
+                        this.printer.printPlayerBoard(this.username, this.clientBoards.get(this.username));
+                        break;
+                }
                 this.printer.printPlayerBoard(this.username, board);
                 break;
             case "w":
-            // TBA way to implement chat
-                // this.inputHandler.setPrompt("Send text:");
-                // super.sendBroadcastText(this.inputHandler.askUser());
-                // break;
+                if (!argument.equals("")) {
+                    if (argument.charAt(0) == ':') {
+                        splitIndex = argument.indexOf(" ");
+                        if (splitIndex != -1) {
+                            String text = argument.substring(splitIndex + 1);
+                            if (!argument.equals("")) {
+                                this.sendPrivateText(argument.substring(0, splitIndex), text);
+                            }
+                        }
+                    }
+                    this.sendBroadcastText(argument);
+                }
 
             case "p":
-                // TBA lista di players
+                this.printer.printSimpleList(this.players, false, true);
                 break;
 
             default:
@@ -637,6 +681,7 @@ public class GraphicalViewTUI extends GraphicalView {
             this.chat.add("(" + someoneUsername + "): " + text);
             this.messages.add(someoneUsername + " sent a private text!");
             this.printer.printMessage(this.messages);
+            this.inputHandler.showPrompt();
         }
     }
 
@@ -650,12 +695,14 @@ public class GraphicalViewTUI extends GraphicalView {
             this.chat.add("[" + someoneUsername + "]: " + text);
             this.messages.add(someoneUsername + " sent a text!");
             this.printer.printMessage(this.messages);
+            this.inputHandler.showPrompt();
         }
     }
 
     public static void main(String[] args) {
         GraphicalViewTUI tui = new GraphicalViewTUI();
         tui.startInterface();
-        while (tui.ongoing) {}
+        while (tui.ongoing) {
+        }
     }
 }
