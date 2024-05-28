@@ -178,7 +178,7 @@ public class GraphicalViewTUI extends GraphicalView {
     private void parsePlayerControl() {
         ClientBoard board = this.clientBoards.get(this.username);
         ClientBoard currentPlayerBoard = this.clientBoards.get(this.currentPlayer);
-        String userIn, player;
+        String userIn;
 
         userIn = this.inputHandler.getNextLine();
         this.printer.clearTerminal();
@@ -398,7 +398,7 @@ public class GraphicalViewTUI extends GraphicalView {
 
         if (!this.getServerResponse()) {
             this.printer.clearTerminal();
-            this.printer.printCenteredMessage(this.lastError + " ! Try again.", 0);
+            this.printer.printCenteredMessage(this.lastError + "! Try again.", 0);
             this.setMatch();
             return;
         }
@@ -415,7 +415,6 @@ public class GraphicalViewTUI extends GraphicalView {
             this.printer.printCenteredMessage(someoneUsername + " joined the match!", 1);
         } else {
             this.printer.printCenteredMessage("Joined match!", 0);
-            joinedPlayers.add("Joined players:");
             this.printer.printMessage(joinedPlayers);
         }
     }
