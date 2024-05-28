@@ -93,4 +93,14 @@ public class NetworkViewTCP extends NetworkView {
     public void drawCard(DrawSource source) {
         this.sendMessage(new DrawCardMessage(this.username, source));
     }
+
+    @Override
+    public void sendBroadcastText(String text) {
+        this.sendMessage(new SendBroadcastTextMessage(this.username, text));
+    }
+
+    @Override
+    public void sendPrivateText(String recipient, String text) {
+        this.sendMessage(new SendPrivateTextMessage(this.username, recipient, text));
+    }
 }

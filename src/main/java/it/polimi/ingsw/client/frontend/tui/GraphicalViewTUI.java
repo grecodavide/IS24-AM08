@@ -4,12 +4,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 import it.polimi.ingsw.client.frontend.ClientBoard;
 import it.polimi.ingsw.client.frontend.GraphicalView;
 import it.polimi.ingsw.client.frontend.ShownCard;
 import it.polimi.ingsw.client.network.NetworkViewRMI;
 import it.polimi.ingsw.client.network.NetworkViewTCP;
+import it.polimi.ingsw.exceptions.WrongInputFormatException;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.LeaderboardEntry;
@@ -18,15 +18,11 @@ import it.polimi.ingsw.utils.RequestStatus;
 
 
 /*
- * TODO:
- * - Implement correctly the messages: have a list of strings, containing all messages to be shown
- * - When a text gets sent, add it to list of messages
- * - Come up with a decent enough prompt
- * - Show current player name (either as a message, or in a corner)
- * - Can be done but not necessary: add a view with objectives, hand etc all in one place
- * - Method to show chat
- * - Method to write to chat
- * - Debug what happens when it fails to join match (getAvailableMatches gets stuck)
+ * TODO: - Implement correctly the messages: have a list of strings, containing all messages to be
+ * shown - When a text gets sent, add it to list of messages - Come up with a decent enough prompt -
+ * Show current player name (either as a message, or in a corner) - Can be done but not necessary:
+ * add a view with objectives, hand etc all in one place - Method to show chat - Method to write to
+ * chat - Debug what happens when it fails to join match (getAvailableMatches gets stuck)
  *
  */
 
@@ -35,13 +31,17 @@ import it.polimi.ingsw.utils.RequestStatus;
  */
 public class GraphicalViewTUI extends GraphicalView {
     private final TuiPrinter printer;
-    private final Scanner scanner;
     private String lastError;
     private boolean ongoing;
     private List<String> playersWithObjective;
     private final PlayerControls playerControls;
+    private final InputHandler inputHandler;
+
+    private final static String playerControlPrompt = "Type command, or 'help' for a list of available commands";
 
     private List<String> chat;
+
+    private List<String> messages;
 
     public GraphicalViewTUI() {
         super();
@@ -50,18 +50,19 @@ public class GraphicalViewTUI extends GraphicalView {
         this.playerControls = new PlayerControls();
         this.playerControls.disable();
         this.chat = new ArrayList<>();
+        this.messages = new ArrayList<>();
         try {
             this.printer = new TuiPrinter();
         } catch (Exception e) {
             throw new RuntimeException("Could not access terminal. Quitting now");
         }
 
-        this.scanner = new Scanner(System.in);
+        this.inputHandler = new InputHandler(this.printer);
     }
 
     private void startInterface() {
         this.printer.clearTerminal();
-        this.setNetwork();
+        this.setNetworkView();
         this.printer.clearTerminal();
         this.setMatch();
         new Thread(() -> {
@@ -72,14 +73,6 @@ public class GraphicalViewTUI extends GraphicalView {
     ///////////////////////
     // AUXILIARY METHODS //
     ///////////////////////
-    private String askUser(String prompt) {
-        this.clearStdin();
-        this.printer.printPrompt(prompt);
-        String userIn = this.scanner.nextLine();
-        this.printer.clearTerminal();
-        return userIn;
-    }
-
     @Override
     public void setLastRequestStatus(RequestStatus status) {
         synchronized (this.lastRequest) {
@@ -105,17 +98,19 @@ public class GraphicalViewTUI extends GraphicalView {
 
     }
 
-    private synchronized String printHand(String prompt, ClientBoard board) {
-        this.printer.clearTerminal();
+    private synchronized String printHand(ClientBoard board) {
         this.printer.printPlayerBoard(this.username, board);
         this.printer.printHandAtBottom(board.getHand());
-        return this.askUser(prompt);
+
+        this.inputHandler.setPrompt("What card do you want to play?");
+        return this.inputHandler.askUser();
     }
 
     private PlayableCard chooseCardFromHand(ClientBoard board) {
         List<PlayableCard> hand = board.getHand();
 
-        String userIn = this.printHand("Choose card to play (1, 2, 3):", board);
+        this.inputHandler.setPrompt("Choose card to play (1, 2, 3):");
+        String userIn = this.printHand(board);
 
         PlayableCard card = null;
         Integer maxValue = hand.size();
@@ -126,7 +121,8 @@ public class GraphicalViewTUI extends GraphicalView {
                     card = hand.get(index);
                 }
             } catch (NumberFormatException e) {
-                userIn = this.printHand("Not a valid number! try again", board);
+                this.inputHandler.setPrompt("Not a valid number! try again");
+                userIn = this.printHand(board);
             }
         }
 
@@ -136,9 +132,11 @@ public class GraphicalViewTUI extends GraphicalView {
     private Side chooseCardSide(PlayableCard card) {
         this.printer.clearTerminal();
         this.printer.printPlayableFrontAndBack(card, 0);
-        String userIn = this.askUser("Choose side (b for back, default to front)");
+
+        this.inputHandler.setPrompt("What side do you want to play the card on? (defaults to front)");
+        String userIn = this.inputHandler.askUser();
         switch (userIn) {
-            case "b":
+            case "b", "back":
                 return Side.BACK;
             default:
                 return Side.FRONT;
@@ -146,7 +144,7 @@ public class GraphicalViewTUI extends GraphicalView {
     }
 
     private Pair<Integer, Integer> chooseCoords(ClientBoard board) {
-        String prompt = "Choose coordinates for card (e.g. 1,1)";
+        this.inputHandler.setPrompt("Choose coordinates for card (e.g. 1,1)");
         String userIn;
 
         Integer x = null, y = null;
@@ -154,73 +152,29 @@ public class GraphicalViewTUI extends GraphicalView {
         while (x == null || y == null) {
             this.printer.clearTerminal();
             this.printer.printPlayerBoard(this.username, board);
-            userIn = this.askUser(prompt);
+
+            this.inputHandler.setPrompt("Where do you want to place the card?");
+            userIn = this.inputHandler.askUser();
 
             splitIndex = userIn.indexOf(",");
             if (splitIndex != -1) {
                 try {
                     x = Integer.valueOf(userIn.substring(0, splitIndex));
                 } catch (NumberFormatException e) {
-                    prompt = "X coordinate is not a number! Try again.";
+                    this.inputHandler.setPrompt("X coordinate is not a number! Try again.");
                 }
 
                 try {
                     y = Integer.valueOf(userIn.substring(splitIndex + 1, userIn.length()));
                 } catch (NumberFormatException e) {
-                    prompt = "Y coordinate is not a number! Try again.";
+                    this.inputHandler.setPrompt("Y coordinate is not a number! Try again.");
                 }
             } else {
-                prompt = "Not a valid format! try again.";
+                this.inputHandler.setPrompt("Not a valid format! try again.");
             }
         }
 
         return new Pair<Integer, Integer>(x, y);
-    }
-
-    private void parseMatchDecision(String prompt, List<AvailableMatch> joinables, List<AvailableMatch> notJoinables) {
-        String userIn;
-        boolean requestSent = false;
-        Integer splitIndex;
-
-        while (!requestSent) {
-            if (!joinables.isEmpty() || !notJoinables.isEmpty()) {
-                this.printer.printMatchesLobby(joinables, notJoinables, 0);
-            }
-            userIn = this.askUser(prompt);
-            splitIndex = userIn.indexOf(" ");
-            if (splitIndex == -1) {
-                // join
-                requestSent = true;
-                try {
-                    Integer index = Integer.valueOf(userIn) - 1;
-                    if (index >= 0 && index < joinables.size()) {
-                        this.joinMatch(joinables.get(index).name());
-                    } else {
-                        prompt = "Not a valid index! Try again.";
-                    }
-                } catch (Exception e) {
-                    prompt = "Not a number! Try again.";
-                }
-            } else {
-                // create
-                String matchName = userIn.substring(0, splitIndex);
-                Integer maxPlayers;
-                try {
-                    maxPlayers = Integer.valueOf(userIn.substring(splitIndex + 1, userIn.length()));
-                    requestSent = true;
-                    this.createMatch(matchName, maxPlayers);
-                } catch (NumberFormatException e) {
-                    prompt = "Bad format: max players was not a number! Try again:";
-                }
-            }
-        }
-    }
-
-    private void clearStdin() {
-        try {
-            System.in.read(new byte[System.in.available()]);
-        } catch (IOException e) {
-        }
     }
 
     private void parsePlayerControl() {
@@ -228,8 +182,9 @@ public class GraphicalViewTUI extends GraphicalView {
         ClientBoard currentPlayerBoard = this.clientBoards.get(this.currentPlayer);
         String userIn, player;
 
-        userIn = scanner.nextLine();
+        userIn = this.inputHandler.getNextLine();
         this.printer.clearTerminal();
+        this.printer.printChat(this.chat);
         switch (userIn) {
             case "o":
                 this.printer.printObjectives(username, board.getColor(), board.getObjective(), this.visibleObjectives);
@@ -240,33 +195,23 @@ public class GraphicalViewTUI extends GraphicalView {
             case "b":
                 this.printer.printPlayerBoard(this.username, board);
                 break;
+            case "w":
+            // TBA way to implement chat
+                // this.inputHandler.setPrompt("Send text:");
+                // super.sendBroadcastText(this.inputHandler.askUser());
+                // break;
 
-            case "1":
-                player = this.players.get(0);
-                this.printer.printPlayerBoard(player, this.clientBoards.get(player));
+            case "p":
+                // TBA lista di players
                 break;
-            case "2":
-                player = this.players.get(1);
-                this.printer.printPlayerBoard(player, this.clientBoards.get(player));
-                break;
-            case "3":
-                if (this.players.size() > 2) {
-                    player = this.players.get(2);
-                    this.printer.printPlayerBoard(player, this.clientBoards.get(player));
-                    break;
-                }
-            case "4":
-                if (this.players.size() > 3) {
-                    player = this.players.get(3);
-                    this.printer.printPlayerBoard(player, this.clientBoards.get(player));
-                    break;
-                }
 
             default:
                 this.printer.printPlayerBoard(this.currentPlayer, currentPlayerBoard);
                 break;
         }
-        this.printer.printPrompt("Prova o");
+        this.inputHandler.setPrompt(playerControlPrompt);
+        this.inputHandler.showPrompt();
+        this.printer.printChat(this.chat);
     }
 
     private void startPlayerControls() {
@@ -295,38 +240,40 @@ public class GraphicalViewTUI extends GraphicalView {
     private void givePlayerControls() {
         synchronized (this.playerControls) {
             this.playerControls.enable();
-            this.printer.printPrompt("Prova o");
+            this.inputHandler.setPrompt(playerControlPrompt);
+            this.inputHandler.showPrompt();
+            this.printer.printChat(this.chat);
             this.playerControls.notifyAll();
         }
     }
 
     private void removePlayerControls() {
         this.playerControls.disable();
-        this.clearStdin();
     }
 
     ////////////////////////
     // PRE MATCH METHODS //
     ///////////////////////
-    private void setNetwork() {
+    private void setNetworkView() {
         String userIn, IPAddr;
         Integer port = null;
 
-        IPAddr = this.askUser("Choose IP address:");
-        userIn = this.askUser("Choose port:");
+        this.inputHandler.setPrompt("Choose IP address:");
+        IPAddr = this.inputHandler.askUser();
+        this.inputHandler.setPrompt("Choose port:");
+        userIn = this.inputHandler.askUser();
         while (port == null) {
             try {
                 port = Integer.valueOf(userIn);
             } catch (NumberFormatException e) {
-                userIn = this.askUser("Not a number. Choose a port:");
+                userIn = this.inputHandler.askUser();
             }
         }
 
-        String prompt = "Choose connection type (1 for TCP, 2 for RMI)";
-
+        this.inputHandler.setPrompt("Choose connection type (1 for TCP, 2 for RMI)");
         this.networkView = null;
         while (this.networkView == null) {
-            userIn = this.askUser(prompt);
+            userIn = this.inputHandler.askUser();
             try {
                 switch (userIn) {
                     case "1", "tcp", "TCP":
@@ -336,56 +283,130 @@ public class GraphicalViewTUI extends GraphicalView {
                         this.setNetworkInterface(new NetworkViewRMI(this, IPAddr, port));
                         break;
                     default:
-                        prompt = "Not a valid connection type! Choose connection type (1 for TCP, 2 for RMI)";
+                        this.inputHandler.setPrompt("Not a valid connection type! Choose connection type (1 for TCP, 2 for RMI)");
                         break;
                 }
             } catch (Exception e) {
                 this.printer.clearTerminal();
                 this.printer.printMessage("Could not connect! Try again");
-                this.setNetwork();
+                this.setNetworkView();
+                return;
             }
         }
     }
 
+    private void chooseUsername() {
+        this.inputHandler.setPrompt("Choose username:");
+        super.setUsername(this.inputHandler.askUser());
+    }
 
-    private void setMatch() {
-        String prompt;
-        List<AvailableMatch> joinables = new ArrayList<>(), notJoinables = new ArrayList<>();
-        this.setUsername(this.askUser("Choose username:"));
-
+    private void getAvailableMatches() {
         this.lastRequest.setStatus(RequestStatus.PENDING);
         this.networkView.getAvailableMatches();
 
         if (!this.getServerResponse()) {
             this.printer.clearTerminal();
             this.printer.printCenteredMessage("Could not receive availbale matches, try again!", 1);
-            this.setMatch();
+            this.getAvailableMatches();
             return;
         }
+    }
 
-        this.printer.clearTerminal();
-        if (this.availableMatches.size() == 0) {
-            prompt = "No matches available. Create one by typing match name and max players (e.g. MatchTest 2):";
-        } else {
-            this.availableMatches.forEach(match -> {
-                if (match.currentPlayers() < match.maxPlayers()) {
-                    joinables.add(match);
-                } else {
-                    notJoinables.add(match);
-                }
-            });
-            prompt = "Join a match by typing its name, or create one by typing its name and max players (e.g. MatchTest 2)";
+    private void createMatch() throws WrongInputFormatException {
+        String userIn = this.inputHandler.askUser();
+        Integer splitIndex = userIn.indexOf(" ");
+        if (splitIndex == -1) {
+            throw new WrongInputFormatException("The max players number was not specified!");
         }
-        this.parseMatchDecision(prompt, joinables, notJoinables);
+
+        String matchName = userIn.substring(0, splitIndex);
+        Integer maxPlayers;
+        try {
+            maxPlayers = Integer.valueOf(userIn.substring(splitIndex + 1));
+        } catch (Exception e) {
+            throw new WrongInputFormatException("Bad format for max players number!");
+        }
+
+        super.createMatch(matchName, maxPlayers);
+    }
+
+    private void joinMatch(List<AvailableMatch> joinables) throws WrongInputFormatException {
+        String userIn = this.inputHandler.askUser();
+        Integer matchIndex;
+        try {
+            matchIndex = Integer.valueOf(userIn) - 1;
+        } catch (NumberFormatException e) {
+            throw new WrongInputFormatException("You must specify a number!");
+        }
+
+        if (matchIndex < 0 || matchIndex >= joinables.size()) {
+            throw new WrongInputFormatException("Invalid index!");
+        }
+
+        super.joinMatch(joinables.get(matchIndex).name());
+    }
+
+    private void setMatch() {
+        List<AvailableMatch> joinables = new ArrayList<>(), notJoinables = new ArrayList<>();
+        this.chooseUsername();
+
+        this.getAvailableMatches();
+
+        String createMatchPrompt = "Type the match name and max players (e.g. MatchTest 2).";
+        String joinMatchPrompt = "Type the number corresponding to the match you want to join.";
+
+        this.availableMatches.forEach(match -> {
+            if (match.currentPlayers() < match.maxPlayers()) {
+                joinables.add(match);
+            } else {
+                notJoinables.add(match);
+            }
+        });
+        this.printer.clearTerminal();
+
+        boolean matchSet = false;
+
+        while (!matchSet) {
+            try {
+                if (this.availableMatches.isEmpty()) {
+                    this.inputHandler.setPrompt("No matches available. " + createMatchPrompt);
+                    this.createMatch();
+                    matchSet = true;
+                } else {
+                    if (joinables.isEmpty())
+                        joinMatchPrompt = "No matches available. " + joinMatchPrompt;
+
+                    this.inputHandler.setPrompt("Do you want to join a match or (c)reate one? (defaults to join)");
+                    String userIn = this.inputHandler.askUser();
+                    this.printer.printMatchesLobby(joinables, notJoinables, 0);
+                    switch (userIn) {
+                        case "c", "C", "create", "Create":
+                            this.inputHandler.setPrompt(createMatchPrompt);
+                            this.createMatch();
+                            matchSet = true;
+                            break;
+
+                        default:
+                            this.inputHandler.setPrompt(joinMatchPrompt);
+                            this.joinMatch(joinables);
+                            matchSet = true;
+                            break;
+                    }
+                }
+            } catch (WrongInputFormatException e) {
+                this.inputHandler.setPrompt(e.getMessage() + "! try again.");
+            }
+        }
 
         if (!this.getServerResponse()) {
             this.printer.clearTerminal();
-            this.printer.printCenteredMessage(this.lastError + "! Try again.", 1);
+            this.printer.printCenteredMessage(this.lastError + " ! Try again.", 0);
             this.setMatch();
             return;
-        } else {
-            this.printer.clearTerminal();
         }
+        this.printer.clearTerminal();
+        this.printer.printCenteredMessage("Waiting for other players to join!", 0);
+
     }
 
     @Override
@@ -398,7 +419,6 @@ public class GraphicalViewTUI extends GraphicalView {
             this.printer.printCenteredMessage("Joined match!", 0);
             joinedPlayers.add("Joined players:");
             this.printer.printMessage(joinedPlayers);
-            this.printer.printPrompt("");
         }
     }
 
@@ -410,10 +430,12 @@ public class GraphicalViewTUI extends GraphicalView {
         super.giveInitialCard(initialCard);
         this.printer.clearTerminal();
         this.printer.printInitialSideBySide(initialCard, 1);
-        String userIn = this.askUser("Choose side for initial card (b for back, defaults to front):");
+
+        this.inputHandler.setPrompt("Choose initial card side (defaults to front)");
+        String userIn = this.inputHandler.askUser();
         Side side;
         switch (userIn) {
-            case "b":
+            case "b", "back":
                 side = Side.BACK;
                 break;
             default:
@@ -444,10 +466,12 @@ public class GraphicalViewTUI extends GraphicalView {
         super.giveSecretObjectives(secretObjectives);
         this.printer.clearTerminal();
         this.printer.printObjectivePair("Your choices:", secretObjectives, 1);
-        String userIn = this.askUser("Choose secret objective (2 for second, defaults to first)");
+
+        this.inputHandler.setPrompt("Choose secret objective (defaults to first):");
+        String userIn = this.inputHandler.askUser();
         Objective objective;
         switch (userIn) {
-            case "2":
+            case "2", "second":
                 objective = secretObjectives.second();
                 break;
             default:
@@ -467,12 +491,6 @@ public class GraphicalViewTUI extends GraphicalView {
     public void someoneChoseSecretObjective(String someoneUsername) {
         super.someoneChoseSecretObjective(someoneUsername);
         this.playersWithObjective.add(someoneUsername);
-
-        // if (this.playersWithObjective.size() == this.players.size() &&
-        // !this.username.equals(this.currentPlayer)) {
-        // this.printer.clearTerminal();
-        // this.givePlayerControls();
-        // }
     }
 
 
@@ -500,15 +518,15 @@ public class GraphicalViewTUI extends GraphicalView {
     @Override
     public void makeMove() {
         this.removePlayerControls();
+        this.printer.clearTerminal();
 
-        List<String> messages = new ArrayList<>();
         if (this.lastRequest.getStatus().equals(RequestStatus.FAILED)) {
-            messages.add(lastError + " Try again.");
+            this.messages.add(lastError + " Try again.");
         }
         if (this.lastTurn) {
-            messages.add("This is the last turn! Play carefully");
+            this.messages.add("This is the last turn! Play carefully");
         }
-        if (!messages.isEmpty()) {
+        if (!this.messages.isEmpty()) {
             this.printer.printMessage(messages);
         }
 
@@ -520,7 +538,9 @@ public class GraphicalViewTUI extends GraphicalView {
         this.printer.clearTerminal();
         this.printer.printPlayerBoard(this.username, board);
         this.printer.printCard(new ShownCard(card, side, coords));
-        String userIn = this.askUser("Are you sure? (n to abort)");
+
+        this.inputHandler.setPrompt("Are you sure? (n to cancel)");
+        String userIn = this.inputHandler.askUser();
         if (userIn.equals("n")) {
             this.makeMove();
             return;
@@ -528,9 +548,11 @@ public class GraphicalViewTUI extends GraphicalView {
 
         super.playCard(coords, card, side);
         if (!this.getServerResponse()) {
+            this.printer.clearTerminal();
+            this.printer.clearTerminal();
             this.makeMove();
         } else {
-            this.printer.clearTerminal();
+            this.messages.clear();
         }
     }
 
@@ -543,10 +565,13 @@ public class GraphicalViewTUI extends GraphicalView {
             this.printer.clearTerminal();
             DrawSource source = null;
             this.printer.printAvailableResources(availableResources, 0);
-            String userIn, prompt = "Choose a draw source: ";
+            String userIn;
+            this.inputHandler.setPrompt("Choose a draw source: ");
             while (source == null) {
                 this.printer.printDrawingScreen(decksTopReign, visiblePlayableCards);
-                userIn = askUser(prompt);
+
+                this.inputHandler.setPrompt("Choose draw source:");
+                userIn = this.inputHandler.askUser();
                 switch (userIn) {
                     case "G", "g":
                         source = DrawSource.GOLDS_DECK;
@@ -567,7 +592,7 @@ public class GraphicalViewTUI extends GraphicalView {
                         source = DrawSource.FOURTH_VISIBLE;
                         break;
                     default:
-                        prompt = "Not a valid source! Try again.";
+                        this.inputHandler.setPrompt("Not a valid source! Try again.");
                         break;
                 }
             }
@@ -605,7 +630,6 @@ public class GraphicalViewTUI extends GraphicalView {
     @Override
     protected void notifyMatchStarted() {}
 
-
     @Override
     public void someoneSentPrivateText(String someoneUsername, String text) {
         super.someoneSentPrivateText(someoneUsername, text);
@@ -614,6 +638,8 @@ public class GraphicalViewTUI extends GraphicalView {
             this.chat.add("(me): " + text);
         } else {
             this.chat.add("(" + someoneUsername + "): " + text);
+            this.messages.add(someoneUsername + " sent a private text!");
+            this.printer.printMessage(this.messages);
         }
     }
 
@@ -625,9 +651,10 @@ public class GraphicalViewTUI extends GraphicalView {
             this.chat.add("[me]: " + text);
         } else {
             this.chat.add("[" + someoneUsername + "]: " + text);
+            this.messages.add(someoneUsername + " sent a text!");
+            this.printer.printMessage(this.messages);
         }
     }
-
 
     public static void main(String[] args) {
         GraphicalViewTUI tui = new GraphicalViewTUI();
@@ -636,5 +663,4 @@ public class GraphicalViewTUI extends GraphicalView {
 
         }
     }
-
 }

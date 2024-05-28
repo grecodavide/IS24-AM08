@@ -2,19 +2,20 @@
 
 // import static org.junit.Assert.assertEquals;
 // import static org.junit.Assert.assertTrue;
+
 // import java.io.BufferedReader;
 // import java.io.BufferedWriter;
 // import java.io.InputStreamReader;
 // import java.io.OutputStreamWriter;
 // import java.net.Socket;
 // import java.util.List;
-// import java.util.Map;
+
 // import org.junit.Test;
+
 // import it.polimi.ingsw.gamemodel.Match;
 // import it.polimi.ingsw.gamemodel.Player;
 // import it.polimi.ingsw.network.messages.actions.ActionMessage;
 // import it.polimi.ingsw.network.messages.actions.CreateMatchMessage;
-// import it.polimi.ingsw.network.messages.actions.DrawInitialCardMessage;
 // import it.polimi.ingsw.network.messages.actions.JoinMatchMessage;
 // import it.polimi.ingsw.network.messages.responses.ResponseMessage;
 // import it.polimi.ingsw.network.messages.responses.SomeoneJoinedMessage;
@@ -26,18 +27,19 @@
 //  */
 
 // public class ClientReceiverTest {
-//     PlayerStub player1, player2;
+//     PlayerStub player1, player2, player3;
 //     MessageJsonParser parser;
 //     Match match;
 //     Server server;
 
 //     public ClientReceiverTest() {
 //         try {
-//             this.server = new Server(1111, 9999);
+//             this.server = new Server(2222, 9999);
 //             server.startTCPServer();
 
 //             this.player1 = new PlayerStub("AAAAA");
 //             this.player2 = new PlayerStub("BBBBB");
+//             this.player3 = new PlayerStub("AAAAA");
 //             this.parser = new MessageJsonParser();
 
 //         } catch (Exception e) {
@@ -46,14 +48,54 @@
 //     }
 
 
+//     // @Test
+//     // public void testGame() {
+//     //     try {
+//     //         ResponseMessage expected;
+//     //         ActionMessage action;
+//     //         String matchName = "TestGameMatch";
+//     //         Map<String, PlayerStub> players = Map.of(player1.username, player1, player2.username, player2);
+//     //         PlayerStub curr;
+
+//     //         action = new CreateMatchMessage(player1.username, matchName, 2);
+//     //         player1.sendMessage(action);
+//     //         expected = new SomeoneJoinedMessage(player1.username, List.of(new Player(player1.username, null)) , 2);
+//     //         assertEquals(parser.toJson(expected), player1.readMessage());
+//     //         this.match = this.server.getMatch(matchName);
+
+//     //         action = new JoinMatchMessage(player2.username, matchName);
+//     //         player2.sendMessage(action);
+//     //         expected = new SomeoneJoinedMessage(player2.username, List.of(new Player(player1.username, null), new Player(player2.username, null)) , 2);
+//     //         assertEquals("Wrong SomeoneJoined from second player to first player", parser.toJson(expected), player1.readMessage());
+//     //         assertEquals("", parser.toJson(expected), player2.readMessage());
+
+//     //         // while (this.match.getVisibleObjectives() == null) { }
+//     //         // expected = new MatchStartedMessage(this.match.getVisibleObjectives(), this.match.getVisiblePlayableCards(), this.match.getDecksTopReigns(), this.match.getPlayers());
+//     //         // assertEquals(this.parser.toJson(expected), player1.readMessage());
+//     //         
+//     //         player1.readMessage();
+//     //         player2.readMessage();
+
+//     //         while (this.match.getCurrentPlayer() == null) { }
+//     //         curr = players.get(this.match.getCurrentPlayer().getUsername());
+
+//     //         action = new DrawInitialCardMessage(curr.username);
+//     //         curr.sendMessage(action);
+
+//     //         System.out.println(player1.readMessage());
+//     //         System.out.println(player2.readMessage());
+//     //     } catch (Exception e) {
+//     //         e.printStackTrace();
+//     //         assertTrue(false);
+//     //     }
+//     // }
+
 //     @Test
-//     public void testGame() {
+//     public void testDuplicate() {
 //         try {
 //             ResponseMessage expected;
 //             ActionMessage action;
-//             String matchName = "TestGameMatch";
-//             Map<String, PlayerStub> players = Map.of(player1.username, player1, player2.username, player2);
-//             PlayerStub curr;
+//             String matchName = "TestGameMatch2";
 
 //             action = new CreateMatchMessage(player1.username, matchName, 2);
 //             player1.sendMessage(action);
@@ -61,32 +103,13 @@
 //             assertEquals(parser.toJson(expected), player1.readMessage());
 //             this.match = this.server.getMatch(matchName);
 
-//             action = new JoinMatchMessage(player2.username, matchName);
-//             player2.sendMessage(action);
-//             expected = new SomeoneJoinedMessage(player2.username, List.of(new Player(player1.username, null), new Player(player2.username, null)) , 2);
-//             assertEquals("Wrong SomeoneJoined from second player to first player", parser.toJson(expected), player1.readMessage());
-//             assertEquals("", parser.toJson(expected), player2.readMessage());
-
-//             // while (this.match.getVisibleObjectives() == null) { }
-//             // expected = new MatchStartedMessage(this.match.getVisibleObjectives(), this.match.getVisiblePlayableCards(), this.match.getDecksTopReigns(), this.match.getPlayers());
-//             // assertEquals(this.parser.toJson(expected), player1.readMessage());
-//             
-//             player1.readMessage();
-//             player2.readMessage();
-
-//             while (this.match.getCurrentPlayer() == null) { }
-//             curr = players.get(this.match.getCurrentPlayer().getUsername());
-
-//             action = new DrawInitialCardMessage(curr.username);
-//             curr.sendMessage(action);
-
-//             System.out.println(player1.readMessage());
-//             System.out.println(player2.readMessage());
+//             action = new JoinMatchMessage(player3.username, matchName);
+//             player3.sendMessage(action);
+//             System.out.println(player3.readMessage());
 //         } catch (Exception e) {
 //             e.printStackTrace();
 //             assertTrue(false);
 //         }
-
 //     }
 // }
 

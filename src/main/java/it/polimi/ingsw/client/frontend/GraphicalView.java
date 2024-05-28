@@ -406,6 +406,15 @@ public abstract class GraphicalView {
     public abstract void matchFinished(List<LeaderboardEntry> ranking);
 
 
+
+    public void sendBroadcastText(String text) {
+        this.networkView.sendBroadcastText(text);
+    }
+
+    public void sendPrivateText(String recipient, String text) {
+        this.networkView.sendPrivateText(recipient, text);
+    }
+
     /**
      * Notifies that somoene sent a broadcast text
      * 

@@ -176,4 +176,8 @@ public abstract class NetworkView implements RemoteViewInterface {
     public void someoneSentPrivateText(String someoneUsername, String text) {
         graphicalView.someoneSentPrivateText(someoneUsername, text);
     }
+
+    public abstract void sendBroadcastText(String text);
+
+    public abstract void sendPrivateText(String recipient, String text);
 }

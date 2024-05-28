@@ -122,4 +122,16 @@ public class NetworkViewRMI extends NetworkView {
         }
     }
 
+    @Override
+    public void sendBroadcastText(String text) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'sendBroadcastText'");
+    }
+
+    @Override
+    public void sendPrivateText(String someoneUsername, String text) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'sendPrivateText'");
+    }
+
 }
