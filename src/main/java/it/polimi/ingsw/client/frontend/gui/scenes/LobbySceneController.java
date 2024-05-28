@@ -6,10 +6,7 @@ import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -43,9 +40,16 @@ public class LobbySceneController extends SceneController {
     @Override
     public void initializePostController() {
         createButton.setOnMouseClicked((e) -> {
+            /*
             RadioButton radioButton = (RadioButton) matchNumberToggle.getSelectedToggle();
             view.setUsername(createUsername.getText());
             view.createMatch(matchName.getText(), Integer.valueOf(radioButton.getText()));
+             */
+            try {
+                this.showLobby();
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
         });
         joinButton.setOnMouseClicked((e) -> {
             /*
@@ -79,6 +83,12 @@ public class LobbySceneController extends SceneController {
 
     private void showMatch() throws IOException {
         VBox root = loadScene("/fxml/match.fxml");
+        GuiUtil.applyCSS(root, "/css/match.css");
+        Scene matchScene = new Scene(root, 1920, 1080);
+        stage.setScene(matchScene);
+    }
+    private void showLobby() throws IOException {
+        StackPane root = GuiUtil.getFromFXML("/fxml/waiting.fxml");
         GuiUtil.applyCSS(root, "/css/match.css");
         Scene matchScene = new Scene(root, 1920, 1080);
         stage.setScene(matchScene);
