@@ -20,6 +20,8 @@ import java.io.IOException;
 public class GraphicalApplication extends Application {
     private GraphicalViewGUI view;
     private Stage primaryStage;
+    public static double screenWidth = 1920;
+    public static double screenHeight = 1020;
 
     public static void main(String[] args) {
         launch(args);
@@ -37,14 +39,16 @@ public class GraphicalApplication extends Application {
         // Add stylesheet
         GuiUtil.applyCSS(root, "/css/style.css");
         // Create the connection scene
-        Scene connectionScene = new Scene(root, 1920, 1080);
+        Scene connectionScene = new Scene(root, screenWidth, screenHeight);
         // Show the window
 
+        /*
         // Fullscreen
         primaryStage.setFullScreen(true);
         primaryStage.setMaximized(true);
         primaryStage.setResizable(false);
         primaryStage.setFullScreenExitHint("");
+        */
 
         primaryStage.setScene(connectionScene);
         primaryStage.show();

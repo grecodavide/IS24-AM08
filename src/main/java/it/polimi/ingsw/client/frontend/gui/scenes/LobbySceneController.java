@@ -1,5 +1,6 @@
 package it.polimi.ingsw.client.frontend.gui.scenes;
 
+import it.polimi.ingsw.client.frontend.gui.GraphicalApplication;
 import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.GuiUtil;
 import javafx.fxml.FXML;
@@ -84,13 +85,13 @@ public class LobbySceneController extends SceneController {
     private void showMatch() throws IOException {
         VBox root = loadScene("/fxml/match.fxml");
         GuiUtil.applyCSS(root, "/css/match.css");
-        Scene matchScene = new Scene(root, 1920, 1080);
+        Scene matchScene = new Scene(root, GraphicalApplication.screenWidth, GraphicalApplication.screenHeight);
         stage.setScene(matchScene);
     }
     private void showLobby() throws IOException {
         StackPane root = GuiUtil.getFromFXML("/fxml/waiting.fxml");
         GuiUtil.applyCSS(root, "/css/match.css");
-        Scene matchScene = new Scene(root, 1920, 1080);
+        Scene matchScene = new Scene(root, GraphicalApplication.screenWidth, GraphicalApplication.screenHeight);
         stage.setScene(matchScene);
     }
     public void updateMatches(List<AvailableMatch> matchList) {

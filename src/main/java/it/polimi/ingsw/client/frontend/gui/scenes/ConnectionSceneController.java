@@ -62,14 +62,14 @@ public class ConnectionSceneController extends SceneController {
     private void showMatch() throws IOException {
         VBox root = loadScene("/fxml/match.fxml");
         GuiUtil.applyCSS(root, "/css/match.css");
-        Scene matchScene = new Scene(root, 1920, 1080);
+        Scene matchScene = new Scene(root, GraphicalApplication.screenWidth, GraphicalApplication.screenHeight);
         stage.setScene(matchScene);
     }
 
     private void showLobby() throws IOException {
         StackPane root = this.loadScene("/fxml/lobby.fxml");
         GuiUtil.applyCSS(root, "/css/style.css");
-        Scene lobbyScene = new Scene(root, 1920, 1080);
+        Scene lobbyScene = new Scene(root, GraphicalApplication.screenWidth, GraphicalApplication.screenHeight);
         stage.setScene(lobbyScene);
     }
 }
