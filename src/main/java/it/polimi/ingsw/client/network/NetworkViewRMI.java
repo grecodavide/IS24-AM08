@@ -63,6 +63,7 @@ public class NetworkViewRMI extends NetworkView {
     public void createMatch(String matchName, Integer maxPlayers) {
         try {
             server.createMatch(matchName, maxPlayers);
+            this.joinMatch(matchName);
         } catch (Exception e) {
             this.graphicalView.notifyError(e);
         }

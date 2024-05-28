@@ -65,9 +65,7 @@ public class GraphicalViewTUI extends GraphicalView {
         this.setNetworkView();
         this.printer.clearTerminal();
         this.setMatch();
-        new Thread(() -> {
-            this.startPlayerControls();
-        }).start();
+        new Thread(this::startPlayerControls).start();
     }
 
     ///////////////////////
@@ -174,7 +172,7 @@ public class GraphicalViewTUI extends GraphicalView {
             }
         }
 
-        return new Pair<Integer, Integer>(x, y);
+        return new Pair<>(x, y);
     }
 
     private void parsePlayerControl() {
@@ -659,8 +657,6 @@ public class GraphicalViewTUI extends GraphicalView {
     public static void main(String[] args) {
         GraphicalViewTUI tui = new GraphicalViewTUI();
         tui.startInterface();
-        while (tui.ongoing) {
-
-        }
+        while (tui.ongoing) {}
     }
 }
