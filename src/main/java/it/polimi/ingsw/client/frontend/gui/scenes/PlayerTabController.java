@@ -29,8 +29,10 @@ import java.util.List;
 import java.util.Map;
 
 public class PlayerTabController extends SceneController{
-    public StackPane rootPane;
-    public Tab playerTab;
+    @FXML
+    private StackPane rootPane;
+    @FXML
+    private Tab playerTab;
     private String username;
     @FXML
     CardView handCard1;
@@ -58,6 +60,9 @@ public class PlayerTabController extends SceneController{
         handCard2.setOnMouseClicked((e) -> {
             this.testBoard();
         });
+        handCard3.setOnMouseClicked((e) -> {
+            this.someoneDrewSecretObjective();
+        });
         initializeHandCard(handCard1);
         initializeHandCard(handCard2);
         initializeHandCard(handCard3);
@@ -72,7 +77,6 @@ public class PlayerTabController extends SceneController{
 
     @Override
     public void initializePostController() {
-        someoneDrewSecretObjective();
     }
 
     public void testBoard() {

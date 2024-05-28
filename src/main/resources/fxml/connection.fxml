@@ -11,44 +11,44 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.layout.StackPane?>
 
-<StackPane styleClass="main-container" fx:controller="it.polimi.ingsw.client.frontend.gui.scenes.ConnectionSceneController" id="pane" xmlns:fx="http://javafx.com/fxml/1">
+<?import javafx.scene.layout.Pane?>
+<StackPane styleClass="main-container"
+           fx:controller="it.polimi.ingsw.client.frontend.gui.scenes.ConnectionSceneController" id="pane"
+           xmlns:fx="http://javafx.com/fxml/1">
     <children>
-        <VBox alignment="CENTER">
-            <children>
-                <VBox VBox.vgrow="always" alignment="CENTER" maxHeight="-Infinity">
+        <HBox StackPane.alignment="CENTER" alignment="CENTER">
+            <ImageView preserveRatio="true" fitWidth="500">
+                <Image
+                        url="@../images/codex-logo.png"
+                        backgroundLoading="true"
+                />
+            </ImageView>
+            <Pane prefWidth="100" />
+            <VBox VBox.vgrow="always" alignment="CENTER" maxHeight="-Infinity">
+                <VBox alignment="CENTER" styleClass="connection-box" fillWidth="false"
+                      maxWidth="-Infinity">
+                    <Label styleClass="title" text="Connect to a server" />
+                    <Pane prefHeight="40"/>
+                    <VBox>
+                        <TextField styleClass="input" promptText="Server IP" maxWidth="500"/>
+                        <Pane prefHeight="25"/>
+                        <TextField styleClass="input" promptText="Port" maxWidth="500"/>
+                        <Pane prefHeight="25"/>
+                        <HBox spacing="20">
+                            <HBox spacing="10" alignment="CENTER">
+                                <RadioButton fx:id="RMIButton" text="RMI" styleClass="radio, normal-radio"/>
+                                <RadioButton fx:id="TCPButton" text="TCP" styleClass="radio, normal-radio"/>
+                            </HBox>
+                        </HBox>
+                    </VBox>
 
-                    <children>
-                        <VBox spacing="10" alignment="CENTER" styleClass="connection-box" fillWidth="false"
-                              maxWidth="-Infinity">
-                            <ImageView preserveRatio="true" fitWidth="350">
-                                <Image
-                                        url="@../images/codex-logo.png"
-                                        backgroundLoading="true"
-                                />
-                            </ImageView>
-                            <VBox>
-                                <Label styleClass="input-label" text="Connect to a server"/>
-                                <TextField styleClass="input" text="127.0.0.1" maxWidth="500"/>
-                            </VBox>
-                            <VBox>
-                                <Label styleClass="input-label" text="Port"></Label>
-                                <TextField styleClass="input" text="42069" maxWidth="500"/>
-                            </VBox>
-                            <VBox>
-                                <Label styleClass="input-label" text="Connection type"/>
-                                <HBox spacing="10" alignment="CENTER">
-                                    <RadioButton fx:id="RMIButton" text="RMI" styleClass="radio"></RadioButton>
-                                    <RadioButton fx:id="TCPButton" text="TCP" styleClass="radio"></RadioButton>
-                                </HBox>
-                            </VBox>
-                            <Button fx:id="connectButton" text="Connect" styleClass="button"/>
-                            <padding>
-                                <Insets top="20" right="20" bottom="20" left="20"/>
-                            </padding>
-                        </VBox>
-                    </children>
+                    <Pane prefHeight="40"/>
+                    <Button fx:id="connectButton" text="Connect" styleClass="button"/>
+                    <padding>
+                        <Insets bottom="40.0" left="40.0" right="40.0" top="40.0"/>
+                    </padding>
                 </VBox>
-            </children>
-        </VBox>
+            </VBox>
+        </HBox>
     </children>
 </StackPane>

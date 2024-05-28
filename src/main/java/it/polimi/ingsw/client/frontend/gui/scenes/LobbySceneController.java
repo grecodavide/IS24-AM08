@@ -37,6 +37,7 @@ public class LobbySceneController extends SceneController {
     public void initialize() {
         matchJoinToggle = new ToggleGroup();
         matchNumberToggle = new ToggleGroup();
+        lobbyScrollPane.getStyleClass().clear();
     }
 
     @Override
@@ -60,13 +61,26 @@ public class LobbySceneController extends SceneController {
             }
         });
         matchNumberContainer.getChildren().forEach((button) -> {((RadioButton) button).setToggleGroup(matchNumberToggle);});
+        // TODO Remove test functions
+
+        matchContainer.getChildren().clear();
+        this.addMatchCard("Morioh", 2, 4);
+        this.addMatchCard("Rome", 3, 4);
+        this.addMatchCard("Caio", 2, 3);
+        this.addMatchCard("Poid", 2, 3);
+        this.addMatchCard("Noi", 2, 3);
+        this.addMatchCard("Noi", 2, 3);
+        this.addMatchCard("Noi", 2, 3);
+        this.addMatchCard("Noi", 2, 3);
+        this.addMatchCard("Noi", 2, 3);
+        this.addMatchCard("Noi", 2, 3);
 
     }
 
     private void showMatch() throws IOException {
         VBox root = loadScene("/fxml/match.fxml");
         GuiUtil.applyCSS(root, "/css/match.css");
-        Scene matchScene = new Scene(root, 1800, 1080);
+        Scene matchScene = new Scene(root, 1920, 1080);
         stage.setScene(matchScene);
     }
     public void updateMatches(List<AvailableMatch> matchList) {
@@ -84,12 +98,23 @@ public class LobbySceneController extends SceneController {
          *                     <Label text="2/4" styleClass="lobby-title" />
          *                     <Pane prefWidth="5"/>
          *                     <RadioButton styleClass="radio" alignment="CENTER"/>
-         *                 </HBox>
+         java*                 </HBox>
          */
         HBox matchCard = new HBox();
         matchCard.getStyleClass().add("lobby-card");
+        matchCard.getStyleClass().add("lobby-card-" + matchContainer.getChildren().size()%2);
+        matchCard.setAlignment(Pos.CENTER);
+
+        RadioButton button = new RadioButton();
+        button.setAlignment(Pos.CENTER);
+        button.getStyleClass().add("radio");
+        button.getStyleClass().add("lobby-radio");
+        button.setToggleGroup(this.matchJoinToggle);
+        //button.setText(name);
+        matchCard.getChildren().add(button);
 
         Label nameLabel = new Label(name);
+        nameLabel.setAlignment(Pos.CENTER);
         nameLabel.getStyleClass().add("lobby-title");
         matchCard.getChildren().add(nameLabel);
 
@@ -98,18 +123,13 @@ public class LobbySceneController extends SceneController {
         matchCard.getChildren().add(spacer);
 
         Label playerLabel = new Label(players + "/" + maxPlayers);
+        playerLabel.setAlignment(Pos.CENTER);
         playerLabel.getStyleClass().add("lobby-title");
         matchCard.getChildren().add(playerLabel);
 
         Pane spacer2 = new Pane();
         spacer2.setPrefWidth(5);
         matchCard.getChildren().add(spacer2);
-
-        RadioButton button = new RadioButton();
-        button.setAlignment(Pos.CENTER);
-        button.getStyleClass().add("radio");
-        button.setToggleGroup(this.matchJoinToggle);
-        matchCard.getChildren().add(button);
 
         matchContainer.getChildren().add(matchCard);
     }

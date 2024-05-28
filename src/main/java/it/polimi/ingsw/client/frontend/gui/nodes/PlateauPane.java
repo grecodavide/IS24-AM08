@@ -5,6 +5,7 @@ import it.polimi.ingsw.utils.GuiUtil;
 import it.polimi.ingsw.utils.Pair;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.Pane;
 
 import javax.xml.crypto.dom.DOMCryptoContext;
@@ -51,6 +52,17 @@ public class PlateauPane extends Pane {
         positions.put(27, new Pair<>(342.0, 141.0));
         positions.put(28, new Pair<>(342.0, 225.0));
         positions.put(29, new Pair<>(199.0, 158.0));
+        // TODO Remove testing method
+        this.setOnMousePressed((e) -> {
+            for (String p : this.points.keySet()) {
+                if (e.getButton() == MouseButton.PRIMARY) {
+                    this.setPoints(p, this.points.get(p) + 1);
+                } else if (e.getButton() == MouseButton.SECONDARY) {
+                    this.setPoints(p, this.points.get(p) - 1);
+                }
+                return;
+            }
+        });
     }
 
     public void setColor(String player, Color color) {
@@ -63,6 +75,9 @@ public class PlateauPane extends Pane {
     }
 
     public void setPoints(String player, int points) {
+        if (points > 29) {
+            return;
+        }
         Pair<Double, Double> position = convertCoords(positions.get(points));
         // Calculate offset because of players in the same position
         int offset = this.playersAtPosition(points);
@@ -83,7 +98,7 @@ public class PlateauPane extends Pane {
         return p;
     }
     private Pair<Double, Double> convertCoords(Pair<Double, Double> coord) {
-        return new Pair<>(coord.first() - pawnSize/2, coord.second()- pawnSize/2);
+        return new Pair<>(coord.first() - pawnSize/2 + 2, coord.second()- pawnSize/2);
     }
 
 }

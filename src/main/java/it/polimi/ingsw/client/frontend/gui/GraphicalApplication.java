@@ -39,15 +39,17 @@ public class GraphicalApplication extends Application {
         // Create the connection scene
         Scene connectionScene = new Scene(root, 1920, 1080);
         // Show the window
-        /*
+
         // Fullscreen
         primaryStage.setFullScreen(true);
         primaryStage.setMaximized(true);
         primaryStage.setResizable(false);
         primaryStage.setFullScreenExitHint("");
-         */
+
         primaryStage.setScene(connectionScene);
         primaryStage.show();
+        root.requestFocus();
+
     }
 
 

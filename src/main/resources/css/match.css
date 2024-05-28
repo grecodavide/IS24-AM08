@@ -1,16 +1,21 @@
 @import "style.css";
 
 .tab-header-area .tab-header-background {
+        -fx-font-size: 30px;
         -fx-background-image: url("../images/secondary-bgup.png");
         -fx-background-repeat: repeat;
         -fx-background-position: center center;
         -fx-background-size: fit;
+        -fx-border-color: transparent transparent -fx-primary-border-color transparent;
+        -fx-border-width: 0 0 5px 0;
 }
 .tab-pane .tab:selected {
     -fx-background-color: -fx-accent-bg-color;
     -fx-text-fill: -fx-accent-fg-color;
     -fx-background-insets: 0 0 0 0;
     -fx-background-radius: 0 0 0 0;
+    -fx-border-color: transparent transparent -fx-primary-border-color transparent;
+    -fx-border-width: 0 0 5px 0;
 }
 .tab .tab-label {
     -fx-alignment: CENTER;

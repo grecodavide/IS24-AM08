@@ -6,15 +6,21 @@
     font-family: 'Cyntho Next';
     src: url('../images/fonts/cyntho-next/CynthoNextRegular.ttf');
 }
+@font-face {
+    font-family: 'Cyntho Next Medium';
+    src: url('../images/fonts/cyntho-next/CynthoNextMedium.ttf');
+}
 
 * {
     -fx-foreground-color: #412714;
     -fx-primary-container: #e4dcb6;
-    -fx-secondary-container: #dad2ac;
+    -fx-secondary-container: #DDD7A0;
     -fx-primary-border-color: #412714;
     -fx-accent-bg-color: #a49849;
     -fx-accent-fg-color: #2c2119;
     -fx-third-bg-color: #f6f3e4;
+    -fx-list-even-color: #ECE3BB;
+    -fx-list-odd-color: #C2B784;
 }
 
 .main-container {
@@ -37,9 +43,10 @@
 }
 
 .input {
+    -fx-background-radius: 16px;
     -fx-text-fill: -fx-foreground-color;
     -fx-background-color: -fx-third-bg-color;
-    -fx-font-size: 30px;
+    -fx-font-size: 25px;
     -fx-accent: -fx-accent-bg-color;
 }
 
@@ -47,10 +54,14 @@
     -fx-text-fill: -fx-foreground-color;
     -fx-font-size: 30px;
 }
+
+.form-label {
+    -fx-text-fill: -fx-foreground-color;
+    -fx-font-size: 25px;
+}
 .radio {
     -fx-text-fill: -fx-foreground-color;
     -jfx-selected-color: -fx-accent-bg-color;
-    -fx-font-size: 30px;
     -fx-focus-color: transparent;
 }
 
@@ -58,6 +69,9 @@
     -fx-background-image: null;
     -fx-background-color: -fx-third-bg-color;
 
+}
+.normal-radio {
+    -fx-font-size: 25px;
 }
 .radio:selected .radio .dot {
     -fx-text-fill: -fx-foreground-color;
@@ -67,7 +81,8 @@
 
 .button {
     -fx-text-fill: -fx-accent-fg-color;
-    -fx-font-size: 30px;
+    -fx-font-family: 'Cyntho Next Medium';
+    -fx-font-size: 25px;
     -fx-background-color: -fx-accent-bg-color;
 
     -fx-border-color: -fx-primary-border-color;
@@ -77,7 +92,15 @@
 
     -fx-padding: 16px 32px;
 }
+
+.button:hover {
+    -fx-background-color: -fx-secondary-container;
+    -fx-text-fill: -fx-accent-bg-color;
+    -fx-border-color: -fx-accent-bg-color;
+}
+
 .smallbutton {
+    -fx-font-weight: bold;
     -fx-text-fill: -fx-accent-fg-color;
     -fx-font-size: 20px;
     -fx-background-color: -fx-accent-bg-color;
@@ -106,11 +129,11 @@
     -fx-text-fill: -fx-foreground-color;
 }
 .lobby-title {
-    -fx-font-size: 30px;
+    -fx-font-size: 25px;
 }
 
 .lobby-player {
-    -fx-font-size: 16px;
+    -fx-font-size: 25px;
 }
 
 .lobby-container {
@@ -119,16 +142,23 @@
 }
 
 .lobby-card {
-    -fx-background-color: -fx-secondary-container;
     -fx-padding: 5 5 5 5;
+}
+
+.lobby-radio {
+    -fx-font-size: 20px;
+    -fx-end-margin: 5px;
+    -fx-padding: 5px;
+}
+
+.lobby-card-0 {
+    -fx-background-color: -fx-list-even-color;
+}
+.lobby-card-1 {
+    -fx-background-color: -fx-list-odd-color;
 }
 .lobby-card2 {
     -fx-background-color: -fx-third-bg-color;
-}
-.button:hover {
-    -fx-background-color: -fx-secondary-container;
-    -fx-text-fill: -fx-accent-bg-color;
-    -fx-border-color: -fx-accent-bg-color;
 }
 
 .gamecard {
