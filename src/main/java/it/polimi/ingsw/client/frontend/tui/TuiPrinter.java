@@ -942,7 +942,7 @@ public class TuiPrinter {
      * @param textColor color of the players' name (red or green)
      * @param isCentered if the list has to be centered in the tui or not
      */
-    public void printListOfString(List<String> stringList, String msg, Color textColor, Boolean isCentered) {
+    public void printStringsBoxed(List<String> stringList, String msg, Color textColor, Boolean isCentered) {
         int maxWidth = 40;  //leave it even
         int xCoord = getDimStart(getWidth(), maxWidth); 
         int yCoord = (isCentered) ? getDimStart(terminal.getHeight(), stringList.size()+4) : 1;
