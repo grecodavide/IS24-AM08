@@ -11,6 +11,7 @@ import java.util.Map;
 import org.junit.Test;
 import it.polimi.ingsw.client.network.RemoteViewInterface;
 import it.polimi.ingsw.exceptions.AlreadyUsedUsernameException;
+import it.polimi.ingsw.exceptions.ChosenMatchException;
 import it.polimi.ingsw.exceptions.WrongStateException;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.AvailableMatch;
@@ -31,7 +32,7 @@ public class PlayerControllerRMITest {
         try {
             player1 = new PlayerControllerRMI("player1", match);
             player1.sendJoined();
-        } catch (AlreadyUsedUsernameException | WrongStateException e) {
+        } catch (AlreadyUsedUsernameException | WrongStateException | ChosenMatchException e) {
             fail("player1 init shouldn't throw exception: " + e.getMessage());
         }
 
@@ -42,7 +43,7 @@ public class PlayerControllerRMITest {
             fail("player 2 init should have thrown AlreadyUsedUsernameException");
         } catch (AlreadyUsedUsernameException e) {
             // this exception should be thrown
-        } catch (WrongStateException e) {
+        } catch (WrongStateException | ChosenMatchException e) {
             fail("player2 initialization shouldn't thrown this specific exception exception: " + e.getMessage());
         }
 
@@ -53,7 +54,7 @@ public class PlayerControllerRMITest {
             player1.sendJoined();
             // An exception is supposed to be thrown here
             fail("player 3 init should have thrown WrongStateException");
-        } catch (AlreadyUsedUsernameException e) {
+        } catch (AlreadyUsedUsernameException | ChosenMatchException e) {
             fail("player2 initialization shouldn't thrown this specific exception exception: " + e.getMessage());
         } catch (WrongStateException e) {
             // this exception should be thrown
@@ -475,7 +476,7 @@ public class PlayerControllerRMITest {
     }
 
     @Test
-    public void matchFinished() throws RemoteException, WrongStateException, AlreadyUsedUsernameException {
+    public void matchFinished() throws RemoteException, WrongStateException, AlreadyUsedUsernameException, ChosenMatchException {
         this.initializeTwoPlayerFinishedMatch();
         Map<String, Object> args = view1.getLastCallArguments();
         List<LeaderboardEntry> ranking = (List<LeaderboardEntry>) args.get("ranking");
@@ -577,7 +578,7 @@ public class PlayerControllerRMITest {
         }
     }
 
-    public void initializeTwoPlayerFinishedMatch() throws WrongStateException, AlreadyUsedUsernameException, RemoteException {
+    public void initializeTwoPlayerFinishedMatch() throws WrongStateException, AlreadyUsedUsernameException, RemoteException, ChosenMatchException {
         int maxPlayers = 2;
 
         GameDeck<InitialCard> initialsDeck;
