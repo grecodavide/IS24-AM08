@@ -163,7 +163,7 @@ public final class PlayerControllerTCP extends PlayerController {
 
     @Override
     public void someoneSentPrivateText(Player someone, Player recipient, String text) {
-        if (recipient.getUsername().equals(this.player.getUsername())) {
+        if (recipient.getUsername().equals(this.player.getUsername()) || someone.getUsername().equals(this.player.getUsername())) {
             Message msg = new SomeoneSentPrivateTextMessage(someone.getUsername(), recipient.getUsername(), text);
             this.sendMessage(msg);
         }

@@ -16,7 +16,6 @@ import it.polimi.ingsw.utils.LeaderboardEntry;
 import it.polimi.ingsw.utils.Pair;
 import it.polimi.ingsw.utils.RequestStatus;
 
-
 /*
  * TODO: - Implement correctly the messages: have a list of strings, containing all messages to be
  * shown - When a text gets sent, add it to list of messages - Come up with a decent enough prompt -
@@ -37,7 +36,7 @@ public class GraphicalViewTUI extends GraphicalView {
     private final PlayerControls playerControls;
     private final InputHandler inputHandler;
 
-    private final static String playerControlPrompt = "Type command, or 'help' for a list of available commands";
+    private final static String playerControlPrompt = "Type command, or 'help' for a list of available commands.";
 
     private List<String> chat;
 
@@ -182,7 +181,6 @@ public class GraphicalViewTUI extends GraphicalView {
 
         userIn = this.inputHandler.getNextLine();
         this.printer.clearTerminal();
-        this.printer.printChat(this.chat);
 
         int splitIndex = userIn.indexOf(" ");
         if (splitIndex == -1) {
@@ -227,7 +225,9 @@ public class GraphicalViewTUI extends GraphicalView {
                         this.printer.printPlayerBoard(this.username, this.clientBoards.get(this.username));
                         break;
                 }
-                this.printer.printPlayerBoard(this.username, board);
+                break;
+            case "c":
+                this.printer.printChat(this.chat);
                 break;
             case "w":
                 if (!argument.equals("")) {
@@ -236,24 +236,34 @@ public class GraphicalViewTUI extends GraphicalView {
                         if (splitIndex != -1) {
                             String text = argument.substring(splitIndex + 1);
                             if (!argument.equals("")) {
-                                this.sendPrivateText(argument.substring(0, splitIndex), text);
+                                this.sendPrivateText(argument.substring(1, splitIndex), text);
                             }
                         }
+                    } else {
+                        this.sendBroadcastText(argument);
                     }
-                    this.sendBroadcastText(argument);
-                }
 
+                    if (!this.getServerResponse()) {
+                        this.messages.add(this.lastError);
+                    }
+                    this.printer.clearTerminal();
+                }
+                break;
             case "p":
                 this.printer.printSimpleList(this.players, false, true);
+                break;
+
+            // TBA
+            case "help":
                 break;
 
             default:
                 this.printer.printPlayerBoard(this.currentPlayer, currentPlayerBoard);
                 break;
         }
+
         this.inputHandler.setPrompt(playerControlPrompt);
         this.inputHandler.showPrompt();
-        this.printer.printChat(this.chat);
     }
 
     private void startPlayerControls() {
@@ -284,7 +294,6 @@ public class GraphicalViewTUI extends GraphicalView {
             this.playerControls.enable();
             this.inputHandler.setPrompt(playerControlPrompt);
             this.inputHandler.showPrompt();
-            this.printer.printChat(this.chat);
             this.playerControls.notifyAll();
         }
     }
@@ -527,13 +536,11 @@ public class GraphicalViewTUI extends GraphicalView {
         }
     }
 
-
     @Override
     public void someoneChoseSecretObjective(String someoneUsername) {
         super.someoneChoseSecretObjective(someoneUsername);
         this.playersWithObjective.add(someoneUsername);
     }
-
 
     // gets called only on others, never on current player
     @Override
@@ -553,7 +560,6 @@ public class GraphicalViewTUI extends GraphicalView {
             }
         }).start();
     }
-
 
     // TO BE CHECKED: does the last turn message appear?
     @Override
@@ -676,7 +682,7 @@ public class GraphicalViewTUI extends GraphicalView {
         super.someoneSentPrivateText(someoneUsername, text);
 
         if (this.username.equals(someoneUsername)) {
-            this.chat.add("(me): " + text);
+            this.chat.add("(to: " + someoneUsername + "): " + text);
         } else {
             this.chat.add("(" + someoneUsername + "): " + text);
             this.messages.add(someoneUsername + " sent a private text!");

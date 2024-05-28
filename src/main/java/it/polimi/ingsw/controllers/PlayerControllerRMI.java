@@ -434,7 +434,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
         if (view == null) {
             onUnregisteredView();
         } else {
-            if (recipient.equals(this.player)) {
+            if (recipient.equals(this.player) || someone.equals(this.player)) {
                 try {
                     view.someoneSentPrivateText(someone.getUsername(), text);
                 } catch (RemoteException e) {
