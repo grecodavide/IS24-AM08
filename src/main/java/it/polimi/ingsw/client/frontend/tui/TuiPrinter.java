@@ -25,6 +25,7 @@ public class TuiPrinter {
         this.infoLineOffset = 2;
         this.commandList = new HashMap<>();
 
+        // TODO remove them?
         // list of available commands
         commandList.put(new Pair<>("quit", "q"), "exit the match");
         commandList.put(new Pair<>("place", "p"), "place a card in the chosen coordinates"); // review
@@ -923,16 +924,16 @@ public class TuiPrinter {
     }
 
     /**
-     * Prints a list of players
-     * @param players list of players
+     * Prints a list of strings
+     * @param stringList list of strings
      * @param msg message to display
      * @param textColor color of the players' name (red or green)
      * @param isCentered if the list has to be centered in the tui or not
      */
-    public void printListOfPlayers(List<Player> players, String msg, Color textColor, Boolean isCentered) {
-        int maxWidth = 30;
+    public void printListOfString(List<String> stringList, String msg, Color textColor, Boolean isCentered) {
+        int maxWidth = 40;  //leave it even
         int xCoord = getDimStart(getWidth(), maxWidth); 
-        int yCoord = (isCentered) ? getDimStart(terminal.getHeight(), players.size()+4) : 1;
+        int yCoord = (isCentered) ? getDimStart(terminal.getHeight(), stringList.size()+4) : 1;
         String bold = "\033[1m", reset = "\033[0m", color;
         switch (textColor) {
             case RED:
@@ -970,19 +971,19 @@ public class TuiPrinter {
         
         // define players' lines
         List<String> playerList = new ArrayList<>();
-        for (Player p : players) {
+        for (String s : stringList) {
 
             StringBuffer player = new StringBuffer();
             player.append("║").append(color);
-            if (p.getUsername().length() % 2 != 0){
-                player.append(repeatChar(' ', (maxWidth - p.getUsername().length() - 2) / 2));
-                player.append(p.getUsername());
-                player.append(repeatChar(' ', ((maxWidth - p.getUsername().length() - 2) / 2) + 1));
+            if (s.length() % 2 != 0){
+                player.append(repeatChar(' ', (maxWidth - s.length() - 2) / 2));
+                player.append(s);
+                player.append(repeatChar(' ', ((maxWidth - s.length() - 2) / 2) + 1));
 
             } else {
-                player.append(repeatChar(' ', (maxWidth - p.getUsername().length() - 2) / 2));
-                player.append(p.getUsername());
-                player.append(repeatChar(' ', (maxWidth - p.getUsername().length() - 2) / 2));
+                player.append(repeatChar(' ', (maxWidth - s.length() - 2) / 2));
+                player.append(s);
+                player.append(repeatChar(' ', (maxWidth - s.length() - 2) / 2));
             }
             player.append(reset).append("║");
 
