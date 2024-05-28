@@ -98,6 +98,9 @@ public class TuiPrinter {
     }
     
     private int getDimStart(int max, int dim) {
+        if (dim >= max)
+            return 1;
+
         int left = max - dim; // available space
         if (left % 2 == 1)
             left--;
@@ -456,6 +459,15 @@ public class TuiPrinter {
         lowerBorder.append("╝");
     }
 
+    private int getMaxElemLen(List<String> stringList) {
+        int max = 0;
+        for (String s : stringList){
+            if (s.length() > max)
+                max = s.length();
+        }
+        return max;
+    }
+
     //! PUBLIC METHODS //
 
     /**
@@ -616,16 +628,16 @@ public class TuiPrinter {
      * @param chat chat object, as a list of strings
      */
     public void printChat(List<String> chat) {
-        int rows = this.getHeight() - infoLineOffset + 1;
-        int start = chat.size() - rows;
-        if (start < 0) {
-            start = 0;
-        }
-
-        for (int i = start; i < chat.size(); i++) {
-            System.out.println(this.setPosition(1, i - start) + chat.get(i));
-        }
-
+        
+        printSimpleList(chat, false, false);
+        // int rows = this.getHeight() - infoLineOffset + 1;
+        // int start = chat.size() - rows;
+        // if (start < 0) {
+        //     start = 0;
+        // }
+        // for (int i = start; i < chat.size(); i++) {
+        //     System.out.println(this.setPosition(1, i - start) + chat.get(i));            
+        // }
     }
 
     /**
@@ -1006,4 +1018,33 @@ public class TuiPrinter {
         
     }
     
+    /**
+     * Prints a list, simple or numbered, either in the center or in the bottom left of the tui
+     * @param stringList list of strings
+     * @param isCentered if you want it centered or not
+     * @param isNumbered if you want it numbered or not
+     */
+    public void printSimpleList(List<String> stringList, Boolean isCentered, Boolean isNumbered){
+        // coords with case
+        int xCoord = (isCentered) ? getDimStart(getWidth(), getMaxElemLen(stringList)) : 1; 
+        int yCoord = (isCentered) ? (terminal.getHeight() - stringList.size()) : (this.getHeight() - infoLineOffset + 1 - stringList.size());
+        int index = 0;
+        if (yCoord <= 0){
+            index = -yCoord+2;
+            yCoord = 1;
+        }
+    
+        // printing phase
+        int i = 1;
+        String prefix = setPosition(xCoord, yCoord);
+        for (; index < stringList.size(); index++){
+            if (isNumbered)
+                System.out.println(prefix + String.valueOf(i++) + ") " + stringList.get(index));
+            else
+                System.out.println(prefix + stringList.get(index));
+            
+            prefix = setPosition(xCoord, ++yCoord);
+        }
+    }
+
 }
