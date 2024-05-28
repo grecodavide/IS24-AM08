@@ -1,9 +1,8 @@
 package it.polimi.ingsw.gamemodel;
 
+import java.util.*;
 import it.polimi.ingsw.exceptions.*;
 import it.polimi.ingsw.utils.Pair;
-
-import java.util.*;
 
 /**
  * Represents the match played by {@link Player} instances, therefore implements a slice of game logic
@@ -727,6 +726,15 @@ public class Match {
      */
     public void subscribeObserver(MatchObserver observer) {
         observers.add(observer);
+    }
+
+    /**
+     * Removes the given MatchObserver to those observers notified on match events.
+     *
+     * @param observer The observer to be removed
+     */
+    public void unsubscribeObserver(MatchObserver observer) {
+        observers.remove(observer);
     }
 
     /**

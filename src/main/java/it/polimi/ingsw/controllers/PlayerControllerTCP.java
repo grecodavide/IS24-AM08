@@ -1,6 +1,9 @@
 package it.polimi.ingsw.controllers;
 
-import it.polimi.ingsw.exceptions.*;
+import it.polimi.ingsw.exceptions.HandException;
+import it.polimi.ingsw.exceptions.WrongChoiceException;
+import it.polimi.ingsw.exceptions.WrongStateException;
+import it.polimi.ingsw.exceptions.WrongTurnException;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.network.messages.Message;
 import it.polimi.ingsw.network.messages.errors.ErrorMessage;
@@ -11,9 +14,8 @@ import it.polimi.ingsw.utils.Pair;
 public final class PlayerControllerTCP extends PlayerController {
     private IOHandler io;
 
-    public PlayerControllerTCP(String username, Match match, IOHandler io) throws AlreadyUsedUsernameException, WrongStateException {
+    public PlayerControllerTCP(String username, Match match, IOHandler io) {
         super(username, match);
-
         try {
             this.io = io;
         } catch (Exception e) {
