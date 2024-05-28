@@ -1,14 +1,20 @@
 package it.polimi.ingsw.client.frontend.tui;
 
 import java.io.IOException;
+import java.nio.channels.Pipe;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
 import org.jline.terminal.Terminal;
 import it.polimi.ingsw.client.frontend.ClientBoard;
 import it.polimi.ingsw.client.frontend.ShownCard;
 import it.polimi.ingsw.exceptions.CardException;
+import it.polimi.ingsw.exceptions.InvalidResourceException;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.Pair;
@@ -93,27 +99,14 @@ public class TuiPrinter {
     }
 
     private void printPoints(String username, Color color, Integer points) {
-        int termRows = this.getHeight(), termCols = this.getWidth();
-        String out = this.parseUsername(username, color) + "'s Points: " + points;
-        System.out.println(this.setPosition((termCols - out.length()) / 4, termRows - infoLineOffset) + out);
-    }
-
-    public void printAvailableResources(Map<Symbol, Integer> availableResources, Integer verticalOffset) {
-        // int termRows = this.getHeight(); 
+        // int termRows = this.getHeight();
+        // int oldOffset = termRows - infoLineOffset;
         int termCols = this.getWidth();
-        String out = "";
-        String spaces = "    ";
-        Integer len = availableResources.keySet().size() * (5 + spaces.length()); // icon, space, :, space, number
-        List<Symbol> toPrint =
-                List.of(Symbol.PLANT, Symbol.INSECT, Symbol.FUNGUS, Symbol.ANIMAL, Symbol.PARCHMENT, Symbol.FEATHER, Symbol.INKWELL);
-
-        for (Symbol resource : toPrint) {
-            out += parser.getRightColor(resource) + parser.getRightIcon(resource) + ": " + availableResources.get(resource) + spaces;
-        }
-
-        System.out.println(this.setPosition((termCols - len) / 2, verticalOffset) + out + "\033[0m");
+        int newOffset = 1;
+        String out = this.parseUsername(username, color) + "'s points: " + points;
+        System.out.println(this.setPosition((termCols - out.length()) / 4, newOffset) + out);
     }
-
+    
     private int getDimStart(int max, int dim) {
         int left = max - dim; // available space
         if (left % 2 == 1)
@@ -139,6 +132,7 @@ public class TuiPrinter {
             System.out.println(welcomeString.get(i));
     }
 
+/* 
     private void printTitleDeprecated(int x, int y) {
         String white = "\033[0m", yellow = parser.getRightColor(Symbol.INKWELL);
         List<String> titleString = new ArrayList<>();
@@ -203,6 +197,7 @@ public class TuiPrinter {
             System.out.println(titleString.get(i));
         System.out.println(white);
     }
+*/
 
     private void printTitle(int x, int y, boolean isLittle){
         if (isLittle)
@@ -449,6 +444,28 @@ public class TuiPrinter {
         return s.toString();
     }
 
+    private void boxBuilder(int totalWidth, StringBuffer upperBorder, StringBuffer middleBorder, StringBuffer lowerBorder){
+        // int yCoord = (heightOffset > 0) ? heightOffset : 1;
+        // int maxWidth = 43+2;
+        int lineWidth = totalWidth - 2;
+        // int textWidth = totalWidth - 4;
+        // int xCoord = getDimStart(getWidth(), totalWidth); 
+        // String prefix = setPosition(xCoord, yCoord);
+            
+        // define the border template
+        upperBorder.append("╔");
+        upperBorder.append(repeatChar('═', lineWidth));
+        upperBorder.append("╗");
+        
+        middleBorder.append("╠");
+        middleBorder.append(repeatChar('═', lineWidth));
+        middleBorder.append("╣");
+        
+        lowerBorder.append("╚");
+        lowerBorder.append(repeatChar('═', lineWidth));
+        lowerBorder.append("╝");
+    }
+
     //! PUBLIC METHODS //
 
     /**
@@ -487,13 +504,35 @@ public class TuiPrinter {
     }
 
     /**
+     * Prints all the players' available resources (from the board)
+     * @param availableResources map from the type of resource (Symbol) to its quantity (Integer)
+     * @param verticalOffset offset lines from the top (default is 1)
+     */
+    public void printAvailableResources(Map<Symbol, Integer> availableResources, Integer verticalOffset) {
+        // int termRows = this.getHeight(); 
+        int vertCoord = (verticalOffset != 1) ? 1 : verticalOffset;
+        int termCols = this.getWidth();
+        String out = "";
+        String spaces = "    ";
+        Integer len = availableResources.keySet().size() * (5 + spaces.length()); // icon, space, :, space, number
+        List<Symbol> toPrint =
+                List.of(Symbol.PLANT, Symbol.INSECT, Symbol.FUNGUS, Symbol.ANIMAL, Symbol.PARCHMENT, Symbol.FEATHER, Symbol.INKWELL);
+
+        for (Symbol resource : toPrint) {
+            out += parser.getRightColor(resource) + parser.getRightIcon(resource) + ": " + availableResources.get(resource) + spaces;
+        }
+
+        System.out.println(this.setPosition((termCols - len) / 2, vertCoord) + out + "\033[0m");
+    }
+
+    /**
      * Prints the whole board, including username, points and resources
      *
      * @param username The username to print
      * @param board the board to be printed
      */
     public void printPlayerBoard(String username, ClientBoard board) {
-        this.clearTerminal();
+        // this.clearTerminal();
         if (board == null) {
             this.printMessage("No such player exists!");
             return;
@@ -780,7 +819,6 @@ public class TuiPrinter {
         printDeckVisibleCard(new Pair<>(cardsStartX, cardsStartY), visiblePlayableCards);
     }
 
-    // TODO: fix setMatch() call of this method in GraphicalViewTUI
     /**
      * Prints the list of matches (joinable or not) in the center of the screen. It can print a maximum of 99 matches.
      * @param availableMatches list of available matches
@@ -788,20 +826,15 @@ public class TuiPrinter {
      */
     public void printMatchesLobby(List<AvailableMatch> joinableMatches, List<AvailableMatch> unavailableMatches, int heightOffset){
         int yCoord = (heightOffset > 0) ? heightOffset : 1;
-        int maxWidth = 43+2;
+        int maxWidth = 45;
         int xCoord = getDimStart(getWidth(), maxWidth); 
         String prefix = setPosition(xCoord, yCoord);
             
         // define the border template
-        StringBuffer upperBorder    = new StringBuffer("╔");
-        upperBorder.append(repeatChar('═', maxWidth-2));
-        upperBorder.append("╗");
-        StringBuffer middleBorder  = new StringBuffer("╠");
-        middleBorder.append(repeatChar('═', maxWidth-2));
-        middleBorder.append("╣");
-        StringBuffer lowerBorder    = new StringBuffer("╚");
-        lowerBorder.append(repeatChar('═', maxWidth-2));
-        lowerBorder.append("╝");
+        StringBuffer upperBorder = new StringBuffer();
+        StringBuffer middleBorder = new StringBuffer();
+        StringBuffer lowerBorder = new StringBuffer();
+        boxBuilder(maxWidth, upperBorder, middleBorder, lowerBorder);
 
         // print upper and middle border
         System.out.println(prefix + upperBorder.toString());
@@ -813,21 +846,21 @@ public class TuiPrinter {
         
 
         // print list of joinable matches
-        String white = "\033[0m", color = "\033[32m";
+        String white = "\033[0m", green = "\033[32m";
         int matchIndex = 1;
         for (AvailableMatch m1 : joinableMatches){
 
             // color = (match.maxPlayers() == match.currentPlayers()) ? "\033[31m" : "\033[35m";
-            System.out.printf("%s║ [%02d] %s%-31s %s/%s%s  ║", prefix, matchIndex, color, m1.name().toString(), m1.currentPlayers().toString(), m1.maxPlayers().toString(), white);     // manually adjust according to maxWidth
+            System.out.printf("%s║ [%02d] %s%-31s %s/%s%s  ║", prefix, matchIndex, green, m1.name().toString(), m1.currentPlayers().toString(), m1.maxPlayers().toString(), white);     // manually adjust according to maxWidth
             prefix = setPosition(xCoord, ++yCoord);
             matchIndex++;
         }
 
         // print list of unavailable matches
-        color = "\033[31m";
+        String red = "\033[31m";
         for (AvailableMatch m2 : unavailableMatches){
 
-            System.out.printf("%s║ [--] %s%-31s %s/%s%s  ║", prefix, color, m2.name().toString(), m2.currentPlayers().toString(), m2.maxPlayers().toString(), white);     // manually adjust according to maxWidth
+            System.out.printf("%s║ [--] %s%-31s %s/%s%s  ║", prefix, red, m2.name().toString(), m2.currentPlayers().toString(), m2.maxPlayers().toString(), white);     // manually adjust according to maxWidth
             prefix = setPosition(xCoord, ++yCoord);
         }
 
@@ -878,6 +911,10 @@ public class TuiPrinter {
         System.out.print(prefix + lowerBorder.toString());
     }
 
+    /**
+     * Prints the hand of the player at the bottom of the screen
+     * @param hand list of the 3 playable cards (hand)
+     */
     public void printHandAtBottom(List<PlayableCard> hand) {
         int termCols = this.getWidth();
         Integer handSize = hand.size();
@@ -896,4 +933,87 @@ public class TuiPrinter {
         }
     }
 
+    /**
+     * Prints a list of players
+     * @param players list of players
+     * @param msg message to display
+     * @param textColor color of the players' name (red or green)
+     * @param isCentered if the list has to be centered in the tui or not
+     */
+    public void printListOfPlayers(List<Player> players, String msg, Color textColor, Boolean isCentered) {
+        int maxWidth = 30;
+        int xCoord = getDimStart(getWidth(), maxWidth); 
+        int yCoord = (isCentered) ? getDimStart(terminal.getHeight(), players.size()+4) : 1;
+        String bold = "\033[1m", reset = "\033[0m", color;
+        switch (textColor) {
+            case RED:
+                color = "\033[31m";
+                break;
+            case GREEN:
+                color = "\033[32m";
+                break;
+            default:
+                color = reset; 
+                break;
+        }
+
+        // define the border template
+        StringBuffer upperBorder = new StringBuffer();
+        StringBuffer middleBorder = new StringBuffer();
+        StringBuffer lowerBorder = new StringBuffer();
+        boxBuilder(maxWidth, upperBorder, middleBorder, lowerBorder);
+
+        // define title of the table
+        // String msg = "Connected Players";
+        StringBuffer title = new StringBuffer();
+        title.append("║").append(bold);
+        if (msg.length() % 2 != 0){
+            title.append(repeatChar(' ', (maxWidth - msg.length() - 2) / 2));
+            title.append(msg);
+            title.append(repeatChar(' ', ((maxWidth - msg.length() - 2) / 2) + 1));
+    
+        } else {
+            title.append(repeatChar(' ', (maxWidth - msg.length() - 2) / 2));
+            title.append(msg);
+            title.append(repeatChar(' ', (maxWidth - msg.length() - 2) / 2));    
+        }
+        title.append("║").append(reset);
+        
+        // define players' lines
+        List<String> playerList = new ArrayList<>();
+        for (Player p : players) {
+
+            StringBuffer player = new StringBuffer();
+            player.append("║").append(color);
+            if (p.getUsername().length() % 2 != 0){
+                player.append(repeatChar(' ', (maxWidth - p.getUsername().length() - 2) / 2));
+                player.append(p.getUsername());
+                player.append(repeatChar(' ', ((maxWidth - p.getUsername().length() - 2) / 2) + 1));
+
+            } else {
+                player.append(repeatChar(' ', (maxWidth - p.getUsername().length() - 2) / 2));
+                player.append(p.getUsername());
+                player.append(repeatChar(' ', (maxWidth - p.getUsername().length() - 2) / 2));
+            }
+            player.append(reset).append("║");
+
+            playerList.add(player.toString());
+        }
+
+        // print it all
+        String prefix = setPosition(xCoord, yCoord);
+        System.out.println(prefix + upperBorder.toString());
+        prefix = setPosition(xCoord, ++yCoord);
+        System.out.println(prefix + title.toString());
+        prefix = setPosition(xCoord, ++yCoord);
+        System.out.println(prefix + middleBorder.toString());
+        prefix = setPosition(xCoord, ++yCoord);
+        for (String s : playerList) {
+            System.out.println(prefix + s);
+            prefix = setPosition(xCoord, ++yCoord);
+        }
+        System.out.println(prefix + lowerBorder);
+        
+    }
+    
 }
