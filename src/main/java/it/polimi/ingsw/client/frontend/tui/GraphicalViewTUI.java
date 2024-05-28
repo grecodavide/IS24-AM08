@@ -16,12 +16,18 @@ import it.polimi.ingsw.utils.LeaderboardEntry;
 import it.polimi.ingsw.utils.Pair;
 import it.polimi.ingsw.utils.RequestStatus;
 
+
 /*
- * TODO: - Implement correctly the messages: have a list of strings, containing all messages to be
- * shown - When a text gets sent, add it to list of messages - Come up with a decent enough prompt -
- * Show current player name (either as a message, or in a corner) - Can be done but not necessary:
- * add a view with objectives, hand etc all in one place - Method to show chat - Method to write to
- * chat - Debug what happens when it fails to join match (getAvailableMatches gets stuck)
+ * TODO:
+ * - Implement correctly the messages: have a list of strings, containing all messages to be shown
+ * - When a text gets sent, add it to list of messages
+ * - Come up with a decent enough prompt
+ * - Show current player name (either as a message, or in a corner)
+ * - Can be done but not necessary: add a view with objectives, hand etc all in one place
+ * - Method to show chat
+ * - Method to write to chat
+ * - Debug what happens when it fails to join match (getAvailableMatches gets stuck)
+ *
  */
 
 /**
@@ -195,7 +201,6 @@ public class GraphicalViewTUI extends GraphicalView {
                 } catch (Exception e) {
                     prompt = "Not a number! Try again.";
                 }
-                this.joinMatch(userIn);
             } else {
                 // create
                 String matchName = userIn.substring(0, splitIndex);
@@ -264,7 +269,6 @@ public class GraphicalViewTUI extends GraphicalView {
         this.printer.printPrompt("Prova o");
     }
 
-    // not working
     private void startPlayerControls() {
         while (this.ongoing) {
             synchronized (this.playerControls) {
@@ -344,7 +348,6 @@ public class GraphicalViewTUI extends GraphicalView {
     }
 
 
-    // FIXME: error handling causes getAvailableMatches to block. Name never gets changed on Server??
     private void setMatch() {
         String prompt;
         List<AvailableMatch> joinables = new ArrayList<>(), notJoinables = new ArrayList<>();
@@ -358,8 +361,6 @@ public class GraphicalViewTUI extends GraphicalView {
             this.printer.printCenteredMessage("Could not receive availbale matches, try again!", 1);
             this.setMatch();
             return;
-        } else {
-            this.printer.clearTerminal();
         }
 
         this.printer.clearTerminal();
@@ -379,8 +380,9 @@ public class GraphicalViewTUI extends GraphicalView {
 
         if (!this.getServerResponse()) {
             this.printer.clearTerminal();
-            this.printer.printCenteredMessage("Something went wrong.. Try again!", 1);
+            this.printer.printCenteredMessage(this.lastError + "! Try again.", 1);
             this.setMatch();
+            return;
         } else {
             this.printer.clearTerminal();
         }
