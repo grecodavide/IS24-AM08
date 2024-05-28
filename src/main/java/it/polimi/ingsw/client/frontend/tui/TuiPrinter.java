@@ -1,24 +1,13 @@
 package it.polimi.ingsw.client.frontend.tui;
 
 import java.io.IOException;
-import java.nio.channels.Pipe;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import java.util.*;
 import org.jline.terminal.Terminal;
-import it.polimi.ingsw.client.frontend.ClientBoard;
-import it.polimi.ingsw.client.frontend.ShownCard;
-import it.polimi.ingsw.exceptions.CardException;
-import it.polimi.ingsw.exceptions.InvalidResourceException;
+
+import it.polimi.ingsw.utils.*;
 import it.polimi.ingsw.gamemodel.*;
-import it.polimi.ingsw.utils.AvailableMatch;
-import it.polimi.ingsw.utils.Pair;
-import it.polimi.ingsw.utils.TUICardParser;
+import it.polimi.ingsw.exceptions.*;
+import it.polimi.ingsw.client.frontend.*;
 
 /**
  * Class that handles the actual printing to the terminal
