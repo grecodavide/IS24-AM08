@@ -5,7 +5,6 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
-
 import it.polimi.ingsw.controllers.PlayerControllerRMI;
 import it.polimi.ingsw.controllers.PlayerControllerRMIInterface;
 import it.polimi.ingsw.exceptions.AlreadyUsedUsernameException;
@@ -110,37 +109,19 @@ public class Server extends UnicastRemoteObject implements ServerRMIInterface {
     }
 
     public static void main(String[] args) throws RemoteException {
-        // int portRMI = Integer.parseInt(args[0]);
-        // int portTCP = Integer.parseInt(args[1]);
-        int portRMI = 2222;
-        int portTCP = 9999;
+        int portRMI, portTCP;
+        if (args.length < 2) {
+            portRMI = 2222;
+            portTCP = 9999;
+        } else {
+            portRMI = Integer.parseInt(args[0]);
+            portTCP = Integer.parseInt(args[1]);
+        }
 
         Server server = new Server(portRMI, portTCP);
 
         server.startRMIServer();
         server.startTCPServer();
-
-        /* Scanner scanner = new Scanner(System.in);
-        String choice;
-
-        do {
-            choice = promptAndInput("What do you want to do?\n\t0: exit\n\t1: create match\n\t2: show matches\n", scanner);
-
-            switch (choice) {
-                case "1" -> {
-                    String matchName = promptAndInput("Match name: ", scanner);
-                    int maxPlayers = Integer.parseInt(promptAndInput("Maximum number of players: ", scanner));
-
-                    try {
-                        server.createMatch(matchName, maxPlayers);
-                    } catch (ChosenMatchException e) {
-                        System.out.println(e.getMessage());
-                    }
-                }
-
-                case "2" -> server.matches.keySet().forEach(System.out::println);
-            }
-        } while (!choice.equals("0")); */
     }
 
 }
