@@ -1,12 +1,11 @@
 package it.polimi.ingsw.gamemodel;
 
-import it.polimi.ingsw.exceptions.InvalidResourceException;
-import it.polimi.ingsw.utils.Pair;
-
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import it.polimi.ingsw.exceptions.InvalidResourceException;
+import it.polimi.ingsw.utils.Pair;
 
 
 /**
@@ -40,6 +39,16 @@ public final class GoldCard extends PlayableCard {
             throw new InvalidResourceException("Resource " + multiplier.toString() + " is not valid for a " + this.getClass());
         }
         this.multiplier = multiplier;
+    }
+
+    
+    /**
+     * Getter for the card points (without multiplier)
+     * 
+     * @return the raw points given by the card
+     */
+    public int getPoints() {
+        return this.points;
     }
 
     /**

@@ -1,13 +1,14 @@
 package it.polimi.ingsw.gamemodel;
 
-import it.polimi.ingsw.exceptions.DeckException;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import it.polimi.ingsw.exceptions.DeckException;
 
 /**
  * Generic used to create the decks for all the types of cards
+ *
+ * @param <T> the type of deck, which can be a {@link ResourceCard}, {@link GoldCard}, {@link InitialCard} or {@link Objective}
  */
 public class GameDeck<T> {
     private List<T> cardsList;
