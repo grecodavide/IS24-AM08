@@ -65,7 +65,6 @@ public class Server extends UnicastRemoteObject implements ServerRMIInterface {
     }
 
     @Override
-    // TODO: Implement this method, synchronize it
     public void createMatch(String matchName, int maxPlayers) throws RemoteException, ChosenMatchException {
         if (matches.containsKey(matchName))
             throw new ChosenMatchException("A match with the chosen name already exists");
