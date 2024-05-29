@@ -30,7 +30,7 @@ public class TUICardParser {
      * @param displayCoord coordinates to display on the card (null if none should be displayed)
      * @param isFacingUp wheter the card is facing up or down
      * 
-     * @returns 
+     * @return The parsed card
      * 
      * @throws CardException 
      */

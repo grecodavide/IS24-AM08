@@ -13,7 +13,7 @@ public final class SomeoneSetInitialSideMessage extends ResponseMessage {
 
     
     /**
-     * @returns Available resources of player after setting the initial card
+     * @return Available resources of player after setting the initial card
      */
     public Map<Symbol, Integer> getAvailableResources() {
         return availableResources;

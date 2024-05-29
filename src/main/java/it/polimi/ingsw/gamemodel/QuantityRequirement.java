@@ -51,7 +51,7 @@ public class QuantityRequirement extends Requirement {
     /**
      * Getter for the QuantityRequirement class
      *
-     * @return Map<Symbol, Integer> representing the card's placement requirements
+     * @return Map representing the card's placement requirements
      */
     public Map<Symbol, Integer> getReqs() {
         return this.reqs;

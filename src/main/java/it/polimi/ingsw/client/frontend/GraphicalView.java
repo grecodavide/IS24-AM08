@@ -46,7 +46,7 @@ public abstract class GraphicalView {
     /**
      * Displayes the user an error, when received
      * 
-     * @param cause What went wrong
+     * @param exception The thrown exception
      */
     public void notifyError(Exception exception) {
         this.setLastRequestStatus(RequestStatus.FAILED);

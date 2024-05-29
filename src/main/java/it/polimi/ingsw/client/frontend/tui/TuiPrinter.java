@@ -1,13 +1,18 @@
 package it.polimi.ingsw.client.frontend.tui;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.jline.terminal.Terminal;
-
-import it.polimi.ingsw.utils.*;
+import it.polimi.ingsw.client.frontend.ClientBoard;
+import it.polimi.ingsw.client.frontend.ShownCard;
+import it.polimi.ingsw.exceptions.CardException;
 import it.polimi.ingsw.gamemodel.*;
-import it.polimi.ingsw.exceptions.*;
-import it.polimi.ingsw.client.frontend.*;
+import it.polimi.ingsw.utils.AvailableMatch;
+import it.polimi.ingsw.utils.Pair;
+import it.polimi.ingsw.utils.TUICardParser;
 
 /**
  * Class that handles the actual printing to the terminal
@@ -823,7 +828,8 @@ public class TuiPrinter {
 
     /**
      * Prints the list of matches (joinable or not) in the center of the screen. It can print a maximum of 99 matches.
-     * @param availableMatches list of available matches
+     * @param joinableMatches list of available matches
+     * @param unavailableMatches list of not joinable matches
      * @param heightOffset offset lines from the top (default is 1)
      */
     public void printMatchesLobby(List<AvailableMatch> joinableMatches, List<AvailableMatch> unavailableMatches, int heightOffset){
