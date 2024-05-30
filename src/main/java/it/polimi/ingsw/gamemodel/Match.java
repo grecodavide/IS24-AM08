@@ -1,6 +1,10 @@
 package it.polimi.ingsw.gamemodel;
 
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import it.polimi.ingsw.exceptions.*;
 import it.polimi.ingsw.utils.Pair;
 
@@ -78,6 +82,7 @@ public class Match {
             throw new IllegalArgumentException("initialDeck does not have enough cards");
         else if (objectivesDeck.getSize() < 6)
             throw new IllegalArgumentException("objectivesDeck does not have enough cards");
+        // TODO: handle this exception!!!
         else if (maxPlayers < 2 || maxPlayers > 4)
             throw new IllegalArgumentException("The players must be at least 2 or maximum 4");
 
@@ -245,7 +250,8 @@ public class Match {
         }
 
         // Notify observers and trigger state transition
-        notifyObservers(observer -> observer.someoneDrewInitialCard(currentPlayer, currentGivenInitialCard));
+        Player copy = new Player(currentPlayer);
+        notifyObservers(observer -> observer.someoneDrewInitialCard(copy, currentGivenInitialCard));
         currentState.transition();
 
         return currentGivenInitialCard;
@@ -266,7 +272,8 @@ public class Match {
             currentProposedObjectives = new Pair<>(obj1, obj2);
 
             // Notify observers and trigger state transition
-            notifyObservers(observer -> observer.someoneDrewSecretObjective(currentPlayer, currentProposedObjectives));
+            Player copy = new Player(currentPlayer);
+            notifyObservers(observer -> observer.someoneDrewSecretObjective(copy, currentProposedObjectives));
             currentState.transition();
 
             return currentProposedObjectives;
@@ -299,7 +306,8 @@ public class Match {
             throw new WrongChoiceException("The chosen objective is not one of the proposed ones");
 
         // Notify observers and trigger state transition
-        notifyObservers(observer -> observer.someoneChoseSecretObjective(currentPlayer, objective));
+        Player copy = new Player(currentPlayer);
+        notifyObservers(observer -> observer.someoneChoseSecretObjective(copy, objective));
         currentState.transition();
     }
 
@@ -342,10 +350,10 @@ public class Match {
             Objective objective2 = objectivesDeck.pop();
 
             // Put golds and resources in visiblePlayableCards
-            visiblePlayableCards.put(DrawSource.FIRST_VISIBLE, resourceCard1);
-            visiblePlayableCards.put(DrawSource.SECOND_VISIBLE, resourceCard2);
-            visiblePlayableCards.put(DrawSource.THIRD_VISIBLE, goldCard1);
-            visiblePlayableCards.put(DrawSource.FOURTH_VISIBLE, goldCard2);
+            visiblePlayableCards.put(DrawSource.FIRST_VISIBLE, goldCard1);
+            visiblePlayableCards.put(DrawSource.SECOND_VISIBLE, goldCard2);
+            visiblePlayableCards.put(DrawSource.THIRD_VISIBLE, resourceCard1);
+            visiblePlayableCards.put(DrawSource.FOURTH_VISIBLE, resourceCard2);
 
             visibleObjectives = new Pair<>(objective1, objective2);
         } catch (DeckException e) {
@@ -431,7 +439,8 @@ public class Match {
                     lastTurn = true;
 
                 // Notify observers and trigger state transition
-                notifyObservers(observer -> observer.someonePlayedCard(currentPlayer, coords, card, side));
+                Player copy = new Player(currentPlayer);
+                notifyObservers(observer -> observer.someonePlayedCard(copy, coords, card, side));
                 currentState.transition();
 
                 break;
@@ -541,7 +550,8 @@ public class Match {
 
         // Notify observers and trigger state transition
         PlayableCard replacementCardFinal = replacementCard;
-        notifyObservers(observer -> observer.someoneDrewCard(currentPlayer, source, card, replacementCardFinal));
+        Player copy = new Player(currentPlayer);
+        notifyObservers(observer -> observer.someoneDrewCard(copy, source, card, replacementCardFinal));
         currentState.transition();
 
         return card;
@@ -565,7 +575,8 @@ public class Match {
         currentGivenInitialCard = null;
 
         // Notify observers and trigger state transition
-        notifyObservers(observer -> observer.someoneSetInitialSide(currentPlayer, side));
+        Player copy = new Player(currentPlayer);
+        notifyObservers(observer -> observer.someoneSetInitialSide(copy, side));
         currentState.transition();
     }
 
@@ -637,7 +648,7 @@ public class Match {
         }
 
         // Notify observers
-        observers.forEach(MatchObserver::matchFinished);
+        notifyObservers(MatchObserver::matchFinished);
     }
 
     /**
@@ -776,25 +787,14 @@ public class Match {
      * @param observerCallable The "method" to be called on each observer of the match
      */
     private void notifyObservers(MatchObserverCallable observerCallable) {
-        List<Thread> threads = new ArrayList<>();
+        if(observers.isEmpty())
+            return;
 
-        // Add a Thread for each MatchObserver in observers
-        for (MatchObserver observer : observers) {
-            threads.add(new Thread(() -> {
-                // Each thread calls the passed MatchObserverCallable on the current observer
-                observerCallable.call(observer);
-            }));
-        }
+        ExecutorService executor = Executors.newFixedThreadPool(observers.size());
 
-        threads.forEach(Thread::run);
+        for (MatchObserver observer : observers)
+            executor.submit(() -> observerCallable.call(observer));
 
-        // Wait for each thread to return and exit
-        for (Thread thread : threads) {
-            try {
-                thread.join();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
+        executor.shutdown();
     }
 }

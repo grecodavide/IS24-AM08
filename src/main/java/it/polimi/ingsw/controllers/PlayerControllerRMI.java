@@ -47,12 +47,11 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
      * @param view The View to save in the PlayerController internal state
      */
     @Override
-    public void registerView(RemoteViewInterface view) throws RemoteException {
+    public void registerView(RemoteViewInterface view) throws RemoteException, ChosenMatchException, WrongStateException, AlreadyUsedUsernameException {
         if (this.view == null) {
             this.view = view;
 
-            List<String> playersUsernames = match.getPlayers().stream().map(Player::getUsername).toList();
-            view.giveLobbyInfo(playersUsernames);
+            this.sendJoined();
         }
     }
 
@@ -223,7 +222,8 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
             onUnregisteredView();
         } else {
             try {
-                view.someoneJoined(someone.getUsername());
+                List<String> playersUsernames = match.getPlayers().stream().map(Player::getUsername).toList();
+                view.someoneJoined(someone.getUsername(), playersUsernames);
             } catch (RemoteException e) {
                 onConnectionError();
             }
@@ -363,7 +363,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
             onUnregisteredView();
         } else {
             try {
-                view.someonePlayedCard(someone.getUsername(), coords, card, side, this.player.getPoints(), this.player.getBoard().getAvailableResources());
+                view.someonePlayedCard(someone.getUsername(), coords, card, side, someone.getPoints(), someone.getBoard().getAvailableResources());
             } catch (RemoteException e) {
                 onConnectionError();
             }
@@ -459,9 +459,8 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
             onUnregisteredView();
         } else {
             try {
-                List<LeaderboardEntry> ranking = match.getPlayersFinalRanking()
-                        .stream()
-                        .map(p -> createLeaderboardEntry(p.first(), p.second())).collect(Collectors.toList());
+                List<LeaderboardEntry> ranking = match.getPlayersFinalRanking().stream()
+                        .map(p -> createLeaderboardEntry(p.first(), p.second())).toList();
                 view.matchFinished(ranking);
             } catch (RemoteException e) {
                 onConnectionError();
@@ -477,6 +476,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
      * Removes the player linked to this PlayerControllerRMI instance when there's a connection error.
      */
     private void onConnectionError() {
+        match.unsubscribeObserver(this);
         match.removePlayer(player);
         System.err.println("There has been a connection error with player: " + player.getUsername());
     }

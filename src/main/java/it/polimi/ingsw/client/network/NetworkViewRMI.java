@@ -13,14 +13,24 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.List;
+import java.util.Map;
+
+import it.polimi.ingsw.client.frontend.GraphicalView;
+import it.polimi.ingsw.controllers.PlayerControllerRMIInterface;
+import it.polimi.ingsw.gamemodel.*;
+import it.polimi.ingsw.server.ServerRMIInterface;
+import it.polimi.ingsw.utils.AvailableMatch;
+import it.polimi.ingsw.utils.LeaderboardEntry;
+import it.polimi.ingsw.utils.Pair;
 
 public class NetworkViewRMI extends NetworkView {
-
     private final ServerRMIInterface server;
     private PlayerControllerRMIInterface controller;
 
     public NetworkViewRMI(GraphicalView graphicalView, String ipAddress, int port) throws RemoteException {
         super(graphicalView, ipAddress, port);
+
+        // System.setProperty("java.rmi.server.hostname","192.168.111.119");
 
         // Try to get a remote Server instance from the network
         Registry registry = LocateRegistry.getRegistry(ipAddress, port);
@@ -120,4 +130,11 @@ public class NetworkViewRMI extends NetworkView {
         }
     }
 
+    @Override
+    public void sendBroadcastText(String text) {
+    }
+
+    @Override
+    public void sendPrivateText(String someoneUsername, String text) {
+    }
 }

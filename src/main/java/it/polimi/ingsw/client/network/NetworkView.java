@@ -112,7 +112,7 @@ public abstract class NetworkView implements RemoteViewInterface {
     @Override
     public void matchStarted(Map<String, Color> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands,
                              Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards,
-                             Pair<Symbol, Symbol> decksTopReigns) throws RemoteException {
+                             Pair<Symbol, Symbol> decksTopReigns) {
         graphicalView.matchStarted(playersUsernamesAndPawns, playersHands, visibleObjectives, visiblePlayableCards, decksTopReigns);
     }
 
