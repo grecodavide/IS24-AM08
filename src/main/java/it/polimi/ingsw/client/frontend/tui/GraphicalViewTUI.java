@@ -16,15 +16,6 @@ import it.polimi.ingsw.utils.LeaderboardEntry;
 import it.polimi.ingsw.utils.Pair;
 import it.polimi.ingsw.utils.RequestStatus;
 
-/*
- * TODO: - Implement correctly the messages: have a list of strings, containing all messages to be
- * shown - When a text gets sent, add it to list of messages - Come up with a decent enough prompt -
- * Show current player name (either as a message, or in a corner) - Can be done but not necessary:
- * add a view with objectives, hand etc all in one place - Method to show chat - Method to write to
- * chat - Debug what happens when it fails to join match (getAvailableMatches gets stuck)
- *
- */
-
 /**
  * Class that handles client game loop from TUI
  */
@@ -46,8 +37,8 @@ public class GraphicalViewTUI extends GraphicalView {
         super();
         this.ongoing = true;
         this.playersWithObjective = new ArrayList<>();
-        this.playerControls = new PlayerControls();
-        this.playerControls.disable();
+        this.playerControls = new PlayerControls(); // starts disabled
+
         this.chat = new ArrayList<>();
         this.messages = new ArrayList<>();
         try {
@@ -278,6 +269,7 @@ public class GraphicalViewTUI extends GraphicalView {
                     }
                 } else {
                     try {
+                        // this.mustPrintHeader = true;
                         this.playerControls.wait();
                     } catch (InterruptedException e) {
                     }
@@ -287,18 +279,6 @@ public class GraphicalViewTUI extends GraphicalView {
         }
     }
 
-    private void givePlayerControls() {
-        synchronized (this.playerControls) {
-            this.playerControls.enable();
-            this.inputHandler.setPrompt(playerControlPrompt);
-            this.inputHandler.showPrompt();
-            this.playerControls.notifyAll();
-        }
-    }
-
-    private void removePlayerControls() {
-        this.playerControls.disable();
-    }
 
     ////////////////////////
     // PRE MATCH METHODS //
@@ -345,8 +325,13 @@ public class GraphicalViewTUI extends GraphicalView {
     }
 
     private void chooseUsername() {
+        String userIn = "";
         this.inputHandler.setPrompt("Choose username:");
-        super.setUsername(this.inputHandler.askUser());
+        while (userIn.equals("")) {
+            userIn = this.inputHandler.askUser();
+            this.inputHandler.setPrompt("Not a valid username! Choose username:");
+        }
+        super.setUsername(userIn);
     }
 
     private void getAvailableMatches() {
@@ -453,8 +438,6 @@ public class GraphicalViewTUI extends GraphicalView {
             this.setMatch();
             return;
         }
-        this.printer.clearTerminal();
-        this.printer.printCenteredMessage("Waiting for other players to join!", 0);
 
     }
 
@@ -465,9 +448,14 @@ public class GraphicalViewTUI extends GraphicalView {
         if (!this.username.equals(someoneUsername)) {
             this.printer.printCenteredMessage(someoneUsername + " joined the match!", 1);
         } else {
-            this.printer.printCenteredMessage("Joined match!", 0);
-            this.printer.printMessage(joinedPlayers);
+            this.printer.clearTerminal();
+            this.printer.printCenteredMessage("Waiting for other players to join!", 0);
         }
+        this.messages.add("Joined players:");
+        this.messages.addAll(joinedPlayers);
+        this.printer.printMessage(this.messages);
+        this.printer.printPrompt("");
+        this.messages.clear();
     }
 
     ///////////////////
@@ -548,12 +536,13 @@ public class GraphicalViewTUI extends GraphicalView {
         new Thread(() -> {
             if (board.getPlaced().isEmpty()) { // choosing initial side
                 this.printer.printCenteredMessage(this.currentPlayer + " is choosing initial side!", 0);
+                this.printer.printPrompt("");
             } else if (!this.playersWithObjective.contains(this.currentPlayer)) { // choosing objective
                 this.printer.printCenteredMessage(this.currentPlayer + " is choosing secret objective!", 0);
+                this.printer.printPrompt("");
             } else {
-                if (!this.playerControls.isEnabled()) {
-                    this.givePlayerControls();
-                }
+                this.printer.printPrompt(playerControlPrompt);
+                this.playerControls.enable();
             }
         }).start();
     }
@@ -561,7 +550,7 @@ public class GraphicalViewTUI extends GraphicalView {
     // TO BE CHECKED: does the last turn message appear?
     @Override
     public void makeMove() {
-        this.removePlayerControls();
+        this.playerControls.disable();
         this.printer.clearTerminal();
 
         if (this.lastRequest.getStatus().equals(RequestStatus.FAILED)) {
@@ -595,6 +584,7 @@ public class GraphicalViewTUI extends GraphicalView {
             this.printer.clearTerminal();
             this.printer.clearTerminal();
             this.makeMove();
+            return;
         } else {
             this.messages.clear();
         }

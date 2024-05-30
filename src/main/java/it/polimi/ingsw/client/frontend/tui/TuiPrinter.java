@@ -487,15 +487,20 @@ public class TuiPrinter {
      */
     public void printPrompt(String customMessage) {
         int termRows = this.getHeight();
-        System.out.print(this.setPosition(1, termRows - infoLineOffset + 1) + customMessage + " ");
+        if (customMessage == "") {
+            System.out.print(this.setPosition(1, termRows - infoLineOffset + 1));
+        } else {
+            System.out.print(this.setPosition(1, termRows - infoLineOffset + 1) + customMessage + " ");
+        }
         System.out.flush();
     }
 
     public void printMessage(List<String> message) {
         int termRows = this.getHeight();
         Integer offset = 0;
-        for (String line : message) {
-            System.out.println(this.setPosition(1, termRows - infoLineOffset - offset) + line);
+        int size = message.size();
+        for (String string : message) {
+            System.out.println(this.setPosition(1, termRows - infoLineOffset - size + offset + 1) + string);
             offset++;
         }
     }

@@ -224,10 +224,10 @@ public class MatchTest {
             match.addPlayer(player1);
             match.addPlayer(player2);
             fail("AlreadyUsedUsernameException not thrown");
-        } catch (AlreadyUsedUsernameException e) {
+        } catch (IllegalArgumentException e) {
             // Good
         } catch (Exception e) {
-            fail("Wrong exception returned: " + e.getMessage());
+            fail("Wrong exception returned: " + e);
         }
 
     }

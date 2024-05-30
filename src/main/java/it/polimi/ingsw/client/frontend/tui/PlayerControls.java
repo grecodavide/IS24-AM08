@@ -15,8 +15,9 @@ public class PlayerControls {
         return this.enabled;
     }
 
-    public void enable() {
+    public synchronized void enable() {
         this.enabled = true;
+        this.notifyAll();
     }
 
     public void disable() {
