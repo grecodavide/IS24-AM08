@@ -65,6 +65,12 @@ public class PlateauPane extends Pane {
         });
     }
 
+    /**
+     * Set the color of a player
+     *
+     * @param player username of the player
+     * @param color  color of the player's pawn
+     */
     public void setColor(String player, Color color) {
         ImageView img = new ImageView(new Image(GuiUtil.getPawnImagePath(color)));
         img.setFitWidth(pawnSize);
@@ -74,6 +80,12 @@ public class PlateauPane extends Pane {
         this.getChildren().add(img);
     }
 
+    /**
+     * Set the amount of points of a player and move its pawn
+     *
+     * @param player username of the player
+     * @param points current number of points he has
+     */
     public void setPoints(String player, int points) {
         if (points > 29) {
             return;
@@ -85,9 +97,15 @@ public class PlateauPane extends Pane {
 
         ImageView playerPawn = players.get(player);
         playerPawn.setLayoutX(position.first());
-        playerPawn.setLayoutY(position.second()+ offset*positionOffset);
+        playerPawn.setLayoutY(position.second() + offset * positionOffset);
     }
 
+    /**
+     * Get the amount of players in a certain point
+     *
+     * @param points number of points
+     * @return number of players in that position
+     */
     private int playersAtPosition(int points) {
         int p = 0;
         for (String player : this.points.keySet()) {
@@ -97,8 +115,16 @@ public class PlateauPane extends Pane {
         }
         return p;
     }
+
+    /**
+     * Convert relative coordinates of the pane to coordinates
+     * corrected to the pawn size
+     *
+     * @param coord coordinate to convert
+     * @return the converted coordinates
+     */
     private Pair<Double, Double> convertCoords(Pair<Double, Double> coord) {
-        return new Pair<>(coord.first() - pawnSize/2 + 2, coord.second()- pawnSize/2);
+        return new Pair<>(coord.first() - pawnSize / 2 + 2, coord.second() - pawnSize / 2);
     }
 
 }

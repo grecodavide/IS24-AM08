@@ -94,6 +94,11 @@ public class LobbySceneController extends SceneController {
         Scene matchScene = new Scene(root, GraphicalApplication.screenWidth, GraphicalApplication.screenHeight);
         stage.setScene(matchScene);
     }
+
+    /**
+     * Set the matches displayed
+     * @param matchList List of the current available matches
+     */
     public void updateMatches(List<AvailableMatch> matchList) {
         matchContainer.getChildren().clear();
         for (AvailableMatch m : matchList) {
@@ -101,6 +106,12 @@ public class LobbySceneController extends SceneController {
         }
     }
 
+    /**
+     * Create the container for a Match
+     * @param name name of the match
+     * @param players current amount of players
+     * @param maxPlayers maximum number of players allowed in the match
+     */
     private void addMatchCard(String name, int players, int maxPlayers) {
         /**
          *                 <HBox styleClass="lobby-card">

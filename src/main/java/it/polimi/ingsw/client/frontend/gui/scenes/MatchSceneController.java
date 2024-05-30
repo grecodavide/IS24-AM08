@@ -6,6 +6,7 @@ import it.polimi.ingsw.client.frontend.gui.nodes.CardView;
 import it.polimi.ingsw.client.frontend.gui.nodes.PlateauPane;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.GuiUtil;
+import it.polimi.ingsw.utils.LeaderboardEntry;
 import it.polimi.ingsw.utils.Pair;
 import javafx.collections.ObservableMap;
 import javafx.fxml.FXML;
@@ -89,9 +90,9 @@ public class MatchSceneController extends SceneController{
     }
 
     private void showRankingScene() throws IOException {
-        StackPane root = GuiUtil.getFromFXML("/fxml/ranking.fxml");
-        GuiUtil.applyCSS(root, "/css/style.css");
+        StackPane root = loadScene("/fxml/ranking.fxml");
         Scene matchScene = new Scene(root, GraphicalApplication.screenWidth, GraphicalApplication.screenHeight);
+        GuiUtil.applyCSS(root, "/css/style.css");
         stage.setScene(matchScene);
     }
 }

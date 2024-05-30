@@ -26,6 +26,10 @@ public class WaitingSceneController extends SceneController {
         this.addPlayer("Boingo");
     }
 
+    /**
+     * Add a player to the list
+     * @param username username of the player to add
+     */
     public void addPlayer(String username) {
         Label playerLabel = new Label();
         playerLabel.setAlignment(Pos.CENTER);
@@ -35,17 +39,29 @@ public class WaitingSceneController extends SceneController {
         labels.put(username, playerLabel);
     }
 
+    /**
+     * Set the name of the match to display
+     * @param name name of the match
+     */
     public void setMatchName(String name) {
         this.name = name;
         updateLabel();
     }
 
+    /**
+     * Set the maximum amount of players in the current match
+     * @param players maximum number of players
+     */
     public void setMaxPlayers(int players) {
         maxPlayers = players;
         updateLabel();
 
     }
 
+    /**
+     * Set the current amount of players in the current match
+     * @param players current number of players
+     */
     public void setCurrentPlayers(int players) {
         this.players = players;
         updateLabel();
@@ -56,6 +72,10 @@ public class WaitingSceneController extends SceneController {
         matchName.setText(name + " " + players + "/" + maxPlayers);
     }
 
+    /**
+     * Remove a player from the list
+     * @param username username of the player to remove
+     */
     public void removePlayer(String username) {
         if (this.labels.containsKey(username)) {
             playersContainer.getChildren().remove(labels.get(username));

@@ -47,7 +47,7 @@ public class RankingSceneController extends SceneController {
         playerResult.getStyleClass().add(entry.winner() ? "leaderboard-winner" : "leaderboard-loser");
 
         // Add elements to parents
-        row.getChildren().addAll(playerLabel, playerPoints, playerLabel);
+        row.getChildren().addAll(playerLabel, playerPoints, playerResult);
         leaderboardContainer.getChildren().add(row);
     }
 

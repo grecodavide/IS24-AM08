@@ -79,6 +79,10 @@ public class ChatPaneController extends SceneController {
 
     }
 
+    /**
+     * Change the icon of the button to open the chat
+     * @param opened if the chat is opened
+     */
     private void setIconStatus(boolean opened) {
         String path;
         if (opened) {
@@ -92,6 +96,10 @@ public class ChatPaneController extends SceneController {
         showChatBtn.setGraphic(img);
     }
 
+    /**
+     * Add a player username to the chats
+     * @param playerUsername username of the player
+     */
     public void addPlayer(String playerUsername) {
         MenuItem newItem = new MenuItem(playerUsername);
         playersItems.put(playerUsername, newItem);
@@ -104,6 +112,11 @@ public class ChatPaneController extends SceneController {
         chatSelectorBar.getItems().add(newItem);
     }
 
+    /**
+     * Add a message in the broadcast chat
+     * @param username user that sent the message
+     * @param message message sent
+     */
     public void addBroadcastMessage(String username, String message) {
             // Add message to the graphical chat
             String textMessage = username + ": " + message + "\n";

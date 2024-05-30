@@ -242,6 +242,7 @@ public class PlayerTabController extends SceneController{
         createCardChoiceContainer(first, second);
         // TODO define what to do on mouse click
     }
+
     public void someoneDrewSecretObjective() {
         stateTitle.setText(username + " is choosing the secret objective");
         CardView first = new CardView(CardsManager.getInstance().getObjectives().get(1), Side.BACK);
@@ -269,6 +270,11 @@ public class PlayerTabController extends SceneController{
         createCardChoiceContainer(front, back);
     }
 
+    /**
+     * Creates the container to show the choice of initials card or objectives
+     * @param front First option to show
+     * @param back Second option to show
+     */
     private void createCardChoiceContainer(CardView front, CardView back) {
         actionContainer = new HBox();
         // Add CardViews
