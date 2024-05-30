@@ -5,6 +5,8 @@ import it.polimi.ingsw.client.frontend.gui.nodes.CardView;
 
 import it.polimi.ingsw.client.frontend.gui.nodes.PlateauPane;
 import it.polimi.ingsw.gamemodel.Color;
+import it.polimi.ingsw.gamemodel.DrawSource;
+import it.polimi.ingsw.gamemodel.PlayableCard;
 import it.polimi.ingsw.gamemodel.Symbol;
 import it.polimi.ingsw.utils.GuiUtil;
 import javafx.collections.ObservableMap;
@@ -75,6 +77,9 @@ public class MatchSceneController extends SceneController{
         this.resourcesDeck.setGoldsCardBack(reign);
     }
 
+    public void setDrawSource (DrawSource source, PlayableCard replacementCard, Symbol replacementReign) {
+
+    }
     private void showRankingScene() throws IOException {
         StackPane root = GuiUtil.getFromFXML("/fxml/ranking.fxml");
         GuiUtil.applyCSS(root, "/css/style.css");

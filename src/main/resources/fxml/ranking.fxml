@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<StackPane id="pane" styleClass="main-container" xmlns="http://javafx.com/javafx" minHeight="Infinity" minWidth="Infinity"
+           fx:controller="it.polimi.ingsw.client.frontend.gui.scenes.RankingSceneController"
+           xmlns:fx="http://javafx.com/fxml"
+           prefHeight="400.0" prefWidth="600.0">
+    <VBox maxHeight="-Infinity" maxWidth="-Infinity" StackPane.alignment="CENTER" alignment="CENTER">
+        <Label styleClass="mega-title" fx:id="victoryLabel"/>
+        <ImageView preserveRatio="true" fitWidth="400">
+            <Image url="@../images/plant.png" backgroundLoading="true" />
+        </ImageView>
+        <VBox alignment="CENTER" spacing="20" styleClass="connection-box" maxWidth="-Infinity" maxHeight="1000">
+            <Label text="Leaderboard" styleClass="title" />
+            <Pane prefHeight="50" />
+            <VBox fx:id="leaderboardContainer" alignment="CENTER" maxWidth="-Infinity" maxHeight="-Infinity">
+
+            </VBox>
+            <padding>
+                <Insets bottom="50.0" left="40.0" right="40.0" top="50.0"/>
+            </padding>
+        </VBox>
+    </VBox>
+</StackPane>

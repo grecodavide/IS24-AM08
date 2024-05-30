@@ -305,3 +305,30 @@
     -fx-font-size: 45px;
     -fx-font-family: "Cyntho Next Medium";
 }
+
+.leaderboard-player-label {
+    -fx-font-family: "Cyntho Next Medium";
+    -fx-font-size: 30px;
+}
+
+.leaderboard-points {
+    -fx-font-family: "Cyntho Next";
+    -fx-font-size: 30px;
+}
+
+.leaderboard-result {
+    -fx-font-size: 24px;
+    -fx-padding: 3 10;
+    -fx-border-radius: 5;
+    -fx-background-radius: 12px;
+}
+
+.leaderboard-loser {
+    -fx-background-color: #E94C16;
+    -fx-text-fill: #571011;
+}
+
+.leaderboard-winner {
+    -fx-background-color: #70BB77;
+    -fx-text-fill: #003D20;
+}
