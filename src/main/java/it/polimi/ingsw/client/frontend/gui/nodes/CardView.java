@@ -84,6 +84,18 @@ public class CardView extends Pane {
     }
 
     /**
+     * Change the displayed card
+     * @param card card to display
+     * @param side side of the card to display
+     */
+    public void setCard(Objective card, Side side) {
+        String imagePath = GuiUtil.getImagePath(card, side);
+        this.getProperties().put("Card", card);
+        this.getProperties().put("Side", side);
+        this.addProperties(imagePath);
+    }
+
+    /**
      * Change the displayed card to the back of a resource card
      * @param reign reign to display
      */

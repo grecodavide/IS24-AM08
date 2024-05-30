@@ -4,11 +4,9 @@ import it.polimi.ingsw.client.frontend.gui.GraphicalApplication;
 import it.polimi.ingsw.client.frontend.gui.nodes.CardView;
 
 import it.polimi.ingsw.client.frontend.gui.nodes.PlateauPane;
-import it.polimi.ingsw.gamemodel.Color;
-import it.polimi.ingsw.gamemodel.DrawSource;
-import it.polimi.ingsw.gamemodel.PlayableCard;
-import it.polimi.ingsw.gamemodel.Symbol;
+import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.GuiUtil;
+import it.polimi.ingsw.utils.Pair;
 import javafx.collections.ObservableMap;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -29,7 +27,6 @@ public class MatchSceneController extends SceneController{
     public CardView firstObjective;
     public CardView secondObjective;
     public PlateauPane plateauPane;
-    public int count = 0;
     @FXML
     TabPane matchTabs;
     @FXML
@@ -69,17 +66,28 @@ public class MatchSceneController extends SceneController{
         matchPane.getChildren().add(chatPane);
     }
 
-    public void setGoldsDeckReign(Symbol reign) {
-        this.goldsDeck.setGoldsCardBack(reign);
-    }
-
-    public void setResourcesDeckReign(Symbol reign) {
-        this.resourcesDeck.setGoldsCardBack(reign);
-    }
-
+    /**
+     * Set the displayed card for the given draw source
+     * @param source Source of the draw
+     * @param replacementCard Replacement card, can be null
+     * @param replacementReign Replacement reign, can be null
+     */
     public void setDrawSource (DrawSource source, PlayableCard replacementCard, Symbol replacementReign) {
-
+        switch (source) {
+            case DrawSource.GOLDS_DECK -> goldsDeck.setGoldsCardBack(replacementReign);
+            case DrawSource.RESOURCES_DECK -> resourcesDeck.setResourcesCardBack(replacementReign);
+            case DrawSource.FIRST_VISIBLE -> firstVisible.setCard(replacementCard, Side.FRONT);
+            case DrawSource.SECOND_VISIBLE -> secondVisible.setCard(replacementCard, Side.FRONT);
+            case DrawSource.THIRD_VISIBLE -> thirdVisible.setCard(replacementCard, Side.FRONT);
+            case DrawSource.FOURTH_VISIBLE -> fourthVisible.setCard(replacementCard, Side.FRONT);
+        }
     }
+
+    public void setObjectives(Pair<Objective, Objective> objectives) {
+        firstObjective.setCard(objectives.first(), Side.FRONT);
+        secondObjective.setCard(objectives.second(), Side.FRONT);
+    }
+
     private void showRankingScene() throws IOException {
         StackPane root = GuiUtil.getFromFXML("/fxml/ranking.fxml");
         GuiUtil.applyCSS(root, "/css/style.css");
