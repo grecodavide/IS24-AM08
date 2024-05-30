@@ -113,7 +113,7 @@ public class GraphicalViewTUI extends GraphicalView {
         Integer maxValue = hand.size();
         while (card == null) {
             try {
-                Integer index = Integer.valueOf(userIn) - 1;
+                Integer index = Integer.parseInt(userIn) - 1;
                 if (index >= 0 && index < maxValue) {
                     card = hand.get(index);
                 }
@@ -132,12 +132,10 @@ public class GraphicalViewTUI extends GraphicalView {
 
         this.inputHandler.setPrompt("What side do you want to play the card on? (defaults to front)");
         String userIn = this.inputHandler.askUser();
-        switch (userIn) {
-            case "b", "back":
-                return Side.BACK;
-            default:
-                return Side.FRONT;
-        }
+        return switch (userIn) {
+            case "b", "back" -> Side.BACK;
+            default -> Side.FRONT;
+        };
     }
 
     private Pair<Integer, Integer> chooseCoords(ClientBoard board) {
@@ -532,7 +530,6 @@ public class GraphicalViewTUI extends GraphicalView {
         super.chooseSecretObjective(objective);
         if (!this.getServerResponse()) {
             this.giveSecretObjectives(secretObjectives);
-            return;
         }
     }
 

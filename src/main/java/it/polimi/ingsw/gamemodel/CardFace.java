@@ -2,12 +2,17 @@ package it.polimi.ingsw.gamemodel;
 
 import it.polimi.ingsw.exceptions.CardException;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Set;
 
 /**
  * Topological definition of a card's side
  */
-public class CardFace {
+public class CardFace implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     private Symbol topLeft;
     private Symbol topRight;
     private Symbol bottomLeft;
@@ -30,18 +35,12 @@ public class CardFace {
      * @throws CardException if the specified corner does not exist
      */
     public Symbol getCorner(Corner corner) throws CardException {
-        switch (corner) {
-            case TOP_LEFT:
-                return this.topLeft;
-            case TOP_RIGHT:
-                return this.topRight;
-            case BOTTOM_LEFT:
-                return this.bottomLeft;
-            case BOTTOM_RIGHT:
-                return this.bottomRight;
-            default:
-                throw new CardException("The specified corner does not exist!");
-        }
+        return switch (corner) {
+            case TOP_LEFT -> this.topLeft;
+            case TOP_RIGHT -> this.topRight;
+            case BOTTOM_LEFT -> this.bottomLeft;
+            case BOTTOM_RIGHT -> this.bottomRight;
+        };
     }
 
     /**
