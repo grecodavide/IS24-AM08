@@ -15,10 +15,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.Dragboard;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.input.TransferMode;
+import javafx.scene.input.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
@@ -58,10 +55,18 @@ public class PlayerTabController extends SceneController{
 
         handCard1.setCard(CardsManager.getInstance().getPlayableCards().get(45), Side.FRONT);
         handCard2.setOnMouseClicked((e) -> {
-            this.testBoard();
+            if (e.getButton() == MouseButton.PRIMARY) {
+                this.testBoard();
+            } else {
+                this.giveInitialCard(CardsManager.getInstance().getInitialCards().get(2));
+            }
         });
         handCard3.setOnMouseClicked((e) -> {
-            this.someoneDrewSecretObjective();
+            if (e.getButton() == MouseButton.SECONDARY) {
+                this.someoneDrewSecretObjective();
+            } else {
+                this.giveSecretObjectives(new Pair<>(CardsManager.getInstance().getObjectives().get(2), CardsManager.getInstance().getObjectives().get(12)));
+            }
         });
         initializeHandCard(handCard1);
         initializeHandCard(handCard2);

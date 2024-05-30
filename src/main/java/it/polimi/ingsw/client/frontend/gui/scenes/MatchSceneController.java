@@ -1,5 +1,6 @@
 package it.polimi.ingsw.client.frontend.gui.scenes;
 
+import it.polimi.ingsw.client.frontend.gui.GraphicalApplication;
 import it.polimi.ingsw.client.frontend.gui.nodes.CardView;
 
 import it.polimi.ingsw.client.frontend.gui.nodes.PlateauPane;
@@ -9,11 +10,10 @@ import it.polimi.ingsw.utils.GuiUtil;
 import javafx.collections.ObservableMap;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.*;
 
 import java.io.IOException;
 
@@ -38,6 +38,13 @@ public class MatchSceneController extends SceneController{
 
     @Override
     public void initializePostController() throws IOException {
+        firstObjective.setOnMouseClicked((e) -> {
+            try {
+                this.showRankingScene();
+            } catch (Exception err) {
+                throw new RuntimeException(err);
+            }
+        });
         String username;
         for (int i = 1; i < 3; i++) {
             username ="Player" + i;
@@ -66,5 +73,12 @@ public class MatchSceneController extends SceneController{
 
     public void setResourcesDeckReign(Symbol reign) {
         this.resourcesDeck.setGoldsCardBack(reign);
+    }
+
+    private void showRankingScene() throws IOException {
+        StackPane root = GuiUtil.getFromFXML("/fxml/ranking.fxml");
+        GuiUtil.applyCSS(root, "/css/style.css");
+        Scene matchScene = new Scene(root, GraphicalApplication.screenWidth, GraphicalApplication.screenHeight);
+        stage.setScene(matchScene);
     }
 }
