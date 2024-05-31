@@ -1,46 +1,39 @@
 package it.polimi.ingsw.network.tcp;
 
+import java.io.IOException;
+import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 import com.google.gson.JsonParseException;
 import it.polimi.ingsw.controllers.PlayerControllerTCP;
 import it.polimi.ingsw.exceptions.AlreadyUsedUsernameException;
 import it.polimi.ingsw.exceptions.ChosenMatchException;
 import it.polimi.ingsw.exceptions.WrongStateException;
-import it.polimi.ingsw.gamemodel.Match;
-import it.polimi.ingsw.gamemodel.PlayableCard;
-import it.polimi.ingsw.gamemodel.Player;
+import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.network.messages.actions.*;
 import it.polimi.ingsw.network.messages.errors.ErrorMessage;
 import it.polimi.ingsw.network.messages.responses.AvailableMatchesMessage;
 import it.polimi.ingsw.network.messages.responses.ResponseMessage;
 import it.polimi.ingsw.server.Server;
+import it.polimi.ingsw.utils.CardsManager;
 import it.polimi.ingsw.utils.MessageJsonParser;
 import it.polimi.ingsw.utils.Pair;
 
-import java.io.EOFException;
-import java.io.IOException;
-import java.net.Socket;
-
 /*
- * actual connection procedure:
- * - socket accepted
- * - socket asks for available matches, giving its name to server
- * - when received, it communicates which match it wants to join
- * - only then a playercontroller will be created, with said match
- * - from there the constructor is done, a player has joined and it just has to listen
+ * actual connection procedure: - socket accepted - socket asks for available matches, giving its
+ * name to server - when received, it communicates which match it wants to join - only then a
+ * playercontroller will be created, with said match - from there the constructor is done, a player
+ * has joined and it just has to listen
  */
 
 /**
- * Every time a socket gets accepted by the TCP server, a new ClientListener
- * will be created with it, and it will:
- * - Acquire the client's username
- * - Make the client (which is still not a {@link Player}) choose/create a
- * {@link Match} to join
- * - Create its {@link PlayerControllerTCP}, which will also make him join such
- * {@link Match}
- * - Listen for any message received and, execute the corresponding action
+ * Every time a socket gets accepted by the TCP server, a new ClientListener will be created with
+ * it, and it will: - Acquire the client's username - Make the client (which is still not a
+ * {@link Player}) choose/create a {@link Match} to join - Create its {@link PlayerControllerTCP},
+ * which will also make him join such {@link Match} - Listen for any message received and, execute
+ * the corresponding action
  * <p>
- * Note that this will just require the action to be executed, but its
- * {@link PlayerControllerTCP}
+ * Note that this will just require the action to be executed, but its {@link PlayerControllerTCP}
  * that actually calls the {@link Player} methods
  */
 public class ClientListener extends Thread {
@@ -49,11 +42,12 @@ public class ClientListener extends Thread {
     private MessageJsonParser parser;
     private IOHandler io;
     private Server server;
+    private Map<Integer, Objective> objectives;
+    private Map<Integer, PlayableCard> playableCards;
 
     /**
-     * Class constructor. Needs to have a reference to the server instance since it
-     * needs to
-     * handle the match assignment
+     * Class constructor. Needs to have a reference to the server instance since it needs to handle the
+     * match assignment
      *
      * @param socket the socket that required a connection
      * @param server the instance of {@link Server} that's running
@@ -65,28 +59,41 @@ public class ClientListener extends Thread {
             this.server = server;
             this.parser = new MessageJsonParser();
 
-            this.clientInteraction(); // init player controller
-        } catch (Exception e) {
-            System.out.println("Failed to create Listener thread");
-            // e.printStackTrace();
+            this.objectives = CardsManager.getInstance().getObjectives();
+            Map<Integer, ResourceCard> resources = CardsManager.getInstance().getResourceCards();
+            Map<Integer, GoldCard> golds = CardsManager.getInstance().getGoldCards();
+
+            this.playableCards = new HashMap<>();
+            resources.forEach((id, card) -> this.playableCards.put(id, (PlayableCard) card));
+            golds.forEach((id, card) -> this.playableCards.put(id, (PlayableCard) card));
+
+            this.setPlayerController();
+        } catch (IOException e) {
+            this.sendError("Failed to create Listener thread", e);
         }
     }
 
+    
     /**
-     * Used to acquire the {@link Player}'s username and the {@link Match} he wants
-     * to join.
-     * If this throws an exception, it means something went wrong with the remote
-     * communication,
-     * and so the ListenerThread should not be created. All other cases are handled
-     * internally
-     *
-     * @throws IOException            if the socket's input stream cannot be read
-     * @throws ClassNotFoundException if the class of the received object (from the
-     *                                socket's input stream) could not be found
-     * @throws EOFException           if the stream gets shut down while it was
-     *                                still waiting for something
+     * Sends error message with custom text
+     * 
+     * @param prompt the text to be shown
+     * @param exception the exception type
      */
-    private void clientInteraction() throws IOException, ClassNotFoundException, EOFException {
+    private void sendError(String prompt, Exception exception) {
+        try {
+            this.io.writeMsg(new ErrorMessage(prompt, exception.getClass().getName()));
+        } catch (Exception ignored) {
+        }
+    }
+
+    
+    /**
+     * Loops until a player controller is created
+     * 
+     * @throws IOException if there was an I/O error
+     */
+    private void setPlayerController() throws IOException {
         ActionMessage msg;
         String username = null;
         Match match = null;
@@ -102,7 +109,6 @@ public class ClientListener extends Thread {
                     switch (msg) {
                         case GetAvailableMatchesMessage getAvailableMatchesMessage:
                             username = getAvailableMatchesMessage.getUsername();
-
                             availableMatches = new AvailableMatchesMessage(this.server.getJoinableMatchesMap());
                             this.io.writeMsg(availableMatches);
                             break;
@@ -112,58 +118,50 @@ public class ClientListener extends Thread {
                             this.server.createMatch(createMatchMessage.getMatchName(), createMatchMessage.getMaxPlayers());
                             match = this.server.getMatch(createMatchMessage.getMatchName());
 
+                            this.createPlayerController(username, match);
                             shouldLoop = false;
                             break;
+
                         case JoinMatchMessage joinMatchMessage:
+                            username = joinMatchMessage.getUsername();
                             match = this.server.getMatch(joinMatchMessage.getMatchName());
 
+                            this.createPlayerController(username, match);
                             shouldLoop = false;
                             break;
+
                         default:
                             break;
                     }
                 }
-            } catch (JsonParseException e) {
+            } catch (JsonParseException | ClassNotFoundException e) {
                 // message is not correctly formatted, ignore
-            } catch (ChosenMatchException e) {
-                ErrorMessage error = new ErrorMessage(e.getMessage(), e.getClass().getName());
-                this.io.writeMsg(error);
+            } catch (ChosenMatchException | WrongStateException | AlreadyUsedUsernameException | IllegalArgumentException e) {
+                this.sendError(e.getMessage(), e);
             }
         }
-
-        // if we reached this point, everything went smooth and the client asked to
-        // either join or create a match
-        this.createPlayerController(username, match);
     }
 
+    
     /**
-     * Once everything went smoothly, we try to actually create the
-     * {@link PlayerControllerTCP}. If this
-     * throws {@link AlreadyUsedUsernameException} or {@link WrongStateException}
-     * the acquisition procedure is restarted
-     * after sending an {@link ErrorMessage} back to the client
-     *
-     * @throws IOException            if the socket's input stream cannot be read
-     * @throws ClassNotFoundException if the class of the received object (from the
-     * @throws EOFException           if the stream gets shut down while it was
-     *                                still waiting for something
+     * Tries to actually create the player controller with the acquired informations
+     * 
+     * @param username The chosen username
+     * @param match The match to join
+     * 
+     * @throws AlreadyUsedUsernameException If the match already contains the chosen username
+     * @throws WrongStateException If the match currently does not accept new players
+     * @throws ChosenMatchException If the match is does not exist or is not valid
      */
-    private void createPlayerController(String username, Match match) throws IOException, ClassNotFoundException, EOFException {
-        try {
-            this.playerController = new PlayerControllerTCP(username, match, this.io);
-            this.playerController.sendJoined();
-        } catch (AlreadyUsedUsernameException | WrongStateException e) {
-            ErrorMessage error = new ErrorMessage(e.getMessage(), e.getClass().getName());
-            this.io.writeMsg(error);
-            this.clientInteraction();
-        }
-
+    private void createPlayerController(String username, Match match)
+            throws AlreadyUsedUsernameException, IllegalArgumentException, WrongStateException, ChosenMatchException {
+        this.playerController = new PlayerControllerTCP(username, match, this.io);
+        this.playerController.sendJoined();
     }
 
     /**
-     * This parses the message received from socket's input stream and executes the
-     * request such message carried.
-     * If the message is not one of the expected types, it will just be ignored
+     * This parses the message received from socket's input stream and executes the request such message
+     * carried. If the message is not one of the expected types, it will just be ignored
      *
      * @see ActionMessage
      */
@@ -172,7 +170,7 @@ public class ClientListener extends Thread {
         if (msg != null) {
             switch (message) {
                 case ChooseSecretObjectiveMessage actionMsg:
-                    this.playerController.chooseSecretObjective(Server.getObjective(actionMsg.getObjectiveID()));
+                    this.playerController.chooseSecretObjective(this.objectives.get(actionMsg.getObjectiveID()));
                     break;
                 case ChooseInitialCardSideMessage actionMsg:
                     this.playerController.chooseInitialCardSide(actionMsg.getSide());
@@ -194,7 +192,7 @@ public class ClientListener extends Thread {
                     break;
                 case PlayCardMessage actionMsg:
                     Pair<Integer, Integer> coords = new Pair<Integer, Integer>(actionMsg.getX(), actionMsg.getY());
-                    PlayableCard card = Server.getPlayableCard(actionMsg.getCardID());
+                    PlayableCard card = this.playableCards.get(actionMsg.getCardID());
                     this.playerController.playCard(coords, card, actionMsg.getSide());
                     break;
                 default:
@@ -205,8 +203,8 @@ public class ClientListener extends Thread {
     }
 
     /**
-     * Main loop. This will just wait for anything to be put on the input stream and
-     * then call {@link ClientListener#executeRequest(String)}
+     * Main loop. This will just wait for anything to be put on the input stream and then call
+     * {@link ClientListener#executeRequest(String)}
      */
     public void listen() {
         try {
@@ -234,9 +232,8 @@ public class ClientListener extends Thread {
     }
 
     /**
-     * Since the class extends {@link Thread} it needs to implement
-     * {@link Thread#run()}. Specifically, this will just run
-     * {@link ClientListener#listen()}
+     * Since the class extends {@link Thread} it needs to implement {@link Thread#run()}. Specifically,
+     * this will just run {@link ClientListener#listen()}
      */
     @Override
     public void run() {

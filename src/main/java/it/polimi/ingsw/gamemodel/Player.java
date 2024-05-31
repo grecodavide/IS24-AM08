@@ -6,6 +6,8 @@ import it.polimi.ingsw.exceptions.WrongStateException;
 import it.polimi.ingsw.exceptions.WrongTurnException;
 import it.polimi.ingsw.utils.Pair;
 
+import java.util.Objects;
+
 /**
  * Represents each in-game user, so acts also as a gateway receiving input by the Controller.
  * It's also responsible for the board's logic, which is a slice of the game logic.
@@ -31,7 +33,34 @@ public class Player {
         //Initialize values
         board = new Board();
         points = 0;
+    }
 
+    /**
+     * Initializes the current instance from a copy reference
+     *
+     * @param player
+     */
+    public Player(Player player) {
+        this.username = player.username;
+        this.match = player.match;
+        this.board = player.board;
+        this.points = player.points;
+        this.pawnColor = player.pawnColor;
+        this.secretObjective = player.secretObjective;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Player player)) return false;
+
+        return username.equals(player.username) &&
+                match.equals(player.match);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(username, match, points, board, pawnColor, secretObjective);
     }
 
     /**
@@ -86,7 +115,7 @@ public class Player {
      */
     public void chooseInitialCardSide(Side side) throws WrongTurnException, WrongStateException {
         if (match.getCurrentPlayer().equals(this))
-            match.setInitialSide(side);
+            match.setInitialSide(side, board.getAvailableResources());
         else
             throw new WrongTurnException("Only the current player can choose the initial card side");
     }

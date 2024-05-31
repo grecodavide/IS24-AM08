@@ -4,10 +4,7 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 import it.polimi.ingsw.client.network.RemoteViewInterface;
-import it.polimi.ingsw.exceptions.HandException;
-import it.polimi.ingsw.exceptions.WrongChoiceException;
-import it.polimi.ingsw.exceptions.WrongStateException;
-import it.polimi.ingsw.exceptions.WrongTurnException;
+import it.polimi.ingsw.exceptions.*;
 import it.polimi.ingsw.gamemodel.DrawSource;
 import it.polimi.ingsw.gamemodel.Objective;
 import it.polimi.ingsw.gamemodel.PlayableCard;
@@ -29,7 +26,7 @@ public interface PlayerControllerRMIInterface extends Remote {
      *
      * @param view The View to save in the PlayerController internal state
      */
-    void registerView(RemoteViewInterface view) throws RemoteException;
+    void registerView(RemoteViewInterface view) throws RemoteException, ChosenMatchException, WrongStateException, AlreadyUsedUsernameException;
 
     /**
      * Draws an initial card for the player.

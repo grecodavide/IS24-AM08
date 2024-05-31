@@ -1,5 +1,6 @@
 package it.polimi.ingsw.gamemodel;
 
+import java.util.Map;
 import it.polimi.ingsw.utils.Pair;
 
 /**
@@ -48,7 +49,7 @@ public interface MatchObserver {
      * @param someone The player instance that has chosen the side
      * @param side    The chosen initial card side
      */
-    void someoneSetInitialSide(Player someone, Side side);
+    void someoneSetInitialSide(Player someone, Side side, Map<Symbol, Integer> availableResources);
 
     /**
      * Notifies that someone has drawn two secret objectives.

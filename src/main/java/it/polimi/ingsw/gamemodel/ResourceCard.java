@@ -2,10 +2,16 @@ package it.polimi.ingsw.gamemodel;
 
 import it.polimi.ingsw.exceptions.InvalidResourceException;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 /*
  * Card that does not require any conditions to be played
  */
-public final class ResourceCard extends PlayableCard {
+public final class ResourceCard extends PlayableCard implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     /**
      * Class constructor. It needs to only take the front as an argument, since the back is handled by its superclass {@link PlayableCard}
      *
@@ -23,7 +29,7 @@ public final class ResourceCard extends PlayableCard {
     /**
      * Getter for the ResourceCard class
      *
-     * @return the quantity requirement for the gold card to be played.
+     * @return points held by the card
      */
     public int getPoints() {
         return this.points;

@@ -18,6 +18,7 @@ public class ClientBoard {
     private Map<Symbol, Integer> availableResources;
     private final Color color;
     private Objective objective;
+    private InitialCard initialCard;
 
     public ClientBoard(Color color, List<PlayableCard> hand) {
         this.placementNumber = 0;
@@ -49,12 +50,15 @@ public class ClientBoard {
         this.hand.add(card);
     }
 
-    public void placeInitial(InitialCard card, Side side) {
-        this.placed.put(placementNumber, new ShownCard(card, side, new Pair<>(0, 0)));
-        this.placementNumber++;
+    public void setInitial(InitialCard card) {
+        this.initialCard = card;
     }
 
-
+    public void placeInitial(Side side, Map<Symbol, Integer> availableResources) {
+        this.placed.put(placementNumber, new ShownCard(this.initialCard, side, new Pair<>(0, 0)));
+        this.availableResources = availableResources;
+        this.placementNumber++;
+    }
 
     public Integer getPlacementNumber() {
         return placementNumber;

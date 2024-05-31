@@ -8,12 +8,13 @@ import java.util.stream.Collectors;
 import it.polimi.ingsw.client.network.RemoteViewInterface;
 import it.polimi.ingsw.exceptions.*;
 import it.polimi.ingsw.gamemodel.*;
+import it.polimi.ingsw.server.Server;
 import it.polimi.ingsw.utils.LeaderboardEntry;
 import it.polimi.ingsw.utils.Pair;
 
 /**
  * Subclass of {@link PlayerController} that implements its abstract methods through RMI interactions.
- * Each instance of this class is supposed to be sent through {@link it.polimi.ingsw.server.Server#joinMatch(String, String)})
+ * Each instance of this class is supposed to be sent through {@link Server#joinMatch(String, String)})
  * to an RMI View, this latter will then send its View instance to the PlayerController object, calling
  * {@link #registerView(RemoteViewInterface)} on it.
  */
@@ -32,7 +33,6 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
      */
     public PlayerControllerRMI(String username, Match match) throws AlreadyUsedUsernameException, WrongStateException {
         super(username, match);
-
     }
 
     /**
@@ -45,12 +45,11 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
      * @param view The View to save in the PlayerController internal state
      */
     @Override
-    public void registerView(RemoteViewInterface view) throws RemoteException {
+    public void registerView(RemoteViewInterface view) throws RemoteException, ChosenMatchException, WrongStateException, AlreadyUsedUsernameException {
         if (this.view == null) {
             this.view = view;
 
-            List<String> playersUsernames = match.getPlayers().stream().map(Player::getUsername).toList();
-            view.giveLobbyInfo(playersUsernames);
+            this.sendJoined();
         }
     }
 
@@ -221,7 +220,8 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
             onUnregisteredView();
         } else {
             try {
-                view.someoneJoined(someone.getUsername());
+                List<String> playersUsernames = match.getPlayers().stream().map(Player::getUsername).toList();
+                view.someoneJoined(someone.getUsername(), playersUsernames);
             } catch (RemoteException e) {
                 onConnectionError();
             }
@@ -284,12 +284,12 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
      * @param side    The chosen initial card side
      */
     @Override
-    public void someoneSetInitialSide(Player someone, Side side) {
+    public void someoneSetInitialSide(Player someone, Side side, Map<Symbol, Integer> availableResources) {
         if (view == null) {
             onUnregisteredView();
         } else {
             try {
-                view.someoneSetInitialSide(someone.getUsername(), side);
+                view.someoneSetInitialSide(someone.getUsername(), side, availableResources);
             } catch (RemoteException e) {
                 onConnectionError();
             }
@@ -361,7 +361,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
             onUnregisteredView();
         } else {
             try {
-                view.someonePlayedCard(someone.getUsername(), coords, card, side, this.player.getPoints(), this.player.getBoard().getAvailableResources());
+                view.someonePlayedCard(someone.getUsername(), coords, card, side, someone.getPoints(), someone.getBoard().getAvailableResources());
             } catch (RemoteException e) {
                 onConnectionError();
             }
@@ -434,7 +434,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
         if (view == null) {
             onUnregisteredView();
         } else {
-            if (recipient.equals(this.player)) {
+            if (recipient.equals(this.player) || someone.equals(this.player)) {
                 try {
                     view.someoneSentPrivateText(someone.getUsername(), text);
                 } catch (RemoteException e) {
@@ -457,9 +457,8 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
             onUnregisteredView();
         } else {
             try {
-                List<LeaderboardEntry> ranking = match.getPlayersFinalRanking()
-                    .stream()
-                    .map(p -> createLeaderboardEntry(p.first(), p.second())).collect(Collectors.toList());
+                List<LeaderboardEntry> ranking = match.getPlayersFinalRanking().stream()
+                        .map(p -> createLeaderboardEntry(p.first(), p.second())).toList();
                 view.matchFinished(ranking);
             } catch (RemoteException e) {
                 onConnectionError();
@@ -475,6 +474,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
      * Removes the player linked to this PlayerControllerRMI instance when there's a connection error.
      */
     private void onConnectionError() {
+        match.unsubscribeObserver(this);
         match.removePlayer(player);
         System.err.println("There has been a connection error with player: " + player.getUsername());
     }

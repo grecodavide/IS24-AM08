@@ -1,17 +1,21 @@
 package it.polimi.ingsw.gamemodel;
 
-import it.polimi.ingsw.exceptions.InvalidResourceException;
-import it.polimi.ingsw.utils.Pair;
-
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import it.polimi.ingsw.exceptions.InvalidResourceException;
+import it.polimi.ingsw.utils.Pair;
 
 /**
  * This class handles requirements involving relative positioning of cards, e.g. three red cards placed in the top right corner of each other
  */
-public class PositionRequirement extends Requirement {
+public class PositionRequirement extends Requirement implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     private Map<Pair<Integer, Integer>, Symbol> reqs;
 
     /**
@@ -74,6 +78,15 @@ public class PositionRequirement extends Requirement {
             }
         }
         return timesMet;
+    }
+
+    /**
+     * Getter for the PositionRequirement class
+     * @return the positioning requirement for the objective card to be activated
+     *
+     */
+    public Map<Pair<Integer, Integer>, Symbol> getReqs(){
+        return this.reqs;
     }
 
 }

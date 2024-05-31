@@ -18,12 +18,6 @@ import it.polimi.ingsw.utils.Pair;
  * rather values representing them (e.g. Player's username).
  */
 public interface RemoteViewInterface extends Remote {
-    /**
-     * Updates the list of players in the lobby before the start of the match
-     *
-     * @param playersUsernames list of usernames
-     */
-    void giveLobbyInfo(List<String> playersUsernames) throws RemoteException;
 
     /**
      * Notifies that the match has just started.
@@ -48,12 +42,6 @@ public interface RemoteViewInterface extends Remote {
      */
     void receiveAvailableMatches(List<AvailableMatch> availableMatchs) throws RemoteException;
 
-    /**
-     * Gives to the remote object an initial card to show it in the view.
-     *
-     * @param initialCard Initial card to give
-     * @throws RemoteException If the remote object is considered not to be reachable any more and cannot return as usual
-     */
     void giveInitialCard(InitialCard initialCard) throws RemoteException;
 
     /**
@@ -80,7 +68,7 @@ public interface RemoteViewInterface extends Remote {
      * @param side            The chosen side
      * @throws RemoteException If the remote object is considered not to be reachable any more and cannot return as usual
      */
-    void someoneSetInitialSide(String someoneUsername, Side side) throws RemoteException;
+    void someoneSetInitialSide(String someoneUsername, Side side, Map<Symbol, Integer> availableResources) throws RemoteException;
 
     /**
      * Notifies that someone (it may or may not be the receiving View instance) has drawn a pair of secret objectives.
@@ -126,7 +114,7 @@ public interface RemoteViewInterface extends Remote {
      * @param someoneUsername
      * @throws RemoteException
      */
-    void someoneJoined(String someoneUsername) throws RemoteException;
+    void someoneJoined(String someoneUsername, List<String> joinedPlayers) throws RemoteException;
 
     /**
      * @param someoneUsername

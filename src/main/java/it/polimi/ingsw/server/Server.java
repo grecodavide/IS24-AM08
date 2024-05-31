@@ -1,47 +1,26 @@
 package it.polimi.ingsw.server;
 
-import it.polimi.ingsw.controllers.PlayerControllerRMI;
-import it.polimi.ingsw.exceptions.AlreadyUsedUsernameException;
-import it.polimi.ingsw.exceptions.ChosenMatchException;
-import it.polimi.ingsw.exceptions.WrongStateException;
-import it.polimi.ingsw.gamemodel.InitialCard;
-import it.polimi.ingsw.gamemodel.Match;
-import it.polimi.ingsw.gamemodel.Objective;
-import it.polimi.ingsw.gamemodel.PlayableCard;
-import it.polimi.ingsw.network.tcp.TCPServer;
-import it.polimi.ingsw.utils.DeckCreator;
-
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
+
+import it.polimi.ingsw.controllers.PlayerControllerRMI;
+import it.polimi.ingsw.controllers.PlayerControllerRMIInterface;
+import it.polimi.ingsw.exceptions.AlreadyUsedUsernameException;
+import it.polimi.ingsw.exceptions.ChosenMatchException;
+import it.polimi.ingsw.exceptions.WrongStateException;
+import it.polimi.ingsw.gamemodel.Match;
+import it.polimi.ingsw.network.tcp.TCPServer;
+import it.polimi.ingsw.utils.AvailableMatch;
+import it.polimi.ingsw.utils.DeckCreator;
 
 public class Server extends UnicastRemoteObject implements ServerRMIInterface {
     private final Map<String, Match> matches;
 
     private final int portRMI;
     private final int portTCP;
-
-    // Cards to be used in matches
-    private static final Map<Integer, Objective> objectives = new HashMap<>();
-    private static final Map<Integer, PlayableCard> playableCards = new HashMap<>();
-    private static final Map<Integer, InitialCard> initialCards = new HashMap<>();
-
-    public static Objective getObjective(Integer id) {
-        return Server.objectives.get(id);
-    }
-
-    public static PlayableCard getPlayableCard(Integer id) {
-        return Server.playableCards.get(id);
-    }
-
-    public static InitialCard getiInitialCard(Integer id) {
-        return Server.initialCards.get(id);
-    }
 
     public Server(int portRMI, int portTCP) throws RemoteException {
         super();
@@ -53,24 +32,40 @@ public class Server extends UnicastRemoteObject implements ServerRMIInterface {
     }
 
     @Override
-    public List<String> getJoinableMatches() {
-        return matches.keySet().stream().filter(name -> !matches.get(name).isFull()).toList();
+    public List<AvailableMatch> getJoinableMatches() {
+        // List of names of matches that are not full (then joinable)
+        List<String> joinableMatches = matches.keySet().stream()
+                                        .filter(name -> !matches.get(name).isFull())
+                                        .toList();
+        List<AvailableMatch> result = new ArrayList<>();
+
+        for (String name : joinableMatches) {
+            Match match = matches.get(name);
+            int maxPlayers = match.getMaxPlayers();
+            int currentPlayers = match.getPlayers().size();
+
+            result.add(new AvailableMatch(name, maxPlayers, currentPlayers));
+        }
+
+        return result;
     }
 
     @Override
-    public PlayerControllerRMI joinMatch(String matchName, String username) throws RemoteException, ChosenMatchException, WrongStateException, AlreadyUsedUsernameException {
+    public PlayerControllerRMIInterface joinMatch(String matchName, String username) throws RemoteException, ChosenMatchException, WrongStateException, AlreadyUsedUsernameException {
         if (!matches.containsKey(matchName))
             throw new ChosenMatchException("The chosen match doesn't exist");
         if (matches.get(matchName).isFull())
             throw new ChosenMatchException("The chosen match is already full");
 
         Match chosenMatch = matches.get(matchName);
+        PlayerControllerRMI controller = new PlayerControllerRMI(username, chosenMatch);
 
-        return new PlayerControllerRMI(username, chosenMatch);
+        UnicastRemoteObject.exportObject(controller, portRMI);
+
+        return controller;
     }
 
     @Override
-    // TODO: Implement this method, synchronize it
     public void createMatch(String matchName, int maxPlayers) throws RemoteException, ChosenMatchException {
         if (matches.containsKey(matchName))
             throw new ChosenMatchException("A match with the chosen name already exists");
@@ -114,34 +109,19 @@ public class Server extends UnicastRemoteObject implements ServerRMIInterface {
     }
 
     public static void main(String[] args) throws RemoteException {
-        int portRMI = Integer.parseInt(args[0]);
-        int portTCP = Integer.parseInt(args[1]);
+        int portRMI, portTCP;
+        if (args.length < 2) {
+            portRMI = 2222;
+            portTCP = 9999;
+        } else {
+            portRMI = Integer.parseInt(args[0]);
+            portTCP = Integer.parseInt(args[1]);
+        }
 
-        Scanner scanner = new Scanner(System.in);
         Server server = new Server(portRMI, portTCP);
-        String choice;
 
         server.startRMIServer();
         server.startTCPServer();
-
-        do {
-            choice = promptAndInput("What do you want to do?\n\t0: exit\n\t1: create match\n\t2: show matches\n", scanner);
-
-            switch (choice) {
-                case "1" -> {
-                    String matchName = promptAndInput("Match name: ", scanner);
-                    int maxPlayers = Integer.parseInt(promptAndInput("Maximum number of players: ", scanner));
-
-                    try {
-                        server.createMatch(matchName, maxPlayers);
-                    } catch (ChosenMatchException e) {
-                        System.out.println(e.getMessage());
-                    }
-                }
-
-                case "2" -> server.matches.keySet().forEach(System.out::println);
-            }
-        } while (!choice.equals("0"));
     }
 
 }

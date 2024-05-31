@@ -1,175 +1,101 @@
 package it.polimi.ingsw.client.network;
 
-import java.rmi.RemoteException;
-import java.util.List;
-import java.util.Map;
 import it.polimi.ingsw.client.frontend.GraphicalView;
-import it.polimi.ingsw.gamemodel.*;
-import it.polimi.ingsw.utils.AvailableMatch;
-import it.polimi.ingsw.utils.LeaderboardEntry;
+import it.polimi.ingsw.gamemodel.DrawSource;
+import it.polimi.ingsw.gamemodel.Objective;
+import it.polimi.ingsw.gamemodel.PlayableCard;
+import it.polimi.ingsw.gamemodel.Side;
+import it.polimi.ingsw.network.messages.Message;
+import it.polimi.ingsw.network.messages.actions.*;
+import it.polimi.ingsw.network.tcp.ClientReceiver;
+import it.polimi.ingsw.network.tcp.IOHandler;
 import it.polimi.ingsw.utils.Pair;
 
+import java.io.IOException;
+import java.net.Socket;
+
 public class NetworkViewTCP extends NetworkView {
-    public NetworkViewTCP(GraphicalView graphicalView) {
-        super(graphicalView);
+    private IOHandler io;
+
+    public NetworkViewTCP(GraphicalView graphicalView, String address, Integer port) throws IOException {
+        super(graphicalView, address, port);
+        Socket socket = new Socket(address, port);
+        this.io = new IOHandler(socket);
+        new Thread(new ClientReceiver(this, socket)).start();
     }
 
-    @Override
-    public void showError(String cause) {
-
+    public void notifyError(Exception exception) {
+        this.graphicalView.notifyError(exception);
     }
 
-    @Override
-    public void giveLobbyInfo(List<String> playersUsernames) throws RemoteException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'giveLobbyInfo'");
+    public String getUsername() {
+        return this.username;
     }
 
-    @Override
-    public void matchStarted(Map<String, Color> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands,
-            Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards,
-            Pair<Symbol, Symbol> decksTopReigns) throws RemoteException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'matchStarted'");
+    public IOHandler getIO() {
+        return this.io;
     }
 
-    @Override
-    public void receiveAvailableMatches(List<AvailableMatch> availableMatchs) throws RemoteException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'receiveAvailableMatches'");
-    }
-
-    @Override
-    public void giveInitialCard(InitialCard initialCard) throws RemoteException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'giveInitialCard'");
-    }
-
-    @Override
-    public void giveSecretObjectives(Pair<Objective, Objective> secretObjectives) throws RemoteException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'giveSecretObjectives'");
-    }
-
-    @Override
-    public void someoneDrewInitialCard(String someoneUsername, InitialCard card) throws RemoteException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'someoneDrewInitialCard'");
-    }
-
-    @Override
-    public void someoneSetInitialSide(String someoneUsername, Side side) throws RemoteException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'someoneSetInitialSide'");
-    }
-
-    @Override
-    public void someoneDrewSecretObjective(String someoneUsername) throws RemoteException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'someoneDrewSecretObjective'");
-    }
-
-    @Override
-    public void someoneChoseSecretObjective(String someoneUsername) throws RemoteException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'someoneChoseSecretObjective'");
-    }
-
-    @Override
-    public void someonePlayedCard(String someoneUsername, Pair<Integer, Integer> coords, PlayableCard card, Side side, int points,
-            Map<Symbol, Integer> availableResources) throws RemoteException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'someonePlayedCard'");
-    }
-
-    @Override
-    public void someoneDrewCard(String someoneUsername, DrawSource source, PlayableCard card, PlayableCard replacementCard,
-            Symbol replacementCardReign) throws RemoteException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'someoneDrewCard'");
-    }
-
-    @Override
-    public void someoneJoined(String someoneUsername) throws RemoteException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'someoneJoined'");
-    }
-
-    @Override
-    public void someoneQuit(String someoneUsername) throws RemoteException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'someoneQuit'");
-    }
-
-    @Override
-    public void matchFinished(List<LeaderboardEntry> ranking) throws RemoteException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'matchFinished'");
-    }
-
-    @Override
-    public void someoneSentBroadcastText(String someoneUsername, String text) throws RemoteException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'someoneSentBroadcastText'");
-    }
-
-    @Override
-    public void someoneSentPrivateText(String someoneUsername, String text) throws RemoteException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'someoneSentPrivateText'");
+    private void sendMessage(Message msg) {
+        try {
+            this.io.writeMsg(msg);
+        } catch (IOException e) {
+            // TODO: handle IO
+        }
     }
 
     @Override
     public void getAvailableMatches() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getAvailableMatches'");
+        this.sendMessage(new GetAvailableMatchesMessage(this.username));
     }
 
     @Override
     public void createMatch(String matchName, Integer maxPlayers) {
-        // TODO
+        this.sendMessage(new CreateMatchMessage(this.username, matchName, maxPlayers));
     }
 
     @Override
     public void joinMatch(String matchName) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'joinMatch'");
+        this.sendMessage(new JoinMatchMessage(this.username, matchName));
     }
 
     @Override
     public void drawInitialCard() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'drawInitialCard'");
+        this.sendMessage(new DrawInitialCardMessage(this.username));
     }
 
     @Override
     public void chooseInitialCardSide(Side side) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'chooseInitialCardSide'");
+        this.sendMessage(new ChooseInitialCardSideMessage(this.username, side));
     }
 
     @Override
     public void drawSecretObjectives() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'drawSecretObjectives'");
+        this.sendMessage(new DrawSecretObjectivesMessage(this.username));
     }
 
     @Override
     public void chooseSecretObjective(Objective objective) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'chooseSecretObjective'");
+        this.sendMessage(new ChooseSecretObjectiveMessage(this.username, objective.getID()));
     }
 
     @Override
     public void playCard(Pair<Integer, Integer> coords, PlayableCard card, Side side) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'playCard'");
+        this.sendMessage(new PlayCardMessage(this.username, coords, card.getId(), side));
     }
 
     @Override
     public void drawCard(DrawSource source) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'drawCard'");
+        this.sendMessage(new DrawCardMessage(this.username, source));
     }
 
+    @Override
+    public void sendBroadcastText(String text) {
+        this.sendMessage(new SendBroadcastTextMessage(this.username, text));
+    }
+
+    @Override
+    public void sendPrivateText(String recipient, String text) {
+        this.sendMessage(new SendPrivateTextMessage(this.username, recipient, text));
+    }
 }
