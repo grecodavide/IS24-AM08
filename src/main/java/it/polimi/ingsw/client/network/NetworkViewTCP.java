@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.net.Socket;
 
 public class NetworkViewTCP extends NetworkView {
-    private IOHandler io;
+    private final IOHandler io;
 
     public NetworkViewTCP(GraphicalView graphicalView, String address, Integer port) throws IOException {
         super(graphicalView, address, port);

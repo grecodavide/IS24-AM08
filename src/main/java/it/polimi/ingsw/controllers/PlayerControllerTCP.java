@@ -1,6 +1,5 @@
 package it.polimi.ingsw.controllers;
 
-import java.util.Map;
 import it.polimi.ingsw.exceptions.HandException;
 import it.polimi.ingsw.exceptions.WrongChoiceException;
 import it.polimi.ingsw.exceptions.WrongStateException;
@@ -11,6 +10,8 @@ import it.polimi.ingsw.network.messages.errors.ErrorMessage;
 import it.polimi.ingsw.network.messages.responses.*;
 import it.polimi.ingsw.network.tcp.IOHandler;
 import it.polimi.ingsw.utils.Pair;
+
+import java.util.Map;
 
 public final class PlayerControllerTCP extends PlayerController {
     private IOHandler io;

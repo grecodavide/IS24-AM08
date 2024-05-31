@@ -18,7 +18,7 @@ import javafx.scene.layout.*;
 
 import java.io.IOException;
 
-public class MatchSceneController extends SceneController{
+public class MatchSceneController extends SceneController {
     @FXML
     TabPane matchTabs;
     @FXML

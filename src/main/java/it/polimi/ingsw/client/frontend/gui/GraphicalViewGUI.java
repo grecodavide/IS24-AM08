@@ -36,19 +36,15 @@ public class GraphicalViewGUI extends GraphicalView {
     public GraphicalViewGUI(Stage stage) {
         this.stage = stage;
     }
-    @Override
-    public void showError(String cause) {
-
-    }
 
     @Override
     public void changePlayer() {
-
+        // TODO: implement
     }
 
     @Override
-    public void giveLobbyInfo(List<String> playersUsernames) {
-
+    public void makeMove() {
+        // TODO: implement
     }
 
     @Override
@@ -83,25 +79,25 @@ public class GraphicalViewGUI extends GraphicalView {
 
     @Override
     public void giveInitialCard(InitialCard initialCard) {
-        //super.giveInitialCard(initialCard);
+        super.giveInitialCard(initialCard);
         playerTabControllers.get(username).giveInitialCard(initialCard);
     }
 
     @Override
     public void giveSecretObjectives(Pair<Objective, Objective> secretObjectives) {
-        //super.giveSecretObjectives(secretObjectives);
+        super.giveSecretObjectives(secretObjectives);
         playerTabControllers.get(username).giveSecretObjectives(secretObjectives);
     }
 
     @Override
     public void someoneDrewInitialCard(String someoneUsername, InitialCard card) {
-        //super.someoneDrewInitialCard(someoneUsername, card);
+        super.someoneDrewInitialCard(someoneUsername, card);
         playerTabControllers.get(someoneUsername).someoneDrewInitialCard(card);
     }
 
     @Override
-    public void someoneSetInitialSide(String someoneUsername, Side side) {
-        //super.someoneSetInitialSide(someoneUsername, side);
+    public void someoneSetInitialSide(String someoneUsername, Side side, Map<Symbol, Integer> availableResources) {
+        super.someoneSetInitialSide(someoneUsername, side, availableResources);
         PlayerTabController playerTabController = playerTabControllers.get(someoneUsername);
         playerTabController.removePlayerChoiceContainer();
         ShownCard card = super.clientBoards.get(someoneUsername).getPlaced().get(0);
@@ -110,14 +106,14 @@ public class GraphicalViewGUI extends GraphicalView {
 
     @Override
     public void someoneDrewSecretObjective(String someoneUsername) {
-        //super.someoneDrewSecretObjective(someoneUsername);
+        super.someoneDrewSecretObjective(someoneUsername);
         PlayerTabController playerTabController = playerTabControllers.get(someoneUsername);
         playerTabController.someoneDrewSecretObjective();
     }
 
     @Override
     public void someoneChoseSecretObjective(String someoneUsername) {
-        //super.someoneChoseSecretObjective(someoneUsername);
+        super.someoneChoseSecretObjective(someoneUsername);
         PlayerTabController playerTabController = playerTabControllers.get(someoneUsername);
         playerTabController.removePlayerChoiceContainer();
         playerTabController.setSecretObjective(null);
@@ -131,13 +127,14 @@ public class GraphicalViewGUI extends GraphicalView {
     }
 
     @Override
-    public void someoneJoined(String someoneUsername) {
-
+    public void someoneJoined(String someoneUsername, List<String> joinedPlayers) {
+        super.someoneJoined(someoneUsername, joinedPlayers);
+        // TODO: implement
     }
 
     @Override
     public void someoneQuit(String someoneUsername) {
-
+        // TODO: implement
     }
 
     @Override
@@ -157,12 +154,12 @@ public class GraphicalViewGUI extends GraphicalView {
 
     @Override
     public void someoneSentBroadcastText(String someoneUsername, String text) {
-
+        // TODO: implement
     }
 
     @Override
     public void someoneSentPrivateText(String someoneUsername, String text) {
-
+        // TODO: implement
     }
 
     @Override

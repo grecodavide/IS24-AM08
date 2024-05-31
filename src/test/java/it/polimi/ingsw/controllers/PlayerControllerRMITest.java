@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.PatternSyntaxException;
 
+import it.polimi.ingsw.exceptions.ChosenMatchException;
 import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.LeaderboardEntry;
 import org.junit.Test;
@@ -47,7 +48,7 @@ public class PlayerControllerRMITest {
         try {
             player1 = new PlayerControllerRMI("player1", match);
             player1.sendJoined();
-        } catch (AlreadyUsedUsernameException | WrongStateException e) {
+        } catch (AlreadyUsedUsernameException | WrongStateException | ChosenMatchException e) {
             fail("player1 init shouldn't throw exception: " + e.getMessage());
         }
 
@@ -58,7 +59,7 @@ public class PlayerControllerRMITest {
             fail("player 2 init should have thrown AlreadyUsedUsernameException");
         } catch (AlreadyUsedUsernameException e) {
             // this exception should be thrown
-        } catch (WrongStateException e) {
+        } catch (WrongStateException | ChosenMatchException e) {
             fail("player2 initialization shouldn't thrown this specific exception exception: " + e.getMessage());
         }
 
@@ -69,7 +70,7 @@ public class PlayerControllerRMITest {
             player1.sendJoined();
             // An exception is supposed to be thrown here
             fail("player 3 init should have thrown WrongStateException");
-        } catch (AlreadyUsedUsernameException e) {
+        } catch (AlreadyUsedUsernameException | ChosenMatchException e) {
             fail("player2 initialization shouldn't thrown this specific exception exception: " + e.getMessage());
         } catch (WrongStateException e) {
             // this exception should be thrown
@@ -491,7 +492,7 @@ public class PlayerControllerRMITest {
     }
 
     @Test
-    public void matchFinished() throws RemoteException, WrongStateException, AlreadyUsedUsernameException {
+    public void matchFinished() throws RemoteException, WrongStateException, AlreadyUsedUsernameException, ChosenMatchException {
         this.initializeTwoPlayerFinishedMatch();
         Map<String, Object> args = view1.getLastCallArguments();
         List<LeaderboardEntry> ranking = (List<LeaderboardEntry>) args.get("ranking");
@@ -593,7 +594,7 @@ public class PlayerControllerRMITest {
         }
     }
 
-    public void initializeTwoPlayerFinishedMatch() throws WrongStateException, AlreadyUsedUsernameException, RemoteException {
+    public void initializeTwoPlayerFinishedMatch() throws WrongStateException, AlreadyUsedUsernameException, RemoteException, ChosenMatchException {
         int maxPlayers = 2;
 
         GameDeck<InitialCard> initialsDeck;
@@ -694,12 +695,6 @@ public class PlayerControllerRMITest {
             args.put("objectives", secretObjectives);
         }
 
-        public void giveLobbyInfo(List<String> playersUsernames) throws RemoteException {
-            lastCall = "giveLobbyInfo";
-            args = new HashMap<>();
-            args.put("names", playersUsernames);
-        }
-
         public void matchStarted(Map<String, Color> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands, Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards, Pair<Symbol, Symbol> decksTopReigns) throws RemoteException {
             lastCall = "matchStarted";
             args = new HashMap<>();
@@ -712,7 +707,7 @@ public class PlayerControllerRMITest {
 
         @Override
         public void receiveAvailableMatches(List<AvailableMatch> availableMatchs) throws RemoteException {
-
+            // TODO: finish
         }
 
         public void someoneDrewInitialCard(String someoneUsername, InitialCard card) throws RemoteException {
@@ -722,11 +717,13 @@ public class PlayerControllerRMITest {
             args.put("card", card);
         }
 
-        public void someoneSetInitialSide(String someoneUsername, Side side) throws RemoteException {
+        @Override
+        public void someoneSetInitialSide(String someoneUsername, Side side, Map<Symbol, Integer> availableResources) throws RemoteException {
             lastCall = "someoneSetInitialSide";
             args = new HashMap<>();
             args.put("name", someoneUsername);
             args.put("side", side);
+            // TODO: finish
         }
 
         public void someoneDrewSecretObjective(String someoneUsername) throws RemoteException {
@@ -760,6 +757,11 @@ public class PlayerControllerRMITest {
             args.put("card", card);
             args.put("replCard", replacementCard);
             args.put("replReign", replacementReign);
+        }
+
+        @Override
+        public void someoneJoined(String someoneUsername, List<String> joinedPlayers) throws RemoteException {
+
         }
 
         public void someoneJoined(String someoneUsername) throws RemoteException {

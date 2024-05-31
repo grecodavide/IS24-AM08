@@ -52,9 +52,11 @@ public class ConnectionSceneController extends SceneController {
         Scene currentScene = stage.getScene();
         RadioButton TCPButton = (RadioButton) currentScene.lookup("#TCP");
         if (TCPButton.isSelected()) {
-            view.setNetworkInterface(new NetworkViewTCP(view));
+            // TODO: fix number of arguments
+            // view.setNetworkInterface(new NetworkViewTCP(view));
         } else {
-            view.setNetworkInterface(new NetworkViewRMI(view, null));
+            // TODO: fix number of arguments
+            // view.setNetworkInterface(new NetworkViewRMI(view, null));
         }
         stage.setScene(new Scene(new VBox(), 1000, 80));
     }

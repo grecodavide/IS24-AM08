@@ -1,11 +1,12 @@
 package it.polimi.ingsw.client.frontend;
 
+import it.polimi.ingsw.gamemodel.*;
+import it.polimi.ingsw.utils.Pair;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import it.polimi.ingsw.gamemodel.*;
-import it.polimi.ingsw.utils.Pair;
 
 /**
  * This class contains just elements needed to show the player's board, points, resources, hand and objectives
@@ -71,6 +72,7 @@ public class ClientBoard {
     public Integer getPoints() {
         return points;
     }
+
     public Map<Integer, ShownCard> getPlaced() {
         return placed;
     }
