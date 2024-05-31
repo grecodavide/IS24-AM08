@@ -7,6 +7,7 @@ import it.polimi.ingsw.utils.CardsManager;
 import it.polimi.ingsw.utils.Pair;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
@@ -77,7 +78,6 @@ public class PlayerTabController extends SceneController{
             res.put(s, 0);
         }
         setResources(res);
-
     }
 
     @Override
@@ -270,6 +270,10 @@ public class PlayerTabController extends SceneController{
         createCardChoiceContainer(front, back);
     }
 
+    public void removePlayerChoiceContainer() {
+        rootPane.getChildren().remove(actionContainer);
+        stateTitle.setText("");
+    }
     /**
      * Creates the container to show the choice of initials card or objectives
      * @param front First option to show
@@ -293,6 +297,32 @@ public class PlayerTabController extends SceneController{
     public void setUsername(String username) {
         this.username = username;
         playerTab.getProperties().put("Username", username);
+    }
+
+    public BoardPane getBoard() {
+        return playerBoard;
+    }
+
+    public void setSecretObjective(Objective objective) {
+        CardView secretObjective;
+        if (objective != null) {
+            secretObjective = new CardView(objective, Side.FRONT);
+        } else {
+            secretObjective = new CardView(CardsManager.getInstance().getObjectives().get(2), Side.BACK);
+        }
+        StackPane.setAlignment(secretObjective, Pos.BOTTOM_LEFT);
+        StackPane.setMargin(secretObjective, new Insets(0, 50, 50, 0));
+
+        rootPane.getChildren().add(secretObjective);
+    }
+
+    public void setStateTitle(String title) {
+        this.stateTitle.setText(title);
+    }
+    public void setHandCards(List<PlayableCard> cards) {
+        handCard1.setCard(cards.get(0), Side.FRONT);
+        handCard2.setCard(cards.get(1), Side.FRONT);
+        handCard3.setCard(cards.get(2), Side.FRONT);
     }
 
 }

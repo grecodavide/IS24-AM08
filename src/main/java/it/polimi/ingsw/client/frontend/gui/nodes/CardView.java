@@ -134,6 +134,8 @@ public class CardView extends Pane {
     private void addProperties(String imagePath) {
         super.setPrefHeight(cardHeight);
         super.setPrefWidth(cardWidth);
+        super.setMaxHeight(cardHeight);
+        super.setMaxWidth(cardWidth);
         Rectangle rect = new Rectangle(cardWidth, cardHeight);
         rect.setArcHeight(20);
         rect.setArcWidth(20);

@@ -19,61 +19,77 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.image.Image?>
 <?import it.polimi.ingsw.client.frontend.gui.nodes.PlateauPane?>
-<VBox styleClass="main-container" fx:controller="it.polimi.ingsw.client.frontend.gui.scenes.MatchSceneController" alignment="TOP_CENTER" maxHeight="1080.0" maxWidth="1920.0" minHeight="1080.0" minWidth="1920.0" prefHeight="1080.0" prefWidth="1920.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
-  <children>
-    <AnchorPane fx:id="matchPane" id="pane" maxHeight="-1.0" maxWidth="-1.0" prefHeight="372.0" prefWidth="707.0" VBox.vgrow="ALWAYS">
-      <children>
-            <TabPane fx:id="matchTabs" layoutX="-56.0" layoutY="27.0" prefHeight="900.0" prefWidth="1600.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-              <tabs>
-                  <Tab text="Table">
-                     <content>
-                         <HBox alignment="CENTER">
-                        <StackPane prefHeight="150.0" prefWidth="200.0">
-                           <children>
-                              <GridPane alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="307.0" prefWidth="683.0">
-                                 <columnConstraints>
-                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="140.0" />
-                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                 </columnConstraints>
-                                 <rowConstraints>
-                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="ALWAYS" />
-                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="ALWAYS" />
-                                 </rowConstraints>
-                                 <children>
-                                     <CardView fx:id="goldsDeck" GridPane.hgrow="NEVER" GridPane.vgrow="NEVER" />
-                                     <CardView fx:id="resourcesDeck" GridPane.hgrow="NEVER" GridPane.rowIndex="1" GridPane.vgrow="NEVER" />
-                                     <CardView fx:id="firstVisible" GridPane.columnIndex="1" GridPane.hgrow="NEVER" GridPane.vgrow="NEVER" />
-                                     <CardView fx:id="secondVisible" GridPane.columnIndex="1" GridPane.hgrow="NEVER" GridPane.rowIndex="1" GridPane.vgrow="NEVER" />
-                                     <CardView fx:id="thirdVisible" GridPane.columnIndex="2" GridPane.hgrow="NEVER" GridPane.vgrow="NEVER" />
-                                     <CardView fx:id="fourthVisible" GridPane.columnIndex="2" GridPane.hgrow="NEVER" GridPane.rowIndex="1" GridPane.vgrow="NEVER" />                         </children>
-                              </GridPane>
-                              <HBox alignment="BOTTOM_CENTER" prefHeight="100.0" prefWidth="200.0" spacing="15.0">
-                                 <children>
-                                    <CardView fx:id="firstObjective" />
-                                    <CardView fx:id="secondObjective" />
-                                 </children>
-                              </HBox>
-                           </children>
-                           <padding>
-                              <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-                           </padding>
-                        </StackPane>
-                             <PlateauPane fx:id="plateauPane" prefWidth="500" prefHeight="1000">
-                                 <ImageView fitHeight="800" fitWidth="400">
-                                     <Image url="@../images/plateau-score.png"
-                                            backgroundLoading="true"/>
-                                 </ImageView>
-                                 <HBox.margin>
-                                     <Insets top="20"/>
-                                 </HBox.margin>
-                             </PlateauPane>
-                         </HBox>
-                     </content>
-                  </Tab>
-              </tabs>
+<VBox fx:id="matchScene" styleClass="main-container"
+      fx:controller="it.polimi.ingsw.client.frontend.gui.scenes.MatchSceneController" alignment="TOP_CENTER"
+      maxHeight="1080.0" maxWidth="1920.0" minHeight="1080.0" minWidth="1920.0" prefHeight="1080.0" prefWidth="1920.0"
+      xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
+    <AnchorPane fx:id="matchPane" id="pane" maxHeight="-1.0" maxWidth="-1.0" prefHeight="372.0" prefWidth="707.0"
+                VBox.vgrow="ALWAYS">
+        <children>
+            <TabPane fx:id="matchTabs" layoutX="-56.0" layoutY="27.0" prefHeight="900.0" prefWidth="1600.0"
+                     tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                     AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                <tabs>
+                    <Tab text="Table">
+                        <content>
+                            <HBox alignment="CENTER">
+                                <StackPane prefHeight="150.0" prefWidth="200.0">
+                                    <children>
+                                        <GridPane alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity"
+                                                  minHeight="-Infinity" minWidth="-Infinity" prefHeight="307.0"
+                                                  prefWidth="683.0">
+                                            <columnConstraints>
+                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="140.0"/>
+                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+                                            </columnConstraints>
+                                            <rowConstraints>
+                                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="ALWAYS"/>
+                                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="ALWAYS"/>
+                                            </rowConstraints>
+                                            <children>
+                                                <CardView fx:id="goldsDeck" GridPane.hgrow="NEVER"
+                                                          GridPane.vgrow="NEVER"/>
+                                                <CardView fx:id="resourcesDeck" GridPane.hgrow="NEVER"
+                                                          GridPane.rowIndex="1" GridPane.vgrow="NEVER"/>
+                                                <CardView fx:id="firstVisible" GridPane.columnIndex="1"
+                                                          GridPane.hgrow="NEVER" GridPane.vgrow="NEVER"/>
+                                                <CardView fx:id="secondVisible" GridPane.columnIndex="1"
+                                                          GridPane.hgrow="NEVER" GridPane.rowIndex="1"
+                                                          GridPane.vgrow="NEVER"/>
+                                                <CardView fx:id="thirdVisible" GridPane.columnIndex="2"
+                                                          GridPane.hgrow="NEVER" GridPane.vgrow="NEVER"/>
+                                                <CardView fx:id="fourthVisible" GridPane.columnIndex="2"
+                                                          GridPane.hgrow="NEVER" GridPane.rowIndex="1"
+                                                          GridPane.vgrow="NEVER"/>
+                                            </children>
+                                        </GridPane>
+                                        <HBox alignment="BOTTOM_CENTER" prefHeight="100.0" prefWidth="200.0"
+                                              spacing="15.0">
+                                            <children>
+                                                <CardView fx:id="firstObjective"/>
+                                                <CardView fx:id="secondObjective"/>
+                                            </children>
+                                        </HBox>
+                                    </children>
+                                    <padding>
+                                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
+                                    </padding>
+                                </StackPane>
+                                <PlateauPane fx:id="plateauPane" prefWidth="500" prefHeight="1000">
+                                    <ImageView fitHeight="800" fitWidth="400">
+                                        <Image url="@../images/plateau-score.png"
+                                               backgroundLoading="true"/>
+                                    </ImageView>
+                                    <HBox.margin>
+                                        <Insets top="20"/>
+                                    </HBox.margin>
+                                </PlateauPane>
+                            </HBox>
+                        </content>
+                    </Tab>
+                </tabs>
             </TabPane>
-      </children>
+        </children>
     </AnchorPane>
-  </children>
 </VBox>
