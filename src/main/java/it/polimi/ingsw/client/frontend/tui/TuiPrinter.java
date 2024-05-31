@@ -477,9 +477,9 @@ public class TuiPrinter {
     private Pair<Integer, Integer> getNumberCoords(Pair<Integer, Integer> coord, Corner corner) {
         return switch (corner) {
             case Corner.TOP_LEFT -> new Pair<>(coord.first() - 2, coord.second() - 1);
-            case Corner.TOP_RIGHT -> new Pair<>(coord.first() + cardCols, coord.second()-1);
+            case Corner.TOP_RIGHT -> new Pair<>(coord.first() + cardCols + 1, coord.second()-1);
             case Corner.BOTTOM_LEFT -> new Pair<>(coord.first() - 2, coord.second() + cardRows);
-            case Corner.BOTTOM_RIGHT -> new Pair<>(coord.first() + cardCols, coord.second() + cardRows);
+            case Corner.BOTTOM_RIGHT -> new Pair<>(coord.first() + cardCols + 1, coord.second() + cardRows);
             default -> null;
         };
     }
