@@ -115,7 +115,7 @@ public class Player {
      */
     public void chooseInitialCardSide(Side side) throws WrongTurnException, WrongStateException {
         if (match.getCurrentPlayer().equals(this))
-            match.setInitialSide(side);
+            match.setInitialSide(side, board.getAvailableResources());
         else
             throw new WrongTurnException("Only the current player can choose the initial card side");
     }

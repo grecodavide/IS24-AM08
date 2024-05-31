@@ -1,18 +1,16 @@
 package it.polimi.ingsw.controllers;
 
-import it.polimi.ingsw.client.network.RemoteViewInterface;
-import it.polimi.ingsw.exceptions.*;
-import it.polimi.ingsw.gamemodel.*;
-import it.polimi.ingsw.utils.LeaderboardEntry;
-import it.polimi.ingsw.utils.Pair;
-
 import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
+import it.polimi.ingsw.client.network.RemoteViewInterface;
+import it.polimi.ingsw.exceptions.*;
+import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.server.Server;
+import it.polimi.ingsw.utils.LeaderboardEntry;
+import it.polimi.ingsw.utils.Pair;
 
 /**
  * Subclass of {@link PlayerController} that implements its abstract methods through RMI interactions.
@@ -286,12 +284,12 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
      * @param side    The chosen initial card side
      */
     @Override
-    public void someoneSetInitialSide(Player someone, Side side) {
+    public void someoneSetInitialSide(Player someone, Side side, Map<Symbol, Integer> availableResources) {
         if (view == null) {
             onUnregisteredView();
         } else {
             try {
-                view.someoneSetInitialSide(someone.getUsername(), side);
+                view.someoneSetInitialSide(someone.getUsername(), side, availableResources);
             } catch (RemoteException e) {
                 onConnectionError();
             }
@@ -436,7 +434,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
         if (view == null) {
             onUnregisteredView();
         } else {
-            if (recipient.equals(this.player)) {
+            if (recipient.equals(this.player) || someone.equals(this.player)) {
                 try {
                     view.someoneSentPrivateText(someone.getUsername(), text);
                 } catch (RemoteException e) {

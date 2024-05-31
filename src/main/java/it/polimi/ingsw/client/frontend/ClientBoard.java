@@ -54,8 +54,9 @@ public class ClientBoard {
         this.initialCard = card;
     }
 
-    public void placeInitial(Side side) {
+    public void placeInitial(Side side, Map<Symbol, Integer> availableResources) {
         this.placed.put(placementNumber, new ShownCard(this.initialCard, side, new Pair<>(0, 0)));
+        this.availableResources = availableResources;
         this.placementNumber++;
     }
 

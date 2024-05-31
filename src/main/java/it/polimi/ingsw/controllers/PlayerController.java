@@ -46,7 +46,7 @@ public abstract sealed class PlayerController implements MatchObserver permits P
      * @throws AlreadyUsedUsernameException if the username is already taken
      * @throws WrongStateException if the match currently does not accept new players
      */
-    public void sendJoined() throws AlreadyUsedUsernameException, WrongStateException, ChosenMatchException {
+    public void sendJoined() throws IllegalArgumentException, AlreadyUsedUsernameException, WrongStateException, ChosenMatchException {
         if (match == null) {
             throw new ChosenMatchException("The specified match does not exist");
         }
@@ -54,7 +54,7 @@ public abstract sealed class PlayerController implements MatchObserver permits P
         try {
             match.subscribeObserver(this);
             this.match.addPlayer(this.player);
-        } catch (AlreadyUsedUsernameException e) {
+        } catch (AlreadyUsedUsernameException | IllegalArgumentException e) {
             match.unsubscribeObserver(this);
             throw e;
         }

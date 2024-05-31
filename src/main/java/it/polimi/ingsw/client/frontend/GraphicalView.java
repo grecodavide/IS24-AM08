@@ -20,10 +20,15 @@ public abstract class GraphicalView {
     protected Pair<Objective, Objective> visibleObjectives;
     protected Map<DrawSource, PlayableCard> visiblePlayableCards;
     protected Pair<Symbol, Symbol> decksTopReign;
-    private boolean lastTurn = false;
+    protected boolean lastTurn = false;
     protected List<AvailableMatch> availableMatches;
     protected String username;
-    protected RequestStatus lastRequestStatus;
+    protected final LastRequest lastRequest;
+
+    public GraphicalView() {
+        this.lastRequest = new LastRequest();
+        this.lastRequest.setStatus(RequestStatus.PENDING);
+    }
 
     protected void setUsername(String username) {
         this.username = username;
@@ -35,11 +40,11 @@ public abstract class GraphicalView {
     }
 
     public void setLastRequestStatus(RequestStatus status) {
-        this.lastRequestStatus = status;
+        this.lastRequest.setStatus(status);
     }
 
     /**
-     * Displays the user an error, when received
+     * Displayes the user an error, when received
      * 
      * @param exception The thrown exception
      */
@@ -109,6 +114,7 @@ public abstract class GraphicalView {
      */
     public void chooseSecretObjective(Objective objective) {
         this.setLastRequestStatus(RequestStatus.PENDING);
+        this.clientBoards.get(this.username).setSecretObjective(objective);
         this.networkView.chooseSecretObjective(objective);
     }
 
@@ -134,37 +140,57 @@ public abstract class GraphicalView {
         this.networkView.drawCard(source);
     }
 
+
+
+    /**
+     * Method used to show the turn has changed
+     */
     public abstract void changePlayer();
 
-    private void nextPlayer(){
-        this.currentPlayer = this.players.get((this.players.indexOf(currentPlayer) + 1) % this.players.size());
+
+    /**
+     * Goes to the next turn, making sure that the current player is set and that he plays the right
+     * turn (choose initial card/objective, or make a move)
+     */
+    private void nextPlayer() {
         if (this.currentPlayer == null)
             this.currentPlayer = this.players.get(0);
         else
             this.currentPlayer = this.players.get((this.players.indexOf(currentPlayer) + 1) % this.players.size());
 
-        this.changePlayer();
 
-        this.setLastRequestStatus(RequestStatus.PENDING);
         if (this.currentPlayer.equals(this.username)) {
             if (this.clientBoards.get(this.username).getPlaced().isEmpty()) {
-                this.networkView.drawInitialCard();
+                this.drawInitialCard();
             } else if (this.clientBoards.get(this.username).getObjective() == null) {
-                this.networkView.drawSecretObjectives();
+                this.drawSecretObjectives();
             } else {
                 this.makeMove();
             }
+        } else {
+            this.changePlayer();
         }
     }
 
+
+    /**
+     * Ask the user to make a play. Must call {@link GraphicalView#playCard(Pair, PlayableCard, Side)}
+     */
     public abstract void makeMove();
 
 
-    public abstract void giveLobbyInfo(List<String> playersUsernames);
-
+    /**
+     * Starts match on the client side, setting all variables to their initial values
+     * 
+     * @param playersUsernamesAndPawns Map containing all players' pawns, indexed by their username
+     * @param playersHands Map containing all the players' hands, indexed by their username
+     * @param visibleObjectives The two objectives common to every player
+     * @param visiblePlayableCards The four cards that can be drawn, visible to everyone
+     * @param decksTopReign the reigns of the two decks' top
+     */
     public void matchStarted(Map<String, Color> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands,
             Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards,
-            Pair<Symbol, Symbol> decksTopReign){
+            Pair<Symbol, Symbol> decksTopReign) {
         this.players = new ArrayList<>();
         this.clientBoards = new HashMap<>();
         Color curr;
@@ -185,7 +211,6 @@ public abstract class GraphicalView {
                 case Color.YELLOW:
                     this.players.set(3, username);
                     break;
-
                 default:
                     break;
             }
@@ -206,7 +231,12 @@ public abstract class GraphicalView {
         this.nextPlayer();
     }
 
+
+    /**
+     * Method that shows the user that the match has started
+     */
     protected abstract void notifyMatchStarted();
+
 
     public void receiveAvailableMatches(List<AvailableMatch> availableMatches) {
         this.setLastRequestStatus(RequestStatus.SUCCESSFUL);
@@ -254,11 +284,11 @@ public abstract class GraphicalView {
      * @param someoneUsername Player who chose the initial card's side
      * @param side Chosen side
      */
-    public void someoneSetInitialSide(String someoneUsername, Side side) {
+    public void someoneSetInitialSide(String someoneUsername, Side side, Map<Symbol, Integer> availableResources) {
         if (this.username.equals(someoneUsername)) {
             this.setLastRequestStatus(RequestStatus.SUCCESSFUL);
         }
-        this.clientBoards.get(someoneUsername).placeInitial(side);
+        this.clientBoards.get(someoneUsername).placeInitial(side, availableResources);
         this.nextPlayer();
     }
 
@@ -335,6 +365,7 @@ public abstract class GraphicalView {
             this.lastTurn = true;
             this.notifyLastTurn();
         }
+        this.clientBoards.get(someoneUsername).drawCard(card);
 
         this.nextPlayer();
     }
@@ -342,7 +373,9 @@ public abstract class GraphicalView {
     /**
      * Notifies the player that this is the last turn he can play
      */
-    public abstract void notifyLastTurn();
+    public void notifyLastTurn() {
+        this.lastTurn = true;
+    }
 
 
     /**
@@ -350,7 +383,7 @@ public abstract class GraphicalView {
      * 
      * @param someoneUsername Player who joined
      */
-    public void someoneJoined(String someoneUsername) {
+    public void someoneJoined(String someoneUsername, List<String> joinedPlayers) {
         if (this.username.equals(someoneUsername)) {
             this.setLastRequestStatus(RequestStatus.SUCCESSFUL);
         }
@@ -372,6 +405,15 @@ public abstract class GraphicalView {
      */
     public abstract void matchFinished(List<LeaderboardEntry> ranking);
 
+
+
+    public void sendBroadcastText(String text) {
+        this.networkView.sendBroadcastText(text);
+    }
+
+    public void sendPrivateText(String recipient, String text) {
+        this.networkView.sendPrivateText(recipient, text);
+    }
 
     /**
      * Notifies that somoene sent a broadcast text

@@ -43,15 +43,6 @@ public final class GoldCard extends PlayableCard {
 
     
     /**
-     * Getter for the card points (without multiplier)
-     * 
-     * @return the raw points given by the card
-     */
-    public int getPoints() {
-        return this.points;
-    }
-
-    /**
      * Getter for the GoldCard class
      *
      * @return the multiplier
@@ -67,6 +58,15 @@ public final class GoldCard extends PlayableCard {
      */
     public QuantityRequirement getRequirement() {
         return this.req;
+    }
+
+    /**
+     * Getter for the GoldCard class
+     *
+     * @return points held by the card
+     */
+    public int getPoints() {
+        return this.points;
     }
 
     /**

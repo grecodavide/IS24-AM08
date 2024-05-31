@@ -1,14 +1,13 @@
 package it.polimi.ingsw.client.network;
 
+import java.rmi.RemoteException;
+import java.util.List;
+import java.util.Map;
 import it.polimi.ingsw.client.frontend.GraphicalView;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.LeaderboardEntry;
 import it.polimi.ingsw.utils.Pair;
-
-import java.rmi.RemoteException;
-import java.util.List;
-import java.util.Map;
 
 public abstract class NetworkView implements RemoteViewInterface {
     protected GraphicalView graphicalView;
@@ -105,11 +104,6 @@ public abstract class NetworkView implements RemoteViewInterface {
     }
 
     @Override
-    public void giveLobbyInfo(List<String> playersUsernames) {
-        graphicalView.giveLobbyInfo(playersUsernames);
-    }
-
-    @Override
     public void matchStarted(Map<String, Color> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands,
                              Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards,
                              Pair<Symbol, Symbol> decksTopReigns) {
@@ -132,8 +126,8 @@ public abstract class NetworkView implements RemoteViewInterface {
     }
 
     @Override
-    public void someoneSetInitialSide(String someoneUsername, Side side) {
-        graphicalView.someoneSetInitialSide(someoneUsername, side);
+    public void someoneSetInitialSide(String someoneUsername, Side side, Map<Symbol, Integer> availableResources) {
+        graphicalView.someoneSetInitialSide(someoneUsername, side, availableResources);
     }
 
     @Override
@@ -159,8 +153,8 @@ public abstract class NetworkView implements RemoteViewInterface {
     }
 
     @Override
-    public void someoneJoined(String someoneUsername) {
-        graphicalView.someoneJoined(someoneUsername);
+    public void someoneJoined(String someoneUsername, List<String> joinedPlayers) {
+        graphicalView.someoneJoined(someoneUsername, joinedPlayers);
     }
 
     @Override
@@ -182,4 +176,8 @@ public abstract class NetworkView implements RemoteViewInterface {
     public void someoneSentPrivateText(String someoneUsername, String text) {
         graphicalView.someoneSentPrivateText(someoneUsername, text);
     }
+
+    public abstract void sendBroadcastText(String text);
+
+    public abstract void sendPrivateText(String recipient, String text);
 }

@@ -1,10 +1,8 @@
 package it.polimi.ingsw.gamemodel;
 
 import java.util.*;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
 import it.polimi.ingsw.exceptions.*;
 import it.polimi.ingsw.utils.Pair;
 
@@ -563,7 +561,7 @@ public class Match {
      * @param side the side to put the initial card on
      * @throws WrongStateException if called while in a state that doesn't allow choosing the initial card side
      */
-    protected void setInitialSide(Side side) throws WrongStateException {
+    protected void setInitialSide(Side side, Map<Symbol, Integer> availableResources) throws WrongStateException {
         currentState.chooseInitialSide();
 
         try {
@@ -576,7 +574,7 @@ public class Match {
 
         // Notify observers and trigger state transition
         Player copy = new Player(currentPlayer);
-        notifyObservers(observer -> observer.someoneSetInitialSide(copy, side));
+        notifyObservers(observer -> observer.someoneSetInitialSide(copy, side, availableResources));
         currentState.transition();
     }
 

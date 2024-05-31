@@ -1,5 +1,6 @@
 package it.polimi.ingsw.controllers;
 
+import java.util.Map;
 import it.polimi.ingsw.exceptions.HandException;
 import it.polimi.ingsw.exceptions.WrongChoiceException;
 import it.polimi.ingsw.exceptions.WrongStateException;
@@ -20,7 +21,6 @@ public final class PlayerControllerTCP extends PlayerController {
             this.io = io;
         } catch (Exception e) {
             e.printStackTrace();
-            // match.removePlayer(player);
         }
     }
 
@@ -34,6 +34,7 @@ public final class PlayerControllerTCP extends PlayerController {
 
     private void connectionError() {
         match.removePlayer(player);
+        match.unsubscribeObserver(this);
     }
 
     private ErrorMessage createErrorMessage(Exception e) {
@@ -62,8 +63,8 @@ public final class PlayerControllerTCP extends PlayerController {
     }
 
     @Override
-    public void someoneSetInitialSide(Player someone, Side side) {
-        this.sendMessage(new SomeoneSetInitialSideMessage(someone.getUsername(), side));
+    public void someoneSetInitialSide(Player someone, Side side, Map<Symbol, Integer> availableResources) {
+        this.sendMessage(new SomeoneSetInitialSideMessage(someone.getUsername(), side, availableResources));
     }
 
     @Override
@@ -162,7 +163,7 @@ public final class PlayerControllerTCP extends PlayerController {
 
     @Override
     public void someoneSentPrivateText(Player someone, Player recipient, String text) {
-        if (recipient.getUsername().equals(this.player.getUsername())) {
+        if (recipient.getUsername().equals(this.player.getUsername()) || someone.getUsername().equals(this.player.getUsername())) {
             Message msg = new SomeoneSentPrivateTextMessage(someone.getUsername(), recipient.getUsername(), text);
             this.sendMessage(msg);
         }

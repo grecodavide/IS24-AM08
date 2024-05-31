@@ -1,14 +1,13 @@
 package it.polimi.ingsw.server;
 
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+import java.util.List;
 import it.polimi.ingsw.controllers.PlayerControllerRMIInterface;
 import it.polimi.ingsw.exceptions.AlreadyUsedUsernameException;
 import it.polimi.ingsw.exceptions.ChosenMatchException;
 import it.polimi.ingsw.exceptions.WrongStateException;
 import it.polimi.ingsw.utils.AvailableMatch;
-
-import java.rmi.Remote;
-import java.rmi.RemoteException;
-import java.util.List;
 
 /**
  * RMI interface used to declare all and only the methods callable on a remote Server instance implementing this

@@ -1,26 +1,19 @@
 package it.polimi.ingsw.client.network;
 
-import it.polimi.ingsw.client.frontend.GraphicalView;
-import it.polimi.ingsw.controllers.PlayerControllerRMIInterface;
-import it.polimi.ingsw.gamemodel.*;
-import it.polimi.ingsw.server.ServerRMIInterface;
-import it.polimi.ingsw.utils.AvailableMatch;
-import it.polimi.ingsw.utils.Pair;
-
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.List;
-import java.util.Map;
-
 import it.polimi.ingsw.client.frontend.GraphicalView;
 import it.polimi.ingsw.controllers.PlayerControllerRMIInterface;
-import it.polimi.ingsw.gamemodel.*;
+import it.polimi.ingsw.gamemodel.DrawSource;
+import it.polimi.ingsw.gamemodel.Objective;
+import it.polimi.ingsw.gamemodel.PlayableCard;
+import it.polimi.ingsw.gamemodel.Side;
 import it.polimi.ingsw.server.ServerRMIInterface;
 import it.polimi.ingsw.utils.AvailableMatch;
-import it.polimi.ingsw.utils.LeaderboardEntry;
 import it.polimi.ingsw.utils.Pair;
 
 public class NetworkViewRMI extends NetworkView {
@@ -71,6 +64,7 @@ public class NetworkViewRMI extends NetworkView {
     public void createMatch(String matchName, Integer maxPlayers) {
         try {
             server.createMatch(matchName, maxPlayers);
+            this.joinMatch(matchName);
         } catch (Exception e) {
             this.graphicalView.notifyError(e);
         }
@@ -132,9 +126,19 @@ public class NetworkViewRMI extends NetworkView {
 
     @Override
     public void sendBroadcastText(String text) {
+        try {
+            controller.sendBroadcastText(text);
+        } catch (Exception e) {
+            this.graphicalView.notifyError(e);
+        }
     }
 
     @Override
-    public void sendPrivateText(String someoneUsername, String text) {
+    public void sendPrivateText(String recipient, String text) {
+        try {
+            controller.sendPrivateText(recipient, text);
+        } catch (Exception e) {
+            this.graphicalView.notifyError(e);
+        }
     }
 }
