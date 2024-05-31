@@ -26,6 +26,7 @@ public class GraphicalViewTUI extends GraphicalView {
     private List<String> playersWithObjective;
     private final PlayerControls playerControls;
     private final InputHandler inputHandler;
+    private final ValidPositions validPositions;
 
     private final static String playerControlPrompt = "Type command, or 'help' for a list of available commands.";
 
@@ -38,6 +39,7 @@ public class GraphicalViewTUI extends GraphicalView {
         this.ongoing = true;
         this.playersWithObjective = new ArrayList<>();
         this.playerControls = new PlayerControls(); // starts disabled
+        this.validPositions = new ValidPositions();
 
         this.chat = new ArrayList<>();
         this.messages = new ArrayList<>();
@@ -130,37 +132,32 @@ public class GraphicalViewTUI extends GraphicalView {
     }
 
     private Pair<Integer, Integer> chooseCoords(ClientBoard board) {
-        this.inputHandler.setPrompt("Choose coordinates for card (e.g. 1,1)");
-        String userIn;
+        Map<Pair<Integer, Integer>, Pair<Integer, Corner>> valids = this.validPositions.getValidPlaces();
 
-        Integer x = null, y = null;
-        Integer splitIndex;
-        while (x == null || y == null) {
-            this.printer.clearTerminal();
+        Pair<Integer, Integer> coord = null;
+
+        this.inputHandler.setPrompt("Choose where to place card:");
+        while (coord == null) {
+            this.printer.printValidPlaces(valids);
             this.printer.printPlayerBoard(this.username, board);
 
-            this.inputHandler.setPrompt("Where do you want to place the card?");
-            userIn = this.inputHandler.askUser();
-
-            splitIndex = userIn.indexOf(",");
-            if (splitIndex != -1) {
-                try {
-                    x = Integer.valueOf(userIn.substring(0, splitIndex));
-                } catch (NumberFormatException e) {
-                    this.inputHandler.setPrompt("X coordinate is not a number! Try again.");
+            Integer position = -1;
+            try {
+                position = Integer.valueOf(this.inputHandler.askUser());
+            } catch (NumberFormatException e) {
+                this.inputHandler.setPrompt("Not a number! Try again");
+            }
+            if (position != -1) {
+                for (Pair<Integer, Integer> cmp : valids.keySet()) {
+                    if (valids.get(cmp).first().equals(position)) {
+                        coord = cmp;
+                    }
                 }
-
-                try {
-                    y = Integer.valueOf(userIn.substring(splitIndex + 1, userIn.length()));
-                } catch (NumberFormatException e) {
-                    this.inputHandler.setPrompt("Y coordinate is not a number! Try again.");
-                }
-            } else {
-                this.inputHandler.setPrompt("Not a valid format! try again.");
+                this.inputHandler.setPrompt("Not a valid number! try again");
             }
         }
 
-        return new Pair<>(x, y);
+        return coord;
     }
 
     private void parsePlayerControl() {
@@ -484,6 +481,7 @@ public class GraphicalViewTUI extends GraphicalView {
             this.giveInitialCard(initialCard);
         } else {
             this.printer.clearTerminal();
+            this.validPositions.addCard(new ShownCard(initialCard, side, new Pair<Integer, Integer>(0, 0)));
         }
     }
 
@@ -567,10 +565,11 @@ public class GraphicalViewTUI extends GraphicalView {
         PlayableCard card = this.chooseCardFromHand(board);
         Side side = this.chooseCardSide(card);
         Pair<Integer, Integer> coords = this.chooseCoords(board);
+        ShownCard shownCard = new ShownCard(card, side, coords);
 
         this.printer.clearTerminal();
         this.printer.printPlayerBoard(this.username, board);
-        this.printer.printCard(new ShownCard(card, side, coords));
+        this.printer.printCard(shownCard);
 
         this.inputHandler.setPrompt("Are you sure? (n to cancel)");
         String userIn = this.inputHandler.askUser();
@@ -587,6 +586,7 @@ public class GraphicalViewTUI extends GraphicalView {
             return;
         } else {
             this.messages.clear();
+            this.validPositions.addCard(shownCard);
         }
     }
 
