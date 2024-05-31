@@ -473,6 +473,28 @@ public class TuiPrinter {
         return max;
     }
 
+    // absolute coords
+    private Pair<Integer, Integer> getNumberCoords(Pair<Integer, Integer> coord, Corner corner) {
+        return switch (corner) {
+            case Corner.TOP_LEFT -> new Pair<>(coord.first() - 2, coord.second() - 1);
+            case Corner.TOP_RIGHT -> new Pair<>(coord.first() + cardCols, coord.second()-1);
+            case Corner.BOTTOM_LEFT -> new Pair<>(coord.first() - 2, coord.second() + cardRows);
+            case Corner.BOTTOM_RIGHT -> new Pair<>(coord.first() + cardCols, coord.second() + cardRows);
+            default -> null;
+        };
+    }
+
+    // relative coords
+    private Pair<Integer, Integer> getLinkedCoords(Pair<Integer, Integer> coord, Corner corner) {
+        return switch (corner) {
+            case Corner.TOP_LEFT -> new Pair<>(coord.first() + 1, coord.second() - 1);
+            case Corner.TOP_RIGHT -> new Pair<>(coord.first() - 1, coord.second() - 1);
+            case Corner.BOTTOM_LEFT -> new Pair<>(coord.first() + 1, coord.second() + 1);
+            case Corner.BOTTOM_RIGHT -> new Pair<>(coord.first() - 1, coord.second() + 1);
+            default -> null;
+        };
+    }
+
     //! PUBLIC METHODS //
 
     /**
@@ -1057,5 +1079,24 @@ public class TuiPrinter {
             prefix = setPosition(xCoord, ++yCoord);
         }
     }
+    
+    /**
+     * Prints indexes for available spots, during the placing card phase
+     * @param validPlaces map FROM board's coordinates where the hypotetic card would be TO a pair, 
+     * consisting of a number (the index) and the corner where future card would be linked 
+     */
+    public void printValidPlaces(Map<Pair<Integer, Integer>, Pair<Integer, Corner>> validPlaces) {
+        Corner link;
+        Pair<Integer, Integer> abs;
+        Pair<Integer, Integer> linkedCard;
+        for (Pair<Integer, Integer> coord : validPlaces.keySet()) {
+            link = validPlaces.get(coord).second();
+            linkedCard = this.getLinkedCoords(coord, link);
+            abs = this.getNumberCoords(this.getAbsoluteCoords(linkedCard), link);
 
+            System.out.print(this.setPosition(abs.first(), abs.second()) + validPlaces.get(coord).first());
+            System.out.flush();
+        }
+    }
+    
 }
