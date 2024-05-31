@@ -19,6 +19,11 @@ import javafx.scene.layout.*;
 import java.io.IOException;
 
 public class MatchSceneController extends SceneController{
+    @FXML
+    TabPane matchTabs;
+    @FXML
+    AnchorPane matchPane;
+
     public CardView goldsDeck;
     public CardView resourcesDeck;
     public CardView firstVisible;
@@ -28,10 +33,6 @@ public class MatchSceneController extends SceneController{
     public CardView firstObjective;
     public CardView secondObjective;
     public PlateauPane plateauPane;
-    @FXML
-    TabPane matchTabs;
-    @FXML
-    AnchorPane matchPane;
 
     public void initialize() {
     }
@@ -45,6 +46,7 @@ public class MatchSceneController extends SceneController{
                 throw new RuntimeException(err);
             }
         });
+
         String username;
         for (int i = 1; i < 3; i++) {
             username ="Player" + i;

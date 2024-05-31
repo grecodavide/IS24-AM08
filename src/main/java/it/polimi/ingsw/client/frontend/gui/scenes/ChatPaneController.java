@@ -2,7 +2,10 @@ package it.polimi.ingsw.client.frontend.gui.scenes;
 
 import javafx.animation.TranslateTransition;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -11,16 +14,11 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.util.Duration;
 
-import java.awt.event.MouseEvent;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 // TODO: to finish implementation
 public class ChatPaneController extends SceneController {
-    public ScrollPane chatHistoryScrollPane;
-    public VBox chatContainer;
     @FXML
     private Button sendMessageBtn;
     @FXML
@@ -32,12 +30,135 @@ public class ChatPaneController extends SceneController {
     @FXML
     private TextField chatInputText;
     @FXML
-    private MenuButton chatSelectorBar;
+    private ChoiceBox<String> chatSelector;
 
+    public ScrollPane chatHistoryScrollPane;
+    public VBox chatContainer;
+    private final Map<String, String> chatHistory = new HashMap<>();
     private boolean isVisible;
-    private Map<String, MenuItem> playersItems = new HashMap<>();
-    private MenuItem broadcastItem;
 
+    @Override
+    public void initialize() {
+        chatHistoryScrollPane.getStyleClass().clear();
+        isVisible = false;
+        chatPane.setTranslateX(460);
+        setIconStatus(false);
+
+        // Add the broadcast item as an entry in the chatSelector and set it as default item
+        chatHistory.put("broadcast", "");
+        chatSelector.getItems().add("broadcast");
+        chatSelector.getSelectionModel().select("broadcast");
+
+        // Show/hide the chat pane when the outer button is clicked
+        showChatBtn.setOnMouseClicked((mouseEvent -> {
+            isVisible = !isVisible;
+            changeVisibility();
+        }));
+
+        // Send message written in input box on send message button clicked
+        sendMessageBtn.setOnMouseClicked(mouseEvent -> {
+            String inputText = chatInputText.getText();
+            String selectedChatName = chatSelector.getSelectionModel().getSelectedItem();
+
+            if (!inputText.isBlank()) {
+                if (selectedChatName.equals("broadcast"))
+                    // TODO: send broadcast message over network
+                    confirmSubmitBroadcastMessage(inputText);
+                else
+                    // TODO: send private message over network
+                    confirmSubmitPrivateMessage(selectedChatName, inputText);
+            }
+
+            chatInputText.clear();
+        });
+
+        // Switch to chat when a chatSelector item is clicked
+        chatSelector.setOnAction(actionEvent -> {
+            String selectedChatName = chatSelector.getSelectionModel().getSelectedItem();
+            String selectedChatHistory = chatHistory.get(selectedChatName);
+
+            chatHistoryText.getChildren().clear();
+            chatHistoryText.getChildren().add(new Text(selectedChatHistory));
+        });
+    }
+
+    /**
+     * Adds a player to the chat.
+     *
+     * @param playerUsername The player's username
+     */
+    public void addPlayer(String playerUsername) {
+        chatHistory.put(playerUsername, "");
+        chatSelector.getItems().add(playerUsername);
+    }
+
+    /**
+     * Handles the receipt of a broadcast message from a user who's not the current client.
+     * For this purpose the method confirmSubmitBroadcastMessage(...) can be used.
+     *
+     * @param senderUsername The username of the player that sent the message
+     * @param message        The message sent
+     */
+    public void receiveBroadcastMessage(String senderUsername, String message) {
+        addMessage("broadcast", senderUsername, message);
+    }
+
+    /**
+     * Handles the receipt of a private message from a user who's not the current client.
+     * For this purpose the method confirmSubmitPrivateMessage(...) can be used.
+     *
+     * @param senderUsername The username of the player that sent the message
+     * @param message        The message sent
+     */
+    public void receivePrivateMessage(String senderUsername, String message) {
+        addMessage(senderUsername, senderUsername, message);
+    }
+
+    /**
+     * Handles the receipt of confirmation of successful submit of a broadcast message
+     * from this client to the server (either broadcast or private).
+     *
+     * @param message The message to be confirmed
+     */
+    public void confirmSubmitBroadcastMessage(String message) {
+        addMessage("broadcast", super.view.getUsername(), message);
+    }
+
+    /**
+     * Handles the receipt of confirmation of successful submit of a private message
+     * from this client to the server (either broadcast or private).
+     *
+     * @param message The message to be confirmed
+     */
+    public void confirmSubmitPrivateMessage(String receiverUsername, String message) {
+        addMessage(receiverUsername, super.view.getUsername(), message);
+    }
+
+    /**
+     * Utility method to add a message to the chat pane
+     *
+     * @param chatName       The chat in which to put the message
+     * @param senderUsername The sender's username
+     * @param message        Text message text content
+     */
+    private void addMessage(String chatName, String senderUsername, String message) {
+        String textMessage = senderUsername + ": " + message + "\n";
+
+        // Update the specific chat history associated to the sender
+        String updatedHistory = chatHistory.get(chatName) + textMessage;
+        chatHistory.put(chatName, updatedHistory);
+
+        // If it's the currently selected chat is this one
+        if (chatSelector.getSelectionModel().getSelectedItem().equals(chatName)) {
+            // Visually update the chat pane
+            chatHistoryText.getChildren().clear();
+            chatHistoryText.getChildren().add(new Text(updatedHistory));
+        }
+    }
+
+    /**
+     * Switches the chat pane from visible to not visible and viceversa.
+     */
     private void changeVisibility() {
         TranslateTransition tt = new TranslateTransition(Duration.millis(200), chatPane);
         if (isVisible) {
@@ -50,38 +171,10 @@ public class ChatPaneController extends SceneController {
         tt.play();
     }
 
-    @Override
-    public void initialize() {
-        chatHistoryScrollPane.getStyleClass().clear();
-        isVisible = false;
-        chatPane.setTranslateX(460);
-        setIconStatus(false);
-
-        showChatBtn.setOnMouseClicked((mouseEvent -> {
-            isVisible = !isVisible;
-            changeVisibility();
-        }));
-
-        sendMessageBtn.setOnMouseClicked(mouseEvent -> {
-            addBroadcastMessage("TestUsername", chatInputText.getText());
-        });
-
-        broadcastItem = new MenuItem("Broadcast");
-        broadcastItem.getProperties().put("history", "");
-        chatSelectorBar.getItems().add(broadcastItem);
-        broadcastItem.setOnAction(actionEvent -> {
-            chatSelectorBar.setText("Broadcast");
-            chatHistoryText.getChildren().clear();
-            chatHistoryText.getChildren().add(new Text((String)broadcastItem.getProperties().get("history")));
-        });
-        addPlayer("ciao");
-        addPlayer("ei");
-
-    }
-
     /**
-     * Change the icon of the button to open the chat
-     * @param opened if the chat is opened
+     * Changes the icon of the button to open the chat.
+     *
+     * @param opened True if the chat is opened, false otherwise
      */
     private void setIconStatus(boolean opened) {
         String path;
@@ -94,35 +187,5 @@ public class ChatPaneController extends SceneController {
         img.setFitHeight(35);
         img.setFitWidth(35);
         showChatBtn.setGraphic(img);
-    }
-
-    /**
-     * Add a player username to the chats
-     * @param playerUsername username of the player
-     */
-    public void addPlayer(String playerUsername) {
-        MenuItem newItem = new MenuItem(playerUsername);
-        playersItems.put(playerUsername, newItem);
-        newItem.getProperties().put("history", "");
-        newItem.setOnAction(actionEvent -> {
-            chatSelectorBar.setText(playerUsername);
-            chatHistoryText.getChildren().clear();
-            chatHistoryText.getChildren().add(new Text((String)newItem.getProperties().get("history")));
-        });
-        chatSelectorBar.getItems().add(newItem);
-    }
-
-    /**
-     * Add a message in the broadcast chat
-     * @param username user that sent the message
-     * @param message message sent
-     */
-    public void addBroadcastMessage(String username, String message) {
-            // Add message to the graphical chat
-            String textMessage = username + ": " + message + "\n";
-
-            String history = broadcastItem.getProperties().get("history") + textMessage;
-            broadcastItem.getProperties().put("history", history);
-            chatHistoryText.getChildren().add(new Text(textMessage));
     }
 }

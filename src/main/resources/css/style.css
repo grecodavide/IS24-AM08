@@ -240,7 +240,7 @@
 
 
 /* Style the MenuButton */
-.menu-button {
+.choice-box {
   -fx-background-color: -fx-secondary-container;
   -fx-text-fill: -fx-foreground-color;
   -fx-font-weight: bold;

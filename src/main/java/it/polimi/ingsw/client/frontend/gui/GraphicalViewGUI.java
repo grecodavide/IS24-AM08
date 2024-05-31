@@ -180,6 +180,10 @@ public class GraphicalViewGUI extends GraphicalView {
         networkView.setUsername(username);
     }
 
+    public String getUsername() {
+        return username;
+    }
+
     /**
      * Initialize the map from player to its PlayerTabController
      */
