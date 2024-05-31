@@ -1,6 +1,9 @@
 package it.polimi.ingsw.client.frontend.gui.scenes;
 
+import it.polimi.ingsw.client.frontend.gui.GraphicalApplication;
+import it.polimi.ingsw.utils.GuiUtil;
 import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 
@@ -80,5 +83,13 @@ public class WaitingSceneController extends SceneController {
         if (this.labels.containsKey(username)) {
             playersContainer.getChildren().remove(labels.get(username));
         }
+    }
+
+    public MatchSceneController showMatch() throws IOException {
+        VBox root = loadScene("/fxml/match.fxml");
+        GuiUtil.applyCSS(root, "/css/match.css");
+        Scene matchScene = new Scene(root, GraphicalApplication.screenWidth, GraphicalApplication.screenHeight);
+        stage.setScene(matchScene);
+        return (MatchSceneController) root.getProperties().get("Controller");
     }
 }
