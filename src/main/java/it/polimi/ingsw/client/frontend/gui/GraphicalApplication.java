@@ -7,6 +7,7 @@ import it.polimi.ingsw.gamemodel.Side;
 import it.polimi.ingsw.utils.GuiUtil;
 import it.polimi.ingsw.utils.Pair;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.*;

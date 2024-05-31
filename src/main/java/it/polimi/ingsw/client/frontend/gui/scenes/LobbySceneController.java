@@ -41,45 +41,16 @@ public class LobbySceneController extends SceneController {
     @Override
     public void initializePostController() {
         createButton.setOnMouseClicked((e) -> {
-            /*
             RadioButton radioButton = (RadioButton) matchNumberToggle.getSelectedToggle();
             view.setUsername(createUsername.getText());
             view.createMatch(matchName.getText(), Integer.valueOf(radioButton.getText()));
-             */
-            try {
-                this.showLobby();
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
         });
         joinButton.setOnMouseClicked((e) -> {
-            /*
             view.setUsername(joinUsername.getText());
             RadioButton radiobutton = (RadioButton) matchJoinToggle.getSelectedToggle();
-            view.joinMatch(radiobutton.getText());
-             */
-            // Show match for debugging
-            try {
-                showMatch();
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
+            view.joinMatch((String) radiobutton.getProperties().get("matchName"));
         });
         matchNumberContainer.getChildren().forEach((button) -> {((RadioButton) button).setToggleGroup(matchNumberToggle);});
-        // TODO Remove test functions
-
-        matchContainer.getChildren().clear();
-        this.addMatchCard("Morioh", 2, 4);
-        this.addMatchCard("Rome", 3, 4);
-        this.addMatchCard("Caio", 2, 3);
-        this.addMatchCard("Poid", 2, 3);
-        this.addMatchCard("Noi", 2, 3);
-        this.addMatchCard("Noi", 2, 3);
-        this.addMatchCard("Noi", 2, 3);
-        this.addMatchCard("Noi", 2, 3);
-        this.addMatchCard("Noi", 2, 3);
-        this.addMatchCard("Noi", 2, 3);
-
     }
 
     private void showMatch() throws IOException {
@@ -94,6 +65,14 @@ public class LobbySceneController extends SceneController {
         Scene matchScene = new Scene(root, GraphicalApplication.screenWidth, GraphicalApplication.screenHeight);
         stage.setScene(matchScene);
     }
+    public WaitingSceneController showWaitScene() throws IOException {
+        StackPane root = loadScene("/fxml/waiting.fxml");
+        GuiUtil.applyCSS(root, "/css/match.css");
+        WaitingSceneController controller = (WaitingSceneController) root.getProperties().get("Controller");
+        Scene matchScene = new Scene(root, GraphicalApplication.screenWidth, GraphicalApplication.screenHeight);
+        stage.setScene(matchScene);
+        return controller;
+    }
 
     /**
      * Set the matches displayed
@@ -101,6 +80,11 @@ public class LobbySceneController extends SceneController {
      */
     public void updateMatches(List<AvailableMatch> matchList) {
         matchContainer.getChildren().clear();
+        if (matchList.isEmpty()) {
+            Label emptyLabel = new Label("There is no match");
+            emptyLabel.getStyleClass().add("input-label");
+            matchContainer.getChildren().add(emptyLabel);
+        }
         for (AvailableMatch m : matchList) {
             addMatchCard(m.name(), m.currentPlayers(), m.maxPlayers());
         }
@@ -132,6 +116,7 @@ public class LobbySceneController extends SceneController {
         button.getStyleClass().add("radio");
         button.getStyleClass().add("lobby-radio");
         button.setToggleGroup(this.matchJoinToggle);
+        button.getProperties().put("matchName", name);
         //button.setText(name);
         matchCard.getChildren().add(button);
 

@@ -13,6 +13,8 @@
 
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.image.Image?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.ProgressIndicator?>
 <StackPane styleClass="main-container" id="pane"
            fx:controller="it.polimi.ingsw.client.frontend.gui.scenes.LobbySceneController"
            xmlns:fx="http://javafx.com/fxml/1">
@@ -25,7 +27,7 @@
             <Pane prefHeight="100" prefWidth="3"/>
             <ScrollPane fx:id="lobbyScrollPane" hbarPolicy="NEVER" fitToWidth="true" maxHeight="250">
                 <VBox fx:id="matchContainer" VBox.vgrow="ALWAYS" alignment="CENTER">
-                    <Label styleClass="form-label" text="No matches available" />
+                    <ProgressIndicator />
                 </VBox>
             </ScrollPane>
             <VBox>

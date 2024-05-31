@@ -5,9 +5,12 @@ import it.polimi.ingsw.client.frontend.ShownCard;
 import it.polimi.ingsw.client.frontend.gui.scenes.*;
 import it.polimi.ingsw.client.network.NetworkView;
 import it.polimi.ingsw.gamemodel.*;
+import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.LeaderboardEntry;
 import it.polimi.ingsw.utils.Pair;
+import it.polimi.ingsw.utils.RequestStatus;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
@@ -25,13 +28,17 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class GraphicalViewGUI extends GraphicalView {
-    private String username;
     private Stage stage;
     private Map<String, PlayerTabController> playerTabControllers;
     private MatchSceneController matchSceneController;
     private WaitingSceneController waitingSceneController;
+    private LobbySceneController lobbySceneController;
+    private String matchName;
+    private List<AvailableMatch> lastAvailableMatches;
+    private Integer maxPlayers;
 
     public GraphicalViewGUI(Stage stage) {
         this.stage = stage;
@@ -47,6 +54,18 @@ public class GraphicalViewGUI extends GraphicalView {
         // TODO: implement
     }
 
+    @Override
+    public void createMatch(String matchName, Integer maxPlayers) {
+        super.createMatch(matchName, maxPlayers);
+        this.matchName = matchName;
+        this.maxPlayers = maxPlayers;
+    }
+
+    @Override
+    public void joinMatch(String matchName) {
+        super.joinMatch(matchName);
+        this.matchName = matchName;
+    }
     @Override
     protected void notifyMatchStarted() {
         try {
@@ -101,7 +120,7 @@ public class GraphicalViewGUI extends GraphicalView {
         PlayerTabController playerTabController = playerTabControllers.get(someoneUsername);
         playerTabController.removePlayerChoiceContainer();
         ShownCard card = super.clientBoards.get(someoneUsername).getPlaced().get(0);
-        playerTabController.getBoard().addCard(new Pair<>(0,0), (InitialCard) card.card(), card.side());
+        playerTabController.getBoard().addCard(new Pair<>(0, 0), (InitialCard) card.card(), card.side());
     }
 
     @Override
@@ -129,7 +148,32 @@ public class GraphicalViewGUI extends GraphicalView {
     @Override
     public void someoneJoined(String someoneUsername, List<String> joinedPlayers) {
         super.someoneJoined(someoneUsername, joinedPlayers);
-        // TODO: implement
+        if (this.maxPlayers == null) {
+            int maxPlayers = lastAvailableMatches.stream()
+                    .filter((m) -> m.name().equals(matchName))
+                    .mapToInt(AvailableMatch::maxPlayers)
+                    .toArray()[0];
+        }
+        if (username.equals(someoneUsername)) {
+            Platform.runLater(() -> {
+                try {
+                    waitingSceneController = lobbySceneController.showWaitScene();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+                waitingSceneController.setCurrentPlayers(joinedPlayers.size());
+                waitingSceneController.setMatchName(matchName);
+                waitingSceneController.setMaxPlayers(maxPlayers);
+                for (String player : joinedPlayers) {
+                    waitingSceneController.addPlayer(player);
+                }
+            });
+        } else {
+            Platform.runLater(() -> {
+                waitingSceneController.addPlayer(someoneUsername);
+                waitingSceneController.setCurrentPlayers(players.size());
+            });
+        }
     }
 
     @Override
@@ -196,5 +240,21 @@ public class GraphicalViewGUI extends GraphicalView {
                 playerTabControllers.put(user, controller);
             }
         }
+    }
+
+    public void getAvailableMatches() {
+        this.setLastRequestStatus(RequestStatus.PENDING);
+        this.networkView.getAvailableMatches();
+    }
+
+    public void receiveAvailableMatches(List<AvailableMatch> availableMatches) {
+        super.receiveAvailableMatches(availableMatches);
+        lastAvailableMatches = availableMatches;
+        Platform.runLater(() -> lobbySceneController.updateMatches(availableMatches));
+    }
+
+    public void setLobbySceneController(LobbySceneController lobbySceneController) {
+        this.lobbySceneController = lobbySceneController;
+        this.getAvailableMatches();
     }
 }

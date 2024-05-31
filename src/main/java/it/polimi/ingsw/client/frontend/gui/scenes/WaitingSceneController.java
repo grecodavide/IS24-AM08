@@ -21,12 +21,7 @@ public class WaitingSceneController extends SceneController {
 
     @Override
     public void initialize() throws IOException {
-        // TODO remove test methods
-        this.setMaxPlayers(4);
-        this.setCurrentPlayers(2);
-        this.setMatchName("Morioh");
-        this.addPlayer("Oingo");
-        this.addPlayer("Boingo");
+
     }
 
     /**

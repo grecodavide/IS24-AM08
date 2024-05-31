@@ -30,9 +30,9 @@
                     <Label styleClass="title" text="Connect to a server" />
                     <Pane prefHeight="40"/>
                     <VBox>
-                        <TextField styleClass="input" promptText="Server IP" maxWidth="500"/>
+                        <TextField fx:id="serverAddress" styleClass="input" promptText="Server IP" maxWidth="500"/>
                         <Pane prefHeight="25"/>
-                        <TextField styleClass="input" promptText="Port" maxWidth="500"/>
+                        <TextField fx:id="serverPort" styleClass="input" promptText="Port" maxWidth="500"/>
                         <Pane prefHeight="25"/>
                         <HBox spacing="20">
                             <HBox spacing="10" alignment="CENTER">

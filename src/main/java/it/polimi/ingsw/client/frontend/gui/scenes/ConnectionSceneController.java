@@ -1,6 +1,7 @@
 package it.polimi.ingsw.client.frontend.gui.scenes;
 
 import it.polimi.ingsw.client.frontend.gui.GraphicalApplication;
+import it.polimi.ingsw.client.network.NetworkView;
 import it.polimi.ingsw.client.network.NetworkViewRMI;
 import it.polimi.ingsw.client.network.NetworkViewTCP;
 import it.polimi.ingsw.gamemodel.Objective;
@@ -10,6 +11,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.RadioButton;
+import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -20,6 +22,8 @@ import java.io.IOException;
  * Controller for the connection scene
  */
 public class ConnectionSceneController extends SceneController {
+    public TextField serverAddress;
+    public TextField serverPort;
     @FXML
     private RadioButton RMIButton;
     @FXML
@@ -36,11 +40,7 @@ public class ConnectionSceneController extends SceneController {
         TCPButton.setSelected(true);
         // Add callback for the button
         connectButton.setOnAction(event -> {
-            try {
-                this.showLobby();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            connect();
         });
     }
 
@@ -50,28 +50,38 @@ public class ConnectionSceneController extends SceneController {
     private void connect() {
         // TODO Define things better
         Scene currentScene = stage.getScene();
-        RadioButton TCPButton = (RadioButton) currentScene.lookup("#TCP");
-        if (TCPButton.isSelected()) {
-            // TODO: fix number of arguments
-            // view.setNetworkInterface(new NetworkViewTCP(view));
-        } else {
-            // TODO: fix number of arguments
-            // view.setNetworkInterface(new NetworkViewRMI(view, null));
-        }
-        stage.setScene(new Scene(new VBox(), 1000, 80));
-    }
+        NetworkView networkHandler = null;
 
-    private void showMatch() throws IOException {
-        VBox root = loadScene("/fxml/match.fxml");
-        GuiUtil.applyCSS(root, "/css/match.css");
-        Scene matchScene = new Scene(root, GraphicalApplication.screenWidth, GraphicalApplication.screenHeight);
-        stage.setScene(matchScene);
+        if (TCPButton.isSelected()) {
+            try {
+                networkHandler = new NetworkViewTCP(view, serverAddress.getText(), Integer.valueOf(serverPort.getText()));
+                view.setNetworkInterface(networkHandler);
+            } catch (Exception e) {
+                // TODO Handle connection error
+                System.err.println(e);
+            }
+        } else {
+            try {
+                networkHandler = new NetworkViewRMI(view, serverAddress.getText(), Integer.parseInt(serverPort.getText()));
+                view.setNetworkInterface(networkHandler);
+            } catch (Exception e) {
+                // TODO Handle connection error
+                System.err.println(e);
+            }
+        }
+        try {
+            showLobby();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void showLobby() throws IOException {
         StackPane root = this.loadScene("/fxml/lobby.fxml");
         GuiUtil.applyCSS(root, "/css/style.css");
         Scene lobbyScene = new Scene(root, GraphicalApplication.screenWidth, GraphicalApplication.screenHeight);
+        LobbySceneController controller = (LobbySceneController) root.getProperties().get("Controller");
+        view.setLobbySceneController(controller);
         stage.setScene(lobbyScene);
     }
 }
