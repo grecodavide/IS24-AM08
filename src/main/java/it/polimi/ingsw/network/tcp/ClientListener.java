@@ -136,9 +136,7 @@ public class ClientListener extends Thread {
                 }
             } catch (JsonParseException | ClassNotFoundException e) {
                 // message is not correctly formatted, ignore
-            } catch (ChosenMatchException | WrongStateException e) {
-                this.sendError(e.getMessage(), e);
-            } catch (AlreadyUsedUsernameException e) {
+            } catch (ChosenMatchException | WrongStateException | AlreadyUsedUsernameException | IllegalArgumentException e) {
                 this.sendError(e.getMessage(), e);
             }
         }
@@ -156,7 +154,7 @@ public class ClientListener extends Thread {
      * @throws ChosenMatchException If the match is does not exist or is not valid
      */
     private void createPlayerController(String username, Match match)
-            throws AlreadyUsedUsernameException, WrongStateException, ChosenMatchException {
+            throws AlreadyUsedUsernameException, IllegalArgumentException, WrongStateException, ChosenMatchException {
         this.playerController = new PlayerControllerTCP(username, match, this.io);
         this.playerController.sendJoined();
     }

@@ -442,12 +442,7 @@ public class GraphicalViewTUI extends GraphicalView {
     public void someoneJoined(String someoneUsername, List<String> joinedPlayers) {
         super.someoneJoined(someoneUsername, joinedPlayers);
         this.printer.clearTerminal();
-        if (!this.username.equals(someoneUsername)) {
-            this.printer.printCenteredMessage(someoneUsername + " joined the match!", 1);
-        } else {
-            this.printer.clearTerminal();
-            this.printer.printCenteredMessage("Waiting for other players to join!", 0);
-        }
+        this.printer.printWelcomeScreen();
         this.messages.add("Joined players:");
         this.messages.addAll(joinedPlayers);
         this.printer.printMessage(this.messages);
@@ -539,7 +534,8 @@ public class GraphicalViewTUI extends GraphicalView {
                 this.printer.printCenteredMessage(this.currentPlayer + " is choosing secret objective!", 0);
                 this.printer.printPrompt("");
             } else {
-                this.printer.printPrompt(playerControlPrompt);
+                this.inputHandler.setPrompt(playerControlPrompt);
+                this.inputHandler.showPrompt();
                 this.playerControls.enable();
             }
         }).start();
