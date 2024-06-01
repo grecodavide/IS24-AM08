@@ -39,6 +39,7 @@ public class GraphicalViewGUI extends GraphicalView {
     private String matchName;
     private List<AvailableMatch> lastAvailableMatches;
     private Integer maxPlayers;
+    int matchState = 0;
 
     public GraphicalViewGUI(Stage stage) {
         this.stage = stage;
@@ -56,6 +57,7 @@ public class GraphicalViewGUI extends GraphicalView {
 
     @Override
     public void createMatch(String matchName, Integer maxPlayers) {
+        matchState = 1;
         super.createMatch(matchName, maxPlayers);
         this.matchName = matchName;
         this.maxPlayers = maxPlayers;
@@ -63,43 +65,51 @@ public class GraphicalViewGUI extends GraphicalView {
 
     @Override
     public void joinMatch(String matchName) {
+        matchState = 1;
         super.joinMatch(matchName);
         this.matchName = matchName;
     }
     @Override
     protected void notifyMatchStarted() {
-        try {
-            matchSceneController = waitingSceneController.showMatch();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        // Set visible objectives
-        matchSceneController.setObjectives(super.visibleObjectives);
-        // Set visible draw sources
-        super.visiblePlayableCards.forEach((drawSource, playableCard) -> {
-            matchSceneController.setDrawSource(drawSource, playableCard, playableCard.getReign());
-        });
-        matchSceneController.setDrawSource(DrawSource.GOLDS_DECK, null, super.decksTopReign.first());
-        matchSceneController.setDrawSource(DrawSource.RESOURCES_DECK, null, super.decksTopReign.second());
-
-        // Create players tabs, assign colors and their hands
-        int n = 0;
-        for (String p : super.players) {
+        matchState = 2;
+        Platform.runLater(() -> {
             try {
-                PlayerTabController controller = matchSceneController.addPlayerTab(p, Color.values()[n]);
-                playerTabControllers.put(p, controller);
-                controller.setHandCards(super.clientBoards.get(p).getHand());
+                matchSceneController = waitingSceneController.showMatch();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            n++;
-        }
+            // Set visible objectives
+            matchSceneController.setObjectives(super.visibleObjectives);
+            // Set visible draw sources
+            super.visiblePlayableCards.forEach((drawSource, playableCard) -> {
+                System.out.println(drawSource + ": " + playableCard.getId());
+                matchSceneController.setDrawSource(drawSource, playableCard, playableCard.getReign());
+            });
+            matchSceneController.setDrawSource(DrawSource.GOLDS_DECK, null, super.decksTopReign.first());
+            matchSceneController.setDrawSource(DrawSource.RESOURCES_DECK, null, super.decksTopReign.second());
+
+            // Create players tabs, assign colors and their hands
+            int n = 0;
+            playerTabControllers = new HashMap<>();
+            for (String p : super.players) {
+                try {
+                    PlayerTabController controller = matchSceneController.addPlayerTab(p, Color.values()[n]);
+                    playerTabControllers.put(p, controller);
+                    controller.setHandCards(super.clientBoards.get(p).getHand());
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                n++;
+            }
+        });
     }
 
     @Override
     public void giveInitialCard(InitialCard initialCard) {
         super.giveInitialCard(initialCard);
-        playerTabControllers.get(username).giveInitialCard(initialCard);
+        Platform.runLater(() -> {
+            playerTabControllers.get(username).giveInitialCard(initialCard);
+        });
     }
 
     @Override
@@ -111,7 +121,7 @@ public class GraphicalViewGUI extends GraphicalView {
     @Override
     public void someoneDrewInitialCard(String someoneUsername, InitialCard card) {
         super.someoneDrewInitialCard(someoneUsername, card);
-        playerTabControllers.get(someoneUsername).someoneDrewInitialCard(card);
+        Platform.runLater(() -> playerTabControllers.get(someoneUsername).someoneDrewInitialCard(card));
     }
 
     @Override
@@ -147,9 +157,12 @@ public class GraphicalViewGUI extends GraphicalView {
 
     @Override
     public void someoneJoined(String someoneUsername, List<String> joinedPlayers) {
+        if (matchState > 1) {
+            return;
+        }
         super.someoneJoined(someoneUsername, joinedPlayers);
         if (this.maxPlayers == null) {
-            int maxPlayers = lastAvailableMatches.stream()
+            maxPlayers = lastAvailableMatches.stream()
                     .filter((m) -> m.name().equals(matchName))
                     .mapToInt(AvailableMatch::maxPlayers)
                     .toArray()[0];
@@ -171,7 +184,7 @@ public class GraphicalViewGUI extends GraphicalView {
         } else {
             Platform.runLater(() -> {
                 waitingSceneController.addPlayer(someoneUsername);
-                waitingSceneController.setCurrentPlayers(players.size());
+                waitingSceneController.setCurrentPlayers(joinedPlayers.size());
             });
         }
     }

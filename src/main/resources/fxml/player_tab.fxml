@@ -19,7 +19,7 @@
             <BoardPane fx:id="playerBoard" styleClass="playerboard" prefWidth="7960" prefHeight="5280" />
         </ScrollPane>
         <VBox StackPane.alignment="TOP_LEFT" maxHeight="-Infinity" minHeight="-Infinity">
-            <Label fx:id="pointsCounter" text="Points: 10" textAlignment="CENTER">
+            <Label fx:id="pointsCounter" text="Points: 0" textAlignment="CENTER">
             </Label>
             <HBox fx:id="resourcesCounter">
             </HBox>

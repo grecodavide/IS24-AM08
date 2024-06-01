@@ -47,23 +47,6 @@ public class MatchSceneController extends SceneController {
             }
         });
 
-        String username;
-        for (int i = 1; i < 3; i++) {
-            username ="Player" + i;
-            FXMLLoader loader = GuiUtil.getLoader("/fxml/player_tab.fxml");
-            ObservableMap<String, Object> namespace = loader.getNamespace();
-            Tab t = loader.load();
-            setControllerAttributes(loader);
-            t.setText(username);
-            matchTabs.getTabs().add(t);
-            PlayerTabController controller = loader.getController();
-            controller.setUsername(username);
-            t.getProperties().put("Controller", loader.getController());
-            plateauPane.setColor(username, Color.values()[i]);
-            //BoardPane playerBoard = (HBox chatPane = this.loadScene("/fxml/chat.fxml");
-            //playerBoard.setId(username + "-board");
-        }
-
         // Add the chat
         HBox chatPane = this.loadScene("/fxml/chat.fxml");
         matchPane.getChildren().add(chatPane);

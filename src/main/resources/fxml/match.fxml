@@ -54,10 +54,10 @@
                                                           GridPane.rowIndex="1" GridPane.vgrow="NEVER"/>
                                                 <CardView fx:id="firstVisible" GridPane.columnIndex="1"
                                                           GridPane.hgrow="NEVER" GridPane.vgrow="NEVER"/>
-                                                <CardView fx:id="secondVisible" GridPane.columnIndex="1"
-                                                          GridPane.hgrow="NEVER" GridPane.rowIndex="1"
+                                                <CardView fx:id="secondVisible" GridPane.columnIndex="2"
+                                                          GridPane.hgrow="NEVER"
                                                           GridPane.vgrow="NEVER"/>
-                                                <CardView fx:id="thirdVisible" GridPane.columnIndex="2"
+                                                <CardView fx:id="thirdVisible" GridPane.columnIndex="1"  GridPane.rowIndex="1"
                                                           GridPane.hgrow="NEVER" GridPane.vgrow="NEVER"/>
                                                 <CardView fx:id="fourthVisible" GridPane.columnIndex="2"
                                                           GridPane.hgrow="NEVER" GridPane.rowIndex="1"
@@ -70,6 +70,9 @@
                                                 <CardView fx:id="firstObjective"/>
                                                 <CardView fx:id="secondObjective"/>
                                             </children>
+                                            <StackPane.margin>
+                                                <Insets bottom="60" />
+                                            </StackPane.margin>
                                         </HBox>
                                     </children>
                                     <padding>
