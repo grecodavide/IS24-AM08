@@ -332,3 +332,7 @@
     -fx-background-color: #70BB77;
     -fx-text-fill: #003D20;
 }
+
+.medium-text {
+    -fx-font-family: 'Cyntho Next Medium';
+}

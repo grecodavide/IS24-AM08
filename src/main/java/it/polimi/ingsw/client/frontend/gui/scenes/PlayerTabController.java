@@ -54,25 +54,6 @@ public class PlayerTabController extends SceneController{
     public void initialize() {
         scroll.getStyleClass().clear();
 
-        handCard1.setCard(CardsManager.getInstance().getPlayableCards().get(45), Side.FRONT);
-        handCard2.setOnMouseClicked((e) -> {
-            if (e.getButton() == MouseButton.PRIMARY) {
-                this.testBoard();
-            } else {
-                this.giveInitialCard(CardsManager.getInstance().getInitialCards().get(2));
-            }
-        });
-        handCard3.setOnMouseClicked((e) -> {
-            if (e.getButton() == MouseButton.SECONDARY) {
-                this.someoneDrewSecretObjective();
-            } else {
-                this.giveSecretObjectives(new Pair<>(CardsManager.getInstance().getObjectives().get(2), CardsManager.getInstance().getObjectives().get(12)));
-            }
-        });
-        initializeHandCard(handCard1);
-        initializeHandCard(handCard2);
-        initializeHandCard(handCard3);
-
         HashMap<Symbol, Integer> res = new HashMap<>();
         for (Symbol s : Symbol.getBasicResources()) {
             res.put(s, 0);
@@ -82,15 +63,9 @@ public class PlayerTabController extends SceneController{
 
     @Override
     public void initializePostController() {
-    }
-
-    public void testBoard() {
-        for (int i=0; i<5; i++) {
-            playerBoard.addCard(new Pair<>(i, i), CardsManager.getInstance().getResourceCards().get(i+1), Side.FRONT);
-        }
-        for (int i = 1; i < 5; i++) {
-            playerBoard.addCard(new Pair<>(i, -i), CardsManager.getInstance().getResourceCards().get(i+1), Side.FRONT);
-        }
+        initializeHandCard(handCard1);
+        initializeHandCard(handCard2);
+        initializeHandCard(handCard3);
     }
 
     /**
@@ -208,6 +183,8 @@ public class PlayerTabController extends SceneController{
             event.setDropCompleted(true);
             playerBoard.addCard(pcoords, card,side);
             this.removeDragAreas();
+            // Play the card
+            view.playCard(pcoords, card, side);
             event.consume();
         });
 
@@ -240,7 +217,10 @@ public class PlayerTabController extends SceneController{
         CardView first = new CardView(objectives.first(), Side.FRONT);
         CardView second = new CardView(objectives.second(), Side.FRONT);
         createCardChoiceContainer(first, second);
-        // TODO define what to do on mouse click
+        first.setCursor(Cursor.HAND);
+        second.setCursor(Cursor.HAND);
+        first.setOnMouseClicked((mouseEvent) -> view.chooseSecretObjective(objectives.first()));
+        second.setOnMouseClicked((mouseEvent -> view.chooseSecretObjective(objectives.second())));
     }
 
     public void someoneDrewSecretObjective() {
@@ -259,7 +239,11 @@ public class PlayerTabController extends SceneController{
         // TODO define what to do on mouse click
         front.setCursor(Cursor.HAND);
         front.setOnMouseClicked((e) -> {
-
+            view.chooseInitialCardSide(Side.FRONT);
+        });
+        back.setCursor(Cursor.HAND);
+        back.setOnMouseClicked((e) -> {
+            view.chooseInitialCardSide(Side.BACK);
         });
     }
 
@@ -323,6 +307,14 @@ public class PlayerTabController extends SceneController{
         handCard1.setCard(cards.get(0), Side.FRONT);
         handCard2.setCard(cards.get(1), Side.FRONT);
         handCard3.setCard(cards.get(2), Side.FRONT);
+    }
+
+    public void setCurrentPlayer(boolean current) {
+        if (current) {
+            playerTab.getStyleClass().add("medium-text");
+        } else {
+            playerTab.getStyleClass().remove("medium-text");
+        }
     }
 
 }

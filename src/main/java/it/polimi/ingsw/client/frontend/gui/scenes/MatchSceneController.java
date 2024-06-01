@@ -14,11 +14,16 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MatchSceneController extends SceneController {
+    public Tab tableTab;
     @FXML
     TabPane matchTabs;
     @FXML
@@ -33,6 +38,7 @@ public class MatchSceneController extends SceneController {
     public CardView firstObjective;
     public CardView secondObjective;
     public PlateauPane plateauPane;
+    Map<String, Tab> tabs = new HashMap<>();
 
     public void initialize() {
     }
@@ -59,6 +65,10 @@ public class MatchSceneController extends SceneController {
         setControllerAttributes(loader);
         // Add the tab
         t.setText(username);
+        ImageView pawnImage = new ImageView(new Image(GuiUtil.getPawnImagePath(color)));
+        pawnImage.setFitWidth(35);
+        pawnImage.setFitHeight(35);
+        t.setGraphic(pawnImage);
         matchTabs.getTabs().add(t);
         // Add properties to the controller
         PlayerTabController controller = loader.getController();
@@ -66,6 +76,7 @@ public class MatchSceneController extends SceneController {
         t.getProperties().put("Controller", controller);
         // Add colored pawn
         plateauPane.setColor(username, color);
+        tabs.put(username, t);
         return controller;
     }
 
@@ -110,5 +121,16 @@ public class MatchSceneController extends SceneController {
         GuiUtil.applyCSS(root, "/css/style.css");
         stage.setScene(matchScene);
         return (RankingSceneController) root.getProperties().get("Controller");
+    }
+
+    /**
+     * Force the focus on a player's tab
+     * @param username username of the player
+     */
+    public void setFocus(String username) {
+        matchTabs.getSelectionModel().select(tabs.get(username));
+    }
+    public void setFocusToBoard() {
+        matchTabs.getSelectionModel().select(tableTab);
     }
 }

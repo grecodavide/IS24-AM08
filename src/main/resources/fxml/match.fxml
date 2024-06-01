@@ -30,7 +30,7 @@
                      tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
                      AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                 <tabs>
-                    <Tab text="Table">
+                    <Tab text="Table" fx:id="tableTab">
                         <content>
                             <HBox alignment="CENTER">
                                 <StackPane prefHeight="150.0" prefWidth="200.0">

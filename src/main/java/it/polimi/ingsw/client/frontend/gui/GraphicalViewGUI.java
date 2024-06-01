@@ -1,6 +1,7 @@
 package it.polimi.ingsw.client.frontend.gui;
 
 import it.polimi.ingsw.client.frontend.GraphicalView;
+import it.polimi.ingsw.client.frontend.MatchStatus;
 import it.polimi.ingsw.client.frontend.ShownCard;
 import it.polimi.ingsw.client.frontend.gui.scenes.*;
 import it.polimi.ingsw.client.network.NetworkView;
@@ -32,14 +33,20 @@ import java.util.Objects;
 
 public class GraphicalViewGUI extends GraphicalView {
     private Stage stage;
+    // Controllers
     private Map<String, PlayerTabController> playerTabControllers;
     private MatchSceneController matchSceneController;
     private WaitingSceneController waitingSceneController;
     private LobbySceneController lobbySceneController;
+    private RankingSceneController rankingSceneController;
+
+    // Match state management
+    MatchStatus matchState = MatchStatus.LOBBY;
+
+    // Temporary vars
     private String matchName;
     private List<AvailableMatch> lastAvailableMatches;
     private Integer maxPlayers;
-    int matchState = 0;
 
     public GraphicalViewGUI(Stage stage) {
         this.stage = stage;
@@ -47,7 +54,10 @@ public class GraphicalViewGUI extends GraphicalView {
 
     @Override
     public void changePlayer() {
-        // TODO: implement
+        Platform.runLater(() -> {
+            playerTabControllers.keySet()
+                    .forEach((s) -> playerTabControllers.get(s).setCurrentPlayer(s.equals(currentPlayer)));
+        });
     }
 
     @Override
@@ -57,7 +67,6 @@ public class GraphicalViewGUI extends GraphicalView {
 
     @Override
     public void createMatch(String matchName, Integer maxPlayers) {
-        matchState = 1;
         super.createMatch(matchName, maxPlayers);
         this.matchName = matchName;
         this.maxPlayers = maxPlayers;
@@ -65,13 +74,12 @@ public class GraphicalViewGUI extends GraphicalView {
 
     @Override
     public void joinMatch(String matchName) {
-        matchState = 1;
         super.joinMatch(matchName);
         this.matchName = matchName;
     }
     @Override
     protected void notifyMatchStarted() {
-        matchState = 2;
+        matchState = MatchStatus.MATCH_STATE;
         Platform.runLater(() -> {
             try {
                 matchSceneController = waitingSceneController.showMatch();
@@ -109,13 +117,17 @@ public class GraphicalViewGUI extends GraphicalView {
         super.giveInitialCard(initialCard);
         Platform.runLater(() -> {
             playerTabControllers.get(username).giveInitialCard(initialCard);
+            matchSceneController.setFocus(username);
         });
     }
 
     @Override
     public void giveSecretObjectives(Pair<Objective, Objective> secretObjectives) {
         super.giveSecretObjectives(secretObjectives);
-        playerTabControllers.get(username).giveSecretObjectives(secretObjectives);
+        Platform.runLater(() -> {
+            playerTabControllers.get(username).giveSecretObjectives(secretObjectives);
+            matchSceneController.setFocus(username);
+        });
     }
 
     @Override
@@ -127,37 +139,45 @@ public class GraphicalViewGUI extends GraphicalView {
     @Override
     public void someoneSetInitialSide(String someoneUsername, Side side, Map<Symbol, Integer> availableResources) {
         super.someoneSetInitialSide(someoneUsername, side, availableResources);
-        PlayerTabController playerTabController = playerTabControllers.get(someoneUsername);
-        playerTabController.removePlayerChoiceContainer();
-        ShownCard card = super.clientBoards.get(someoneUsername).getPlaced().get(0);
-        playerTabController.getBoard().addCard(new Pair<>(0, 0), (InitialCard) card.card(), card.side());
+        Platform.runLater(() -> {
+            PlayerTabController playerTabController = playerTabControllers.get(someoneUsername);
+            playerTabController.removePlayerChoiceContainer();
+            ShownCard card = super.clientBoards.get(someoneUsername).getPlaced().get(0);
+            playerTabController.getBoard().addCard(new Pair<>(0, 0), (InitialCard) card.card(), card.side());
+        });
     }
 
     @Override
     public void someoneDrewSecretObjective(String someoneUsername) {
         super.someoneDrewSecretObjective(someoneUsername);
         PlayerTabController playerTabController = playerTabControllers.get(someoneUsername);
-        playerTabController.someoneDrewSecretObjective();
+        Platform.runLater(playerTabController::someoneDrewSecretObjective);
     }
 
     @Override
     public void someoneChoseSecretObjective(String someoneUsername) {
         super.someoneChoseSecretObjective(someoneUsername);
-        PlayerTabController playerTabController = playerTabControllers.get(someoneUsername);
-        playerTabController.removePlayerChoiceContainer();
-        playerTabController.setSecretObjective(null);
+        Platform.runLater(() -> {
+            PlayerTabController playerTabController = playerTabControllers.get(someoneUsername);
+            playerTabController.removePlayerChoiceContainer();
+            if (someoneUsername.equals(username)) {
+                playerTabController.setSecretObjective(clientBoards.get(username).getObjective());
+            } else {
+                playerTabController.setSecretObjective(null);
+            }
+        });
     }
 
     @Override
     public void notifyLastTurn() {
         for (PlayerTabController t : playerTabControllers.values()) {
-            t.setStateTitle("Last turn, play carefully!");
+            Platform.runLater(() -> t.setStateTitle("Last turn, play carefully!"));
         }
     }
 
     @Override
     public void someoneJoined(String someoneUsername, List<String> joinedPlayers) {
-        if (matchState > 1) {
+        if (!matchState.equals(MatchStatus.WAIT_STATE) && !matchState.equals(MatchStatus.LOBBY)) {
             return;
         }
         super.someoneJoined(someoneUsername, joinedPlayers);
@@ -168,6 +188,7 @@ public class GraphicalViewGUI extends GraphicalView {
                     .toArray()[0];
         }
         if (username.equals(someoneUsername)) {
+            matchState = MatchStatus.WAIT_STATE;
             Platform.runLater(() -> {
                 try {
                     waitingSceneController = lobbySceneController.showWaitScene();
@@ -197,7 +218,7 @@ public class GraphicalViewGUI extends GraphicalView {
     @Override
     public void matchFinished(List<LeaderboardEntry> ranking) {
         try {
-            RankingSceneController rankingSceneController = matchSceneController.showRankingScene();
+            rankingSceneController = matchSceneController.showRankingScene();
             ranking.forEach((entry) -> {
                 if (entry.username().equals(this.username)) {
                     rankingSceneController.setVictory(entry.winner());
@@ -236,23 +257,6 @@ public class GraphicalViewGUI extends GraphicalView {
 
     public String getUsername() {
         return username;
-    }
-
-    /**
-     * Initialize the map from player to its PlayerTabController
-     */
-    public void initializeSceneControllers() {
-        matchSceneController = (MatchSceneController) stage.getScene().lookup("#matchScene").getProperties().get("Controller");
-        playerTabControllers = new HashMap<>();
-        TabPane tabs = (TabPane) stage.getScene().lookup("#matchTabs");
-        if (tabs == null) return;
-        for (Tab tab : tabs.getTabs()) {
-            String user = (String) tab.getProperties().get("Username");
-            if (user != null) {
-                PlayerTabController controller = (PlayerTabController) tab.getProperties().get("Controller");
-                playerTabControllers.put(user, controller);
-            }
-        }
     }
 
     public void getAvailableMatches() {

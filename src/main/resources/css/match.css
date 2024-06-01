@@ -1,7 +1,7 @@
 @import "style.css";
 
 .tab-header-area .tab-header-background {
-        -fx-font-size: 30px;
+        -fx-font-size: 40px;
         -fx-background-image: url("../images/secondary-bgup.png");
         -fx-background-repeat: repeat;
         -fx-background-position: center center;
