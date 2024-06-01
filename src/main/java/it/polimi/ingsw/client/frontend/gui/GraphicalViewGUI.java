@@ -49,7 +49,7 @@ public class GraphicalViewGUI extends GraphicalView {
 
     @Override
     public void makeMove() {
-        // TODO: implement
+        matchSceneController.setFocus(username);
     }
 
     @Override
@@ -251,11 +251,32 @@ public class GraphicalViewGUI extends GraphicalView {
     @Override
     public void someonePlayedCard(String someoneUsername, Pair<Integer, Integer> coords, PlayableCard card, Side side, int points, Map<Symbol, Integer> availableResources) {
         super.someonePlayedCard(someoneUsername, coords, card, side, points, availableResources);
-        PlayerTabController controller = playerTabControllers.get(someoneUsername);
-        controller.placeCard(coords, card, side);
-        controller.setPoints(points);
-        matchSceneController.setPlateauPoints(someoneUsername, points);
-        controller.setResources(availableResources);
+        Platform.runLater(() -> {
+            PlayerTabController controller = playerTabControllers.get(someoneUsername);
+            controller.placeCard(coords, card, side);
+            controller.setPoints(points);
+            matchSceneController.setPlateauPoints(someoneUsername, points);
+            controller.setHandCards(clientBoards.get(someoneUsername).getHand());
+            controller.setResources(availableResources);
+            if (someoneUsername.equals(username)) {
+                matchSceneController.setFocusToTable();
+            }
+        });
+    }
+
+    @Override
+    public void someoneDrewCard(String someoneUsername, DrawSource source, PlayableCard card, PlayableCard replacementCard,
+                                Symbol replacementCardReign) {
+        super.someoneDrewCard(someoneUsername, source, card, replacementCard, replacementCardReign);
+        Platform.runLater(() -> {
+            PlayerTabController tab = playerTabControllers.get(someoneUsername);
+            tab.setHandCards(clientBoards.get(someoneUsername).getHand());
+            matchSceneController.setDrawSource(source, replacementCard, replacementCardReign);
+        });
+    }
+    @Override
+    public void notifyError(Exception exception) {
+        System.out.println(exception.getMessage());
     }
 
     public void setUsername(String username) {

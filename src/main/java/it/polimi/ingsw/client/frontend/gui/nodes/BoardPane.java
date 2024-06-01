@@ -47,6 +47,8 @@ public class BoardPane extends Pane {
     public void addCard(Pair<Integer, Integer> position, InitialCard card, Side side) {
         CardView c = new CardView(card, side);
         displayCard(position, c);
+        takenSpots.add(position);
+        c.getProperties().put("gameCoords", position);
     }
 
     /**

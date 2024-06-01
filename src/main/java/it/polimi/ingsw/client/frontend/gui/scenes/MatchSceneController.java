@@ -6,11 +6,10 @@ import it.polimi.ingsw.client.frontend.gui.nodes.CardView;
 import it.polimi.ingsw.client.frontend.gui.nodes.PlateauPane;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.GuiUtil;
-import it.polimi.ingsw.utils.LeaderboardEntry;
 import it.polimi.ingsw.utils.Pair;
-import javafx.collections.ObservableMap;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -46,14 +45,30 @@ public class MatchSceneController extends SceneController {
 
     @Override
     public void initializePostController() throws IOException {
-        firstObjective.setOnMouseClicked((e) -> {
-            try {
-                this.showRankingScene();
-            } catch (Exception err) {
-                throw new RuntimeException(err);
-            }
+        goldsDeck.setOnMouseClicked((clickEvent) -> {
+            view.drawCard(DrawSource.GOLDS_DECK);
         });
-
+        goldsDeck.setCursor(Cursor.HAND);
+        resourcesDeck.setOnMouseClicked((clickEvent) -> {
+            view.drawCard(DrawSource.RESOURCES_DECK);
+        });
+        resourcesDeck.setCursor(Cursor.HAND);
+        firstVisible.setOnMouseClicked((clickEvent) -> {
+            view.drawCard(DrawSource.FIRST_VISIBLE);
+        });
+        firstVisible.setCursor(Cursor.HAND);
+        secondVisible.setOnMouseClicked((clickEvent) -> {
+            view.drawCard(DrawSource.SECOND_VISIBLE);
+        });
+        secondVisible.setCursor(Cursor.HAND);
+        thirdVisible.setOnMouseClicked((clickEvent) -> {
+            view.drawCard(DrawSource.THIRD_VISIBLE);
+        });
+        thirdVisible.setCursor(Cursor.HAND);
+        fourthVisible.setOnMouseClicked((clickEvent) -> {
+            view.drawCard(DrawSource.FOURTH_VISIBLE);
+        });
+        fourthVisible.setCursor(Cursor.HAND);
         // Load the chat pane
         chatPane = loadScene("/fxml/chat.fxml");
         matchPane.getChildren().add(chatPane);
@@ -136,7 +151,7 @@ public class MatchSceneController extends SceneController {
     public void setFocus(String username) {
         matchTabs.getSelectionModel().select(tabs.get(username));
     }
-    public void setFocusToBoard() {
+    public void setFocusToTable() {
         matchTabs.getSelectionModel().select(tableTab);
     }
 }

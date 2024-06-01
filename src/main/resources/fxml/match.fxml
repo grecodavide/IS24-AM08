@@ -35,6 +35,16 @@
                             <HBox alignment="CENTER">
                                 <StackPane prefHeight="150.0" prefWidth="200.0">
                                     <children>
+                                        <HBox alignment="BOTTOM_CENTER" prefHeight="100.0" prefWidth="200.0"
+                                              spacing="15.0">
+                                            <children>
+                                                <CardView fx:id="firstObjective"/>
+                                                <CardView fx:id="secondObjective"/>
+                                            </children>
+                                            <StackPane.margin>
+                                                <Insets bottom="60" />
+                                            </StackPane.margin>
+                                        </HBox>
                                         <GridPane alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity"
                                                   minHeight="-Infinity" minWidth="-Infinity" prefHeight="307.0"
                                                   prefWidth="683.0">
@@ -64,16 +74,6 @@
                                                           GridPane.vgrow="NEVER"/>
                                             </children>
                                         </GridPane>
-                                        <HBox alignment="BOTTOM_CENTER" prefHeight="100.0" prefWidth="200.0"
-                                              spacing="15.0">
-                                            <children>
-                                                <CardView fx:id="firstObjective"/>
-                                                <CardView fx:id="secondObjective"/>
-                                            </children>
-                                            <StackPane.margin>
-                                                <Insets bottom="60" />
-                                            </StackPane.margin>
-                                        </HBox>
                                     </children>
                                     <padding>
                                         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>

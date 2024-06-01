@@ -25,13 +25,8 @@
             </HBox>
         </VBox>
         <Label fx:id="stateTitle" styleClass="state-title" StackPane.alignment="TOP_CENTER" />
-        <HBox alignment="BOTTOM_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+        <HBox fx:id="handCards" alignment="BOTTOM_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
               minWidth="-Infinity" spacing="15.0" StackPane.alignment="BOTTOM_CENTER" >
-            <children>
-                <CardView fx:id="handCard1" />
-                <CardView fx:id="handCard2" />
-                <CardView fx:id="handCard3" />
-            </children>
             <StackPane.margin>
                 <Insets>
                     <bottom>100</bottom>

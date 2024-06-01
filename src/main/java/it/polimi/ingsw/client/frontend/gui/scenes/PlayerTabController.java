@@ -27,17 +27,12 @@ import java.util.List;
 import java.util.Map;
 
 public class PlayerTabController extends SceneController{
+    public HBox handCards;
     @FXML
     private StackPane rootPane;
     @FXML
     private Tab playerTab;
     private String username;
-    @FXML
-    CardView handCard1;
-    @FXML
-    CardView handCard2;
-    @FXML
-    CardView handCard3;
     @FXML
     BoardPane playerBoard;
     @FXML
@@ -63,9 +58,7 @@ public class PlayerTabController extends SceneController{
 
     @Override
     public void initializePostController() {
-        initializeHandCard(handCard1);
-        initializeHandCard(handCard2);
-        initializeHandCard(handCard3);
+
     }
 
     /**
@@ -130,6 +123,13 @@ public class PlayerTabController extends SceneController{
             card.setCursor(Cursor.OPEN_HAND);
             event.consume();
         });
+        card.setOnMouseClicked((clickEvent) -> {
+            if (clickEvent.getButton() == MouseButton.SECONDARY) {
+                Side side = (Side) card.getProperties().get("Side");
+                Side newSide = side.equals(Side.BACK) ? Side.FRONT : Side.BACK;
+                card.setCard((PlayableCard) card.getProperties().get("Card"), newSide);
+            }
+        });
     }
 
     /**
@@ -181,7 +181,6 @@ public class PlayerTabController extends SceneController{
         // When you drop on the area do the needed actions
         dragArea.setOnDragDropped(event -> {
             event.setDropCompleted(true);
-            playerBoard.addCard(pcoords, card,side);
             this.removeDragAreas();
             // Play the card
             view.playCard(pcoords, card, side);
@@ -304,9 +303,12 @@ public class PlayerTabController extends SceneController{
         this.stateTitle.setText(title);
     }
     public void setHandCards(List<PlayableCard> cards) {
-        handCard1.setCard(cards.get(0), Side.FRONT);
-        handCard2.setCard(cards.get(1), Side.FRONT);
-        handCard3.setCard(cards.get(2), Side.FRONT);
+        handCards.getChildren().clear();
+        for (PlayableCard card : cards) {
+            CardView handCard = new CardView(card, Side.FRONT);
+            initializeHandCard(handCard);
+            handCards.getChildren().add(handCard);
+        }
     }
 
     public void setCurrentPlayer(boolean current) {
