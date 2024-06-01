@@ -4,32 +4,18 @@ import it.polimi.ingsw.client.frontend.GraphicalView;
 import it.polimi.ingsw.client.frontend.MatchStatus;
 import it.polimi.ingsw.client.frontend.ShownCard;
 import it.polimi.ingsw.client.frontend.gui.scenes.*;
-import it.polimi.ingsw.client.network.NetworkView;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.LeaderboardEntry;
 import it.polimi.ingsw.utils.Pair;
 import it.polimi.ingsw.utils.RequestStatus;
-import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.fxml.FXMLLoader;
-import javafx.geometry.Pos;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Control;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public class GraphicalViewGUI extends GraphicalView {
     private Stage stage;
@@ -39,6 +25,7 @@ public class GraphicalViewGUI extends GraphicalView {
     private WaitingSceneController waitingSceneController;
     private LobbySceneController lobbySceneController;
     private RankingSceneController rankingSceneController;
+    private ChatPaneController chatPaneController;
 
     // Match state management
     MatchStatus matchState = MatchStatus.LOBBY;
@@ -108,6 +95,17 @@ public class GraphicalViewGUI extends GraphicalView {
                     throw new RuntimeException(e);
                 }
                 n++;
+            }
+
+            // Initialize the chat pane
+            try {
+                chatPaneController = matchSceneController.getChatPane();
+                playerTabControllers.forEach((tabUsername, controller) -> {
+                    if (!tabUsername.equals(this.username))
+                        chatPaneController.addPlayer(tabUsername);
+                });
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         });
     }
@@ -212,7 +210,7 @@ public class GraphicalViewGUI extends GraphicalView {
 
     @Override
     public void someoneQuit(String someoneUsername) {
-        // TODO: implement
+
     }
 
     @Override
@@ -232,12 +230,22 @@ public class GraphicalViewGUI extends GraphicalView {
 
     @Override
     public void someoneSentBroadcastText(String someoneUsername, String text) {
-        // TODO: implement
+        Platform.runLater(() -> {
+            if (someoneUsername.equals(this.username))
+                chatPaneController.confirmSubmitBroadcastMessage(text);
+            else
+                chatPaneController.receiveBroadcastMessage(someoneUsername, text);
+        });
     }
 
     @Override
     public void someoneSentPrivateText(String someoneUsername, String text) {
-        // TODO: implement
+        Platform.runLater(() -> {
+            if (someoneUsername.equals(this.username))
+                chatPaneController.confirmSubmitPrivateMessage(text);
+            else
+                chatPaneController.receivePrivateMessage(someoneUsername, text);
+        });
     }
 
     @Override

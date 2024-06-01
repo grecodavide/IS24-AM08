@@ -14,8 +14,7 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.util.Duration;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 // TODO: to finish implementation
 public class ChatPaneController extends SceneController {
@@ -36,6 +35,7 @@ public class ChatPaneController extends SceneController {
     public VBox chatContainer;
     private final Map<String, String> chatHistory = new HashMap<>();
     private boolean isVisible;
+    private Queue<String> unconfirmedPrivateMessagesReceivers;
 
     @Override
     public void initialize() {
@@ -43,6 +43,8 @@ public class ChatPaneController extends SceneController {
         isVisible = false;
         chatPane.setTranslateX(460);
         setIconStatus(false);
+
+        unconfirmedPrivateMessagesReceivers = new LinkedList<>();
 
         // Add the broadcast item as an entry in the chatSelector and set it as default item
         chatHistory.put("broadcast", "");
@@ -61,12 +63,12 @@ public class ChatPaneController extends SceneController {
             String selectedChatName = chatSelector.getSelectionModel().getSelectedItem();
 
             if (!inputText.isBlank()) {
-                if (selectedChatName.equals("broadcast"))
-                    // TODO: send broadcast message over network
-                    confirmSubmitBroadcastMessage(inputText);
-                else
-                    // TODO: send private message over network
-                    confirmSubmitPrivateMessage(selectedChatName, inputText);
+                if (selectedChatName.equals("broadcast")) {
+                    super.view.sendBroadcastText(inputText);
+                } else {
+                    super.view.sendPrivateText(selectedChatName, inputText);
+                    unconfirmedPrivateMessagesReceivers.offer(selectedChatName);
+                }
             }
 
             chatInputText.clear();
@@ -130,7 +132,8 @@ public class ChatPaneController extends SceneController {
      *
      * @param message The message to be confirmed
      */
-    public void confirmSubmitPrivateMessage(String receiverUsername, String message) {
+    public void confirmSubmitPrivateMessage(String message) {
+        String receiverUsername = unconfirmedPrivateMessagesReceivers.poll();
         addMessage(receiverUsername, super.view.getUsername(), message);
     }
 

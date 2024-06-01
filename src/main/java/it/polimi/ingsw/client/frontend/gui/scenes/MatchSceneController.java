@@ -38,6 +38,7 @@ public class MatchSceneController extends SceneController {
     public CardView firstObjective;
     public CardView secondObjective;
     public PlateauPane plateauPane;
+    public HBox chatPane;
     Map<String, Tab> tabs = new HashMap<>();
 
     public void initialize() {
@@ -53,8 +54,8 @@ public class MatchSceneController extends SceneController {
             }
         });
 
-        // Add the chat
-        HBox chatPane = this.loadScene("/fxml/chat.fxml");
+        // Load the chat pane
+        chatPane = loadScene("/fxml/chat.fxml");
         matchPane.getChildren().add(chatPane);
     }
 
@@ -117,10 +118,15 @@ public class MatchSceneController extends SceneController {
 
     public RankingSceneController showRankingScene() throws IOException {
         StackPane root = loadScene("/fxml/ranking.fxml");
-        Scene matchScene = new Scene(root, GraphicalApplication.screenWidth, GraphicalApplication.screenHeight);
+        Scene rankingScene = new Scene(root, GraphicalApplication.screenWidth, GraphicalApplication.screenHeight);
         GuiUtil.applyCSS(root, "/css/style.css");
-        stage.setScene(matchScene);
+        stage.setScene(rankingScene);
         return (RankingSceneController) root.getProperties().get("Controller");
+    }
+
+    public ChatPaneController getChatPane() throws IOException {
+        ChatPaneController controller = (ChatPaneController) chatPane.getProperties().get("Controller");
+        return controller;
     }
 
     /**
