@@ -8,8 +8,11 @@ import it.polimi.ingsw.controllers.PlayerController;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.*;
 import javafx.application.Platform;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -307,21 +310,28 @@ public class GraphicalViewGUI extends GraphicalView {
     public void notifyError(Exception exception) {
         System.out.println(exception.getMessage());
 
-        Stage dialog = new Stage();
+        try {
+            // Load the error node from the fxml file
+            FXMLLoader loader = GuiUtil.getLoader("/fxml/error.fxml");
+            StackPane root = loader.load();
+            ErrorSceneController controller = loader.getController();
 
-        // TODO: implement modal window for errors
-//        Parent root = null;
-//        try {
-//            root = GuiUtil.getFromFXML("error.fxml");
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//        dialog.setScene(new Scene());
-        dialog.setTitle("Error");
+            Stage dialog = new Stage();
+            Scene errorScene = new Scene(root, 500.0, 200.0);
 
-        dialog.initOwner(this.stage);
-        dialog.initModality(Modality.APPLICATION_MODAL);
-        dialog.showAndWait();
+            // Initialize attributes
+            GuiUtil.applyCSS(root, "/css/style.css");
+            controller.setText(exception.getMessage());
+            dialog.setScene(errorScene);
+            dialog.setTitle("Error");
+            dialog.initOwner(this.stage);
+            dialog.initModality(Modality.APPLICATION_MODAL);
+
+            // Show the modal window (stage)
+            dialog.show();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void setUsername(String username) {
