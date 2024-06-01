@@ -1,4 +1,4 @@
-package it.polimi.ingsw.client.frontend.gui.scenes;
+package it.polimi.ingsw.client.frontend.gui.controllers;
 
 import it.polimi.ingsw.utils.LeaderboardEntry;
 import javafx.geometry.Pos;
@@ -7,7 +7,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
 import java.io.IOException;
-import java.util.Stack;
 
 public class RankingSceneController extends SceneController {
 

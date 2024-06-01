@@ -3,13 +3,14 @@ package it.polimi.ingsw.client.frontend.gui;
 import it.polimi.ingsw.client.frontend.GraphicalView;
 import it.polimi.ingsw.client.frontend.MatchStatus;
 import it.polimi.ingsw.client.frontend.ShownCard;
-import it.polimi.ingsw.client.frontend.gui.scenes.*;
+import it.polimi.ingsw.client.frontend.gui.controllers.*;
+import it.polimi.ingsw.controllers.PlayerController;
 import it.polimi.ingsw.gamemodel.*;
-import it.polimi.ingsw.utils.AvailableMatch;
-import it.polimi.ingsw.utils.LeaderboardEntry;
-import it.polimi.ingsw.utils.Pair;
-import it.polimi.ingsw.utils.RequestStatus;
+import it.polimi.ingsw.utils.*;
 import javafx.application.Platform;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -18,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 public class GraphicalViewGUI extends GraphicalView {
-    private Stage stage;
+    private final Stage stage;
     // Controllers
     private Map<String, PlayerTabController> playerTabControllers;
     private MatchSceneController matchSceneController;
@@ -42,14 +43,27 @@ public class GraphicalViewGUI extends GraphicalView {
     @Override
     public void changePlayer() {
         Platform.runLater(() -> {
-            playerTabControllers.keySet()
-                    .forEach((s) -> playerTabControllers.get(s).setCurrentPlayer(s.equals(currentPlayer)));
+            // Notify to each player tab if it is his turn and disable his hand card interactions
+            // this is needed in order to disable this client's interactions after his turn has finished
+            for (String username : playerTabControllers.keySet()) {
+                PlayerTabController tab = playerTabControllers.get(username);
+                boolean isCurrent = username.equals(currentPlayer);
+
+                tab.setCurrentPlayer(isCurrent);
+                tab.enablePlaceCardInteractions(false);
+            }
         });
     }
 
+    /**
+     * Method called everytime it's this client turn.
+     */
     @Override
     public void makeMove() {
-        matchSceneController.setFocus(username);
+        matchSceneController.setFocus(this.username);
+
+        // Enable the hand cards interactions, so that they can be dragged
+        playerTabControllers.get(this.username).enablePlaceCardInteractions(true);
     }
 
     @Override
@@ -91,6 +105,8 @@ public class GraphicalViewGUI extends GraphicalView {
                     PlayerTabController controller = matchSceneController.addPlayerTab(p, Color.values()[n]);
                     playerTabControllers.put(p, controller);
                     controller.setHandCards(super.clientBoards.get(p).getHand());
+                    // Disable the interaction with hand cards on all player tabs
+                    controller.enablePlaceCardInteractions(false);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -107,6 +123,9 @@ public class GraphicalViewGUI extends GraphicalView {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+
+            // By default, disable draw sources interactions
+            matchSceneController.enableDrawSourcesInteractions(false);
         });
     }
 
@@ -258,8 +277,14 @@ public class GraphicalViewGUI extends GraphicalView {
             matchSceneController.setPlateauPoints(someoneUsername, points);
             controller.setHandCards(clientBoards.get(someoneUsername).getHand());
             controller.setResources(availableResources);
-            if (someoneUsername.equals(username)) {
+
+            // If the player that played a card is this client
+            if (someoneUsername.equals(this.username)) {
+                // Set the focus on the plateau tab
                 matchSceneController.setFocusToTable();
+
+                // Enable draw sources interactions
+                matchSceneController.enableDrawSourcesInteractions(true);
             }
         });
     }
@@ -272,11 +297,31 @@ public class GraphicalViewGUI extends GraphicalView {
             PlayerTabController tab = playerTabControllers.get(someoneUsername);
             tab.setHandCards(clientBoards.get(someoneUsername).getHand());
             matchSceneController.setDrawSource(source, replacementCard, replacementCardReign);
+
+            // If the player that drew a card is this client, disable draw source interactions
+            if (someoneUsername.equals(this.username))
+                matchSceneController.enableDrawSourcesInteractions(false);
         });
     }
     @Override
     public void notifyError(Exception exception) {
         System.out.println(exception.getMessage());
+
+        Stage dialog = new Stage();
+
+        // TODO: implement modal window for errors
+//        Parent root = null;
+//        try {
+//            root = GuiUtil.getFromFXML("error.fxml");
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
+//        dialog.setScene(new Scene());
+        dialog.setTitle("Error");
+
+        dialog.initOwner(this.stage);
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.showAndWait();
     }
 
     public void setUsername(String username) {

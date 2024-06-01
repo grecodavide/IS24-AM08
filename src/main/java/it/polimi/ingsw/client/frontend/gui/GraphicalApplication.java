@@ -1,28 +1,19 @@
 package it.polimi.ingsw.client.frontend.gui;
 
-import it.polimi.ingsw.client.frontend.gui.scenes.PlayerTabController;
-import it.polimi.ingsw.client.frontend.gui.scenes.SceneController;
-import it.polimi.ingsw.gamemodel.PlayableCard;
-import it.polimi.ingsw.gamemodel.Side;
+import it.polimi.ingsw.client.frontend.gui.controllers.SceneController;
 import it.polimi.ingsw.utils.GuiUtil;
-import it.polimi.ingsw.utils.Pair;
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.input.KeyCombination;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import java.io.IOException;
 
 public class GraphicalApplication extends Application {
     private GraphicalViewGUI view;
     private Stage primaryStage;
-    public static double screenWidth = 1920;
-    public static double screenHeight = 1020;
+    public static double screenWidth = 1920.0;
+    public static double screenHeight = 1020.0;
 
     public static void main(String[] args) {
         launch(args);

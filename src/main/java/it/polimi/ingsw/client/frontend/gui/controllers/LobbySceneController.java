@@ -1,4 +1,4 @@
-package it.polimi.ingsw.client.frontend.gui.scenes;
+package it.polimi.ingsw.client.frontend.gui.controllers;
 
 import it.polimi.ingsw.client.frontend.gui.GraphicalApplication;
 import it.polimi.ingsw.utils.AvailableMatch;

@@ -165,13 +165,12 @@ public abstract class GraphicalView {
 
 
         if (this.currentPlayer.equals(this.username)) {
-            if (this.clientBoards.get(this.username).getPlaced().isEmpty()) {
+            if (this.clientBoards.get(this.username).getPlaced().isEmpty())
                 this.drawInitialCard();
-            } else if (this.clientBoards.get(this.username).getObjective() == null) {
+            else if (this.clientBoards.get(this.username).getObjective() == null)
                 this.drawSecretObjectives();
-            } else {
+            else
                 this.makeMove();
-            }
         } else {
             this.changePlayer();
         }

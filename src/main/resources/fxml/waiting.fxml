@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.*?>
 
 <?import javafx.geometry.Insets?>
-<StackPane styleClass="main-container" id="pane" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.polimi.ingsw.client.frontend.gui.scenes.WaitingSceneController">
+<StackPane styleClass="main-container" id="pane" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.polimi.ingsw.client.frontend.gui.controllers.WaitingSceneController">
     <VBox alignment="CENTER" maxWidth="-Infinity" maxHeight="-Infinity">
         <Label styleClass="mega-title">Waiting for players</Label>
         <Pane prefHeight="100" />

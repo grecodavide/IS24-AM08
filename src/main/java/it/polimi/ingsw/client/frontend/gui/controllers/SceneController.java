@@ -1,8 +1,7 @@
-package it.polimi.ingsw.client.frontend.gui.scenes;
+package it.polimi.ingsw.client.frontend.gui.controllers;
 
 import it.polimi.ingsw.client.frontend.gui.GraphicalViewGUI;
 import it.polimi.ingsw.utils.GuiUtil;
-import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.stage.Stage;

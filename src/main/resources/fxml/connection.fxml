@@ -13,7 +13,7 @@
 
 <?import javafx.scene.layout.Pane?>
 <StackPane styleClass="main-container"
-           fx:controller="it.polimi.ingsw.client.frontend.gui.scenes.ConnectionSceneController" id="pane"
+           fx:controller="it.polimi.ingsw.client.frontend.gui.controllers.ConnectionSceneController" id="pane"
            xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <HBox StackPane.alignment="CENTER" alignment="CENTER">

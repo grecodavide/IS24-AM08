@@ -1,11 +1,10 @@
-package it.polimi.ingsw.client.frontend.gui.scenes;
+package it.polimi.ingsw.client.frontend.gui.controllers;
 
 import it.polimi.ingsw.client.frontend.gui.nodes.BoardPane;
 import it.polimi.ingsw.client.frontend.gui.nodes.CardView;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.CardsManager;
 import it.polimi.ingsw.utils.Pair;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -16,7 +15,10 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.*;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
@@ -26,7 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class PlayerTabController extends SceneController{
+public class PlayerTabController extends SceneController {
     public HBox handCards;
     @FXML
     private StackPane rootPane;
@@ -44,7 +46,7 @@ public class PlayerTabController extends SceneController{
     @FXML
     Label stateTitle;
     HBox actionContainer;
-    private List<Node> temporaryDragAreas = new ArrayList<>();
+    private final List<Node> temporaryDragAreas = new ArrayList<>();
 
     public void initialize() {
         scroll.getStyleClass().clear();
@@ -63,6 +65,7 @@ public class PlayerTabController extends SceneController{
 
     /**
      * Set the displayed resources
+     *
      * @param resources map to the resources amount
      */
     public void setResources(Map<Symbol, Integer> resources) {
@@ -82,6 +85,7 @@ public class PlayerTabController extends SceneController{
 
     /**
      * Places a card on the board
+     *
      * @param coords
      * @param card
      * @param side
@@ -98,6 +102,7 @@ public class PlayerTabController extends SceneController{
 
     /**
      * Add attributes to the hand card
+     *
      * @param card CardView to add attributes
      */
     private void initializeHandCard(CardView card) {
@@ -110,8 +115,8 @@ public class PlayerTabController extends SceneController{
             dragboard.setContent(content);
             // Set the card as image of the dragboard
             dragboard.setDragView(card.snapshot(null, null));
-            dragboard.setDragViewOffsetX(CardView.cardWidth/2);
-            dragboard.setDragViewOffsetY(CardView.cardHeight/2);
+            dragboard.setDragViewOffsetX(CardView.cardWidth / 2);
+            dragboard.setDragViewOffsetY(CardView.cardHeight / 2);
             this.createDragArea((PlayableCard) card.getProperties().get("Card"), (Side) card.getProperties().get("Side"));
             card.setVisible(false);
             card.setCursor(Cursor.CLOSED_HAND);
@@ -134,12 +139,13 @@ public class PlayerTabController extends SceneController{
 
     /**
      * Create all possible drag areas on the board
+     *
      * @param card Card to place
      * @param side Side on which place the card
      */
     private void createDragArea(PlayableCard card, Side side) {
         List<Pair<Integer, Integer>> placeableCoords = new ArrayList<>();
-        for (Pair<Integer, Integer> coords : playerBoard.takenSpots ) {
+        for (Pair<Integer, Integer> coords : playerBoard.takenSpots) {
             for (int i = -1; i < 2; i++) {
                 for (int j = -1; j < 2; j++) {
                     if (i != 0 && j != 0) {
@@ -156,9 +162,10 @@ public class PlayerTabController extends SceneController{
 
     /**
      * Create a drag area in the specified coordinates, for the specified card on a certain side
+     *
      * @param pcoords Game coordinates on which to put the area
-     * @param card Card where to put the area
-     * @param side Side on which to put the card
+     * @param card    Card where to put the area
+     * @param side    Side on which to put the card
      */
     private void showDragArea(Pair<Integer, Integer> pcoords, PlayableCard card, Side side) {
         Pane dragArea = new Pane();
@@ -257,10 +264,12 @@ public class PlayerTabController extends SceneController{
         rootPane.getChildren().remove(actionContainer);
         stateTitle.setText("");
     }
+
     /**
      * Creates the container to show the choice of initials card or objectives
+     *
      * @param front First option to show
-     * @param back Second option to show
+     * @param back  Second option to show
      */
     private void createCardChoiceContainer(CardView front, CardView back) {
         actionContainer = new HBox();
@@ -302,6 +311,7 @@ public class PlayerTabController extends SceneController{
     public void setStateTitle(String title) {
         this.stateTitle.setText(title);
     }
+
     public void setHandCards(List<PlayableCard> cards) {
         handCards.getChildren().clear();
         for (PlayableCard card : cards) {
@@ -317,6 +327,15 @@ public class PlayerTabController extends SceneController{
         } else {
             playerTab.getStyleClass().remove("medium-text");
         }
+    }
+
+    /**
+     * Enables/disables mouse interactions with hand cards.
+     *
+     * @param enable True if interactions should be enabled, false otherwise
+     */
+    public void enablePlaceCardInteractions(boolean enable) {
+        handCards.setDisable(!enable);
     }
 
 }

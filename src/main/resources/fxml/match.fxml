@@ -20,7 +20,7 @@
 <?import javafx.scene.image.Image?>
 <?import it.polimi.ingsw.client.frontend.gui.nodes.PlateauPane?>
 <VBox fx:id="matchScene" styleClass="main-container"
-      fx:controller="it.polimi.ingsw.client.frontend.gui.scenes.MatchSceneController" alignment="TOP_CENTER"
+      fx:controller="it.polimi.ingsw.client.frontend.gui.controllers.MatchSceneController" alignment="TOP_CENTER"
       maxHeight="1080.0" maxWidth="1920.0" minHeight="1080.0" minWidth="1920.0" prefHeight="1080.0" prefWidth="1920.0"
       xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1">
     <AnchorPane fx:id="matchPane" id="pane" maxHeight="-1.0" maxWidth="-1.0" prefHeight="372.0" prefWidth="707.0"

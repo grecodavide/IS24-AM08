@@ -16,7 +16,7 @@
 <?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.ProgressIndicator?>
 <StackPane styleClass="main-container" id="pane"
-           fx:controller="it.polimi.ingsw.client.frontend.gui.scenes.LobbySceneController"
+           fx:controller="it.polimi.ingsw.client.frontend.gui.controllers.LobbySceneController"
            xmlns:fx="http://javafx.com/fxml/1">
     <ImageView StackPane.alignment="BOTTOM_CENTER" fitHeight="200" fitWidth="268.5">
         <Image url="@../images/owl.png" />

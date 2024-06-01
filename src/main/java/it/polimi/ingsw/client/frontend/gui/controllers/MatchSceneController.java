@@ -1,4 +1,4 @@
-package it.polimi.ingsw.client.frontend.gui.scenes;
+package it.polimi.ingsw.client.frontend.gui.controllers;
 
 import it.polimi.ingsw.client.frontend.gui.GraphicalApplication;
 import it.polimi.ingsw.client.frontend.gui.nodes.CardView;
@@ -45,30 +45,19 @@ public class MatchSceneController extends SceneController {
 
     @Override
     public void initializePostController() throws IOException {
-        goldsDeck.setOnMouseClicked((clickEvent) -> {
-            view.drawCard(DrawSource.GOLDS_DECK);
-        });
+        goldsDeck.setOnMouseClicked((clickEvent) -> view.drawCard(DrawSource.GOLDS_DECK));
         goldsDeck.setCursor(Cursor.HAND);
-        resourcesDeck.setOnMouseClicked((clickEvent) -> {
-            view.drawCard(DrawSource.RESOURCES_DECK);
-        });
+        resourcesDeck.setOnMouseClicked((clickEvent) -> view.drawCard(DrawSource.RESOURCES_DECK));
         resourcesDeck.setCursor(Cursor.HAND);
-        firstVisible.setOnMouseClicked((clickEvent) -> {
-            view.drawCard(DrawSource.FIRST_VISIBLE);
-        });
+        firstVisible.setOnMouseClicked((clickEvent) -> view.drawCard(DrawSource.FIRST_VISIBLE));
         firstVisible.setCursor(Cursor.HAND);
-        secondVisible.setOnMouseClicked((clickEvent) -> {
-            view.drawCard(DrawSource.SECOND_VISIBLE);
-        });
+        secondVisible.setOnMouseClicked((clickEvent) -> view.drawCard(DrawSource.SECOND_VISIBLE));
         secondVisible.setCursor(Cursor.HAND);
-        thirdVisible.setOnMouseClicked((clickEvent) -> {
-            view.drawCard(DrawSource.THIRD_VISIBLE);
-        });
+        thirdVisible.setOnMouseClicked((clickEvent) -> view.drawCard(DrawSource.THIRD_VISIBLE));
         thirdVisible.setCursor(Cursor.HAND);
-        fourthVisible.setOnMouseClicked((clickEvent) -> {
-            view.drawCard(DrawSource.FOURTH_VISIBLE);
-        });
+        fourthVisible.setOnMouseClicked((clickEvent) -> view.drawCard(DrawSource.FOURTH_VISIBLE));
         fourthVisible.setCursor(Cursor.HAND);
+
         // Load the chat pane
         chatPane = loadScene("/fxml/chat.fxml");
         matchPane.getChildren().add(chatPane);
@@ -140,8 +129,7 @@ public class MatchSceneController extends SceneController {
     }
 
     public ChatPaneController getChatPane() throws IOException {
-        ChatPaneController controller = (ChatPaneController) chatPane.getProperties().get("Controller");
-        return controller;
+        return (ChatPaneController) chatPane.getProperties().get("Controller");
     }
 
     /**
@@ -151,7 +139,25 @@ public class MatchSceneController extends SceneController {
     public void setFocus(String username) {
         matchTabs.getSelectionModel().select(tabs.get(username));
     }
+
+    /**
+     *
+     */
     public void setFocusToTable() {
         matchTabs.getSelectionModel().select(tableTab);
+    }
+
+    /**
+     * Enables/disables mouse interactions with draw sources.
+     *
+     * @param enable True if interactions should be enabled, false otherwise
+     */
+    public void enableDrawSourcesInteractions(boolean enable) {
+        goldsDeck.setDisable(!enable);
+        resourcesDeck.setDisable(!enable);
+        firstVisible.setDisable(!enable);
+        secondVisible.setDisable(!enable);
+        thirdVisible.setDisable(!enable);
+        fourthVisible.setDisable(!enable);
     }
 }

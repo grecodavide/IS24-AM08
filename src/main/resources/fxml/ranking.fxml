@@ -12,7 +12,7 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.image.Image?>
 <StackPane id="pane" styleClass="main-container" xmlns="http://javafx.com/javafx" minHeight="Infinity" minWidth="Infinity"
-           fx:controller="it.polimi.ingsw.client.frontend.gui.scenes.RankingSceneController"
+           fx:controller="it.polimi.ingsw.client.frontend.gui.controllers.RankingSceneController"
            xmlns:fx="http://javafx.com/fxml"
            prefHeight="400.0" prefWidth="600.0">
     <VBox maxHeight="-Infinity" maxWidth="-Infinity" StackPane.alignment="CENTER" alignment="CENTER">

@@ -1,15 +1,13 @@
-package it.polimi.ingsw.client.frontend.gui.scenes;
+package it.polimi.ingsw.client.frontend.gui.controllers;
 
 import it.polimi.ingsw.client.frontend.gui.GraphicalApplication;
 import it.polimi.ingsw.client.network.NetworkView;
 import it.polimi.ingsw.client.network.NetworkViewRMI;
 import it.polimi.ingsw.client.network.NetworkViewTCP;
 import it.polimi.ingsw.gamemodel.Color;
-import it.polimi.ingsw.gamemodel.Objective;
 import it.polimi.ingsw.utils.GuiUtil;
 import it.polimi.ingsw.utils.LeaderboardEntry;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.RadioButton;

@@ -1,4 +1,4 @@
-package it.polimi.ingsw.client.frontend.gui.scenes;
+package it.polimi.ingsw.client.frontend.gui.controllers;
 
 import javafx.animation.TranslateTransition;
 import javafx.fxml.FXML;
