@@ -72,5 +72,14 @@ public class GuiUtil {
         return pawnsPath + "/" + color.toString().toLowerCase(Locale.ROOT) + "-pawn.png";
     }
 
+    public static String getHexFromColor(Color color) {
+        return switch (color) {
+            case RED -> "#C00402";
+            case BLUE -> "#0C6692";
+            case GREEN -> "#195C00";
+            case YELLOW -> "#BEA013";
+        };
+    }
+
 }
 

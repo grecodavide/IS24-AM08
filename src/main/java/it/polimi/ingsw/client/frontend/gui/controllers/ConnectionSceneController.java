@@ -132,7 +132,8 @@ public class ConnectionSceneController extends SceneController {
                 Scene lobbyScene = new Scene(root, GraphicalApplication.screenWidth, GraphicalApplication.screenHeight);
                 stage.setScene(lobbyScene);
                 controller.addPlayerTab("Oingo", Color.RED);
-                controller.addPlayerTab("Boingo", Color.BLUE);
+                PlayerTabController controller1 = controller.addPlayerTab("Boingo", Color.BLUE);
+                controller1.setCurrentPlayer(true);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

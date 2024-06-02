@@ -16,6 +16,8 @@ import javafx.scene.control.TabPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Paint;
+import javafx.scene.shape.Circle;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -70,10 +72,10 @@ public class MatchSceneController extends SceneController {
         setControllerAttributes(loader);
         // Add the tab
         t.setText(username);
-        ImageView pawnImage = new ImageView(new Image(GuiUtil.getPawnImagePath(color)));
-        pawnImage.setFitWidth(35);
-        pawnImage.setFitHeight(35);
-        t.setGraphic(pawnImage);
+        Circle icon = new Circle();
+        icon.setRadius(15);
+        icon.setFill(javafx.scene.paint.Color.web(GuiUtil.getHexFromColor(color)));
+        t.setGraphic(icon);
         matchTabs.getTabs().add(t);
         // Add properties to the controller
         PlayerTabController controller = loader.getController();

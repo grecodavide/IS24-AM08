@@ -20,9 +20,18 @@
 .tab .tab-label {
     -fx-alignment: CENTER;
     -fx-text-fill: -fx-foreground-color;
-    -fx-font-weight: bold;
     -fx-padding: 0 10 0 10;
+    -fx-font-size: 25px;
 }
+
+.player-tab .tab-label {
+    -fx-alignment: CENTER;
+    -fx-text-fill: -fx-foreground-color;
+    -fx-padding: 0 10 0 10;
+    -fx-font-size: 25px;
+    -fx-font-family: 'Cyntho Next Medium'
+}
+
 .tab-pane:top *.tab-header-area {
     -fx-padding: 0 0 0 30;
 }

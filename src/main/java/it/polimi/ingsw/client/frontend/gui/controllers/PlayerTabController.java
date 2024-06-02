@@ -125,7 +125,7 @@ public class PlayerTabController extends SceneController {
         card.setOnDragDone(event -> {
             this.removeDragAreas();
             card.setVisible(true);
-            card.setCursor(Cursor.OPEN_HAND);
+            card.setCursor(Cursor.DEFAULT);
             event.consume();
         });
         card.setOnMouseClicked((clickEvent) -> {
@@ -323,9 +323,9 @@ public class PlayerTabController extends SceneController {
 
     public void setCurrentPlayer(boolean current) {
         if (current) {
-            playerTab.getStyleClass().add("medium-text");
+            playerTab.getStyleClass().add("player-tab");
         } else {
-            playerTab.getStyleClass().remove("medium-text");
+            playerTab.getStyleClass().remove("player-tab");
         }
     }
 
