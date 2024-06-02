@@ -310,28 +310,31 @@ public class GraphicalViewGUI extends GraphicalView {
     public void notifyError(Exception exception) {
         System.out.println(exception.getMessage());
 
-        try {
-            // Load the error node from the fxml file
-            FXMLLoader loader = GuiUtil.getLoader("/fxml/error.fxml");
-            StackPane root = loader.load();
-            ErrorSceneController controller = loader.getController();
+        Platform.runLater(() -> {
+            try {
+                // Load the error node from the fxml file
 
-            Stage dialog = new Stage();
-            Scene errorScene = new Scene(root, 500.0, 200.0);
+                FXMLLoader loader = GuiUtil.getLoader("/fxml/error.fxml");
+                StackPane root = loader.load();
+                ErrorSceneController controller = loader.getController();
 
-            // Initialize attributes
-            GuiUtil.applyCSS(root, "/css/style.css");
-            controller.setText(exception.getMessage());
-            dialog.setScene(errorScene);
-            dialog.setTitle("Error");
-            dialog.initOwner(this.stage);
-            dialog.initModality(Modality.APPLICATION_MODAL);
+                Stage dialog = new Stage();
+                Scene errorScene = new Scene(root, 500.0, 200.0);
 
-            // Show the modal window (stage)
-            dialog.show();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+                // Initialize attributes
+                GuiUtil.applyCSS(root, "/css/style.css");
+                controller.setText(exception.getMessage());
+                dialog.setScene(errorScene);
+                dialog.setTitle("Error");
+                dialog.initOwner(this.stage);
+                dialog.initModality(Modality.APPLICATION_MODAL);
+
+                // Show the modal window (stage)
+                dialog.show();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     public void setUsername(String username) {
