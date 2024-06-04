@@ -262,11 +262,13 @@ public class GraphicalViewTUI extends GraphicalView {
                         } else {
                             Thread.sleep(200);
                         }
-                    } catch (InterruptedException | IOException e) {
+                    } catch (InterruptedException e) {
+                    } catch (IOException e) {
+                        System.err.println("Could not connect! Quitting now...");
+                        System.exit(1);
                     }
                 } else {
                     try {
-                        // this.mustPrintHeader = true;
                         this.playerControls.wait();
                     } catch (InterruptedException e) {
                     }
@@ -445,7 +447,7 @@ public class GraphicalViewTUI extends GraphicalView {
         this.printer.printWelcomeScreen();
         this.messages.add("Joined players:");
         this.messages.addAll(joinedPlayers);
-        this.printer.printMessage(this.messages);
+        this.printer.printListReverse(this.messages);
         this.printer.printPrompt("");
         this.messages.clear();
     }
@@ -554,7 +556,7 @@ public class GraphicalViewTUI extends GraphicalView {
             this.messages.add("This is the last turn! Play carefully");
         }
         if (!this.messages.isEmpty()) {
-            this.printer.printMessage(messages);
+            this.printer.printMessages(messages);
         }
 
         ClientBoard board = this.clientBoards.get(this.username);
@@ -669,7 +671,7 @@ public class GraphicalViewTUI extends GraphicalView {
         } else {
             this.chat.add("(" + someoneUsername + "): " + text);
             this.messages.add(someoneUsername + " sent a private text!");
-            this.printer.printMessage(this.messages);
+            this.printer.printMessages(this.messages);
             this.inputHandler.showPrompt();
         }
     }
@@ -683,7 +685,7 @@ public class GraphicalViewTUI extends GraphicalView {
         } else {
             this.chat.add("[" + someoneUsername + "]: " + text);
             this.messages.add(someoneUsername + " sent a text!");
-            this.printer.printMessage(this.messages);
+            this.printer.printMessages(this.messages);
             this.inputHandler.showPrompt();
         }
     }

@@ -521,7 +521,28 @@ public class TuiPrinter {
         System.out.flush();
     }
 
-    public void printMessage(List<String> message) {
+    
+    /**
+     * Prints a list of Strings to the terminal, first element of first line, last element on last line
+     * 
+     * @param messages List of messages to display
+     */
+    public void printMessages(List<String> messages) {
+        int termRows = this.getHeight();
+        Integer offset = 0;
+        for (String string : messages) {
+            System.out.println(this.setPosition(1, termRows - infoLineOffset - offset ) + string);
+            offset++;
+        }
+    }
+
+    
+    /**
+     * Prints a list of Strings to the terminal, first element on last line, last element of first line
+     * 
+     * @param message List of messages to display
+     */
+    public void printListReverse(List<String> message) {
         int termRows = this.getHeight();
         Integer offset = 0;
         int size = message.size();
