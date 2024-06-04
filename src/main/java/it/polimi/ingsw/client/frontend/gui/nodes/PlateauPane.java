@@ -8,7 +8,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.Pane;
 
-import javax.xml.crypto.dom.DOMCryptoContext;
 import java.util.HashMap;
 
 public class PlateauPane extends Pane {

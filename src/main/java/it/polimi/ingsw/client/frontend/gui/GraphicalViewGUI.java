@@ -7,6 +7,7 @@ import it.polimi.ingsw.client.frontend.gui.controllers.*;
 import it.polimi.ingsw.controllers.PlayerController;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.*;
+import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -81,6 +82,7 @@ public class GraphicalViewGUI extends GraphicalView {
         super.joinMatch(matchName);
         this.matchName = matchName;
     }
+
     @Override
     protected void notifyMatchStarted() {
         matchState = MatchStatus.MATCH_STATE;
@@ -319,7 +321,7 @@ public class GraphicalViewGUI extends GraphicalView {
                 ErrorSceneController controller = loader.getController();
 
                 Stage dialog = new Stage();
-                Scene errorScene = new Scene(root, 500.0, 200.0);
+                Scene errorScene = new Scene(root, ErrorSceneController.windowWidth, ErrorSceneController.windowHeight);
 
                 // Initialize attributes
                 GuiUtil.applyCSS(root, "/css/style.css");
@@ -328,6 +330,8 @@ public class GraphicalViewGUI extends GraphicalView {
                 dialog.setTitle("Error");
                 dialog.initOwner(this.stage);
                 dialog.initModality(Modality.APPLICATION_MODAL);
+                dialog.setResizable(false);
+                dialog.sizeToScene();
 
                 // Show the modal window (stage)
                 dialog.show();
@@ -360,5 +364,9 @@ public class GraphicalViewGUI extends GraphicalView {
     public void setLobbySceneController(LobbySceneController lobbySceneController) {
         this.lobbySceneController = lobbySceneController;
         this.getAvailableMatches();
+    }
+
+    public static void main(String[] args) {
+        Application.launch(GraphicalApplication.class, args);
     }
 }

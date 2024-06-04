@@ -49,13 +49,10 @@ public class ConnectionSceneController extends SceneController {
      * Connect to the specified NetworkView
      */
     private void connect() {
-        // TODO Define things better
-        Scene currentScene = stage.getScene();
-        NetworkView networkHandler = null;
-
         if (debuggingKeys()) {
             return;
         }
+        NetworkView networkHandler = null;
         if (TCPButton.isSelected()) {
             try {
                 networkHandler = new NetworkViewTCP(view, serverAddress.getText(), Integer.valueOf(serverPort.getText()));
@@ -116,7 +113,7 @@ public class ConnectionSceneController extends SceneController {
                 stage.setScene(lobbyScene);
                 controller.setCurrentPlayers(3);
                 controller.setMaxPlayers(4);
-                controller.setMatchName("Porcodio");
+                controller.setMatchName("Marioh");
                 controller.addPlayer("Oingo");
                 controller.addPlayer("Boingo");
                 controller.addPlayer("Hol Horse");
@@ -138,6 +135,9 @@ public class ConnectionSceneController extends SceneController {
                 throw new RuntimeException(e);
             }
             return true;
+        } else if (command.startsWith("error")) {
+            String errorMessage = command.replace("error ", "");
+            view.notifyError(new Exception(errorMessage));
         }
         return res;
     }
