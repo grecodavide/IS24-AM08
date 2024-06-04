@@ -42,6 +42,7 @@ public class ClientListener extends Thread {
     private MessageJsonParser parser;
     private IOHandler io;
     private Server server;
+    private Match match;
     private Map<Integer, Objective> objectives;
     private Map<Integer, PlayableCard> playableCards;
 
@@ -67,13 +68,12 @@ public class ClientListener extends Thread {
             resources.forEach((id, card) -> this.playableCards.put(id, (PlayableCard) card));
             golds.forEach((id, card) -> this.playableCards.put(id, (PlayableCard) card));
 
-            this.setPlayerController();
         } catch (IOException e) {
             this.sendError("Failed to create Listener thread", e);
         }
     }
 
-    
+
     /**
      * Sends error message with custom text
      * 
@@ -87,13 +87,13 @@ public class ClientListener extends Thread {
         }
     }
 
-    
+
     /**
      * Loops until a player controller is created
      * 
      * @throws IOException if there was an I/O error
      */
-    private void setPlayerController() throws IOException {
+    private void setPlayerController() {
         ActionMessage msg;
         String username = null;
         Match match = null;
@@ -138,11 +138,15 @@ public class ClientListener extends Thread {
                 // message is not correctly formatted, ignore
             } catch (ChosenMatchException | WrongStateException | AlreadyUsedUsernameException | IllegalArgumentException e) {
                 this.sendError(e.getMessage(), e);
+            } catch (IOException e) {
+                match.removePlayer(this.playerController.getPlayer());
+                this.close();
             }
         }
+        this.match = match;
     }
 
-    
+
     /**
      * Tries to actually create the player controller with the acquired informations
      * 
@@ -210,9 +214,14 @@ public class ClientListener extends Thread {
         try {
             while (this.socket.isConnected()) {
                 String msg = this.io.readMsg();
+                // if msg is null, it means the socket was closed client side. Quit all
+                if (msg == null) {
+                    throw new IOException("Socket closed");
+                }
                 this.executeRequest(msg);
             }
         } catch (IOException | ClassNotFoundException e) {
+            match.removePlayer(this.playerController.getPlayer());
             this.close();
         }
     }
@@ -237,6 +246,7 @@ public class ClientListener extends Thread {
      */
     @Override
     public void run() {
+        this.setPlayerController();
         this.listen();
     }
 }

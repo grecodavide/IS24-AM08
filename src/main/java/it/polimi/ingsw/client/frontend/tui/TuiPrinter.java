@@ -2,13 +2,18 @@ package it.polimi.ingsw.client.frontend.tui;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
 import org.jline.terminal.Terminal;
 import it.polimi.ingsw.client.frontend.ClientBoard;
 import it.polimi.ingsw.client.frontend.ShownCard;
 import it.polimi.ingsw.exceptions.CardException;
+import it.polimi.ingsw.exceptions.InvalidResourceException;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.Pair;
@@ -94,12 +99,11 @@ public class TuiPrinter {
     }
 
     private void printPoints(String username, Color color, Integer points) {
-        // int termRows = this.getHeight();
-        // int oldOffset = termRows - infoLineOffset;
+        int oldOffset = this.getHeight() - infoLineOffset;
         int termCols = this.getWidth();
-        int newOffset = 1;
+        // int newOffset = 1;
         String out = this.parseUsername(username, color) + "'s points: " + points;
-        System.out.println(this.setPosition((termCols - out.length()) / 4, newOffset) + out);
+        System.out.println(this.setPosition((termCols - out.length()) / 4, oldOffset) + out);
     }
     
     private int getDimStart(int max, int dim) {
@@ -517,7 +521,28 @@ public class TuiPrinter {
         System.out.flush();
     }
 
-    public void printMessage(List<String> message) {
+    
+    /**
+     * Prints a list of Strings to the terminal, first element of first line, last element on last line
+     * 
+     * @param messages List of messages to display
+     */
+    public void printMessages(List<String> messages) {
+        int termRows = this.getHeight();
+        Integer offset = 0;
+        for (String string : messages) {
+            System.out.println(this.setPosition(1, termRows - infoLineOffset - offset ) + string);
+            offset++;
+        }
+    }
+
+    
+    /**
+     * Prints a list of Strings to the terminal, first element on last line, last element of first line
+     * 
+     * @param message List of messages to display
+     */
+    public void printListReverse(List<String> message) {
         int termRows = this.getHeight();
         Integer offset = 0;
         int size = message.size();
@@ -543,8 +568,11 @@ public class TuiPrinter {
      * @param verticalOffset offset lines from the top (default is 1)
      */
     public void printAvailableResources(Map<Symbol, Integer> availableResources, Integer verticalOffset) {
+        // ! strettamente connessa a (private) printPoints per visibilità        
+
         // int termRows = this.getHeight(); 
-        int vertCoord = (verticalOffset != 1) ? 1 : verticalOffset;
+        // int vertCoord = (verticalOffset != 1) ? 1 : verticalOffset; 
+        int vertCoord = this.getHeight() - this.infoLineOffset;
         int termCols = this.getWidth();
         String out = "";
         String spaces = "    ";
