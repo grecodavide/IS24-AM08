@@ -68,6 +68,7 @@ public class GraphicalViewGUI extends GraphicalView {
 
         // Enable the hand cards interactions, so that they can be dragged
         playerTabControllers.get(this.username).enablePlaceCardInteractions(true);
+        playerTabControllers.get(this.username).setStateTitle("Play a card");
     }
 
     @Override
@@ -287,10 +288,13 @@ public class GraphicalViewGUI extends GraphicalView {
             if (someoneUsername.equals(this.username)) {
                 // Set the focus on the plateau tab
                 matchSceneController.setFocusToTable();
-
+                matchSceneController.setStateTitle("Draw a card");
                 // Enable draw sources interactions
                 matchSceneController.enableDrawSourcesInteractions(true);
+            } else {
+                matchSceneController.setStateTitle(someoneUsername + " is drawing a card...");
             }
+            playerTabControllers.get(someoneUsername).setStateTitle("");
         });
     }
 
@@ -304,8 +308,12 @@ public class GraphicalViewGUI extends GraphicalView {
             matchSceneController.setDrawSource(source, replacementCard, replacementCardReign);
 
             // If the player that drew a card is this client, disable draw source interactions
-            if (someoneUsername.equals(this.username))
+            if (someoneUsername.equals(this.username)) {
                 matchSceneController.enableDrawSourcesInteractions(false);
+                matchSceneController.setFocus(this.username);
+            }
+            // Remove draw title
+            matchSceneController.setStateTitle("");
         });
     }
     @Override

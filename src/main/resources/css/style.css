@@ -33,6 +33,9 @@
     -fx-background-position: center center;
 }
 
+#error {
+    -fx-background-color: -fx-primary-container;
+}
 .connection-box {
     -fx-background-color: -fx-primary-container;
     -fx-border-color: -fx-primary-border-color;

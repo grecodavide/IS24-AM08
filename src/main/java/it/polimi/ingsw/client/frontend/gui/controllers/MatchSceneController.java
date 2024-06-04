@@ -11,6 +11,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.image.Image;
@@ -25,6 +26,7 @@ import java.util.Map;
 
 public class MatchSceneController extends SceneController {
     public Tab tableTab;
+    public Label stateTitle;
     @FXML
     TabPane matchTabs;
     @FXML
@@ -161,5 +163,9 @@ public class MatchSceneController extends SceneController {
         secondVisible.setDisable(!enable);
         thirdVisible.setDisable(!enable);
         fourthVisible.setDisable(!enable);
+    }
+
+    public void setStateTitle(String text) {
+        stateTitle.setText(text);
     }
 }

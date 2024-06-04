@@ -218,6 +218,10 @@ public class PlayerTabController extends SceneController {
         temporaryDragAreas.clear();
     }
 
+    /**
+     * Current player has to choose the secret objective
+     * @param objectives the two objectives to choose
+     */
     public void giveSecretObjectives(Pair<Objective, Objective> objectives) {
         stateTitle.setText("Choose your secret objective");
         CardView first = new CardView(objectives.first(), Side.FRONT);
@@ -229,14 +233,20 @@ public class PlayerTabController extends SceneController {
         second.setOnMouseClicked((mouseEvent -> view.chooseSecretObjective(objectives.second())));
     }
 
+    /**
+     * Another player is choosing the secret objective
+     */
     public void someoneDrewSecretObjective() {
         stateTitle.setText(username + " is choosing the secret objective");
         CardView first = new CardView(CardsManager.getInstance().getObjectives().get(1), Side.BACK);
         CardView second = new CardView(CardsManager.getInstance().getObjectives().get(1), Side.BACK);
         createCardChoiceContainer(first, second);
-        // TODO define what to do on mouse click
     }
 
+    /**
+     * The current player is choosing the initial card side
+     * @param card given initial card
+     */
     public void giveInitialCard(InitialCard card) {
         stateTitle.setText("Choose your card");
         CardView front = new CardView(card, Side.FRONT);
@@ -253,6 +263,10 @@ public class PlayerTabController extends SceneController {
         });
     }
 
+    /**
+     * Show that someone is choosing the initial card side
+     * @param card initial card
+     */
     public void someoneDrewInitialCard(InitialCard card) {
         stateTitle.setText(username + " is choosing the initial card side...");
         CardView front = new CardView(card, Side.FRONT);
@@ -295,6 +309,10 @@ public class PlayerTabController extends SceneController {
         return playerBoard;
     }
 
+    /**
+     * Set the secret objective for the current player
+     * @param objective objective to set
+     */
     public void setSecretObjective(Objective objective) {
         CardView secretObjective;
         if (objective != null) {
@@ -303,7 +321,7 @@ public class PlayerTabController extends SceneController {
             secretObjective = new CardView(CardsManager.getInstance().getObjectives().get(2), Side.BACK);
         }
         StackPane.setAlignment(secretObjective, Pos.BOTTOM_LEFT);
-        StackPane.setMargin(secretObjective, new Insets(0, 50, 50, 0));
+        StackPane.setMargin(secretObjective, new Insets(0, 100, 100, 0));
 
         rootPane.getChildren().add(secretObjective);
     }
@@ -312,6 +330,10 @@ public class PlayerTabController extends SceneController {
         this.stateTitle.setText(title);
     }
 
+    /**
+     * Set player hand cards
+     * @param cards list of cards currently in the player's hand
+     */
     public void setHandCards(List<PlayableCard> cards) {
         handCards.getChildren().clear();
         for (PlayableCard card : cards) {
