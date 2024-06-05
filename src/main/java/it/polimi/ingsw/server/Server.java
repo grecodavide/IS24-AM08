@@ -67,20 +67,24 @@ public class Server extends UnicastRemoteObject implements ServerRMIInterface {
 
     @Override
     public void createMatch(String matchName, int maxPlayers) throws RemoteException, ChosenMatchException {
-        if (matches.containsKey(matchName))
-            throw new ChosenMatchException("A match with the chosen name already exists");
+        synchronized (matches) {
+            if (matches.containsKey(matchName))
+                throw new ChosenMatchException("A match with the chosen name already exists");
 
-        Match newMatch = getNewMatch(maxPlayers);
-
-        matches.put(matchName, newMatch);
+            Match newMatch = getNewMatch(maxPlayers);
+            newMatch.subscribeObserver(new MatchStatusObserver(matchName, matches));
+            matches.put(matchName, newMatch);
+        }
     }
 
     public Map<String, Match> getJoinableMatchesMap() {
-        HashMap<String, Match> result = new HashMap<>();
-        for (String name : matches.keySet()) {
-            result.put(name, matches.get(name));
+        synchronized (matches) {
+            HashMap<String, Match> result = new HashMap<>();
+            for (String name : matches.keySet()) {
+                result.put(name, matches.get(name));
+            }
+            return result;
         }
-        return result;
     }
 
     public Match getMatch(String name) {
