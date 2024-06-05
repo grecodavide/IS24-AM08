@@ -163,8 +163,8 @@ public class GraphicalViewGUI extends GraphicalView {
         Platform.runLater(() -> {
             PlayerTabController playerTabController = playerTabControllers.get(someoneUsername);
             playerTabController.removePlayerChoiceContainer();
-            ShownCard card = super.clientBoards.get(someoneUsername).getPlaced().get(0);
-            playerTabController.getBoard().addCard(new Pair<>(0, 0), (InitialCard) card.card(), card.side());
+            InitialCard card = super.clientBoards.get(someoneUsername).getInitialCard();
+            playerTabController.getBoard().addCard(new Pair<>(0, 0), card, side);
         });
     }
 

@@ -3,6 +3,7 @@ package it.polimi.ingsw.client.frontend.gui;
 import it.polimi.ingsw.client.frontend.gui.controllers.SceneController;
 import it.polimi.ingsw.utils.GuiUtil;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
@@ -45,6 +46,10 @@ public class GraphicalApplication extends Application {
         primaryStage.setScene(connectionScene);
         primaryStage.show();
         root.requestFocus();
+        primaryStage.setOnCloseRequest((event) -> {
+                Platform.exit();
+                System.exit(0);
+            });
 
     }
 
