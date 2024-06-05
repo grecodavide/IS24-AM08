@@ -54,7 +54,7 @@ public class GraphicalApplication extends Application {
      * @param path file path of FXML
      * @return The first node
      * @param <T> Type of the node
-     * @throws IOException
+     * @throws IOException in case of error while reading the file
      */
     private <T>T loadScene(String path) throws IOException {
         FXMLLoader loader = GuiUtil.getLoader(path);

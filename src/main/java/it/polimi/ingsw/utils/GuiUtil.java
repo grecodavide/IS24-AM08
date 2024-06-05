@@ -1,6 +1,10 @@
 package it.polimi.ingsw.utils;
 
 import it.polimi.ingsw.client.frontend.gui.GraphicalApplication;
+import it.polimi.ingsw.exceptions.AlreadyUsedUsernameException;
+import it.polimi.ingsw.exceptions.WrongChoiceException;
+import it.polimi.ingsw.exceptions.WrongStateException;
+import it.polimi.ingsw.exceptions.WrongTurnException;
 import it.polimi.ingsw.gamemodel.*;
 import javafx.fxml.FXMLLoader;
 
@@ -78,6 +82,16 @@ public class GuiUtil {
             case BLUE -> "#0C6692";
             case GREEN -> "#195C00";
             case YELLOW -> "#BEA013";
+        };
+    }
+
+    public static String getExceptionTitle(Exception e) {
+        return switch (e) {
+            case WrongStateException ignored -> "Wrong turn!";
+            case WrongChoiceException ignored -> "Wrong move!";
+            case AlreadyUsedUsernameException ignored -> "Username already used!";
+            case WrongTurnException ignored -> "It is not your turn!";
+            default -> "Error!";
         };
     }
 

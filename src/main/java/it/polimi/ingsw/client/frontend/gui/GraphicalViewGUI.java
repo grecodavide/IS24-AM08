@@ -333,7 +333,7 @@ public class GraphicalViewGUI extends GraphicalView {
 
                 // Initialize attributes
                 GuiUtil.applyCSS(root, "/css/style.css");
-                controller.setText(exception.getMessage());
+                controller.setErrror(exception);
                 dialog.setScene(errorScene);
                 dialog.setTitle("Error");
                 dialog.initOwner(this.stage);
