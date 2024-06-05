@@ -139,8 +139,7 @@ public class ClientListener extends Thread {
             } catch (ChosenMatchException | WrongStateException | AlreadyUsedUsernameException | IllegalArgumentException e) {
                 this.sendError(e.getMessage(), e);
             } catch (IOException e) {
-                match.removePlayer(this.playerController.getPlayer());
-                this.close();
+                this.close(match);
             }
         }
         this.match = match;
@@ -212,7 +211,7 @@ public class ClientListener extends Thread {
      */
     public void listen() {
         try {
-            while (this.socket.isConnected()) {
+            while (!this.socket.isClosed() && this.socket.isConnected()) {
                 String msg = this.io.readMsg();
                 // if msg is null, it means the socket was closed client side. Quit all
                 if (msg == null) {
@@ -221,17 +220,17 @@ public class ClientListener extends Thread {
                 this.executeRequest(msg);
             }
         } catch (IOException | ClassNotFoundException e) {
-            match.removePlayer(this.playerController.getPlayer());
-            this.close();
+            this.close(match);
         }
     }
 
     /**
      * This will close socket and input/output handlers, if not null
      */
-    private void close() {
+    private void close(Match match) {
+        match.removePlayer(this.playerController.getPlayer());
         try {
-            if (this.socket != null) {
+            if (this.socket != null && !this.socket.isClosed()) {
                 this.socket.close();
             }
             this.io.close();
