@@ -231,9 +231,9 @@ public class ClientListener extends Thread {
         match.removePlayer(this.playerController.getPlayer());
         try {
             if (this.socket != null && !this.socket.isClosed()) {
+                this.io.close();
                 this.socket.close();
             }
-            this.io.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
