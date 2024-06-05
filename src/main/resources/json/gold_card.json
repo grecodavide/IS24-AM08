@@ -3,8 +3,8 @@
     "multiplier": "CORNER_OBJ",
     "req": {
       "reqs": {
-        "ANIMAL": 1,
-        "PLANT": 3
+        "PLANT": 3,
+        "ANIMAL": 1
       }
     },
     "points": 2,
@@ -463,8 +463,8 @@
     "multiplier": "PARCHMENT",
     "req": {
       "reqs": {
-        "ANIMAL": 1,
-        "INSECT": 2
+        "INSECT": 2,
+        "ANIMAL": 1
       }
     },
     "points": 1,
@@ -491,8 +491,8 @@
     "multiplier": "PARCHMENT",
     "req": {
       "reqs": {
-        "FUNGUS": 2,
-        "INSECT": 1
+        "INSECT": 1,
+        "FUNGUS": 2
       }
     },
     "points": 1,
@@ -519,8 +519,8 @@
     "multiplier": "PARCHMENT",
     "req": {
       "reqs": {
-        "FUNGUS": 1,
-        "PLANT": 2
+        "PLANT": 2,
+        "FUNGUS": 1
       }
     },
     "points": 1,
@@ -547,8 +547,8 @@
     "multiplier": "PARCHMENT",
     "req": {
       "reqs": {
-        "ANIMAL": 2,
-        "PLANT": 1
+        "PLANT": 1,
+        "ANIMAL": 2
       }
     },
     "points": 1,
@@ -575,8 +575,8 @@
     "multiplier": "FEATHER",
     "req": {
       "reqs": {
-        "ANIMAL": 1,
-        "FUNGUS": 2
+        "FUNGUS": 2,
+        "ANIMAL": 1
       }
     },
     "points": 1,
@@ -603,8 +603,8 @@
     "multiplier": "FEATHER",
     "req": {
       "reqs": {
-        "FUNGUS": 1,
-        "ANIMAL": 2
+        "ANIMAL": 2,
+        "FUNGUS": 1
       }
     },
     "points": 1,
@@ -631,8 +631,8 @@
     "multiplier": "FEATHER",
     "req": {
       "reqs": {
-        "INSECT": 1,
-        "PLANT": 2
+        "PLANT": 2,
+        "INSECT": 1
       }
     },
     "points": 1,
@@ -659,8 +659,8 @@
     "multiplier": "FEATHER",
     "req": {
       "reqs": {
-        "PLANT": 1,
-        "INSECT": 2
+        "INSECT": 2,
+        "PLANT": 1
       }
     },
     "points": 1,
@@ -687,8 +687,8 @@
     "multiplier": "INKWELL",
     "req": {
       "reqs": {
-        "ANIMAL": 1,
-        "PLANT": 2
+        "PLANT": 2,
+        "ANIMAL": 1
       }
     },
     "points": 1,
@@ -715,8 +715,8 @@
     "multiplier": "INKWELL",
     "req": {
       "reqs": {
-        "FUNGUS": 1,
-        "INSECT": 2
+        "INSECT": 2,
+        "FUNGUS": 1
       }
     },
     "points": 1,
@@ -743,8 +743,8 @@
     "multiplier": "INKWELL",
     "req": {
       "reqs": {
-        "ANIMAL": 2,
-        "INSECT": 1
+        "INSECT": 1,
+        "ANIMAL": 2
       }
     },
     "points": 1,
@@ -771,8 +771,8 @@
     "multiplier": "INKWELL",
     "req": {
       "reqs": {
-        "FUNGUS": 2,
-        "PLANT": 1
+        "PLANT": 1,
+        "FUNGUS": 2
       }
     },
     "points": 1,
@@ -799,8 +799,8 @@
     "multiplier": "CORNER_OBJ",
     "req": {
       "reqs": {
-        "ANIMAL": 3,
-        "PLANT": 1
+        "PLANT": 1,
+        "ANIMAL": 3
       }
     },
     "points": 2,
@@ -827,8 +827,8 @@
     "multiplier": "CORNER_OBJ",
     "req": {
       "reqs": {
-        "ANIMAL": 3,
-        "INSECT": 1
+        "INSECT": 1,
+        "ANIMAL": 3
       }
     },
     "points": 2,
@@ -855,8 +855,8 @@
     "multiplier": "CORNER_OBJ",
     "req": {
       "reqs": {
-        "FUNGUS": 1,
-        "ANIMAL": 3
+        "ANIMAL": 3,
+        "FUNGUS": 1
       }
     },
     "points": 2,
@@ -883,8 +883,8 @@
     "multiplier": "CORNER_OBJ",
     "req": {
       "reqs": {
-        "ANIMAL": 1,
-        "FUNGUS": 3
+        "FUNGUS": 3,
+        "ANIMAL": 1
       }
     },
     "points": 2,
@@ -911,8 +911,8 @@
     "multiplier": "CORNER_OBJ",
     "req": {
       "reqs": {
-        "FUNGUS": 3,
-        "PLANT": 1
+        "PLANT": 1,
+        "FUNGUS": 3
       }
     },
     "points": 2,
@@ -939,8 +939,8 @@
     "multiplier": "CORNER_OBJ",
     "req": {
       "reqs": {
-        "FUNGUS": 3,
-        "INSECT": 1
+        "INSECT": 1,
+        "FUNGUS": 3
       }
     },
     "points": 2,
@@ -967,8 +967,8 @@
     "multiplier": "CORNER_OBJ",
     "req": {
       "reqs": {
-        "ANIMAL": 1,
-        "INSECT": 3
+        "INSECT": 3,
+        "ANIMAL": 1
       }
     },
     "points": 2,
@@ -995,8 +995,8 @@
     "multiplier": "CORNER_OBJ",
     "req": {
       "reqs": {
-        "PLANT": 1,
-        "INSECT": 3
+        "INSECT": 3,
+        "PLANT": 1
       }
     },
     "points": 2,
@@ -1023,8 +1023,8 @@
     "multiplier": "CORNER_OBJ",
     "req": {
       "reqs": {
-        "FUNGUS": 1,
-        "INSECT": 3
+        "INSECT": 3,
+        "FUNGUS": 1
       }
     },
     "points": 2,
@@ -1051,8 +1051,8 @@
     "multiplier": "CORNER_OBJ",
     "req": {
       "reqs": {
-        "INSECT": 1,
-        "PLANT": 3
+        "PLANT": 3,
+        "INSECT": 1
       }
     },
     "points": 2,
@@ -1079,8 +1079,8 @@
     "multiplier": "CORNER_OBJ",
     "req": {
       "reqs": {
-        "FUNGUS": 1,
-        "PLANT": 3
+        "PLANT": 3,
+        "FUNGUS": 1
       }
     },
     "points": 2,

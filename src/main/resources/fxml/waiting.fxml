@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.geometry.Insets?>
+<StackPane styleClass="main-container" id="pane" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.polimi.ingsw.client.frontend.gui.controllers.WaitingSceneController">
+    <VBox alignment="CENTER" maxWidth="-Infinity" maxHeight="-Infinity">
+        <Label styleClass="mega-title">Waiting for players</Label>
+        <Pane prefHeight="100" />
+        <VBox alignment="CENTER" styleClass="connection-box">
+            <Label fx:id="matchName" styleClass="match-title" text="Morioh 4/4"/>
+            <Pane prefWidth="100" />
+            <VBox fx:id="playersContainer" alignment="CENTER">
+
+            </VBox>
+            <padding>
+                <Insets bottom="50.0" left="40.0" right="40.0" top="50.0"/>
+            </padding>
+        </VBox>
+    </VBox>
+</StackPane>

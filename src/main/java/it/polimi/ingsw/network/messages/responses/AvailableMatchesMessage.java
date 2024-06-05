@@ -1,18 +1,18 @@
 package it.polimi.ingsw.network.messages.responses;
 
-import com.google.gson.JsonObject;
-import it.polimi.ingsw.gamemodel.Match;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import it.polimi.ingsw.gamemodel.Match;
+import it.polimi.ingsw.utils.AvailableMatch;
 
 /**
  * This response is sent when a user is connected to the server.
  */
-public final class AvailableMatchesMessage extends ResponseMessage{
+public final class AvailableMatchesMessage extends ResponseMessage {
 
-    private final List<JsonObject> matches;
+    private final List<AvailableMatch> matches;
+
     public AvailableMatchesMessage(Map<String, Match> availableMatches) {
         super(null);
         matches = new ArrayList<>();
@@ -20,21 +20,16 @@ public final class AvailableMatchesMessage extends ResponseMessage{
     }
 
     /**
-     *
      * @return a list containing a JsonObject for each match with properties:
      * name - name of the match
      * maxPlayers - maximum number of players
      * joinedPlayers - number of players in the match
      */
-    public List<JsonObject> getMatches() {
+    public List<AvailableMatch> getMatches() {
         return matches;
     }
 
-    private final JsonObject encodeMatch(String name, Match match) {
-        JsonObject result = new JsonObject();
-        result.addProperty("name", name);
-        result.addProperty("maxPlayers", match.getMaxPlayers());
-        result.addProperty("joinedPlayers", match.getPlayers().size());
-        return result;
+    private final AvailableMatch encodeMatch(String name, Match match) {
+        return new AvailableMatch(name, match.getMaxPlayers(), match.getPlayers().size());
     }
 }

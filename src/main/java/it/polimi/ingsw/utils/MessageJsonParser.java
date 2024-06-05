@@ -2,9 +2,9 @@ package it.polimi.ingsw.utils;
 
 import com.google.gson.*;
 import it.polimi.ingsw.network.messages.Message;
-import it.polimi.ingsw.network.messages.actions.*;
+import it.polimi.ingsw.network.messages.actions.ActionMessage;
 import it.polimi.ingsw.network.messages.errors.ErrorMessage;
-import it.polimi.ingsw.network.messages.responses.*;
+import it.polimi.ingsw.network.messages.responses.ResponseMessage;
 
 import java.lang.reflect.Type;
 import java.util.Arrays;

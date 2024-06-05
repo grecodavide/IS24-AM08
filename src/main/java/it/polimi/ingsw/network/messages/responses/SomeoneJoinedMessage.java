@@ -1,22 +1,26 @@
 package it.polimi.ingsw.network.messages.responses;
 
+import it.polimi.ingsw.gamemodel.Player;
+
+import java.util.List;
+
 /**
  * This response is sent when a player joins the current match.
  */
-public final class SomeoneJoinedMessage extends ResponseMessage{
-    private final int joinedPlayers;
+public final class SomeoneJoinedMessage extends ResponseMessage {
+    private final List<String> joinedPlayers;
     private final int maxPlayers;
 
-    public SomeoneJoinedMessage(String username, int joinedPlayers, int maxPlayers) {
+    public SomeoneJoinedMessage(String username, List<Player> joinedPlayers, int maxPlayers) {
         super(username);
-        this.joinedPlayers = joinedPlayers;
+        this.joinedPlayers = joinedPlayers.stream().map(Player::getUsername).toList();
         this.maxPlayers = maxPlayers;
     }
 
     /**
-     * @return Number of players currently in the match
+     * @return Usernames of players currently in the match
      */
-    public int getJoinedPlayers() {
+    public List<String> getJoinedPlayers() {
         return joinedPlayers;
     }
 

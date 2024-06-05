@@ -1,17 +1,11 @@
 package it.polimi.ingsw.network.messages.responses;
 
+import it.polimi.ingsw.gamemodel.*;
+import it.polimi.ingsw.utils.Pair;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import it.polimi.ingsw.gamemodel.Card;
-import it.polimi.ingsw.gamemodel.Color;
-import it.polimi.ingsw.gamemodel.DrawSource;
-import it.polimi.ingsw.gamemodel.Objective;
-import it.polimi.ingsw.gamemodel.PlayableCard;
-import it.polimi.ingsw.gamemodel.Player;
-import it.polimi.ingsw.gamemodel.Symbol;
-import it.polimi.ingsw.utils.Pair;
 
 /**
  * Sent when the required amount of players is reached and the match is about to start.
@@ -62,11 +56,12 @@ public final class MatchStartedMessage extends ResponseMessage {
 
     /**
      * Calculates the needed parameters given some information from the match
+     *
      * @param objectives Pair containing the two visible objectives
-     * @param cards Map that for each visible draw source maps the visible card
+     * @param cards      Map that for each visible draw source maps the visible card
      * @param deckReigns Pair containing the reign of the two visible cards on top of the deck.
      *                   The first is for the Golds deck, while the second for the resources deck.
-     * @param players List of the players in the match
+     * @param players    List of the players in the match
      */
     public MatchStartedMessage(Pair<Objective, Objective> objectives, Map<DrawSource, PlayableCard> cards, Pair<Symbol, Symbol> deckReigns, List<Player> players) {
         super(null);
@@ -86,9 +81,9 @@ public final class MatchStartedMessage extends ResponseMessage {
             result = p.getBoard().getCurrentHand().stream()
                     .mapToInt(Card::getId)
                     .boxed().toArray(Integer[]::new);
-            playerPawnColors.put(p.getNickname(), p.getPawnColor());
-            playerHands.put(p.getNickname(), result);
+            playerPawnColors.put(p.getUsername(), p.getPawnColor());
+            playerHands.put(p.getUsername(), result);
         }
     }
-    
+
 }

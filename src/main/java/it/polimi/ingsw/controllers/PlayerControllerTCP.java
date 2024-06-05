@@ -1,34 +1,27 @@
 package it.polimi.ingsw.controllers;
 
-import it.polimi.ingsw.exceptions.AlreadyUsedNicknameException;
 import it.polimi.ingsw.exceptions.HandException;
 import it.polimi.ingsw.exceptions.WrongChoiceException;
 import it.polimi.ingsw.exceptions.WrongStateException;
 import it.polimi.ingsw.exceptions.WrongTurnException;
-import it.polimi.ingsw.gamemodel.DrawSource;
-import it.polimi.ingsw.gamemodel.InitialCard;
-import it.polimi.ingsw.gamemodel.Match;
-import it.polimi.ingsw.gamemodel.Objective;
-import it.polimi.ingsw.gamemodel.PlayableCard;
-import it.polimi.ingsw.gamemodel.Player;
-import it.polimi.ingsw.gamemodel.Side;
+import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.network.messages.Message;
 import it.polimi.ingsw.network.messages.errors.ErrorMessage;
 import it.polimi.ingsw.network.messages.responses.*;
 import it.polimi.ingsw.network.tcp.IOHandler;
 import it.polimi.ingsw.utils.Pair;
 
+import java.util.Map;
+
 public final class PlayerControllerTCP extends PlayerController {
     private IOHandler io;
 
-    public PlayerControllerTCP(String nickname, Match match, IOHandler io) throws AlreadyUsedNicknameException, WrongStateException {
-        super(nickname, match);
-
+    public PlayerControllerTCP(String username, Match match, IOHandler io) {
+        super(username, match);
         try {
             this.io = io;
         } catch (Exception e) {
             e.printStackTrace();
-            // match.removePlayer(player);
         }
     }
 
@@ -42,6 +35,7 @@ public final class PlayerControllerTCP extends PlayerController {
 
     private void connectionError() {
         match.removePlayer(player);
+        match.unsubscribeObserver(this);
     }
 
     private ErrorMessage createErrorMessage(Exception e) {
@@ -56,29 +50,29 @@ public final class PlayerControllerTCP extends PlayerController {
 
     @Override
     public void someoneJoined(Player someone) {
-        this.sendMessage(new SomeoneJoinedMessage(someone.getNickname(), match.getPlayers().size(), match.getMaxPlayers()));
+        this.sendMessage(new SomeoneJoinedMessage(someone.getUsername(), match.getPlayers(), match.getMaxPlayers()));
     }
 
     @Override
     public void someoneQuit(Player someone) {
-        this.sendMessage(new SomeoneQuitMessage(someone.getNickname(), match.getPlayers().size(), match.isFinished()));
+        this.sendMessage(new SomeoneQuitMessage(someone.getUsername(), match.getPlayers().size(), match.isFinished()));
     }
 
     @Override
     public void someoneDrewInitialCard(Player someone, InitialCard card) {
-        this.sendMessage(new SomeoneDrewInitialCardMessage(someone.getNickname(), card.getId()));
+        this.sendMessage(new SomeoneDrewInitialCardMessage(someone.getUsername(), card.getId()));
     }
 
     @Override
-    public void someoneSetInitialSide(Player someone, Side side) {
-        this.sendMessage(new SomeoneSetInitialSideMessage(someone.getNickname(), side));
+    public void someoneSetInitialSide(Player someone, Side side, Map<Symbol, Integer> availableResources) {
+        this.sendMessage(new SomeoneSetInitialSideMessage(someone.getUsername(), side, availableResources));
     }
 
     @Override
     public void someoneDrewSecretObjective(Player someone, Pair<Objective, Objective> objectives) {
         Pair<Integer, Integer> IDs = new Pair<Integer, Integer>(objectives.first().getID(),
                 objectives.second().getID());
-        this.sendMessage(new SomeoneDrewSecretObjectivesMessage(someone.getNickname(), IDs));
+        this.sendMessage(new SomeoneDrewSecretObjectivesMessage(someone.getUsername(), IDs));
     }
 
     @Override
@@ -86,19 +80,25 @@ public final class PlayerControllerTCP extends PlayerController {
         Integer objectiveID = null;
         if (someone.equals(player))
             objectiveID = objective.getID();
-        this.sendMessage(new SomeoneChoseSecretObjectiveMessage(someone.getNickname(), objectiveID));
+        this.sendMessage(new SomeoneChoseSecretObjectiveMessage(someone.getUsername(), objectiveID));
     }
 
     @Override
     public void someonePlayedCard(Player someone, Pair<Integer, Integer> coords, PlayableCard card, Side side) {
         this.sendMessage(
-                new SomeonePlayedCardMessage(someone.getNickname(), coords, card.getId(), side, someone.getPoints()));
+                new SomeonePlayedCardMessage(someone.getUsername(), coords, card.getId(), side, someone.getPoints(), someone.getBoard().getAvailableResources()));
     }
 
     @Override
     public void someoneDrewCard(Player someone, DrawSource source, PlayableCard card, PlayableCard replacementCard) {
-        this.sendMessage(new SomeoneDrewCardMessage(someone.getNickname(), source, card.getId(),
-                replacementCard.getId(), replacementCard.getReign()));
+        Integer repId = null;
+        Symbol repReign = null;
+        if (replacementCard != null) {
+            repId = replacementCard.getId();
+            repReign = replacementCard.getReign();
+        }
+        this.sendMessage(new SomeoneDrewCardMessage(someone.getUsername(), source, card.getId(),
+                repId, repReign));
     }
 
     @Override
@@ -106,7 +106,7 @@ public final class PlayerControllerTCP extends PlayerController {
         this.sendMessage(new MatchFinishedMessage(match.getPlayersFinalRanking()));
     }
 
-    @Override
+
     public void drawInitialCard() {
         try {
             this.player.drawInitialCard();
@@ -115,7 +115,7 @@ public final class PlayerControllerTCP extends PlayerController {
         }
     }
 
-    @Override
+
     public void chooseInitialCardSide(Side side) {
         try {
             this.player.chooseInitialCardSide(side);
@@ -124,7 +124,6 @@ public final class PlayerControllerTCP extends PlayerController {
         }
     }
 
-    @Override
     public void drawSecretObjectives() {
         try {
             this.player.drawSecretObjectives();
@@ -133,7 +132,6 @@ public final class PlayerControllerTCP extends PlayerController {
         }
     }
 
-    @Override
     public void chooseSecretObjective(Objective objective) {
         try {
             this.player.chooseSecretObjective(objective);
@@ -142,7 +140,6 @@ public final class PlayerControllerTCP extends PlayerController {
         }
     }
 
-    @Override
     public void playCard(Pair<Integer, Integer> coords, PlayableCard card, Side side) {
         try {
             this.player.playCard(coords, card, side);
@@ -151,7 +148,6 @@ public final class PlayerControllerTCP extends PlayerController {
         }
     }
 
-    @Override
     public void drawCard(DrawSource source) {
         try {
             this.player.drawCard(source);
@@ -160,6 +156,37 @@ public final class PlayerControllerTCP extends PlayerController {
         }
     }
 
+    @Override
+    public void someoneSentBroadcastText(Player someone, String text) {
+        Message msg = new SomeoneSentBroadcastTextMessage(someone.getUsername(), text);
+        this.sendMessage(msg);
+    }
 
+    @Override
+    public void someoneSentPrivateText(Player someone, Player recipient, String text) {
+        if (recipient.getUsername().equals(this.player.getUsername()) || someone.getUsername().equals(this.player.getUsername())) {
+            Message msg = new SomeoneSentPrivateTextMessage(someone.getUsername(), recipient.getUsername(), text);
+            this.sendMessage(msg);
+        }
+    }
+
+    public void sendBroadcastText(String text) {
+        this.player.sendBroadcastText(text);
+    }
+
+    public void sendPrivateText(String recipientUsername, String text) {
+        Player recipient = null;
+        for (Player player : this.match.getPlayers()) {
+            if (player.getUsername().equals(recipientUsername)) {
+                recipient = player;
+                break;
+            }
+        }
+
+        // if you want to send error if recipient does not exist, change here
+        if (recipient != null) {
+            this.player.sendPrivateText(recipient, text);
+        }
+    }
 
 }

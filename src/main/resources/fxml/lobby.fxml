@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Label?>
+
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.Button?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.Pane?>
+
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.ProgressIndicator?>
+<StackPane styleClass="main-container" id="pane"
+           fx:controller="it.polimi.ingsw.client.frontend.gui.controllers.LobbySceneController"
+           xmlns:fx="http://javafx.com/fxml/1">
+    <ImageView StackPane.alignment="BOTTOM_CENTER" fitHeight="200" fitWidth="268.5">
+        <Image url="@../images/owl.png" />
+    </ImageView>
+    <HBox StackPane.alignment="CENTER" alignment="CENTER" minHeight="-Infinity" minWidth="-Infinity">
+        <VBox alignment="CENTER" VBox.vgrow="always" maxHeight="-Infinity" maxWidth="600" styleClass="connection-box">
+            <Label fx:id="joinTitle" alignment="TOP_CENTER" text="Join a match" styleClass="title"/>
+            <Pane prefHeight="100" prefWidth="3"/>
+            <ScrollPane fx:id="lobbyScrollPane" hbarPolicy="NEVER" fitToWidth="true" maxHeight="250">
+                <VBox fx:id="matchContainer" VBox.vgrow="ALWAYS" alignment="CENTER">
+                    <ProgressIndicator />
+                </VBox>
+            </ScrollPane>
+            <VBox>
+                <VBox alignment="CENTER">
+                    <Pane prefHeight="25"/>
+                    <TextField fx:id="joinUsername" styleClass="input" promptText="Username" maxWidth="500" alignment="CENTER"/>
+                    <Pane prefHeight="100"/>
+                    <Button fx:id="joinButton" text="Join Match" styleClass="button" alignment="CENTER" />
+                </VBox>
+            </VBox>
+            <padding>
+                <Insets bottom="50.0" left="40.0" right="40.0" top="50.0"/>
+            </padding>
+        </VBox>
+        <StackPane prefWidth="500" prefHeight="-Infinity">
+            <Label styleClass="title" text="OR" StackPane.alignment="CENTER"/>
+        </StackPane>
+        <VBox alignment="CENTER" VBox.vgrow="always" maxHeight="-Infinity" maxWidth="600" styleClass="connection-box">
+            <Label alignment="TOP_CENTER" text="Create a match" styleClass="title"/>
+            <Pane prefHeight="100"/>
+            <VBox>
+                <TextField fx:id="createUsername" styleClass="input" promptText="Username" maxWidth="500" alignment="CENTER"/>
+                <Pane prefHeight="25"/>
+                <TextField fx:id="matchName" styleClass="input" promptText="Match Name" maxWidth="500" alignment="CENTER"/>
+                <Pane prefHeight="25"/>
+                <HBox spacing="30" alignment="CENTER">
+                    <Label text="Max Players:" styleClass="form-label"/>
+                    <HBox spacing="5" alignment="CENTER" fx:id="matchNumberContainer">
+                        <RadioButton text="2" styleClass="radio, normal-radio" selected="true"/>
+                        <RadioButton text="3" styleClass="radio, normal-radio"/>
+                        <RadioButton text="4" styleClass="radio, normal-radio"/>
+                    </HBox>
+                </HBox>
+                <Pane prefHeight="100"/>
+                <HBox alignment="CENTER">
+                    <Button fx:id="createButton" text="Create Match" styleClass="button" alignment="CENTER"/>
+                </HBox>
+            </VBox>
+            <padding>
+                <Insets bottom="50.0" left="40.0" right="40.0" top="50.0"/>
+            </padding>
+        </VBox>
+    </HBox>
+</StackPane>

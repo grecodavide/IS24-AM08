@@ -1,8 +1,8 @@
 package it.polimi.ingsw.gamemodel;
 
 /**
-* All the corners of a card, which can contain a {@link Symbol}
-*/
+ * All the corners of a card, which can contain a {@link Symbol}
+ */
 public enum Corner {
     TOP_LEFT,
     TOP_RIGHT,

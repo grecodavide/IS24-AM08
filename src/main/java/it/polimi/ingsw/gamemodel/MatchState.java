@@ -1,4 +1,5 @@
 package it.polimi.ingsw.gamemodel;
+
 import it.polimi.ingsw.exceptions.WrongStateException;
 
 /**
@@ -13,7 +14,7 @@ import it.polimi.ingsw.exceptions.WrongStateException;
 public abstract class MatchState {
     Match match;
 
-    protected MatchState (Match match) {
+    protected MatchState(Match match) {
         this.match = match;
     }
 
@@ -28,6 +29,7 @@ public abstract class MatchState {
      * Checks dynamically if a player can be added in the current state, otherwise throws an exception.
      * The check is performed implicitly, since this version of the method is called if and only if it hasn't been
      * overridden by the MatchState object from which it's called.
+     *
      * @throws WrongStateException if the method cannot be called in the current state
      */
     public void addPlayer() throws WrongStateException {
@@ -50,9 +52,10 @@ public abstract class MatchState {
      * Checks dynamically if an initial card can be drawn in the current state, otherwise throws an exception.
      * The check is performed implicitly, since this version of the method is called if and only if it hasn't been
      * overridden by the MatchState object from which it's called.
+     *
      * @throws WrongStateException if the method cannot be called in the current state
      */
-    public void drawInitialCard() throws WrongStateException{
+    public void drawInitialCard() throws WrongStateException {
         throw new WrongStateException("drawInitialCard not allowed in the current match state!");
     }
 
@@ -60,9 +63,10 @@ public abstract class MatchState {
      * Checks dynamically if a player can choose the initial card side in the current state, otherwise throws an exception.
      * The check is performed implicitly, since this version of the method is called if and only if it hasn't been
      * overridden by the MatchState object from which it's called.
+     *
      * @throws WrongStateException if the method cannot be called in the current state
      */
-    public void chooseInitialSide() throws WrongStateException{
+    public void chooseInitialSide() throws WrongStateException {
         throw new WrongStateException("chooseInitialSide not allowed in the current match state!");
     }
 
@@ -70,9 +74,10 @@ public abstract class MatchState {
      * Checks dynamically if a player can make a move in the current state, otherwise throws an exception.
      * The check is performed implicitly, since this version of the method is called if and only if it hasn't been
      * overridden by the MatchState object from which it's called.
+     *
      * @throws WrongStateException if the method cannot be called in the current state
      */
-    public void makeMove() throws WrongStateException{
+    public void makeMove() throws WrongStateException {
         throw new WrongStateException("makeMove not allowed in the current match state!");
     }
 
@@ -80,9 +85,10 @@ public abstract class MatchState {
      * Checks dynamically if a player can draw a playable card in the current state, otherwise throws an exception.
      * The check is performed implicitly, since this version of the method is called if and only if it hasn't been
      * overridden by the MatchState object from which it's called.
+     *
      * @throws WrongStateException if the method cannot be called in the current state
      */
-    public void drawCard() throws WrongStateException{
+    public void drawCard() throws WrongStateException {
         throw new WrongStateException("drawCard not allowed in the current match state!");
     }
 
@@ -91,9 +97,10 @@ public abstract class MatchState {
      * throws an exception.
      * The check is performed implicitly, since this version of the method is called if and only if it hasn't been
      * overridden by the MatchState object from which it's called.
+     *
      * @throws WrongStateException if the method cannot be called in the current state
      */
-    public void proposeSecretObjectives() throws WrongStateException{
+    public void proposeSecretObjectives() throws WrongStateException {
         throw new WrongStateException("proposeSecretObjective not allowed in the current match state!");
     }
 
@@ -101,6 +108,7 @@ public abstract class MatchState {
      * Checks dynamically if a player can choose their secret objective in the current state, otherwise throws an exception.
      * The check is performed implicitly, since this version of the method is called if and only if it hasn't been
      * overridden by the MatchState object from which it's called.
+     *
      * @throws WrongStateException if the method cannot be called in the current state
      */
     public void chooseSecretObjective() throws WrongStateException {

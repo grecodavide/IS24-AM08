@@ -1,13 +1,14 @@
 package it.polimi.ingsw.gamemodel;
 
 /**
-* Used to know which of the two faces of a card we want to use
-*/
+ * Used to know which of the two faces of a card we want to use
+ */
 public enum Side {
     FRONT("front"),
     BACK("back");
 
     private String string;
+
     Side(String string) {
         this.string = string;
     }

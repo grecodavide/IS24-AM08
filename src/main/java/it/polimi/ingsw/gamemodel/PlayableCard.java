@@ -1,17 +1,22 @@
 package it.polimi.ingsw.gamemodel;
 
-import java.util.Set;
-
 import it.polimi.ingsw.exceptions.InvalidResourceException;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.Set;
 
 /**
  * Class that represents every kind of card that can be played during the game.
  * All these cards have at least a side (the back) that does not require any
- * resouce to be played.
- * 
+ * resource to be played.
+ *
  * @see CardFace
  */
-public abstract sealed class PlayableCard extends Card permits GoldCard, ResourceCard {
+public abstract sealed class PlayableCard extends Card implements Serializable permits GoldCard, ResourceCard {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     protected int points;
     protected Symbol reign;
     private static Integer lastID = 0;
@@ -21,7 +26,7 @@ public abstract sealed class PlayableCard extends Card permits GoldCard, Resourc
      * have a reign and that the back is made up of
      * only full corners (no resources) and the center gives a resource of their
      * reign
-     * 
+     *
      * @param reign the reign of the card
      * @throws InvalidResourceException if the passed resource is not in
      *                                  {@link Symbol#getReigns()}
@@ -40,9 +45,13 @@ public abstract sealed class PlayableCard extends Card permits GoldCard, Resourc
         }
     }
 
+    public PlayableCard() {
+
+    }
+
     /**
      * Getter for the card reign
-     * 
+     *
      * @return the card's reign
      * @see Symbol#getReigns()
      */
