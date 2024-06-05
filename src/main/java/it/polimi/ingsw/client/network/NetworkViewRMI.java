@@ -1,11 +1,5 @@
 package it.polimi.ingsw.client.network;
 
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
-import java.util.List;
 import it.polimi.ingsw.client.frontend.GraphicalView;
 import it.polimi.ingsw.controllers.PlayerControllerRMIInterface;
 import it.polimi.ingsw.gamemodel.DrawSource;
@@ -16,14 +10,19 @@ import it.polimi.ingsw.server.ServerRMIInterface;
 import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.Pair;
 
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
+import java.util.List;
+
 public class NetworkViewRMI extends NetworkView {
     private final ServerRMIInterface server;
     private PlayerControllerRMIInterface controller;
 
     public NetworkViewRMI(GraphicalView graphicalView, String ipAddress, int port) throws RemoteException {
         super(graphicalView, ipAddress, port);
-
-        // System.setProperty("java.rmi.server.hostname","192.168.111.119");
 
         // Try to get a remote Server instance from the network
         Registry registry = LocateRegistry.getRegistry(ipAddress, port);
@@ -36,7 +35,6 @@ public class NetworkViewRMI extends NetworkView {
         }
     }
 
-    // Methods called by the GraphicalView
     @Override
     public void getAvailableMatches() {
         try {

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Label?>
+
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.Button?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.layout.StackPane?>
+
+<?import javafx.scene.layout.Pane?>
+<StackPane styleClass="main-container"
+           fx:controller="it.polimi.ingsw.client.frontend.gui.controllers.ConnectionSceneController" id="pane"
+           xmlns:fx="http://javafx.com/fxml/1">
+    <children>
+        <HBox StackPane.alignment="CENTER" alignment="CENTER">
+            <ImageView preserveRatio="true" fitWidth="500">
+                <Image
+                        url="@../images/codex-logo.png"
+                        backgroundLoading="true"
+                />
+            </ImageView>
+            <Pane prefWidth="100" />
+            <VBox VBox.vgrow="always" alignment="CENTER" maxHeight="-Infinity">
+                <VBox alignment="CENTER" styleClass="connection-box" fillWidth="false"
+                      maxWidth="-Infinity">
+                    <Label styleClass="title" text="Connect to a server" />
+                    <Pane prefHeight="40"/>
+                    <VBox>
+                        <TextField fx:id="serverAddress" styleClass="input" promptText="Server IP" maxWidth="500"/>
+                        <Pane prefHeight="25"/>
+                        <TextField fx:id="serverPort" styleClass="input" promptText="Port" maxWidth="500"/>
+                        <Pane prefHeight="25"/>
+                        <HBox spacing="20">
+                            <HBox spacing="10" alignment="CENTER">
+                                <RadioButton fx:id="RMIButton" text="RMI" styleClass="radio, normal-radio"/>
+                                <RadioButton fx:id="TCPButton" text="TCP" styleClass="radio, normal-radio"/>
+                            </HBox>
+                        </HBox>
+                    </VBox>
+
+                    <Pane prefHeight="40"/>
+                    <Button fx:id="connectButton" text="Connect" styleClass="button"/>
+                    <padding>
+                        <Insets bottom="40.0" left="40.0" right="40.0" top="40.0"/>
+                    </padding>
+                </VBox>
+            </VBox>
+        </HBox>
+    </children>
+</StackPane>

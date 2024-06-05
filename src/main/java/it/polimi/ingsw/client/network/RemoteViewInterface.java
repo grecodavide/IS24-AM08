@@ -1,13 +1,14 @@
 package it.polimi.ingsw.client.network;
 
-import java.rmi.Remote;
-import java.rmi.RemoteException;
-import java.util.List;
-import java.util.Map;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.LeaderboardEntry;
 import it.polimi.ingsw.utils.Pair;
+
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Network interface used to declare all and only the methods callable on a remote view instance implementing this interface or
@@ -34,10 +35,10 @@ public interface RemoteViewInterface extends Remote {
      */
     void matchStarted(Map<String, Color> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands, Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards, Pair<Symbol, Symbol> decksTopReigns) throws RemoteException;
 
-    
+
     /**
      * Gives the graphical view a list of available matches
-     * 
+     *
      * @param availableMatchs The available matches
      */
     void receiveAvailableMatches(List<AvailableMatch> availableMatchs) throws RemoteException;

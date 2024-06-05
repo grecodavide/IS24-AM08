@@ -1,20 +1,21 @@
 package it.polimi.ingsw.client.network;
 
-import java.io.IOException;
-import java.net.Socket;
-import java.util.List;
-import java.util.Map;
-
 import it.polimi.ingsw.client.frontend.GraphicalView;
-import it.polimi.ingsw.gamemodel.*;
+import it.polimi.ingsw.gamemodel.DrawSource;
+import it.polimi.ingsw.gamemodel.Objective;
+import it.polimi.ingsw.gamemodel.PlayableCard;
+import it.polimi.ingsw.gamemodel.Side;
 import it.polimi.ingsw.network.messages.Message;
 import it.polimi.ingsw.network.messages.actions.*;
 import it.polimi.ingsw.network.tcp.ClientReceiver;
 import it.polimi.ingsw.network.tcp.IOHandler;
 import it.polimi.ingsw.utils.Pair;
 
+import java.io.IOException;
+import java.net.Socket;
+
 public class NetworkViewTCP extends NetworkView {
-    private IOHandler io;
+    private final IOHandler io;
 
     public NetworkViewTCP(GraphicalView graphicalView, String address, Integer port) throws IOException {
         super(graphicalView, address, port);
@@ -41,13 +42,6 @@ public class NetworkViewTCP extends NetworkView {
         } catch (IOException e) {
             // TODO: handle IO
         }
-    }
-
-    @Override
-    public void matchStarted(Map<String, Color> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands,
-            Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards,
-            Pair<Symbol, Symbol> decksTopReign) {
-        this.graphicalView.matchStarted(playersUsernamesAndPawns, playersHands, visibleObjectives, visiblePlayableCards, decksTopReign);
     }
 
     @Override

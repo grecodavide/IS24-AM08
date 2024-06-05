@@ -1,0 +1,351 @@
+@font-face {
+    font-family: 'FrakturNo2';
+    src: url('../images/fonts/FrakturNo2/FrakturNo2.ttf');
+}
+@font-face {
+    font-family: 'Cyntho Next';
+    src: url('../images/fonts/cyntho-next/CynthoNextRegular.ttf');
+}
+@font-face {
+    font-family: 'Cyntho Next Medium';
+    src: url('../images/fonts/cyntho-next/CynthoNextMedium.ttf');
+}
+
+@font-face {
+    font-family: 'Cyntho Next ExtraBold';
+    src: url('../images/fonts/cyntho-next/CynthoNextExtraBold.ttf');
+}
+
+* {
+    -fx-foreground-color: #412714;
+    -fx-primary-container: #e4dcb6;
+    -fx-secondary-container: #DDD7A0;
+    -fx-primary-border-color: #412714;
+    -fx-accent-bg-color: #a49849;
+    -fx-accent-fg-color: #2c2119;
+    -fx-third-bg-color: #f6f3e4;
+    -fx-list-even-color: #ECE3BB;
+    -fx-list-odd-color: #C2B784;
+}
+
+.main-container {
+    -fx-font-family: 'Cyntho Next';
+}
+
+#pane{
+    -fx-background-image: url("../images/background.png");
+    -fx-background-repeat: repeat;
+    -fx-background-position: center center;
+}
+
+#error {
+    -fx-background-color: -fx-primary-container;
+}
+.connection-box {
+    -fx-background-color: -fx-primary-container;
+    -fx-border-color: -fx-primary-border-color;
+    -fx-border-width: 5px;
+    -fx-border-radius: 20px;
+    -fx-background-radius: 20px;
+    -fx-box-shadow: rgba(0,0,0,0.8) 0 0 10px;
+}
+
+.input {
+    -fx-background-radius: 16px;
+    -fx-text-fill: -fx-foreground-color;
+    -fx-background-color: -fx-third-bg-color;
+    -fx-font-size: 25px;
+    -fx-accent: -fx-accent-bg-color;
+}
+
+.input-label {
+    -fx-text-fill: -fx-foreground-color;
+    -fx-font-size: 30px;
+}
+
+.form-label {
+    -fx-text-fill: -fx-foreground-color;
+    -fx-font-size: 25px;
+}
+.radio {
+    -fx-text-fill: -fx-foreground-color;
+    -jfx-selected-color: -fx-accent-bg-color;
+    -fx-focus-color: transparent;
+}
+
+.radio .radio {
+    -fx-background-image: null;
+    -fx-background-color: -fx-third-bg-color;
+
+}
+.normal-radio {
+    -fx-font-size: 25px;
+}
+.radio:selected .radio .dot {
+    -fx-text-fill: -fx-foreground-color;
+    -fx-background-color: -fx-accent-bg-color;
+    -fx-background-insets: 0;
+}
+
+.button {
+    -fx-text-fill: -fx-accent-fg-color;
+    -fx-font-family: 'Cyntho Next Medium';
+    -fx-font-size: 25px;
+    -fx-background-color: -fx-accent-bg-color;
+
+    -fx-border-color: -fx-primary-border-color;
+    -fx-border-width: 3px;
+    -fx-border-radius: 16px;
+    -fx-background-radius: 16px;
+
+    -fx-padding: 16px 32px;
+}
+
+.button:hover {
+    -fx-background-color: -fx-secondary-container;
+    -fx-text-fill: -fx-accent-bg-color;
+    -fx-border-color: -fx-accent-bg-color;
+}
+
+.smallbutton {
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-accent-fg-color;
+    -fx-font-size: 20px;
+    -fx-background-color: -fx-accent-bg-color;
+
+    -fx-border-color: -fx-primary-border-color;
+    -fx-border-width: 3px;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+
+    -fx-padding: 12px 20px;
+}
+.iconbutton {
+    -fx-text-fill: -fx-accent-fg-color;
+    -fx-font-size: 20px;
+    -fx-background-color: -fx-accent-bg-color;
+
+    -fx-border-color: -fx-primary-border-color;
+    -fx-border-width: 3px;
+    -fx-background-radius: 99999px;
+
+    -fx-padding: 5px 5px;
+}
+.title {
+    -fx-font-family: 'FrakturNo2';
+    -fx-font-size: 40px;
+    -fx-text-fill: -fx-foreground-color;
+}
+
+.match-title {
+    -fx-font-family: "Cyntho Next Medium";
+    -fx-font-size: 40px;
+}
+
+.mega-title {
+    -fx-font-size: 80px;
+    -fx-font-family: 'FrakturNo2';
+}
+.lobby-title {
+    -fx-font-size: 25px;
+}
+
+.lobby-player {
+    -fx-font-size: 25px;
+}
+
+.lobby-container {
+    -fx-background-color: -fx-primary-container;
+    -fx-background-radius: 20px;
+}
+
+.lobby-card {
+    -fx-padding: 5 5 5 5;
+}
+
+.lobby-radio {
+    -fx-font-size: 20px;
+    -fx-end-margin: 5px;
+    -fx-padding: 5px;
+}
+
+.lobby-card-0 {
+    -fx-background-color: -fx-list-even-color;
+}
+.lobby-card-1 {
+    -fx-background-color: -fx-list-odd-color;
+}
+.lobby-card2 {
+    -fx-background-color: -fx-third-bg-color;
+}
+
+.gamecard {
+    -fx-background-radius: 20;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 0);
+}
+
+
+.scroll-pane .viewport {
+    -fx-background-color: transparent;
+    -fx-faint-focus-color: transparent;
+    -fx-border-color: background;
+    -fx-background-insets: -1.4, 0, 1, 2;
+}
+
+
+/* Scrollbar theming*/
+.scroll-bar:horizontal .track,
+.scroll-bar:vertical .track{
+    -fx-background-color: transparent;
+    -fx-border-color : transparent;
+    -fx-background-radius : 0.0em;
+    -fx-border-radius :2.0em;
+}
+.scroll-bar:horizontal .track-background,
+.scroll-bar:vertical .track-background{
+    -fx-background-color: -fx-third-bg-color;
+}
+.scroll-bar:vertical .increment-button ,
+.scroll-bar:vertical .decrement-button {
+    -fx-background-color :transparent;
+    -fx-background-radius : 0.0em;
+    -fx-padding :0.0 10.0 0.0 0.0;
+}
+
+.scroll-bar:horizontal .increment-button ,
+.scroll-bar:horizontal .decrement-button {
+    -fx-background-color :transparent;
+    -fx-background-radius : 0.0em;
+    -fx-padding :0.0 0.0 10.0 0.0;
+}
+
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow{
+    -fx-shape : " ";
+    -fx-padding :0.15em 0.0;
+}
+
+.scroll-bar:vertical .increment-arrow,
+.scroll-bar:vertical .decrement-arrow{
+    -fx-shape : " ";
+    -fx-padding :0.0 0.15em;
+}
+
+.scroll-bar:horizontal .thumb,
+.scroll-bar:vertical .thumb {
+    -fx-background-color : -fx-accent-bg-color;
+    -fx-background-insets : 2.0, 0.0, 0.0;
+    -fx-background-radius : 2.0em;
+}
+
+.scroll-bar:horizontal .thumb:hover,
+.scroll-bar:vertical .thumb:hover {
+    -fx-background-color : -fx-secondary-container;
+    -fx-background-insets : 2.0, 0.0, 0.0;
+    -fx-background-radius : 2.0em;
+}
+
+
+
+/* Style the MenuButton */
+.choice-box {
+  -fx-background-color: -fx-secondary-container;
+  -fx-text-fill: -fx-foreground-color;
+  -fx-font-weight: bold;
+  -fx-padding: 5px 10px;
+  -fx-cursor: hand;
+}
+/*
+.menu-button:hover {
+  -fx-background-color: #e0e0e0;
+}
+*/
+/* Style the arrow button inside the MenuButton */
+.menu-button > .arrow {
+  -fx-fill: black;
+}
+
+/* Style the popup menu itself */
+.menu-button .menu {
+  -fx-background-color: -fx-secondary-container;    /* White background for menu */
+  -fx-border-color: gray;       /* Light gray border */
+  -fx-border-radius: 5px;       /* Rounded corners */
+}
+
+/* Style the menu items */
+.menu-button .menu-item {
+  -fx-text-fill: black;         /* Black text color for menu items */
+  -fx-padding: 5px 15px;        /* Padding around menu item text */
+  -fx-background-color: -fx-secondary-container;
+}
+
+/* Style the menu item when hovered */
+.menu-button .menu-item:hover {
+  -fx-background-color: -fx-accent-bg-color; /* Light gray on hover */
+  -fx-text-fill: -fx-accent-fg-color;
+}
+
+.message-input {
+    -fx-text-fill: -fx-foreground-color;
+    -fx-background-color: -fx-third-bg-color;
+    -fx-font-size: 20px;
+    -fx-accent: -fx-accent-bg-color;
+}
+
+.chat-container {
+    -fx-background-color: #e4dcb6;
+    -fx-font-size: 25px;
+}
+
+.place-spot {
+    -fx-background-color: #e4dcb699;
+}
+
+
+.place-spot-hover {
+    -fx-background-color: -fx-accent-bg-color;
+}
+
+#pointsCounter {
+    -fx-font-size: 30px;
+}
+
+.state-title {
+    -fx-font-size: 45px;
+    -fx-font-family: "Cyntho Next Medium";
+}
+
+.leaderboard-player-label {
+    -fx-font-family: "Cyntho Next Medium";
+    -fx-font-size: 30px;
+}
+
+.leaderboard-points {
+    -fx-font-family: "Cyntho Next";
+    -fx-font-size: 30px;
+}
+
+.leaderboard-result {
+    -fx-font-size: 24px;
+    -fx-padding: 3 10;
+    -fx-border-radius: 5;
+    -fx-background-radius: 12px;
+}
+
+.leaderboard-loser {
+    -fx-background-color: #E94C16;
+    -fx-text-fill: #571011;
+}
+
+.leaderboard-winner {
+    -fx-background-color: #70BB77;
+    -fx-text-fill: #003D20;
+}
+
+.medium-text {
+    -fx-font-family: 'Cyntho Next ExtraBold';
+}
+
+.progress-indicator:indeterminate .segment {
+    -fx-background-color: -fx-primary-border-color;
+}

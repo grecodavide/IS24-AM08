@@ -27,24 +27,28 @@ public abstract sealed class PlayerController implements MatchObserver permits P
      * instance to the match observers.
      *
      * @param username The username of the new player of the Match
-     * @param match The match to which this PlayerClass must pertain
+     * @param match    The match to which this PlayerClass must pertain
      */
     public PlayerController(String username, Match match) {
         this.player = new Player(username, match);
         this.match = match;
     }
 
+    /**
+     * Gets the player linked to this PlayerController instance.
+     *
+     * @return The player linked to this instance
+     */
     public Player getPlayer() {
         return player;
     }
 
-
     /**
      * Tries to effectively join a match, adding himself to the list of observers and the corresponding
      * player to the match, if the username is valid
-     * 
+     *
      * @throws AlreadyUsedUsernameException if the username is already taken
-     * @throws WrongStateException if the match currently does not accept new players
+     * @throws WrongStateException          if the match currently does not accept new players
      */
     public void sendJoined() throws IllegalArgumentException, AlreadyUsedUsernameException, WrongStateException, ChosenMatchException {
         if (match == null) {

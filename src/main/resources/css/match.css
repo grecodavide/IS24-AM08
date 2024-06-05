@@ -1,0 +1,69 @@
+@import "style.css";
+
+.tab-header-area .tab-header-background {
+        -fx-font-size: 40px;
+        -fx-background-image: url("../images/secondary-bgup.png");
+        -fx-background-repeat: repeat;
+        -fx-background-position: center center;
+        -fx-background-size: fit;
+        -fx-border-color: transparent transparent -fx-primary-border-color transparent;
+        -fx-border-width: 0 0 5px 0;
+}
+.tab-pane .tab:selected {
+    -fx-background-color: -fx-accent-bg-color;
+    -fx-text-fill: -fx-accent-fg-color;
+    -fx-background-insets: 0 0 0 0;
+    -fx-background-radius: 0 0 0 0;
+    -fx-border-color: transparent transparent -fx-primary-border-color transparent;
+    -fx-border-width: 0 0 5px 0;
+}
+.tab .tab-label {
+    -fx-alignment: CENTER;
+    -fx-text-fill: -fx-foreground-color;
+    -fx-padding: 0 10 0 10;
+    -fx-font-size: 25px;
+}
+
+.player-tab .tab-label {
+    -fx-alignment: CENTER;
+    -fx-text-fill: -fx-foreground-color;
+    -fx-padding: 0 10 0 10;
+    -fx-font-size: 25px;
+    -fx-font-family: 'Cyntho Next Medium'
+}
+
+.tab-pane:top *.tab-header-area {
+    -fx-padding: 0 0 0 30;
+}
+.tab-pane {
+    -fx-background-color: transparent;
+    -fx-tab-min-width: 100px;
+    -fx-tab-min-height: 66px;
+    -fx-tab-max-height: 66px;
+}
+.tab-pane .tab {
+    -fx-background-color: transparent;
+}
+
+.tab-pane:focused .tab-header-area .headers-region .tab:selected .focus-indicator {
+    -fx-border-width: 0;
+    -fx-border-insets: 0 0 0 0;
+    -fx-border-radius: 0;
+}
+
+.playerboard {
+    -fx-background-color: transparent;
+}
+
+.resources-count {
+    -fx-font-size: 30px;
+    -fx-text-fill: -fx-foreground-color;
+}
+
+.scroll-bar:horizontal .track-background,
+.scroll-bar:vertical .track-background{
+    -fx-background-image: url("../images/background.png");
+    -fx-background-repeat: repeat;
+    -fx-background-position: center center;
+    -fx-padding: 0;
+}

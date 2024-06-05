@@ -1,13 +1,13 @@
 package it.polimi.ingsw.client.network;
 
-import java.rmi.RemoteException;
-import java.util.List;
-import java.util.Map;
 import it.polimi.ingsw.client.frontend.GraphicalView;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.LeaderboardEntry;
 import it.polimi.ingsw.utils.Pair;
+
+import java.util.List;
+import java.util.Map;
 
 public abstract class NetworkView implements RemoteViewInterface {
     protected GraphicalView graphicalView;
@@ -19,8 +19,8 @@ public abstract class NetworkView implements RemoteViewInterface {
      * Initialize the instance all its internal attributes.
      *
      * @param graphicalView The GraphicalView to be subscribed to this NetworkView instance
-     * @param ipAddress The server IP address
-     * @param port The server port
+     * @param ipAddress     The server IP address
+     * @param port          The server port
      */
     public NetworkView(GraphicalView graphicalView, String ipAddress, int port) {
         this.graphicalView = graphicalView;

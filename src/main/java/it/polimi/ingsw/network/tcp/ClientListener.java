@@ -1,9 +1,5 @@
 package it.polimi.ingsw.network.tcp;
 
-import java.io.IOException;
-import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
 import com.google.gson.JsonParseException;
 import it.polimi.ingsw.controllers.PlayerControllerTCP;
 import it.polimi.ingsw.exceptions.AlreadyUsedUsernameException;
@@ -19,10 +15,15 @@ import it.polimi.ingsw.utils.CardsManager;
 import it.polimi.ingsw.utils.MessageJsonParser;
 import it.polimi.ingsw.utils.Pair;
 
+import java.io.IOException;
+import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
+
 /*
  * actual connection procedure: - socket accepted - socket asks for available matches, giving its
  * name to server - when received, it communicates which match it wants to join - only then a
- * playercontroller will be created, with said match - from there the constructor is done, a player
+ * PlayerController will be created, with said match - from there the constructor is done, a player
  * has joined and it just has to listen
  */
 
@@ -65,8 +66,8 @@ public class ClientListener extends Thread {
             Map<Integer, GoldCard> golds = CardsManager.getInstance().getGoldCards();
 
             this.playableCards = new HashMap<>();
-            resources.forEach((id, card) -> this.playableCards.put(id, (PlayableCard) card));
-            golds.forEach((id, card) -> this.playableCards.put(id, (PlayableCard) card));
+            resources.forEach((id, card) -> this.playableCards.put(id, card));
+            golds.forEach((id, card) -> this.playableCards.put(id, card));
 
         } catch (IOException e) {
             this.sendError("Failed to create Listener thread", e);
@@ -76,21 +77,21 @@ public class ClientListener extends Thread {
 
     /**
      * Sends error message with custom text
-     * 
-     * @param prompt the text to be shown
+     *
+     * @param prompt    the text to be shown
      * @param exception the exception type
      */
     private void sendError(String prompt, Exception exception) {
         try {
             this.io.writeMsg(new ErrorMessage(prompt, exception.getClass().getName()));
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
     }
 
 
     /**
      * Loops until a player controller is created
-     * 
+     *
      * @throws IOException if there was an I/O error
      */
     private void setPlayerController() {
@@ -136,7 +137,8 @@ public class ClientListener extends Thread {
                 }
             } catch (JsonParseException | ClassNotFoundException e) {
                 // message is not correctly formatted, ignore
-            } catch (ChosenMatchException | WrongStateException | AlreadyUsedUsernameException | IllegalArgumentException e) {
+            } catch (ChosenMatchException | WrongStateException | AlreadyUsedUsernameException |
+                     IllegalArgumentException e) {
                 this.sendError(e.getMessage(), e);
             } catch (IOException e) {
                 this.close(match);
@@ -147,14 +149,13 @@ public class ClientListener extends Thread {
 
 
     /**
-     * Tries to actually create the player controller with the acquired informations
-     * 
+     * Tries to actually create the player controller with the acquired information
+     *
      * @param username The chosen username
-     * @param match The match to join
-     * 
+     * @param match    The match to join
      * @throws AlreadyUsedUsernameException If the match already contains the chosen username
-     * @throws WrongStateException If the match currently does not accept new players
-     * @throws ChosenMatchException If the match is does not exist or is not valid
+     * @throws WrongStateException          If the match currently does not accept new players
+     * @throws ChosenMatchException         If the match does not exist or is not valid
      */
     private void createPlayerController(String username, Match match)
             throws AlreadyUsedUsernameException, IllegalArgumentException, WrongStateException, ChosenMatchException {
@@ -194,7 +195,7 @@ public class ClientListener extends Thread {
                     this.playerController.sendPrivateText(actionMsg.getRecpient(), actionMsg.getText());
                     break;
                 case PlayCardMessage actionMsg:
-                    Pair<Integer, Integer> coords = new Pair<Integer, Integer>(actionMsg.getX(), actionMsg.getY());
+                    Pair<Integer, Integer> coords = new Pair<>(actionMsg.getX(), actionMsg.getY());
                     PlayableCard card = this.playableCards.get(actionMsg.getCardID());
                     this.playerController.playCard(coords, card, actionMsg.getSide());
                     break;

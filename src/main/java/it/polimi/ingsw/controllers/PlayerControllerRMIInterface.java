@@ -1,8 +1,5 @@
 package it.polimi.ingsw.controllers;
 
-import java.rmi.Remote;
-import java.rmi.RemoteException;
-
 import it.polimi.ingsw.client.network.RemoteViewInterface;
 import it.polimi.ingsw.exceptions.*;
 import it.polimi.ingsw.gamemodel.DrawSource;
@@ -10,6 +7,9 @@ import it.polimi.ingsw.gamemodel.Objective;
 import it.polimi.ingsw.gamemodel.PlayableCard;
 import it.polimi.ingsw.gamemodel.Side;
 import it.polimi.ingsw.utils.Pair;
+
+import java.rmi.Remote;
+import java.rmi.RemoteException;
 
 /**
  * RMI interface used to declare all and only the methods callable on a remote PlayerControllerRMI instance implementing
@@ -87,14 +87,12 @@ public interface PlayerControllerRMIInterface extends Remote {
     void drawCard(DrawSource source) throws RemoteException, HandException, WrongStateException, WrongTurnException, WrongChoiceException;
 
     /**
-     *
      * @param text
      * @throws RemoteException
      */
     public void sendBroadcastText(String text) throws RemoteException;
 
     /**
-     *
      * @param recipient
      * @param text
      */
