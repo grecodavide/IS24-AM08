@@ -71,10 +71,12 @@ public class Player {
      * @param side   whether the card should be placed on the front or on the back
      */
     public void playCard(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws WrongTurnException, WrongStateException, WrongChoiceException {
-        if (match.getCurrentPlayer().equals(this))
-            match.makeMove(coords, card, side);
-        else
-            throw new WrongTurnException("Only the current player can play cards");
+        synchronized (match) {
+            if (match.getCurrentPlayer().equals(this))
+                match.makeMove(coords, card, side);
+            else
+                throw new WrongTurnException("Only the current player can play cards");
+        }
     }
 
     /**
@@ -85,10 +87,12 @@ public class Player {
      * @throws WrongTurnException  if called by the player when it's not its turn
      */
     public Pair<Objective, Objective> drawSecretObjectives() throws WrongStateException, WrongTurnException {
-        if (match.getCurrentPlayer().equals(this)) {
-            return match.proposeSecretObjectives();
-        } else {
-            throw new WrongTurnException("Only the current player can draw secret objectives");
+        synchronized (match) {
+            if (match.getCurrentPlayer().equals(this)) {
+                return match.proposeSecretObjectives();
+            } else {
+                throw new WrongTurnException("Only the current player can draw secret objectives");
+            }
         }
     }
 
@@ -100,10 +104,12 @@ public class Player {
      * @throws WrongStateException if called during the wrong match state
      */
     public InitialCard drawInitialCard() throws WrongTurnException, WrongStateException {
-        if (match.getCurrentPlayer().equals(this))
-            return match.drawInitialCard();
-        else
-            throw new WrongTurnException("Only the current player can draw the initial card");
+        synchronized (match) {
+            if (match.getCurrentPlayer().equals(this))
+                return match.drawInitialCard();
+            else
+                throw new WrongTurnException("Only the current player can draw the initial card");
+        }
     }
 
     /**
@@ -114,10 +120,12 @@ public class Player {
      * @throws WrongStateException if called during the wrong match state
      */
     public void chooseInitialCardSide(Side side) throws WrongTurnException, WrongStateException {
-        if (match.getCurrentPlayer().equals(this))
-            match.setInitialSide(side, board.getAvailableResources());
-        else
-            throw new WrongTurnException("Only the current player can choose the initial card side");
+        synchronized (match) {
+            if (match.getCurrentPlayer().equals(this))
+                match.setInitialSide(side, board.getAvailableResources());
+            else
+                throw new WrongTurnException("Only the current player can choose the initial card side");
+        }
     }
 
     /**
@@ -129,11 +137,13 @@ public class Player {
      * @throws WrongStateException  if called during the wrong match state
      */
     public void drawCard(DrawSource source) throws HandException, WrongStateException, WrongChoiceException, WrongTurnException {
-        if (match.getCurrentPlayer().equals(this)) {
-            PlayableCard card = match.drawCard(source);
-            board.addHandCard(card);
-        } else {
-            throw new WrongTurnException("Only the current player can draw cards");
+        synchronized (match) {
+            if (match.getCurrentPlayer().equals(this)) {
+                PlayableCard card = match.drawCard(source);
+                board.addHandCard(card);
+            } else {
+                throw new WrongTurnException("Only the current player can draw cards");
+            }
         }
     }
 
@@ -146,11 +156,13 @@ public class Player {
      * @throws WrongChoiceException if called on an objective which is not one of the proposed ones
      */
     public void chooseSecretObjective(Objective objective) throws WrongTurnException, WrongStateException, WrongChoiceException {
-        if (match.getCurrentPlayer().equals(this)) {
-            match.setSecretObjective(objective);
-            secretObjective = objective;
-        } else {
-            throw new WrongTurnException("Only the current player can choose an objective");
+        synchronized (match) {
+            if (match.getCurrentPlayer().equals(this)) {
+                match.setSecretObjective(objective);
+                secretObjective = objective;
+            } else {
+                throw new WrongTurnException("Only the current player can choose an objective");
+            }
         }
     }
 

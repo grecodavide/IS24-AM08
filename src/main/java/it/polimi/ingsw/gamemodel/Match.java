@@ -97,17 +97,19 @@ public class Match {
      * @throws WrongStateException      if called while in a state that doesn't allow adding players
      */
     public void addPlayer(Player player) throws IllegalArgumentException, WrongStateException, AlreadyUsedUsernameException {
-        List<String> playersUsernames = getPlayers().stream().map(Player::getUsername).toList();
+        synchronized (this) {
+            List<String> playersUsernames = getPlayers().stream().map(Player::getUsername).toList();
 
-        if (players.contains(player))
-            throw new IllegalArgumentException("Duplicated player in a match");
-        if (playersUsernames.contains(player.getUsername()))
-            throw new AlreadyUsedUsernameException("The chosen username is already in use");
+            if (players.contains(player))
+                throw new IllegalArgumentException("Duplicated player in a match");
+            if (playersUsernames.contains(player.getUsername()))
+                throw new AlreadyUsedUsernameException("The chosen username is already in use");
 
-        currentState.addPlayer();
-        players.add(player);
-        notifyObservers(observer -> observer.someoneJoined(player));
-        currentState.transition();
+            currentState.addPlayer();
+            players.add(player);
+            notifyObservers(observer -> observer.someoneJoined(player));
+            currentState.transition();
+        }
     }
 
     /**
@@ -117,10 +119,14 @@ public class Match {
      * @param player player to be removed from the match
      */
     public void removePlayer(Player player) {
-        currentState.removePlayer();
-        players.remove(player);
-        notifyObservers(observer -> observer.someoneQuit(player));
-        currentState.transition();
+        synchronized (this) {
+            currentState.removePlayer();
+            if (players.contains(player)) {
+                players.remove(player);
+                notifyObservers(observer -> observer.someoneQuit(player));
+                currentState.transition();
+            }
+        }
     }
 
     /**
