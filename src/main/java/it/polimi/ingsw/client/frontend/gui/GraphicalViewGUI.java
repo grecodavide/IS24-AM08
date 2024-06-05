@@ -64,11 +64,13 @@ public class GraphicalViewGUI extends GraphicalView {
      */
     @Override
     public void makeMove() {
-        matchSceneController.setFocus(this.username);
+        Platform.runLater(() -> {
+            matchSceneController.setFocus(this.username);
 
-        // Enable the hand cards interactions, so that they can be dragged
-        playerTabControllers.get(this.username).enablePlaceCardInteractions(true);
-        playerTabControllers.get(this.username).setStateTitle("Play a card");
+            // Enable the hand cards interactions, so that they can be dragged
+            playerTabControllers.get(this.username).enablePlaceCardInteractions(true);
+            playerTabControllers.get(this.username).setStateTitle("Play a card");
+        });
     }
 
     @Override
@@ -120,15 +122,11 @@ public class GraphicalViewGUI extends GraphicalView {
             }
 
             // Initialize the chat pane
-            try {
-                chatPaneController = matchSceneController.getChatPane();
-                playerTabControllers.forEach((tabUsername, controller) -> {
-                    if (!tabUsername.equals(this.username))
-                        chatPaneController.addPlayer(tabUsername);
-                });
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            chatPaneController = matchSceneController.getChatPane();
+            playerTabControllers.forEach((tabUsername, controller) -> {
+                if (!tabUsername.equals(this.username))
+                    chatPaneController.addPlayer(tabUsername);
+            });
 
             // By default, disable draw sources interactions
             matchSceneController.enableDrawSourcesInteractions(false);
@@ -235,22 +233,28 @@ public class GraphicalViewGUI extends GraphicalView {
 
     @Override
     public void someoneQuit(String someoneUsername) {
-
+        if (matchState.equals(MatchStatus.WAIT_STATE)) {
+            Platform.runLater(() -> {waitingSceneController.removePlayer(someoneUsername);});
+        } else {
+            notifyError(new Exception("Someone Quit"));
+        }
     }
 
     @Override
     public void matchFinished(List<LeaderboardEntry> ranking) {
-        try {
-            rankingSceneController = matchSceneController.showRankingScene();
-            ranking.forEach((entry) -> {
-                if (entry.username().equals(this.username)) {
-                    rankingSceneController.setVictory(entry.winner());
-                }
-                rankingSceneController.addRanking(entry);
-            });
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        Platform.runLater(() -> {
+            try {
+                rankingSceneController = matchSceneController.showRankingScene();
+                ranking.forEach((entry) -> {
+                    if (entry.username().equals(this.username)) {
+                        rankingSceneController.setVictory(entry.winner());
+                    }
+                    rankingSceneController.addRanking(entry);
+                });
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     @Override
@@ -316,6 +320,7 @@ public class GraphicalViewGUI extends GraphicalView {
             matchSceneController.setStateTitle("");
         });
     }
+
     @Override
     public void notifyError(Exception exception) {
         System.out.println(exception.getMessage());

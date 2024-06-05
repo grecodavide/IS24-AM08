@@ -11,6 +11,11 @@
     src: url('../images/fonts/cyntho-next/CynthoNextMedium.ttf');
 }
 
+@font-face {
+    font-family: 'Cyntho Next ExtraBold';
+    src: url('../images/fonts/cyntho-next/CynthoNextExtraBold.ttf');
+}
+
 * {
     -fx-foreground-color: #412714;
     -fx-primary-container: #e4dcb6;
@@ -288,7 +293,8 @@
 }
 
 .chat-container {
-    -fx-background-color: #e4dcb6AA;
+    -fx-background-color: #e4dcb6;
+    -fx-font-size: 25px;
 }
 
 .place-spot {
@@ -337,5 +343,5 @@
 }
 
 .medium-text {
-    -fx-font-family: 'Cyntho Next Medium';
+    -fx-font-family: 'Cyntho Next ExtraBold';
 }

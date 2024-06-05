@@ -1,6 +1,7 @@
 package it.polimi.ingsw.client.frontend.gui.controllers;
 
 import it.polimi.ingsw.client.frontend.gui.GraphicalApplication;
+import it.polimi.ingsw.exceptions.WrongInputFormatException;
 import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.GuiUtil;
 import javafx.fxml.FXML;
@@ -42,29 +43,26 @@ public class LobbySceneController extends SceneController {
     public void initializePostController() {
         createButton.setOnMouseClicked((e) -> {
             RadioButton radioButton = (RadioButton) matchNumberToggle.getSelectedToggle();
+            if (radioButton.getText().isEmpty() || createUsername.getText().isEmpty() || matchName.getText().isEmpty() ) {
+                view.notifyError(new WrongInputFormatException("Username or match name or max players not chosen"));
+                return;
+            }
             view.setUsername(createUsername.getText());
             view.createMatch(matchName.getText(), Integer.valueOf(radioButton.getText()));
+
         });
         joinButton.setOnMouseClicked((e) -> {
             view.setUsername(joinUsername.getText());
             RadioButton radiobutton = (RadioButton) matchJoinToggle.getSelectedToggle();
+            if (radiobutton == null || joinUsername.getText().isEmpty() ) {
+                view.notifyError(new WrongInputFormatException("Username or match not chosen"));
+                return;
+            }
             view.joinMatch((String) radiobutton.getProperties().get("matchName"));
         });
         matchNumberContainer.getChildren().forEach((button) -> {((RadioButton) button).setToggleGroup(matchNumberToggle);});
     }
 
-    private void showMatch() throws IOException {
-        VBox root = loadScene("/fxml/match.fxml");
-        GuiUtil.applyCSS(root, "/css/match.css");
-        Scene matchScene = new Scene(root, GraphicalApplication.screenWidth, GraphicalApplication.screenHeight);
-        stage.setScene(matchScene);
-    }
-    private void showLobby() throws IOException {
-        StackPane root = GuiUtil.getFromFXML("/fxml/waiting.fxml");
-        GuiUtil.applyCSS(root, "/css/match.css");
-        Scene matchScene = new Scene(root, GraphicalApplication.screenWidth, GraphicalApplication.screenHeight);
-        stage.setScene(matchScene);
-    }
     public WaitingSceneController showWaitScene() throws IOException {
         StackPane root = loadScene("/fxml/waiting.fxml");
         GuiUtil.applyCSS(root, "/css/match.css");

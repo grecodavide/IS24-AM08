@@ -132,7 +132,7 @@ public class MatchSceneController extends SceneController {
         return (RankingSceneController) root.getProperties().get("Controller");
     }
 
-    public ChatPaneController getChatPane() throws IOException {
+    public ChatPaneController getChatPane() {
         return (ChatPaneController) chatPane.getProperties().get("Controller");
     }
 

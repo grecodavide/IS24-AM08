@@ -26,6 +26,6 @@ public class ErrorSceneController extends SceneController {
 
     public void setErrror(Exception e) {
         errorTitle.setText(GuiUtil.getExceptionTitle(e));
-        errorTitle.setText(e.getMessage());
+        errorText.setText(e.getMessage());
     }
 }

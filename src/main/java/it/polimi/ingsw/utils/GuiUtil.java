@@ -9,6 +9,7 @@ import it.polimi.ingsw.gamemodel.*;
 import javafx.fxml.FXMLLoader;
 
 import java.io.IOException;
+import java.rmi.RemoteException;
 import java.util.Locale;
 
 public class GuiUtil {
@@ -91,6 +92,7 @@ public class GuiUtil {
             case WrongChoiceException ignored -> "Wrong move!";
             case AlreadyUsedUsernameException ignored -> "Username already used!";
             case WrongTurnException ignored -> "It is not your turn!";
+            case RemoteException ignored -> "Connection error";
             default -> "Error!";
         };
     }

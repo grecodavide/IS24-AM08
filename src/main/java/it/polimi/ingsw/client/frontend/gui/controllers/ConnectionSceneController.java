@@ -17,6 +17,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
 import java.io.IOException;
+import java.rmi.RemoteException;
 
 /**
  * Controller for the connection scene
@@ -57,23 +58,18 @@ public class ConnectionSceneController extends SceneController {
             try {
                 networkHandler = new NetworkViewTCP(view, serverAddress.getText(), Integer.valueOf(serverPort.getText()));
                 view.setNetworkInterface(networkHandler);
+                showLobby();
             } catch (Exception e) {
-                // TODO Handle connection error
-                System.err.println(e);
+                view.notifyError(new RemoteException("Cannot connect to the server!"));
             }
         } else {
             try {
                 networkHandler = new NetworkViewRMI(view, serverAddress.getText(), Integer.parseInt(serverPort.getText()));
                 view.setNetworkInterface(networkHandler);
+                showLobby();
             } catch (Exception e) {
-                // TODO Handle connection error
-                System.err.println(e);
+                view.notifyError(e);
             }
-        }
-        try {
-            showLobby();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -131,6 +127,11 @@ public class ConnectionSceneController extends SceneController {
                 controller.addPlayerTab("Oingo", Color.RED);
                 PlayerTabController controller1 = controller.addPlayerTab("Boingo", Color.BLUE);
                 controller1.setCurrentPlayer(true);
+                ChatPaneController chatPaneController = controller.getChatPane();
+                chatPaneController.addPlayer("Oingo");
+                chatPaneController.receiveBroadcastMessage("Oingo", "JOfasdfasdf");
+                chatPaneController.receiveBroadcastMessage("Oingo", "JOdfafasdfasdf");
+                chatPaneController.receiveBroadcastMessage("Oingo", "dfsiooisfd 8fdsd");
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
