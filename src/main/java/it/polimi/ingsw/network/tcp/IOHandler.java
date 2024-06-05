@@ -1,10 +1,10 @@
 package it.polimi.ingsw.network.tcp;
 
-import it.polimi.ingsw.network.messages.Message;
-import it.polimi.ingsw.utils.MessageJsonParser;
-
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketException;
+import it.polimi.ingsw.network.messages.Message;
+import it.polimi.ingsw.utils.MessageJsonParser;
 
 /**
  * This class will handle all the IO operations for a certain socket
@@ -19,12 +19,15 @@ public class IOHandler {
 
     private final MessageJsonParser parser;
 
+    private final Socket socket;
+
     /**
      * Class constructor. It takes a {@link Socket} as a parameter to open its
      * {@link ObjectOutputStream} and {@link ObjectInputStream}
      */
     public IOHandler(Socket socket) throws IOException {
 
+        this.socket = socket;
         this.outputWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
         this.inputReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
@@ -35,9 +38,8 @@ public class IOHandler {
      * Acquires a {@link Message} from the socket's input stream
      *
      * @return the string representing the message
-     * @throws IOException            if the remote communication failed
-     * @throws ClassNotFoundException if the class of the received object could not
-     *                                be found
+     * @throws IOException if the remote communication failed
+     * @throws ClassNotFoundException if the class of the received object could not be found
      */
     public String readMsg() throws IOException, ClassNotFoundException {
         return this.inputReader.readLine();
@@ -93,11 +95,15 @@ public class IOHandler {
      * @throws IOException if the streams could not be accessed
      */
     public void close() throws IOException {
-        if (this.inputReader != null) {
-            this.inputReader.close();
-        }
-        if (this.outputWriter != null) {
-            this.outputWriter.close();
+        try {
+            if (this.inputReader != null) {
+                this.inputReader.close();
+            }
+            if (this.outputWriter != null) {
+                this.outputWriter.close();
+            }
+        } catch (SocketException e) {
+            // socket already closed, no need to do anything
         }
     }
 }
