@@ -345,3 +345,7 @@
 .medium-text {
     -fx-font-family: 'Cyntho Next ExtraBold';
 }
+
+.progress-indicator:indeterminate .segment {
+    -fx-background-color: -fx-primary-border-color;
+}

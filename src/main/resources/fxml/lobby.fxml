@@ -23,7 +23,7 @@
     </ImageView>
     <HBox StackPane.alignment="CENTER" alignment="CENTER" minHeight="-Infinity" minWidth="-Infinity">
         <VBox alignment="CENTER" VBox.vgrow="always" maxHeight="-Infinity" maxWidth="600" styleClass="connection-box">
-            <Label alignment="TOP_CENTER" text="Join a match" styleClass="title"/>
+            <Label fx:id="joinTitle" alignment="TOP_CENTER" text="Join a match" styleClass="title"/>
             <Pane prefHeight="100" prefWidth="3"/>
             <ScrollPane fx:id="lobbyScrollPane" hbarPolicy="NEVER" fitToWidth="true" maxHeight="250">
                 <VBox fx:id="matchContainer" VBox.vgrow="ALWAYS" alignment="CENTER">

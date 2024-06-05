@@ -20,6 +20,7 @@ public class LobbySceneController extends SceneController {
     public TextField matchName;
     @FXML
     public HBox matchNumberContainer;
+    public Label joinTitle;
     @FXML
     VBox matchContainer;
     @FXML
@@ -41,6 +42,7 @@ public class LobbySceneController extends SceneController {
 
     @Override
     public void initializePostController() {
+        joinTitle.setOnMouseClicked((event) -> refreshMatches());
         createButton.setOnMouseClicked((e) -> {
             RadioButton radioButton = (RadioButton) matchNumberToggle.getSelectedToggle();
             if (radioButton.getText().isEmpty() || createUsername.getText().isEmpty() || matchName.getText().isEmpty() ) {
@@ -72,6 +74,12 @@ public class LobbySceneController extends SceneController {
         return controller;
     }
 
+    private void refreshMatches() {
+        matchContainer.getChildren().clear();
+        matchContainer.getChildren().add(new ProgressIndicator());
+        view.getAvailableMatches();
+    }
+
     /**
      * Set the matches displayed
      * @param matchList List of the current available matches
@@ -94,22 +102,14 @@ public class LobbySceneController extends SceneController {
      * @param players current amount of players
      * @param maxPlayers maximum number of players allowed in the match
      */
-    private void addMatchCard(String name, int players, int maxPlayers) {
-        /**
-         *                 <HBox styleClass="lobby-card">
-         *                     <Label text="Match Name" styleClass="lobby-title" />
-         *                     <Pane HBox.hgrow="ALWAYS" />
-         *                     <Label text="2/4" styleClass="lobby-title" />
-         *                     <Pane prefWidth="5"/>
-         *                     <RadioButton styleClass="radio" alignment="CENTER"/>
-         java*                 </HBox>
-         */
+    public void addMatchCard(String name, int players, int maxPlayers) {
         HBox matchCard = new HBox();
         matchCard.getStyleClass().add("lobby-card");
         matchCard.getStyleClass().add("lobby-card-" + matchContainer.getChildren().size()%2);
         matchCard.setAlignment(Pos.CENTER);
 
         RadioButton button = new RadioButton();
+        button.setDisable(players == maxPlayers);
         button.setAlignment(Pos.CENTER);
         button.getStyleClass().add("radio");
         button.getStyleClass().add("lobby-radio");

@@ -5,6 +5,7 @@ import it.polimi.ingsw.client.network.NetworkView;
 import it.polimi.ingsw.client.network.NetworkViewRMI;
 import it.polimi.ingsw.client.network.NetworkViewTCP;
 import it.polimi.ingsw.gamemodel.Color;
+import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.GuiUtil;
 import it.polimi.ingsw.utils.LeaderboardEntry;
 import javafx.fxml.FXML;
@@ -18,6 +19,8 @@ import javafx.scene.layout.VBox;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Controller for the connection scene
@@ -139,6 +142,19 @@ public class ConnectionSceneController extends SceneController {
         } else if (command.startsWith("error")) {
             String errorMessage = command.replace("error ", "");
             view.notifyError(new Exception(errorMessage));
+        } else if (command.equals("lobby")) {
+            try {
+                StackPane root = this.loadScene("/fxml/lobby.fxml");
+                GuiUtil.applyCSS(root, "/css/style.css");
+                LobbySceneController controller = (LobbySceneController) root.getProperties().get("Controller");
+                List<AvailableMatch> matches = new ArrayList<>();
+                Scene lobbyScene = new Scene(root, GraphicalApplication.screenWidth, GraphicalApplication.screenHeight);
+                stage.setScene(lobbyScene);
+
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            return true;
         }
         return res;
     }
