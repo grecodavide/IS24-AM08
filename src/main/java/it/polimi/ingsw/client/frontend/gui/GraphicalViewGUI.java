@@ -64,6 +64,7 @@ public class GraphicalViewGUI extends GraphicalView {
      */
     @Override
     public void makeMove() {
+        this.changePlayer();
         Platform.runLater(() -> {
             matchSceneController.setFocus(this.username);
 
@@ -136,6 +137,7 @@ public class GraphicalViewGUI extends GraphicalView {
     @Override
     public void giveInitialCard(InitialCard initialCard) {
         super.giveInitialCard(initialCard);
+        this.changePlayer();
         Platform.runLater(() -> {
             playerTabControllers.get(username).giveInitialCard(initialCard);
             matchSceneController.setFocus(username);
@@ -145,6 +147,7 @@ public class GraphicalViewGUI extends GraphicalView {
     @Override
     public void giveSecretObjectives(Pair<Objective, Objective> secretObjectives) {
         super.giveSecretObjectives(secretObjectives);
+        this.changePlayer();
         Platform.runLater(() -> {
             playerTabControllers.get(username).giveSecretObjectives(secretObjectives);
             matchSceneController.setFocus(username);
