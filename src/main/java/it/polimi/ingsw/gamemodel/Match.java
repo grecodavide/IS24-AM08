@@ -120,11 +120,11 @@ public class Match {
      */
     public void removePlayer(Player player) {
         synchronized (this) {
-            currentState.removePlayer();
             if (players.contains(player)) {
                 players.remove(player);
+                // If in a state different from the wait state, end the match
+                currentState.removePlayer();
                 notifyObservers(observer -> observer.someoneQuit(player));
-                currentState.transition();
             }
         }
     }
