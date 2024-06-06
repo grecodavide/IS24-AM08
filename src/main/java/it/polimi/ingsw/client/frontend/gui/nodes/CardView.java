@@ -3,7 +3,9 @@ package it.polimi.ingsw.client.frontend.gui.nodes;
 
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.GuiUtil;
+import it.polimi.ingsw.utils.Pair;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
@@ -12,13 +14,17 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
 
+import javax.xml.crypto.dom.DOMCryptoContext;
 import java.util.HashMap;
+import java.util.Map;
 
 public class CardView extends Pane {
     public static double cardWidth = 199;
     public static double cardHeight = 132;
     public static double cardBorderW = 44.8;
     public static double cardBorderH = 52.6;
+    public static double tokenRadius = 28;
+
     public static String noCardPath = "/images/no_resource2.png";
     public Pane topLeftCorner;
     public Pane topRightCorner;
@@ -178,6 +184,36 @@ public class CardView extends Pane {
         corner.setLayoutX(x);
         corner.setLayoutY(y);
         super.getChildren().add(corner);
+    }
+
+    /**
+     * Display token of a color on the initial card
+     * @param color color of the token
+     */
+    public void setToken(Color color) {
+        double tokenY = 64;
+        Map<Side, Pair<Double, Double>> coords = new HashMap<>();
+        coords.put(Side.FRONT, new Pair<>(78.0, 121.0));
+        coords.put(Side.BACK, new Pair<>(62.0, 137.0));
+
+        Side side = (Side)super.getProperties().get("Side");
+
+        ImageView token = new ImageView(new Image(GuiUtil.getPawnImagePath(color)));
+        token.setFitWidth(tokenRadius);
+        token.setFitHeight(tokenRadius);
+
+        token.setLayoutX(coords.get(side).first() - tokenRadius/2);
+        token.setLayoutY(tokenY - tokenRadius / 2);
+
+        if (color.equals(Color.RED)) {
+            ImageView blackToken = new ImageView(GuiUtil.getBlackPawnImagePath());
+            blackToken.setFitWidth(tokenRadius);
+            blackToken.setFitHeight(tokenRadius);
+            blackToken.setLayoutX(coords.get(side).second() - tokenRadius/2);
+            blackToken.setLayoutY(tokenY - tokenRadius/2);
+            super.getChildren().add(blackToken);
+        }
+        super.getChildren().add(token);
     }
 
 }

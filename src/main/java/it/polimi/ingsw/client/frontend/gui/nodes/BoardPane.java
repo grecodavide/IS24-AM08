@@ -44,11 +44,12 @@ public class BoardPane extends Pane {
      * @param card card to add
      * @param side side of the card to add
      */
-    public void addCard(Pair<Integer, Integer> position, InitialCard card, Side side) {
+    public CardView addCard(Pair<Integer, Integer> position, InitialCard card, Side side) {
         CardView c = new CardView(card, side);
         displayCard(position, c);
         takenSpots.add(position);
         c.getProperties().put("gameCoords", position);
+        return c;
     }
 
     /**

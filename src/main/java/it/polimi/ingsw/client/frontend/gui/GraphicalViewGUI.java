@@ -4,6 +4,7 @@ import it.polimi.ingsw.client.frontend.GraphicalView;
 import it.polimi.ingsw.client.frontend.MatchStatus;
 import it.polimi.ingsw.client.frontend.ShownCard;
 import it.polimi.ingsw.client.frontend.gui.controllers.*;
+import it.polimi.ingsw.client.frontend.gui.nodes.CardView;
 import it.polimi.ingsw.controllers.PlayerController;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.*;
@@ -167,7 +168,8 @@ public class GraphicalViewGUI extends GraphicalView {
             PlayerTabController playerTabController = playerTabControllers.get(someoneUsername);
             playerTabController.removePlayerChoiceContainer();
             InitialCard card = super.clientBoards.get(someoneUsername).getInitialCard();
-            playerTabController.getBoard().addCard(new Pair<>(0, 0), card, side);
+            CardView initial = playerTabController.getBoard().addCard(new Pair<>(0, 0), card, side);
+            initial.setToken(Color.values()[players.indexOf(someoneUsername)]);
         });
     }
 

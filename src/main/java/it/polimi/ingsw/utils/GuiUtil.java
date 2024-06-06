@@ -76,6 +76,9 @@ public class GuiUtil {
     public static String getPawnImagePath(Color color) {
         return pawnsPath + "/" + color.toString().toLowerCase(Locale.ROOT) + "-pawn.png";
     }
+    public static String getBlackPawnImagePath() {
+        return pawnsPath + "/black-pawn.png";
+    }
 
     public static String getHexFromColor(Color color) {
         return switch (color) {

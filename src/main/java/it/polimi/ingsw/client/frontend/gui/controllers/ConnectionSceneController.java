@@ -1,13 +1,13 @@
 package it.polimi.ingsw.client.frontend.gui.controllers;
 
 import it.polimi.ingsw.client.frontend.gui.GraphicalApplication;
+import it.polimi.ingsw.client.frontend.gui.nodes.CardView;
 import it.polimi.ingsw.client.network.NetworkView;
 import it.polimi.ingsw.client.network.NetworkViewRMI;
 import it.polimi.ingsw.client.network.NetworkViewTCP;
 import it.polimi.ingsw.gamemodel.Color;
-import it.polimi.ingsw.utils.AvailableMatch;
-import it.polimi.ingsw.utils.GuiUtil;
-import it.polimi.ingsw.utils.LeaderboardEntry;
+import it.polimi.ingsw.gamemodel.Side;
+import it.polimi.ingsw.utils.*;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -130,11 +130,9 @@ public class ConnectionSceneController extends SceneController {
                 controller.addPlayerTab("Oingo", Color.RED);
                 PlayerTabController controller1 = controller.addPlayerTab("Boingo", Color.BLUE);
                 controller1.setCurrentPlayer(true);
+                CardView cardView = new CardView();
                 ChatPaneController chatPaneController = controller.getChatPane();
                 chatPaneController.addPlayer("Oingo");
-                chatPaneController.receiveBroadcastMessage("Oingo", "JOfasdfasdf");
-                chatPaneController.receiveBroadcastMessage("Oingo", "JOdfafasdfasdf");
-                chatPaneController.receiveBroadcastMessage("Oingo", "dfsiooisfd 8fdsd");
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
