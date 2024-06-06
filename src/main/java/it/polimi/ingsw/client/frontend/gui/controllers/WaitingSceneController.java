@@ -63,7 +63,10 @@ public class WaitingSceneController extends SceneController {
     public void setCurrentPlayers(int players) {
         this.players = players;
         updateLabel();
+    }
 
+    public int getCurrentPlayers() {
+        return players;
     }
 
     public void updateLabel() {

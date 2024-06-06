@@ -237,9 +237,12 @@ public class GraphicalViewGUI extends GraphicalView {
     @Override
     public void someoneQuit(String someoneUsername) {
         if (matchState.equals(MatchStatus.WAIT_STATE)) {
-            Platform.runLater(() -> {waitingSceneController.removePlayer(someoneUsername);});
+            Platform.runLater(() -> {
+                waitingSceneController.removePlayer(someoneUsername);
+                waitingSceneController.setCurrentPlayers(waitingSceneController.getCurrentPlayers()-1);
+            });
         } else {
-            notifyError(new Exception("Someone Quit"));
+            notifyError("Player Quit", "Match finished because " + someoneUsername + " quit");
         }
     }
 
@@ -326,8 +329,10 @@ public class GraphicalViewGUI extends GraphicalView {
 
     @Override
     public void notifyError(Exception exception) {
-        System.out.println(exception.getMessage());
+        this.notifyError(GuiUtil.getExceptionTitle(exception), exception.getMessage());
+    }
 
+    public void notifyError(String title, String description) {
         Platform.runLater(() -> {
             try {
                 // Load the error node from the fxml file
@@ -341,7 +346,9 @@ public class GraphicalViewGUI extends GraphicalView {
 
                 // Initialize attributes
                 GuiUtil.applyCSS(root, "/css/style.css");
-                controller.setErrror(exception);
+                controller.setTitle(title);
+                controller.setText(description);
+
                 dialog.setScene(errorScene);
                 dialog.setTitle("Error");
                 dialog.initOwner(this.stage);
