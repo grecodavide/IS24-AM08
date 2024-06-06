@@ -8,16 +8,18 @@ public class WaitState extends MatchState {
 
     @Override
     public void transition() {
-        if (match.isFull()) {
-            match.setupDecks();
-            match.setupPlayers();
-            match.setupBoards();
+        synchronized (match) {
+            if (match.isFull()) {
+                match.setupDecks();
+                match.setupPlayers();
+                match.setupBoards();
 
-            MatchState nextState = new NextTurnState(match);
-            match.setState(nextState);
+                MatchState nextState = new NextTurnState(match);
+                match.setState(nextState);
 
-            // Notify observers
-            match.notifyMatchStart();
+                // Notify observers
+                match.notifyMatchStart();
+            }
         }
     }
 
