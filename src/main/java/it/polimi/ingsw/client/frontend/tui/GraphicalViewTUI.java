@@ -543,7 +543,6 @@ public class GraphicalViewTUI extends GraphicalView {
         }).start();
     }
 
-    // TO BE CHECKED: does the last turn message appear?
     @Override
     public void makeMove() {
         this.playerControls.disable();
