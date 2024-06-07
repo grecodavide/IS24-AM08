@@ -51,17 +51,6 @@ public class PlateauPane extends Pane {
         positions.put(27, new Pair<>(342.0, 141.0));
         positions.put(28, new Pair<>(342.0, 225.0));
         positions.put(29, new Pair<>(199.0, 158.0));
-        // TODO Remove testing method
-        this.setOnMousePressed((e) -> {
-            for (String p : this.points.keySet()) {
-                if (e.getButton() == MouseButton.PRIMARY) {
-                    this.setPoints(p, this.points.get(p) + 1);
-                } else if (e.getButton() == MouseButton.SECONDARY) {
-                    this.setPoints(p, this.points.get(p) - 1);
-                }
-                return;
-            }
-        });
     }
 
     /**
