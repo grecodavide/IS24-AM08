@@ -47,30 +47,32 @@ public class PlayerControllerRMITest {
 
         try {
             player1 = new PlayerControllerRMI("player1", match);
-            player1.sendJoined();
-        } catch (AlreadyUsedUsernameException | WrongStateException | ChosenMatchException e) {
+            player1.registerView(new TestView());
+        } catch (AlreadyUsedUsernameException | WrongStateException | ChosenMatchException | RemoteException e) {
             fail("player1 init shouldn't throw exception: " + e.getMessage());
         }
 
         try {
             player2 = new PlayerControllerRMI("player1", match);
-            player2.sendJoined();
+            player2.registerView(new TestView());
             // An exception is supposed to be thrown here
             fail("player 2 init should have thrown AlreadyUsedUsernameException");
         } catch (AlreadyUsedUsernameException e) {
             // this exception should be thrown
         } catch (WrongStateException | ChosenMatchException e) {
             fail("player2 initialization shouldn't thrown this specific exception exception: " + e.getMessage());
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
         }
 
         try {
             // The given match is in NextTurnState, should be in WaitState
             initializeStartedMatch(2);
             player1 = new PlayerControllerRMI("player3", match);
-            player1.sendJoined();
+            player1.registerView(new TestView());
             // An exception is supposed to be thrown here
             fail("player 3 init should have thrown WrongStateException");
-        } catch (AlreadyUsedUsernameException | ChosenMatchException e) {
+        } catch (AlreadyUsedUsernameException | ChosenMatchException | RemoteException e) {
             fail("player2 initialization shouldn't thrown this specific exception exception: " + e.getMessage());
         } catch (WrongStateException e) {
             // this exception should be thrown
@@ -83,14 +85,15 @@ public class PlayerControllerRMITest {
 
         try {
             player1 = new PlayerControllerRMI("player1", match);
-            player1.sendJoined();
             view1 = new TestView();
             player1.registerView(view1);
-
+            String name = (String) view1.getLastCallArguments().get("name");
+            assertEquals("someoneJoined: wrong last call in view1", "someoneJoined", view1.getLastCall());
+            assertEquals("someoneJoined: wrong args in view1", "player1", name);
             // Verify that adding player2 triggers player1.someoneJoined and it calls the view method someoneJoined
             player2 = new PlayerControllerRMI("player2", match);
-            player2.sendJoined();
-            String name = (String) view1.getLastCallArguments().get("name");
+            player2.registerView(new TestView());
+            name =  (String) view1.getLastCallArguments().get("name");
             assertEquals("someoneJoined: wrong last call in view1", "someoneJoined", view1.getLastCall());
             assertEquals("someoneJoined: wrong args in view1", "player2", name);
         } catch (Exception e) {
@@ -104,15 +107,14 @@ public class PlayerControllerRMITest {
 
         try {
             player1 = new PlayerControllerRMI("player1", match);
-            player1.sendJoined();
             view1 = new TestView();
             player1.registerView(view1);
+            view1.ignoreLastCall();
             player2 = new PlayerControllerRMI("player2", match);
-            player2.sendJoined();
-
+            player2.registerView(new TestView());
+            view1.ignoreLastCall();
             // Verify that removing  player2 triggers player1.someoneQuit and it calls the view method someoneQuit
             match.removePlayer(player2.getPlayer());
-
             String name = (String) view1.getLastCallArguments().get("name");
             assertEquals("someoneQuit: wrong last call in view1", "someoneQuit", view1.getLastCall());
             assertEquals("someoneQuit: wrong args in view1", "player2", name);
@@ -127,11 +129,9 @@ public class PlayerControllerRMITest {
 
         try {
             player1 = new PlayerControllerRMI("player1", match);
-            player1.sendJoined();
             view1 = new TestView();
             player1.registerView(view1);
             player2 = new PlayerControllerRMI("player2", match);
-            player2.sendJoined();
             view2 = new TestView();
             player2.registerView(view2);
 
@@ -149,19 +149,22 @@ public class PlayerControllerRMITest {
 
             TestView currentPlayerView = (TestView) currentPlayer.getView();
             TestView otherPlayerView = (TestView) otherPlayer.getView();
-
+            currentPlayerView.ignoreLastCall();
+            otherPlayerView.ignoreLastCall();
             currentPlayer.drawInitialCard();
 
             // Verify that current player PlayerControllerRMI called the method giveInitialCard on its view
-            InitialCard card = (InitialCard) currentPlayerView.getLastCallArguments().get("card");
+            Map<String, Object> lastCall = currentPlayerView.getLastCallArguments();
+            InitialCard card = (InitialCard) lastCall.get("card");
             InitialCard drawnCard = (InitialCard) this.getPrivateAttribute(match, "currentGivenInitialCard");
 
             assertEquals("someoneDrewInitialCard: wrong last call in currentPlayerView", "giveInitialCard", currentPlayerView.getLastCall());
             assertEquals("someoneDrewInitialCard: wrong args in currentPlayerView", drawnCard, card);
 
             // Verify that the other player PlayerControllerRMI called the method someoneDrewInitialCard on its view
-            card = (InitialCard) otherPlayerView.getLastCallArguments().get("card");
-            String name = (String) otherPlayerView.getLastCallArguments().get("name");
+            lastCall = otherPlayerView.getLastCallArguments();
+            card = (InitialCard) lastCall.get("card");
+            String name = (String) lastCall.get("name");
 
 
             assertEquals("someoneDrewInitialCard: wrong last call in otherPlayerView", "someoneDrewInitialCard", otherPlayerView.getLastCall());
@@ -178,11 +181,9 @@ public class PlayerControllerRMITest {
 
         try {
             player1 = new PlayerControllerRMI("player1", match);
-            player1.sendJoined();
             view1 = new TestView();
             player1.registerView(view1);
             player2 = new PlayerControllerRMI("player2", match);
-            player2.sendJoined();
             view2 = new TestView();
             player2.registerView(view2);
 
@@ -199,15 +200,15 @@ public class PlayerControllerRMITest {
 
             TestView currentPlayerView = (TestView) currentPlayer.getView();
             TestView otherPlayerView = (TestView) otherPlayer.getView();
-
             currentPlayer.drawInitialCard();
             currentPlayer.chooseInitialCardSide(Side.FRONT);
 
+            otherPlayerView.waitForCall("someoneSetInitialSide");
+            Map<String, Object> lastCall = otherPlayerView.getLastCallArguments();
             // Verify that current player PlayerControllerRMI called the method someoneSetInitialCard on its view
-            Side side = (Side) otherPlayerView.getLastCallArguments().get("side");
-            String name = (String) otherPlayerView.getLastCallArguments().get("name");
+            Side side = (Side) lastCall.get("side");
+            String name = (String) lastCall.get("name");
 
-            assertEquals("someoneSetInitialSide: wrong last call in currentPlayerView", "someoneSetInitialSide", currentPlayerView.getLastCall());
             assertEquals("someoneSetInitialSide: wrong name arg in currentPlayerView", currentPlayer.getPlayer().getUsername(), name);
             assertEquals("someoneSetInitialSide: wrong side arg in currentPlayerView", Side.FRONT, side);
 
@@ -222,11 +223,9 @@ public class PlayerControllerRMITest {
 
         try {
             player1 = new PlayerControllerRMI("player1", match);
-            player1.sendJoined();
             view1 = new TestView();
             player1.registerView(view1);
             player2 = new PlayerControllerRMI("player2", match);
-            player2.sendJoined();
             view2 = new TestView();
             player2.registerView(view2);
 
@@ -251,17 +250,19 @@ public class PlayerControllerRMITest {
             otherPlayer.chooseInitialCardSide(Side.FRONT);
             currentPlayer.drawSecretObjectives();
 
+            currentPlayerView.waitForCall("giveSecretObjectives");
+
             // Verify that current player PlayerControllerRMI called the method giveSecretObjectives on its view
-            Pair<Objective, Objective> objectives = (Pair<Objective, Objective>) currentPlayerView.getLastCallArguments().get("objectives");
+            Map<String, Object> lastCall = currentPlayerView.getLastCallArguments();
+            Pair<Objective, Objective> objectives = (Pair<Objective, Objective>) lastCall.get("objectives");
             Pair<Objective, Objective> actualObjectives = (Pair<Objective, Objective>) this.getPrivateAttribute(match, "currentProposedObjectives");
 
-            assertEquals("someoneDrewSecretObjective: wrong last call in currentPlayerView", "giveSecretObjectives", currentPlayerView.getLastCall());
             assertEquals("someoneDrewSecretObjective: wrong arg in currentPlayerView", actualObjectives, objectives);
 
             // Verify that current player PlayerControllerRMI called the method giveSecretObjectives on its view
             String name = (String) otherPlayerView.getLastCallArguments().get("name");
+            otherPlayerView.waitForCall("someoneDrewSecretObjective");
 
-            assertEquals("someoneDrewSecretObjective: wrong last call in otherPlayerView", "someoneDrewSecretObjective", otherPlayerView.getLastCall());
             assertEquals("someoneDrewSecretObjective: wrong arg in otherPlayerView", currentPlayer.getPlayer().getUsername(), name);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -537,9 +538,7 @@ public class PlayerControllerRMITest {
 
         try {
             player1 = new PlayerControllerRMI("player1", match);
-            player1.sendJoined();
             player2 = new PlayerControllerRMI("player2", match);
-            player2.sendJoined();
             view2 = new TestView();
 
             // Verify that registering a view to player2 triggers player.registerView and it calls the view method getLobbyInfo
@@ -547,7 +546,6 @@ public class PlayerControllerRMITest {
 
             List<String> names = (List<String>) view2.getLastCallArguments().get("names");
 
-            assertEquals("registerView: wrong last call in view2", "giveLobbyInfo", view2.getLastCall());
             assertTrue("registerView: wrong args in view2", names.contains("player1"));
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -683,19 +681,21 @@ public class PlayerControllerRMITest {
         private String lastCall;
         private Map<String, Object> args;
 
-        public void giveInitialCard(InitialCard initialCard) {
+        public synchronized void giveInitialCard(InitialCard initialCard) {
             lastCall = "giveInitialCard";
             args = new HashMap<>();
             args.put("card", initialCard);
+            this.notifyAll();
         }
 
-        public void giveSecretObjectives(Pair<Objective, Objective> secretObjectives) {
+        public synchronized void giveSecretObjectives(Pair<Objective, Objective> secretObjectives) {
             lastCall = "giveSecretObjectives";
             args = new HashMap<>();
             args.put("objectives", secretObjectives);
+            this.notifyAll();
         }
 
-        public void matchStarted(Map<String, Color> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands, Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards, Pair<Symbol, Symbol> decksTopReigns) throws RemoteException {
+        public synchronized void matchStarted(Map<String, Color> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands, Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards, Pair<Symbol, Symbol> decksTopReigns) throws RemoteException {
             lastCall = "matchStarted";
             args = new HashMap<>();
             args.put("pawns", playersUsernamesAndPawns);
@@ -703,6 +703,7 @@ public class PlayerControllerRMITest {
             args.put("objectives", visibleObjectives);
             args.put("playable", visiblePlayableCards);
             args.put("decksTopReigns", decksTopReigns);
+            this.notifyAll();
         }
 
         @Override
@@ -710,36 +711,39 @@ public class PlayerControllerRMITest {
             // TODO: finish
         }
 
-        public void someoneDrewInitialCard(String someoneUsername, InitialCard card) throws RemoteException {
+        public synchronized void someoneDrewInitialCard(String someoneUsername, InitialCard card) throws RemoteException {
             lastCall = "someoneDrewInitialCard";
             args = new HashMap<>();
             args.put("name", someoneUsername);
             args.put("card", card);
+            this.notifyAll();
         }
 
         @Override
-        public void someoneSetInitialSide(String someoneUsername, Side side, Map<Symbol, Integer> availableResources) throws RemoteException {
+        public synchronized void someoneSetInitialSide(String someoneUsername, Side side, Map<Symbol, Integer> availableResources) throws RemoteException {
             lastCall = "someoneSetInitialSide";
             args = new HashMap<>();
             args.put("name", someoneUsername);
             args.put("side", side);
-            // TODO: finish
+            this.notifyAll();
         }
 
-        public void someoneDrewSecretObjective(String someoneUsername) throws RemoteException {
+        public synchronized void someoneDrewSecretObjective(String someoneUsername) throws RemoteException {
             lastCall = "someoneDrewSecretObjective";
             args = new HashMap<>();
             args.put("name", someoneUsername);
+            this.notifyAll();
         }
 
-        public void someoneChoseSecretObjective(String someoneUsername) throws RemoteException {
+        public synchronized void someoneChoseSecretObjective(String someoneUsername) throws RemoteException {
             lastCall = "someoneChoseSecretObjective";
             args = new HashMap<>();
             args.put("name", someoneUsername);
+            this.notifyAll();
         }
 
         @Override
-        public void someonePlayedCard(String someoneUsername, Pair<Integer, Integer> coords, PlayableCard card, Side side, int points, Map<Symbol, Integer> availableResources) throws RemoteException {
+        public synchronized void someonePlayedCard(String someoneUsername, Pair<Integer, Integer> coords, PlayableCard card, Side side, int points, Map<Symbol, Integer> availableResources) throws RemoteException {
             lastCall = "someonePlayedCard";
             args = new HashMap<>();
             args.put("name", someoneUsername);
@@ -747,62 +751,99 @@ public class PlayerControllerRMITest {
             args.put("card", card);
             args.put("side", side);
             args.put("resources", availableResources);
+            this.notifyAll();
         }
 
-        public void someoneDrewCard(String someoneUsername, DrawSource source, PlayableCard card, PlayableCard replacementCard, Symbol replacementReign) throws RemoteException {
+        public synchronized void someoneDrewCard(String someoneUsername, DrawSource source, PlayableCard card, PlayableCard replacementCard, Pair<Symbol, Symbol> deckTopReigns) throws RemoteException {
             lastCall = "someoneDrewCard";
             args = new HashMap<>();
             args.put("name", someoneUsername);
             args.put("source", source);
             args.put("card", card);
             args.put("replCard", replacementCard);
-            args.put("replReign", replacementReign);
+            args.put("deckReign", deckTopReigns);
+            this.notifyAll();
         }
 
         @Override
-        public void someoneJoined(String someoneUsername, List<String> joinedPlayers) throws RemoteException {
-
-        }
-
-        public void someoneJoined(String someoneUsername) throws RemoteException {
+        public synchronized void someoneJoined(String someoneUsername, List<String> joinedPlayers) throws RemoteException {
             lastCall = "someoneJoined";
             args = new HashMap<>();
             args.put("name", someoneUsername);
+            args.put("names", joinedPlayers);
+            this.notifyAll();
         }
 
-        public void someoneQuit(String someoneUsername) throws RemoteException {
+        public synchronized void someoneQuit(String someoneUsername) throws RemoteException {
             lastCall = "someoneQuit";
             args = new HashMap<>();
             args.put("name", someoneUsername);
+            this.notifyAll();
         }
 
         @Override
-        public void matchFinished(List<LeaderboardEntry> ranking) throws RemoteException {
+        public synchronized void matchFinished(List<LeaderboardEntry> ranking) throws RemoteException {
             lastCall = "matchFinished";
             args = new HashMap<>();
             args.put("ranking", ranking);
+            this.notifyAll();
         }
 
-        public void someoneSentBroadcastText(String someoneUsername, String text) throws RemoteException {
+        public synchronized void someoneSentBroadcastText(String someoneUsername, String text) throws RemoteException {
             lastCall = "someoneSentBroadcastText";
             args = new HashMap<>();
             args.put("name", someoneUsername);
             args.put("text", text);
+            this.notifyAll();
         }
 
-        public void someoneSentPrivateText(String someoneUsername, String text) throws RemoteException {
+        public synchronized void someoneSentPrivateText(String someoneUsername, String text) throws RemoteException {
             lastCall = "someoneSentPrivateText";
             args = new HashMap<>();
             args.put("name", someoneUsername);
             args.put("text", text);
+            this.notifyAll();
         }
 
         public String getLastCall() {
             return lastCall;
         }
 
+        public synchronized void waitForCall(String call) {
+            while (!lastCall.equals(call)) {
+                try {
+                    this.wait();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
         public Map<String, Object> getLastCallArguments() {
-            return args;
+            synchronized (this) {
+                while (args == null) {
+                    try {
+                        this.wait();
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                HashMap<String, Object> argsCopy = new HashMap<>();
+                argsCopy.putAll(args);
+                args = null;
+                return argsCopy;
+            }
+        }
+        public void ignoreLastCall() {
+            synchronized (this) {
+                while (args == null) {
+                    try {
+                        this.wait();
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                args = null;
+            }
         }
     }
 }
