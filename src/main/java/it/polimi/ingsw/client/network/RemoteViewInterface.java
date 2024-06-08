@@ -107,9 +107,11 @@ public interface RemoteViewInterface extends Remote {
      * @param someoneUsername The username of the player who has played a card
      * @param source          The DrawSource from which the card has been drawn
      * @param card            The card that has been drawn
+     * @param replacementCard The card that replaced the drawn one
+     * @param deckTopReigns   The decks top reigns
      * @throws RemoteException If the remote object is considered not to be reachable any more and cannot return as usual
      */
-    void someoneDrewCard(String someoneUsername, DrawSource source, PlayableCard card, PlayableCard replacementCard, Symbol replacementCardReign) throws RemoteException;
+    void someoneDrewCard(String someoneUsername, DrawSource source, PlayableCard card, PlayableCard replacementCard, Pair<Symbol, Symbol> deckTopReigns) throws RemoteException;
 
     /**
      * @param someoneUsername

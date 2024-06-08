@@ -100,7 +100,7 @@ public class ClientReceiver implements Runnable {
                     break;
                 case SomeoneDrewCardMessage msg:
                     this.networkView.someoneDrewCard(username, msg.getDrawSource(), this.getPlayable(msg.getCardID()),
-                            this.getPlayable(msg.getReplacementCardID()), msg.getReplacementCardReign());
+                            this.getPlayable(msg.getReplacementCardID()), msg.getDeckTopReigns());
                     break;
                 case SomeoneJoinedMessage msg:
                     this.networkView.someoneJoined(username, msg.getJoinedPlayers());

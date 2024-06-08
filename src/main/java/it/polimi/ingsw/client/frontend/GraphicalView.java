@@ -348,21 +348,17 @@ public abstract class GraphicalView {
      * @param card                 The card he drew
      * @param replacementCard      The replacement card, which will be null if the {@link DrawSource} is a
      *                             deck
-     * @param replacementCardReign The replacement card's reign, which will be null if the
-     *                             {@link DrawSource} is not a deck
+     * @param deckTopReigns Current deck top reigns
      */
     public void someoneDrewCard(String someoneUsername, DrawSource source, PlayableCard card, PlayableCard replacementCard,
-                                Symbol replacementCardReign) {
+                                Pair<Symbol, Symbol> deckTopReigns) {
         if (this.username.equals(someoneUsername)) {
             this.setLastRequestStatus(RequestStatus.SUCCESSFUL);
         }
-        if (source.equals(DrawSource.GOLDS_DECK)) {
-            this.decksTopReign = new Pair<Symbol, Symbol>(replacementCardReign, this.decksTopReign.second());
-        } else if (source.equals(DrawSource.RESOURCES_DECK)) {
-            this.decksTopReign = new Pair<Symbol, Symbol>(this.decksTopReign.first(), replacementCardReign);
-        } else {
+        if (!source.equals(DrawSource.GOLDS_DECK) && !source.equals(DrawSource.RESOURCES_DECK)) {
             visiblePlayableCards.put(source, replacementCard);
         }
+        this.decksTopReign = deckTopReigns;
 
         if (decksTopReign.first() == null && decksTopReign.second() == null && !this.lastTurn) {
             this.lastTurn = true;

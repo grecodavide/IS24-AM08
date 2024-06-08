@@ -312,12 +312,16 @@ public class GraphicalViewGUI extends GraphicalView {
 
     @Override
     public void someoneDrewCard(String someoneUsername, DrawSource source, PlayableCard card, PlayableCard replacementCard,
-                                Symbol replacementCardReign) {
-        super.someoneDrewCard(someoneUsername, source, card, replacementCard, replacementCardReign);
+                                Pair<Symbol, Symbol> deckTopReigns) {
+        super.someoneDrewCard(someoneUsername, source, card, replacementCard, deckTopReigns);
         Platform.runLater(() -> {
             PlayerTabController tab = playerTabControllers.get(someoneUsername);
             tab.setHandCards(clientBoards.get(someoneUsername).getHand());
-            matchSceneController.setDrawSource(source, replacementCard, replacementCardReign);
+            if (!source.equals(DrawSource.GOLDS_DECK) && !source.equals(DrawSource.RESOURCES_DECK)) {
+                matchSceneController.setDrawSource(source, replacementCard, replacementCard.getReign());
+            }
+            matchSceneController.setDrawSource(DrawSource.GOLDS_DECK, null, deckTopReigns.first());
+            matchSceneController.setDrawSource(DrawSource.RESOURCES_DECK, null, deckTopReigns.second());
 
             // If the player that drew a card is this client, disable draw source interactions
             if (someoneUsername.equals(this.username)) {

@@ -148,8 +148,8 @@ public abstract class NetworkView implements RemoteViewInterface {
 
     @Override
     public void someoneDrewCard(String someoneUsername, DrawSource source, PlayableCard card, PlayableCard replacementCard,
-                                Symbol replacementCardReign) {
-        graphicalView.someoneDrewCard(someoneUsername, source, card, replacementCard, replacementCardReign);
+                                Pair<Symbol, Symbol> deckTopReigns) {
+        graphicalView.someoneDrewCard(someoneUsername, source, card, replacementCard, deckTopReigns);
     }
 
     @Override
