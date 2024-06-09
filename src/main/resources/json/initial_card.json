@@ -13,9 +13,9 @@
       "bottomLeft": "EMPTY_CORNER",
       "bottomRight": "EMPTY_CORNER",
       "center": [
+        "ANIMAL",
         "INSECT",
-        "PLANT",
-        "ANIMAL"
+        "PLANT"
       ]
     },
     "id": 1
@@ -53,8 +53,8 @@
       "bottomLeft": "FULL_CORNER",
       "bottomRight": "FULL_CORNER",
       "center": [
-        "FUNGUS",
-        "PLANT"
+        "PLANT",
+        "FUNGUS"
       ]
     },
     "id": 3
@@ -92,8 +92,8 @@
       "bottomLeft": "FULL_CORNER",
       "bottomRight": "FULL_CORNER",
       "center": [
-        "INSECT",
-        "ANIMAL"
+        "ANIMAL",
+        "INSECT"
       ]
     },
     "id": 5
@@ -112,9 +112,9 @@
       "bottomLeft": "EMPTY_CORNER",
       "bottomRight": "EMPTY_CORNER",
       "center": [
-        "FUNGUS",
+        "ANIMAL",
         "PLANT",
-        "ANIMAL"
+        "FUNGUS"
       ]
     },
     "id": 6

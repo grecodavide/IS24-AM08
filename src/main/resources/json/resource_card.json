@@ -363,7 +363,7 @@
       "topLeft": "FUNGUS",
       "topRight": "INSECT",
       "bottomLeft": "PARCHMENT",
-      "bottomRight": "EMPTY_CORNER",
+      "bottomRight": "FULL_CORNER",
       "center": []
     },
     "back": {

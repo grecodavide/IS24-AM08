@@ -284,7 +284,7 @@ public class CardsSerializer {
             topLeft = Symbol.FUNGUS;
             topRight = Symbol.INSECT;
             bottomLeft = Symbol.PARCHMENT;
-            bottomRight = Symbol.EMPTY_CORNER;
+            bottomRight = Symbol.FULL_CORNER;
             resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);
             resourceCardMap.put(resourceCard.getId(), resourceCard);
 
