@@ -151,11 +151,12 @@ public class Board {
                 availableResources.put(s, availableResources.get(s) + 1);
             }
         }
-
-        switch (card) {
-            case GoldCard gold -> points = gold.calculatePoints(this, coord);
-            case ResourceCard resource -> points = resource.getPoints();
-            default -> throw new CardException("Unknown card type: " + card.getClass() + "!");
+        if (side.equals(Side.FRONT)) {
+            switch (card) {
+                case GoldCard gold -> points = gold.calculatePoints(this, coord);
+                case ResourceCard resource -> points = resource.getPoints();
+                default -> throw new CardException("Unknown card type: " + card.getClass() + "!");
+            }
         }
 
         return points;

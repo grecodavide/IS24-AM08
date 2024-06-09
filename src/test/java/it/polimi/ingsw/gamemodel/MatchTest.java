@@ -668,7 +668,7 @@ public class MatchTest {
         try {
             player1.getBoard().removeHandCard(player1.getBoard().getCurrentHand().get(1));
             cheatCard = new GoldCard(
-                    new CardFace(Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.FULL_CORNER, Collections.emptySet()),
+                    new CardFace(Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.FUNGUS, Symbol.FULL_CORNER, Collections.emptySet()),
                     Symbol.FUNGUS,
                     Symbol.NO_MULT,
                     pointDifference,
@@ -678,7 +678,31 @@ public class MatchTest {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+
         // Simulate the match
+        if (match.getCurrentPlayer().equals(player1)) {
+            try {
+                match.getCurrentPlayer().playCard(new Pair<>(i, i), match.getCurrentPlayer().getBoard().getCurrentHand().get(2), Side.FRONT);
+                match.getCurrentPlayer().drawCard(decideDrawSource());
+                match.getCurrentPlayer().playCard(new Pair<>(i, i), match.getCurrentPlayer().getBoard().getCurrentHand().get(1), Side.BACK);
+                match.getCurrentPlayer().drawCard(decideDrawSource());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            i++;
+        } else {
+            try {
+                match.getCurrentPlayer().playCard(new Pair<>(i, i), match.getCurrentPlayer().getBoard().getCurrentHand().get(1), Side.BACK);
+                match.getCurrentPlayer().drawCard(decideDrawSource());
+                match.getCurrentPlayer().playCard(new Pair<>(i, i), match.getCurrentPlayer().getBoard().getCurrentHand().get(2), Side.FRONT);
+                match.getCurrentPlayer().drawCard(decideDrawSource());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            i++;
+        }
+        player1.getPoints();
+        player2.getPoints();
         while (!match.isFinished()) {
             try {
                 match.getCurrentPlayer().playCard(new Pair<>(i, i), match.getCurrentPlayer().getBoard().getCurrentHand().get(1), Side.BACK);
