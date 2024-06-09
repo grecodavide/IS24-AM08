@@ -5,6 +5,7 @@ import com.google.gson.reflect.TypeToken;
 import it.polimi.ingsw.gamemodel.*;
 
 import java.io.FileReader;
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,11 +40,19 @@ public final class CardsManager {
         Type objectivesType = new TypeToken<Map<Integer, Objective>>() {}.getType();
 
         try {
-            initialCards = gson.fromJson(new FileReader("src/main/resources/json/initial_card.json"), initialCardsType);
-            goldCards = gson.fromJson(new FileReader("src/main/resources/json/gold_card.json"), goldCardsType);
-            resourceCards = gson.fromJson(new FileReader("src/main/resources/json/resource_card.json"), resourceCardsType);
-            objectives = gson.fromJson(new FileReader("src/main/resources/json/objective_card.json"), objectivesType);
+            initialCards = gson.fromJson(getResource("/json/initial_card.json"), initialCardsType);
+            goldCards = gson.fromJson(getResource("/json/gold_card.json"), goldCardsType);
+            resourceCards = gson.fromJson(getResource("/json/resource_card.json"), resourceCardsType);
+            objectives = gson.fromJson(getResource("/json/objective_card.json"), objectivesType);
         } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String getResource(String path) {
+        try {
+            return new String(this.getClass().getResourceAsStream(path).readAllBytes());
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
