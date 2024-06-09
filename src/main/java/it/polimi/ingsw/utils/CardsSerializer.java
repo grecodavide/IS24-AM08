@@ -468,7 +468,7 @@ public class CardsSerializer {
             topRight = Symbol.EMPTY_CORNER;
             bottomLeft = Symbol.ANIMAL;
             bottomRight = Symbol.FULL_CORNER;
-            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);
+            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, 0);
             resourceCardMap.put(resourceCard.getId(), resourceCard);
         } catch (InvalidResourceException e) {
             throw new RuntimeException(e);
