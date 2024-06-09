@@ -100,8 +100,6 @@ public class Match {
         synchronized (this) {
             List<String> playersUsernames = getPlayers().stream().map(Player::getUsername).toList();
 
-            if (players.contains(player))
-                throw new IllegalArgumentException("Duplicated player in a match");
             if (playersUsernames.contains(player.getUsername()))
                 throw new AlreadyUsedUsernameException("The chosen username is already in use");
 
