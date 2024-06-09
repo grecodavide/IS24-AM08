@@ -118,8 +118,10 @@ public class Server extends UnicastRemoteObject implements ServerRMIInterface {
 
         // If some arguments are missing, notify it to the user and exit
         if (args.length < 2) {
-            System.err.println("Arguments missing, run the server executable with RMI port and TCP port arguments");
-            return;
+            System.err.println("Arguments missing, run the server executable with RMI port and TCP port arguments.");
+            System.err.println("Defaulting to RMI 2222 and TCP 9999 ports...");
+            portRMI = 2222;
+            portTCP = 9999;
         } else {
             portRMI = Integer.parseInt(args[0]);
             portTCP = Integer.parseInt(args[1]);
