@@ -105,7 +105,7 @@ public interface PlayerControllerRMIInterface extends Remote {
      * @throws WrongTurnException If the current turn it's not the one of this player
      * @throws WrongChoiceException If the chosen objective is not one of the two drawn ones using {@link #drawSecretObjectives()}
      */
-    void chooseSecretObjective(Objective objective) throweffectivelys RemoteException, WrongStateException, WrongTurnException, WrongChoiceException;
+    void chooseSecretObjective(Objective objective) throws RemoteException, WrongStateException, WrongTurnException, WrongChoiceException;
 
     /**
      * Plays a card.

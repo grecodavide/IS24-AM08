@@ -58,11 +58,6 @@ public class PlayerTabController extends SceneController {
         setResources(res);
     }
 
-    @Override
-    public void initializePostController() {
-
-    }
-
     /**
      * Set the displayed resources
      *

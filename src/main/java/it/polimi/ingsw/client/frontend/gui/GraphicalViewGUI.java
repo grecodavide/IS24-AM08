@@ -2,19 +2,15 @@ package it.polimi.ingsw.client.frontend.gui;
 
 import it.polimi.ingsw.client.frontend.GraphicalView;
 import it.polimi.ingsw.client.frontend.MatchStatus;
-import it.polimi.ingsw.client.frontend.ShownCard;
 import it.polimi.ingsw.client.frontend.gui.controllers.*;
 import it.polimi.ingsw.client.frontend.gui.nodes.CardView;
-import it.polimi.ingsw.controllers.PlayerController;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.*;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
