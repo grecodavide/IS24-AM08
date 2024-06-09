@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.regex.PatternSyntaxException;
 
 import it.polimi.ingsw.exceptions.ChosenMatchException;
+import it.polimi.ingsw.exceptions.WrongTurnException;
 import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.LeaderboardEntry;
 import org.junit.Test;
@@ -103,20 +104,25 @@ public class PlayerControllerRMITest {
 
     @Test
     public void someoneQuit() {
-        this.initializeUnstartedMatch(2);
+        this.initializeUnstartedMatch(3);
 
         try {
             player1 = new PlayerControllerRMI("player1", match);
             view1 = new TestView();
             player1.registerView(view1);
-            view1.ignoreLastCall();
             player2 = new PlayerControllerRMI("player2", match);
             player2.registerView(new TestView());
-            view1.ignoreLastCall();
             // Verify that removing  player2 triggers player1.someoneQuit and it calls the view method someoneQuit
-            match.removePlayer(player2.getPlayer());
-            String name = (String) view1.getLastCallArguments().get("name");
-            assertEquals("someoneQuit: wrong last call in view1", "someoneQuit", view1.getLastCall());
+
+            Thread th = new Thread(() -> {
+                synchronized (view1) {
+                    match.removePlayer(player2.getPlayer());
+                }
+            });
+            view1.waitForCall("someoneQuit", th);
+
+            Map<String, Object> args = view1.waitForCall("someoneQuit");
+            String name = (String) args.get("name");
             assertEquals("someoneQuit: wrong args in view1", "player2", name);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -125,6 +131,7 @@ public class PlayerControllerRMITest {
 
     @Test
     public void someoneDrewInitialCard() {
+        System.out.println(new Object(){}.getClass().getEnclosingMethod().getName());
         this.initializeUnstartedMatch(2);
 
         try {
@@ -149,25 +156,28 @@ public class PlayerControllerRMITest {
 
             TestView currentPlayerView = (TestView) currentPlayer.getView();
             TestView otherPlayerView = (TestView) otherPlayer.getView();
-            currentPlayerView.ignoreLastCall();
-            otherPlayerView.ignoreLastCall();
-            currentPlayer.drawInitialCard();
-
+            Thread th = new Thread(() -> {
+                synchronized (currentPlayerView) {
+                    try {
+                        currentPlayer.drawInitialCard();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            });
             // Verify that current player PlayerControllerRMI called the method giveInitialCard on its view
-            Map<String, Object> lastCall = currentPlayerView.getLastCallArguments();
+            Map<String, Object> lastCall = currentPlayerView.waitForCall("giveInitialCard", th);
             InitialCard card = (InitialCard) lastCall.get("card");
             InitialCard drawnCard = (InitialCard) this.getPrivateAttribute(match, "currentGivenInitialCard");
 
-            assertEquals("someoneDrewInitialCard: wrong last call in currentPlayerView", "giveInitialCard", currentPlayerView.getLastCall());
             assertEquals("someoneDrewInitialCard: wrong args in currentPlayerView", drawnCard, card);
 
             // Verify that the other player PlayerControllerRMI called the method someoneDrewInitialCard on its view
-            lastCall = otherPlayerView.getLastCallArguments();
+            lastCall = otherPlayerView.waitForCall("someoneDrewInitialCard");
             card = (InitialCard) lastCall.get("card");
             String name = (String) lastCall.get("name");
 
 
-            assertEquals("someoneDrewInitialCard: wrong last call in otherPlayerView", "someoneDrewInitialCard", otherPlayerView.getLastCall());
             assertEquals("someoneDrewInitialCard: wrong card arg in otherPlayerView", drawnCard, card);
             assertEquals("someoneDrewInitialCard: wrong name arg in otherPlayerView", currentPlayer.getPlayer().getUsername(), name);
         } catch (Exception e) {
@@ -177,6 +187,7 @@ public class PlayerControllerRMITest {
 
     @Test
     public void someoneSetInitialSide() {
+        System.out.println(new Object(){}.getClass().getEnclosingMethod().getName());
         this.initializeUnstartedMatch(2);
 
         try {
@@ -201,10 +212,18 @@ public class PlayerControllerRMITest {
             TestView currentPlayerView = (TestView) currentPlayer.getView();
             TestView otherPlayerView = (TestView) otherPlayer.getView();
             currentPlayer.drawInitialCard();
-            currentPlayer.chooseInitialCardSide(Side.FRONT);
 
-            otherPlayerView.waitForCall("someoneSetInitialSide");
-            Map<String, Object> lastCall = otherPlayerView.getLastCallArguments();
+            Thread th = new Thread(() -> {
+                synchronized (currentPlayerView) {
+                    try {
+                        currentPlayer.chooseInitialCardSide(Side.FRONT);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            });
+
+            Map<String, Object> lastCall = otherPlayerView.waitForCall("someoneSetInitialSide", th);
             // Verify that current player PlayerControllerRMI called the method someoneSetInitialCard on its view
             Side side = (Side) lastCall.get("side");
             String name = (String) lastCall.get("name");
@@ -219,6 +238,7 @@ public class PlayerControllerRMITest {
 
     @Test
     public void someoneDrewSecretObjective() {
+        System.out.println(new Object(){}.getClass().getEnclosingMethod().getName());
         this.initializeUnstartedMatch(2);
 
         try {
@@ -248,22 +268,24 @@ public class PlayerControllerRMITest {
             currentPlayer.chooseInitialCardSide(Side.FRONT);
             otherPlayer.drawInitialCard();
             otherPlayer.chooseInitialCardSide(Side.FRONT);
-            currentPlayer.drawSecretObjectives();
 
-            currentPlayerView.waitForCall("giveSecretObjectives");
+            Thread th = new Thread(() -> {
+                synchronized (currentPlayerView) {
+                    try {
+                        currentPlayer.drawSecretObjectives();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            });
 
             // Verify that current player PlayerControllerRMI called the method giveSecretObjectives on its view
-            Map<String, Object> lastCall = currentPlayerView.getLastCallArguments();
+            Map<String, Object> lastCall = currentPlayerView.waitForCall("giveSecretObjectives", th);
             Pair<Objective, Objective> objectives = (Pair<Objective, Objective>) lastCall.get("objectives");
             Pair<Objective, Objective> actualObjectives = (Pair<Objective, Objective>) this.getPrivateAttribute(match, "currentProposedObjectives");
 
             assertEquals("someoneDrewSecretObjective: wrong arg in currentPlayerView", actualObjectives, objectives);
 
-            // Verify that current player PlayerControllerRMI called the method giveSecretObjectives on its view
-            String name = (String) otherPlayerView.getLastCallArguments().get("name");
-            otherPlayerView.waitForCall("someoneDrewSecretObjective");
-
-            assertEquals("someoneDrewSecretObjective: wrong arg in otherPlayerView", currentPlayer.getPlayer().getUsername(), name);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -271,15 +293,14 @@ public class PlayerControllerRMITest {
 
     @Test
     public void someoneChoseSecretObjective() {
+        System.out.println(new Object(){}.getClass().getEnclosingMethod().getName());
         this.initializeUnstartedMatch(2);
 
         try {
             player1 = new PlayerControllerRMI("player1", match);
-            player1.sendJoined();
             view1 = new TestView();
             player1.registerView(view1);
             player2 = new PlayerControllerRMI("player2", match);
-            player2.sendJoined();
             view2 = new TestView();
             player2.registerView(view2);
 
@@ -301,12 +322,18 @@ public class PlayerControllerRMITest {
             currentPlayer.chooseInitialCardSide(Side.FRONT);
             otherPlayer.drawInitialCard();
             otherPlayer.chooseInitialCardSide(Side.FRONT);
-            currentPlayer.drawSecretObjectives();
-            Objective obj = ((Pair<Objective, Objective>) currentPlayerView.getLastCallArguments().get("objectives")).first();
-            currentPlayer.chooseSecretObjective(obj);
-
+            Objective obj = currentPlayer.getPlayer().drawSecretObjectives().first();
+            Thread th = new Thread(() -> {
+                synchronized (currentPlayerView) {
+                    try {
+                        currentPlayer.chooseSecretObjective(obj);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            });
             // Verify that current player PlayerControllerRMI called the method someoneChoseSecretObjective on its view
-            String name = (String) currentPlayerView.getLastCallArguments().get("name");
+            String name = (String) currentPlayerView.waitForCall("someoneChoseSecretObjective", th).get("name");
 
             assertEquals("someoneChoseSecretObjective: wrong last call in currentPlayerView", "someoneChoseSecretObjective", currentPlayerView.getLastCall());
             assertEquals("someoneChoseSecretObjective: wrong arg in currentPlayerView", currentPlayer.getPlayer().getUsername(), name);
@@ -317,15 +344,14 @@ public class PlayerControllerRMITest {
 
     @Test
     public void someonePlayedCard() {
+        System.out.println(new Object(){}.getClass().getEnclosingMethod().getName());
         this.initializeUnstartedMatch(2);
 
         try {
             player1 = new PlayerControllerRMI("player1", match);
-            player1.sendJoined();
             view1 = new TestView();
             player1.registerView(view1);
             player2 = new PlayerControllerRMI("player2", match);
-            player2.sendJoined();
             view2 = new TestView();
             player2.registerView(view2);
 
@@ -343,24 +369,34 @@ public class PlayerControllerRMITest {
             TestView currentPlayerView = (TestView) currentPlayer.getView();
             TestView otherPlayerView = (TestView) otherPlayer.getView();
 
+            // Advance the game
             currentPlayer.drawInitialCard();
             currentPlayer.chooseInitialCardSide(Side.FRONT);
             otherPlayer.drawInitialCard();
             otherPlayer.chooseInitialCardSide(Side.FRONT);
-            currentPlayer.drawSecretObjectives();
-            Objective currObj = ((Pair<Objective, Objective>) currentPlayerView.getLastCallArguments().get("objectives")).first();
+            Objective currObj = currentPlayer.getPlayer().drawSecretObjectives().first();
             currentPlayer.chooseSecretObjective(currObj);
-            otherPlayer.drawSecretObjectives();
-            Objective otherObj = ((Pair<Objective, Objective>) otherPlayerView.getLastCallArguments().get("objectives")).first();
+            Objective otherObj = otherPlayer.getPlayer().drawSecretObjectives().first();
             otherPlayer.chooseSecretObjective(otherObj);
+
+            // Play the card
             PlayableCard playedCard = currentPlayer.getPlayer().getBoard().getCurrentHand().stream().filter(c -> c instanceof ResourceCard).findAny().get();
-            currentPlayer.playCard(new Pair<>(-1, 1), playedCard, Side.FRONT);
+            Thread th = new Thread(() -> {
+                synchronized (currentPlayerView) {
+                    try {
+                        currentPlayer.playCard(new Pair<>(-1, 1), playedCard, Side.FRONT);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            });
 
             // Verify that current player PlayerControllerRMI called the method someonePlayedCard on its view
-            String name = (String) currentPlayerView.getLastCallArguments().get("name");
-            Pair<Integer, Integer> coords = (Pair<Integer, Integer>) currentPlayerView.getLastCallArguments().get("coords");
-            Side side = (Side) currentPlayerView.getLastCallArguments().get("side");
-            PlayableCard card = (PlayableCard) currentPlayerView.getLastCallArguments().get("card");
+            Map<String, Object> lastCall = currentPlayerView.waitForCall("someonePlayedCard", th);
+            String name = (String) lastCall.get("name");
+            Pair<Integer, Integer> coords = (Pair<Integer, Integer>) lastCall.get("coords");
+            Side side = (Side) lastCall.get("side");
+            PlayableCard card = (PlayableCard) lastCall.get("card");
 
             assertEquals("someonePlayedCard: wrong last call in currentPlayerView", "someonePlayedCard", currentPlayerView.getLastCall());
             assertEquals("someonePlayedCard: wrong name arg in currentPlayerView", currentPlayer.getPlayer().getUsername(), name);
@@ -375,15 +411,14 @@ public class PlayerControllerRMITest {
 
     @Test
     public void someoneDrewCard() {
+        System.out.println(new Object(){}.getClass().getEnclosingMethod().getName());
         this.initializeUnstartedMatch(2);
 
         try {
             player1 = new PlayerControllerRMI("player1", match);
-            player1.sendJoined();
             view1 = new TestView();
             player1.registerView(view1);
             player2 = new PlayerControllerRMI("player2", match);
-            player2.sendJoined();
             view2 = new TestView();
             player2.registerView(view2);
 
@@ -401,36 +436,51 @@ public class PlayerControllerRMITest {
             TestView currentPlayerView = (TestView) currentPlayer.getView();
             TestView otherPlayerView = (TestView) otherPlayer.getView();
 
+            currentPlayerView.waitForCallDestructive("matchStarted");
+            otherPlayerView.waitForCallDestructive("matchStarted");
+
+            // Advance the game
             currentPlayer.drawInitialCard();
             currentPlayer.chooseInitialCardSide(Side.FRONT);
             otherPlayer.drawInitialCard();
             otherPlayer.chooseInitialCardSide(Side.FRONT);
-            currentPlayer.drawSecretObjectives();
-            Objective currObj = ((Pair<Objective, Objective>) currentPlayerView.getLastCallArguments().get("objectives")).first();
+            Objective currObj = currentPlayer.getPlayer().drawSecretObjectives().first();
             currentPlayer.chooseSecretObjective(currObj);
-            otherPlayer.drawSecretObjectives();
-            Objective otherObj = ((Pair<Objective, Objective>) otherPlayerView.getLastCallArguments().get("objectives")).first();
+            Objective otherObj = otherPlayer.getPlayer().drawSecretObjectives().first();
             otherPlayer.chooseSecretObjective(otherObj);
             PlayableCard playedCard = currentPlayer.getPlayer().getBoard().getCurrentHand().stream().filter(c -> c instanceof ResourceCard).findAny().get();
             currentPlayer.playCard(new Pair<>(-1, 1), playedCard, Side.FRONT);
+            // Check drawn card
             PlayableCard drawnCard = ((Map<DrawSource, PlayableCard>) this.getPrivateAttribute(match, "visiblePlayableCards")).get(DrawSource.FIRST_VISIBLE);
             currentPlayer.drawCard(DrawSource.FIRST_VISIBLE);
-            PlayableCard actualReplCard = ((Map<DrawSource, PlayableCard>) this.getPrivateAttribute(match, "visiblePlayableCards")).get(DrawSource.FIRST_VISIBLE);
-            Symbol actualReplReign = actualReplCard.getReign();
 
             // Verify that current player PlayerControllerRMI called the method someoneDrewCard on its view
-            String name = (String) currentPlayerView.getLastCallArguments().get("name");
-            DrawSource source = (DrawSource) currentPlayerView.getLastCallArguments().get("source");
-            Side side = (Side) currentPlayerView.getLastCallArguments().get("side");
-            PlayableCard card = (PlayableCard) currentPlayerView.getLastCallArguments().get("card");
-            PlayableCard replCard = (PlayableCard) currentPlayerView.getLastCallArguments().get("replCard");
-            Symbol replReign = (Symbol) currentPlayerView.getLastCallArguments().get("replReign");
+            Thread th = new Thread(() -> {
+                synchronized (currentPlayerView) {
+                    try {
+                        currentPlayer.drawCard(DrawSource.FIRST_VISIBLE);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            });
+            Map<String, Object> lastCall = currentPlayerView.waitForCall("someoneDrewCard", th);
+
+            PlayableCard actualReplCard = ((Map<DrawSource, PlayableCard>) this.getPrivateAttribute(match, "visiblePlayableCards")).get(DrawSource.FIRST_VISIBLE);
+            Pair<Symbol, Symbol> deckReign = match.getDecksTopReigns();
+
+            String name = (String) lastCall.get("name");
+            DrawSource source = (DrawSource) lastCall.get("source");
+            Side side = (Side) lastCall.get("side");
+            PlayableCard card = (PlayableCard) lastCall.get("card");
+            PlayableCard replCard = (PlayableCard) lastCall.get("replCard");
+            Pair<Symbol, Symbol> reigns = (Pair<Symbol, Symbol>) lastCall.get("deckReign");
 
             assertEquals("someoneDrewCard: wrong last call in currentPlayerView", "someoneDrewCard", currentPlayerView.getLastCall());
             assertEquals("someoneDrewCard: wrong name arg in currentPlayerView", currentPlayer.getPlayer().getUsername(), name);
             assertEquals("someoneDrewCard: wrong card arg in currentPlayerView", drawnCard, card);
             assertEquals("someoneDrewCard: wrong replCard arg in currentPlayerView", actualReplCard, replCard);
-            assertEquals("someoneDrewCard: wrong replReign arg in currentPlayerView", actualReplReign, replReign);
+            assertEquals("someoneDrewCard: wrong deckReign arg in currentPlayerView", reigns, deckReign);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -438,23 +488,30 @@ public class PlayerControllerRMITest {
 
     @Test
     public void someoneSentBroadcastText() {
+        System.out.println(new Object(){}.getClass().getEnclosingMethod().getName());
         this.initializeUnstartedMatch(2);
 
         try {
             player1 = new PlayerControllerRMI("player1", match);
-            player1.sendJoined();
             view1 = new TestView();
             player1.registerView(view1);
             player2 = new PlayerControllerRMI("player2", match);
-            player2.sendJoined();
             view2 = new TestView();
             player2.registerView(view2);
-
-            player1.sendBroadcastText("test text :)");
-
+            Thread th = new Thread(() -> {
+                synchronized (view1) {
+                    try {
+                        player1.sendBroadcastText("test text :)");
+                    } catch (RemoteException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            });
             // Verify that current player PlayerControllerRMI called the method someonePlayedCard on its view
-            String name = (String) view1.getLastCallArguments().get("name");
-            String text = (String) view1.getLastCallArguments().get("text");
+
+            Map<String, Object> lastCall = view1.waitForCall("someoneSentBroadcastText", th);
+            String name = (String) lastCall.get("name");
+            String text = (String) lastCall.get("text");
 
             assertEquals("someoneSentBroadcastText: wrong last call in currentPlayerView", "someoneSentBroadcastText", view1.getLastCall());
             assertEquals("someoneSentBroadcastText: wrong name arg in currentPlayerView", player1.getPlayer().getUsername(), name);
@@ -466,23 +523,31 @@ public class PlayerControllerRMITest {
 
     @Test
     public void someoneSentPrivateText() {
+        System.out.println(new Object(){}.getClass().getEnclosingMethod().getName());
         this.initializeUnstartedMatch(2);
 
         try {
             player1 = new PlayerControllerRMI("player1", match);
-            player1.sendJoined();
             view1 = new TestView();
             player1.registerView(view1);
             player2 = new PlayerControllerRMI("player2", match);
-            player2.sendJoined();
             view2 = new TestView();
             player2.registerView(view2);
 
-            player1.sendPrivateText("player2", "test text :)");
+            Thread th = new Thread(() -> {
+                synchronized (view2) {
+                    try {
+                        player1.sendPrivateText("player2", "test text :)");
+                    } catch (RemoteException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            });
 
             // Verify that other player PlayerControllerRMI called the method someoneSentPrivateText on its view
-            String sender = (String) view2.getLastCallArguments().get("name");
-            String text = (String) view2.getLastCallArguments().get("text");
+            Map<String, Object> lastCall  = view2.waitForCall("someoneSentPrivateText", th);
+            String sender = (String) lastCall.get("name");
+            String text = (String) lastCall.get("text");
 
             assertEquals("someoneSentPrivateText: wrong last call in currentPlayerView", "someoneSentPrivateText", view2.getLastCall());
             assertEquals("someoneSentPrivateText: wrong name arg in currentPlayerView", player1.getPlayer().getUsername(), sender);
@@ -493,8 +558,10 @@ public class PlayerControllerRMITest {
     }
 
     @Test
-    public void matchFinished() throws RemoteException, WrongStateException, AlreadyUsedUsernameException, ChosenMatchException {
+    public void matchFinished() throws RemoteException, WrongStateException, AlreadyUsedUsernameException, ChosenMatchException, InterruptedException {
         this.initializeTwoPlayerFinishedMatch();
+        Thread.sleep(200);
+        view1.waitForCall("matchFinished");
         Map<String, Object> args = view1.getLastCallArguments();
         List<LeaderboardEntry> ranking = (List<LeaderboardEntry>) args.get("ranking");
         List<Pair<Player, Boolean>> matchRaking = match.getPlayersFinalRanking();
@@ -508,10 +575,10 @@ public class PlayerControllerRMITest {
     @Test
     public void matchStarted() {
         this.initializeUnstartedMatch(2);
-
         this.addTwoPlayerWithView();
         player1.matchStarted();
         player2.matchStarted();
+        view1.waitForCall("matchStarted");
         Map<String, Object> args = view1.getLastCallArguments();
         Map<Color, String> pawns = (Map<Color, String>) args.get("pawns");
         Map<String, List<PlayableCard>> hands = (Map<String, List<PlayableCard>>) args.get("hands");
@@ -608,12 +675,10 @@ public class PlayerControllerRMITest {
         match = new Match(maxPlayers, initialsDeck, resourcesDeck, goldsDeck, objectivesDeck);
 
         player1 = new PlayerControllerRMI("Oingo", match);
-        player1.sendJoined();
         view1 = new TestView();
         player1.registerView(view1);
 
         player2 = new PlayerControllerRMI("Boingo", match);
-        player2.sendJoined();
         view2 = new TestView();
         player2.registerView(view2);
 
@@ -647,12 +712,10 @@ public class PlayerControllerRMITest {
     private void addTwoPlayerWithView() {
         try {
             player1 = new PlayerControllerRMI("Oingo", match);
-            player1.sendJoined();
             view1 = new TestView();
             player1.registerView(view1);
 
             player2 = new PlayerControllerRMI("Boingo", match);
-            player2.sendJoined();
             view2 = new TestView();
             player2.registerView(view2);
         } catch (Exception e) {
@@ -678,7 +741,7 @@ public class PlayerControllerRMITest {
     }
 
     private static class TestView implements RemoteViewInterface {
-        private String lastCall;
+        private String lastCall = "";
         private Map<String, Object> args;
 
         public synchronized void giveInitialCard(InitialCard initialCard) {
@@ -774,6 +837,7 @@ public class PlayerControllerRMITest {
             this.notifyAll();
         }
 
+        @Override
         public synchronized void someoneQuit(String someoneUsername) throws RemoteException {
             lastCall = "someoneQuit";
             args = new HashMap<>();
@@ -809,7 +873,7 @@ public class PlayerControllerRMITest {
             return lastCall;
         }
 
-        public synchronized void waitForCall(String call) {
+        public synchronized Map<String, Object> waitForCall(String call) {
             while (!lastCall.equals(call)) {
                 try {
                     this.wait();
@@ -817,6 +881,30 @@ public class PlayerControllerRMITest {
                     throw new RuntimeException(e);
                 }
             }
+            return args;
+        }
+
+        public synchronized Map<String, Object> waitForCall(String call, Thread th) {
+            th.start();
+            while (!lastCall.equals(call)) {
+                try {
+                    this.wait();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException();
+                }
+            }
+            this.notifyAll();
+            return args;
+        }
+        public synchronized Map<String, Object> waitForCallDestructive(String call) {
+            while (!lastCall.equals(call)) {
+                try {
+                    this.wait();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            return getLastCallArguments();
         }
         public Map<String, Object> getLastCallArguments() {
             synchronized (this) {

@@ -122,7 +122,7 @@ public class MatchTest {
             // An exception is supposed to be thrown here
             fail("Exception about duplicated player not thrown");
         }
-        catch (IllegalArgumentException e) {}
+        catch (AlreadyUsedUsernameException e) {}
         catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -224,7 +224,7 @@ public class MatchTest {
             match.addPlayer(player1);
             match.addPlayer(player2);
             fail("AlreadyUsedUsernameException not thrown");
-        } catch (IllegalArgumentException e) {
+        } catch (AlreadyUsedUsernameException e) {
             // Good
         } catch (Exception e) {
             fail("Wrong exception returned: " + e);
