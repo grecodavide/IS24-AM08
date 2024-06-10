@@ -225,6 +225,7 @@ public abstract class GraphicalView {
                     .toList();
             for (Pair<Integer, Integer> cardCoord : orderedCards) {
                 if (cardCoord.equals(new Pair<>(0, 0))) {
+                    clientBoard.setInitial((InitialCard) playerBoard.get(cardCoord).getCard());
                     clientBoard.placeInitial(playerBoard.get(cardCoord).getPlayedSide(),
                             availableResources.get(player));
                 } else {
