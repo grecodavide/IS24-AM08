@@ -36,11 +36,6 @@ public abstract sealed class PlayerController implements MatchObserver permits P
         this.match = match;
     }
 
-    public PlayerController(Player player, Match match) {
-        this.player = player;
-        this.match = match;
-    }
-
     /**
      * Gets the player linked to this PlayerController instance.
      *
@@ -78,12 +73,12 @@ public abstract sealed class PlayerController implements MatchObserver permits P
                         player = playerOptional.get();
                         player.setConnected(true);
                         match.subscribeObserver(this);
+                        this.matchResumed();
                     } else {
                         throw new WrongStateException("There is no disconnected player with this username");
                     }
                 }
             }
-            this.matchResumed();
         } catch (AlreadyUsedUsernameException | IllegalArgumentException e) {
             match.unsubscribeObserver(this);
             throw e;
