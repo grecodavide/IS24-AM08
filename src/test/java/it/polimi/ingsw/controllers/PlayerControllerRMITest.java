@@ -13,6 +13,7 @@ import java.util.regex.PatternSyntaxException;
 
 import it.polimi.ingsw.exceptions.ChosenMatchException;
 import it.polimi.ingsw.exceptions.WrongTurnException;
+import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.LeaderboardEntry;
 import org.junit.Test;
@@ -20,19 +21,6 @@ import org.junit.Test;
 import it.polimi.ingsw.client.network.RemoteViewInterface;
 import it.polimi.ingsw.exceptions.AlreadyUsedUsernameException;
 import it.polimi.ingsw.exceptions.WrongStateException;
-import it.polimi.ingsw.gamemodel.Color;
-import it.polimi.ingsw.gamemodel.DrawSource;
-import it.polimi.ingsw.gamemodel.GameDeck;
-import it.polimi.ingsw.gamemodel.GoldCard;
-import it.polimi.ingsw.gamemodel.InitialCard;
-import it.polimi.ingsw.gamemodel.Match;
-import it.polimi.ingsw.gamemodel.MatchTest;
-import it.polimi.ingsw.gamemodel.Objective;
-import it.polimi.ingsw.gamemodel.PlayableCard;
-import it.polimi.ingsw.gamemodel.Player;
-import it.polimi.ingsw.gamemodel.ResourceCard;
-import it.polimi.ingsw.gamemodel.Side;
-import it.polimi.ingsw.gamemodel.Symbol;
 import it.polimi.ingsw.utils.Pair;
 
 public class PlayerControllerRMITest {
@@ -787,6 +775,11 @@ public class PlayerControllerRMITest {
                 args.put("decksTopReigns", decksTopReigns);
                 this.notifyAll();
             }
+        }
+
+        @Override
+        public void matchResumed(Map<String, Color> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands, Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards, Pair<Symbol, Symbol> decksTopReigns, Objective secretObjective, Map<Player, Map<Symbol, Integer>> availableResources, Map<String, Map<Pair<Integer, Integer>, PlacedCard>> placedCards, Map<Player, Integer> playerPoints, String currentPlayer) throws RemoteException {
+            //TODO Test
         }
 
         @Override

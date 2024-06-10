@@ -6,6 +6,7 @@ import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.LeaderboardEntry;
 import it.polimi.ingsw.utils.Pair;
 
+import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Map;
 
@@ -108,6 +109,13 @@ public abstract class NetworkView implements RemoteViewInterface {
                              Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards,
                              Pair<Symbol, Symbol> decksTopReigns) {
         graphicalView.matchStarted(playersUsernamesAndPawns, playersHands, visibleObjectives, visiblePlayableCards, decksTopReigns);
+    }
+
+    @Override
+    public void matchResumed(Map<String, Color> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands,
+                             Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards,
+                             Pair<Symbol, Symbol> decksTopReigns, Objective secretObjective, Map<Player, Map<Symbol, Integer>> availableResources, Map<String, Map<Pair<Integer, Integer>, PlacedCard>> placedCards, Map<Player, Integer> playerPoints, String currentPlayer) throws RemoteException {
+        graphicalView.resumeMatch(playersUsernamesAndPawns, playersHands, visibleObjectives, visiblePlayableCards, decksTopReigns, secretObjective, availableResources, placedCards, playerPoints, currentPlayer);
     }
 
     @Override

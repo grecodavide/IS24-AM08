@@ -31,10 +31,27 @@ public interface RemoteViewInterface extends Remote {
      * @param visiblePlayableCards     Map having as values the visible common cards (the keys are just indexes).
      * @param decksTopReigns           Pair of reign symbols representing the two visible reigns symbols on top of the two decks;
      *                                 the first one is the gold deck one, the second one the resource deck one
-     * @throws RemoteException If the remote object is considered not to be reachable any more and cannot return as usual
+     * @throws RemoteException If the remote object is considered not to be reachable anymore and cannot return as usual
      */
     void matchStarted(Map<String, Color> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands, Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards, Pair<Symbol, Symbol> decksTopReigns) throws RemoteException;
 
+    /**
+     * Notifies that the match has resumed.
+     * Furthermore, gives to the receiving object all the information (parameters) needed to show to the current match
+     * state.
+     *
+     * @param playersUsernamesAndPawns Map that matches each pawn color to the corresponding player's username
+     * @param playersHands             Map that matches each player's username to the corresponding List of cards in the hand
+     * @param visibleObjectives        Pair of objectives visible to all players
+     * @param visiblePlayableCards     Map having as values the visible common cards (the keys are just indexes).
+     * @param decksTopReigns           Pair of reign symbols representing the two visible reigns symbols on top of the two decks;
+     *                                 the first one is the gold deck one, the second one the resource deck one
+     * @throws RemoteException If the remote object is considered not to be reachable anymore and cannot return as usual
+     */
+    void matchResumed(Map<String, Color> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands,
+                      Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards,
+                      Pair<Symbol, Symbol> decksTopReigns, Objective secretObjective, Map<Player, Map<Symbol, Integer>> availableResources,
+                      Map<String, Map<Pair<Integer, Integer>, PlacedCard>> placedCards, Map<Player, Integer> playerPoints, String currentPlayer) throws RemoteException;
 
     /**
      * Gives the graphical view a list of available matches
