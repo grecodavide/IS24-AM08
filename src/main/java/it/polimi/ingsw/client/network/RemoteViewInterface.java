@@ -50,8 +50,8 @@ public interface RemoteViewInterface extends Remote {
      */
     void matchResumed(Map<String, Color> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands,
                       Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards,
-                      Pair<Symbol, Symbol> decksTopReigns, Objective secretObjective, Map<Player, Map<Symbol, Integer>> availableResources,
-                      Map<String, Map<Pair<Integer, Integer>, PlacedCard>> placedCards, Map<Player, Integer> playerPoints, String currentPlayer) throws RemoteException;
+                      Pair<Symbol, Symbol> decksTopReigns, Objective secretObjective, Map<String, Map<Symbol, Integer>> availableResources,
+                      Map<String, Map<Pair<Integer, Integer>, PlacedCard>> placedCards, Map<String, Integer> playerPoints, String currentPlayer) throws RemoteException;
 
     /**
      * Gives the graphical view a list of available matches

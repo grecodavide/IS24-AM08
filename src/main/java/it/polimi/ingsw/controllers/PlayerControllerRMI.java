@@ -37,7 +37,45 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
 
     @Override
     public void matchResumed() {
-        //TODO Implement
+        if (view == null) {
+            onUnregisteredView();
+        } else {
+            // Get visible objectives, visible playable cards and visible decks top reigns
+            Pair<Objective, Objective> visibleObjectives = match.getVisibleObjectives();
+            Map<DrawSource, PlayableCard> visiblePlayableCards = match.getVisiblePlayableCards();
+            Pair<Symbol, Symbol> decksTopReigns = match.getDecksTopReigns();
+
+            // Create a map that matches each pawn colour to the corresponding player's username
+            Map<String, Color> playersUsernamesAndPawns = new HashMap<>();
+
+            // Create a map that matches each player's username to the corresponding list of cards in the hand
+            Map<String, List<PlayableCard>> playersHands = new HashMap<>();
+
+            // Create a map that matches each player's username to the corresponding available resources
+            Map<String, Map<Symbol, Integer>> availableResources = new HashMap<>();
+
+            // Create a map that matches each player's username to the corresponding points
+            Map<String, Integer> playerPoints = new HashMap<>();
+
+            // Create a map that matches each player's username to the corresponding board
+            Map<String, Map<Pair<Integer, Integer>, PlacedCard>> playerBoards = new HashMap<>();
+
+            // Fill the maps with proper values
+            for (Player p : match.getPlayers()) {
+                playersUsernamesAndPawns.put(p.getUsername(), p.getPawnColor());
+                playersHands.put(p.getUsername(), p.getBoard().getCurrentHand());
+                availableResources.put(p.getUsername(), p.getBoard().getAvailableResources());
+                playerPoints.put(p.getUsername(), p.getPoints());
+                playerBoards.put(p.getUsername(), p.getBoard().getPlacedCards());
+            }
+
+            try {
+                view.matchResumed(playersUsernamesAndPawns, playersHands, visibleObjectives, visiblePlayableCards, decksTopReigns,
+                        player.getSecretObjective(), availableResources, playerBoards, playerPoints, match.getCurrentPlayer().getUsername());
+            } catch (RemoteException e) {
+                onConnectionError();
+            }
+        }
     }
 
     /**

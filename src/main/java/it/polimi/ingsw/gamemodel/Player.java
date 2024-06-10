@@ -221,7 +221,7 @@ public class Player {
      *
      * @see #chooseSecretObjective(Objective)
      */
-    protected Objective getSecretObjective() {
+    public Objective getSecretObjective() {
         return secretObjective;
     }
 

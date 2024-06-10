@@ -213,8 +213,8 @@ public abstract class GraphicalView {
      */
     public void resumeMatch(Map<String, Color> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands,
                             Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards,
-                            Pair<Symbol, Symbol> decksTopReign, Objective secretObjective, Map<Player, Map<Symbol, Integer>> availableResources,
-                            Map<String, Map<Pair<Integer, Integer>, PlacedCard>> placedCards, Map<Player, Integer> playerPoints, String currentPlayer) {
+                            Pair<Symbol, Symbol> decksTopReign, Objective secretObjective, Map<String, Map<Symbol, Integer>> availableResources,
+                            Map<String, Map<Pair<Integer, Integer>, PlacedCard>> placedCards, Map<String, Integer> playerPoints, String currentPlayer) {
         this.setupMatch(playersUsernamesAndPawns, playersHands, visibleObjectives, visiblePlayableCards, decksTopReign);
         this.clientBoards.get(username).setSecretObjective(secretObjective);
         for (String player : placedCards.keySet()) {
