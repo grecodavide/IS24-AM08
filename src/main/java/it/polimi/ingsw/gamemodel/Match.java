@@ -799,4 +799,9 @@ public class Match {
 
         executor.shutdown();
     }
+
+    public synchronized boolean isRejoinable() {
+        return players.stream().anyMatch((p) -> !p.isConnected()) && isStarted();
+    }
+
 }

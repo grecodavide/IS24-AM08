@@ -19,6 +19,8 @@ public class Player {
     private final Board board;
     private Color pawnColor;
     private Objective secretObjective;
+    /** If the player is connected */
+    private boolean connected;
 
     /**
      * Initializes the main player's attributes.
@@ -30,6 +32,7 @@ public class Player {
         this.username = username;
         this.match = match;
 
+        this.connected = true;
         //Initialize values
         board = new Board();
         points = 0;
@@ -236,5 +239,17 @@ public class Player {
      */
     public String getUsername() {
         return username;
+    }
+
+    public boolean isConnected() {
+       synchronized (match) {
+           return connected;
+       }
+    }
+
+    public void setConnected(boolean connected) {
+        synchronized (match) {
+            this.connected = connected;
+        }
     }
 }
