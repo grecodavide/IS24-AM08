@@ -33,6 +33,7 @@ public class CardView extends Pane {
     public double startX;
     public double startY;
     private Image image;
+    private Rectangle cardRectangle;
 
     public CardView() {
         super();
@@ -143,17 +144,25 @@ public class CardView extends Pane {
         super.setMaxHeight(cardHeight);
         super.setMaxWidth(cardWidth);
         Rectangle rect = new Rectangle(cardWidth, cardHeight);
-        rect.setArcHeight(20);
-        rect.setArcWidth(20);
         image = new Image(imagePath);
         ImagePattern pattern = new ImagePattern(
                 image
         );
         rect.setFill(pattern);
+        cardRectangle = rect;
+        setArc(20);
         super.getChildren().add(rect);
         super.getStyleClass().add("game-card");
         addCorners();
+    }
 
+    /**
+     * Set arcHeight and arcWidth of the card
+     * @param arc arc width and height
+     */
+    public void setArc(double arc) {
+        cardRectangle.setArcHeight(arc);
+        cardRectangle.setArcWidth(arc);
     }
 
 

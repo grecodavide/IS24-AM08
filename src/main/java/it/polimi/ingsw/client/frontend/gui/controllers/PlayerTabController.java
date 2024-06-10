@@ -109,6 +109,7 @@ public class PlayerTabController extends SceneController {
             content.putString("");
             dragboard.setContent(content);
             // Set the card as image of the dragboard
+            card.setArc(0);
             dragboard.setDragView(card.snapshot(null, null));
             dragboard.setDragViewOffsetX(CardView.cardWidth / 2);
             dragboard.setDragViewOffsetY(CardView.cardHeight / 2);
@@ -119,6 +120,7 @@ public class PlayerTabController extends SceneController {
         });
         card.setOnDragDone(event -> {
             this.removeDragAreas();
+            card.setArc(20);
             card.setVisible(true);
             card.setCursor(Cursor.DEFAULT);
             event.consume();
