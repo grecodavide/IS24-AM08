@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import it.polimi.ingsw.client.frontend.ClientBoard;
 import it.polimi.ingsw.client.frontend.GraphicalView;
 import it.polimi.ingsw.client.frontend.ShownCard;
@@ -27,6 +28,14 @@ public class GraphicalViewTUI extends GraphicalView {
     private final PlayerControls playerControls;
     private final InputHandler inputHandler;
     private final ValidPositions validPositions;
+    private final static List<String> helpMessage = List.of(
+        "players,     p -> show list of players",
+        "write,       w -> write message (add :username to send private text)",
+        "chat,        c -> show chat",
+        "board,       b -> show your board (or specify a number to show corresponding player's board)",
+        "objectives,  o -> show secret and common objectives",
+        "hand,        h -> show your hand"
+    ); 
 
     private final static String playerControlPrompt = "Type command, or 'help' for a list of available commands.";
 
@@ -50,6 +59,7 @@ public class GraphicalViewTUI extends GraphicalView {
         }
 
         this.inputHandler = new InputHandler(this.printer);
+
     }
 
     private void startInterface() {
@@ -178,13 +188,13 @@ public class GraphicalViewTUI extends GraphicalView {
         }
 
         switch (command) {
-            case "o":
+            case "o", "objectives":
                 this.printer.printObjectives(username, board.getColor(), board.getObjective(), this.visibleObjectives);
                 break;
-            case "h":
+            case "h", "hand":
                 this.printer.printHand(this.username, board.getColor(), board.getHand());
                 break;
-            case "b":
+            case "b", "board":
                 switch (argument) {
                     case "1":
                         player = this.players.get(0);
@@ -212,10 +222,10 @@ public class GraphicalViewTUI extends GraphicalView {
                         break;
                 }
                 break;
-            case "c":
+            case "c", "chat":
                 this.printer.printChat(this.chat);
                 break;
-            case "w":
+            case "w", "write":
                 if (!argument.equals("")) {
                     if (argument.charAt(0) == ':') {
                         splitIndex = argument.indexOf(" ");
@@ -235,16 +245,16 @@ public class GraphicalViewTUI extends GraphicalView {
                     this.printer.clearTerminal();
                 }
                 break;
-            case "p":
+            case "p", "players":
                 this.printer.printSimpleList(this.players, false, true);
                 break;
 
-            // TBA
             case "help":
+                this.printer.printSimpleList(helpMessage, false, false);
                 break;
 
             default:
-                this.printer.printPlayerBoard(this.currentPlayer, currentPlayerBoard);
+                this.printer.printCenteredMessage("Not a known command: '" + command + "'. Type 'help' to show a help message", 0);
                 break;
         }
 
