@@ -11,10 +11,11 @@ import it.polimi.ingsw.controllers.PlayerControllerRMIInterface;
 import it.polimi.ingsw.exceptions.AlreadyUsedUsernameException;
 import it.polimi.ingsw.exceptions.ChosenMatchException;
 import it.polimi.ingsw.exceptions.WrongStateException;
-import it.polimi.ingsw.gamemodel.Match;
+import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.network.tcp.TCPServer;
 import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.DeckCreator;
+import it.polimi.ingsw.utils.Pair;
 
 public class Server extends UnicastRemoteObject implements ServerRMIInterface {
     private final Map<String, Match> matches;
@@ -39,7 +40,7 @@ public class Server extends UnicastRemoteObject implements ServerRMIInterface {
                                         .toList();
         List<AvailableMatch> result = new ArrayList<>();
 
-        for (String name : joinableMatches) {
+        for (String name : matches.keySet()) {
             Match match = matches.get(name);
             int maxPlayers = match.getMaxPlayers();
             int currentPlayers = match.getPlayers().size();
@@ -54,7 +55,7 @@ public class Server extends UnicastRemoteObject implements ServerRMIInterface {
     public PlayerControllerRMIInterface joinMatch(String matchName, String username) throws RemoteException, ChosenMatchException, WrongStateException, AlreadyUsedUsernameException {
         if (!matches.containsKey(matchName))
             throw new ChosenMatchException("The chosen match doesn't exist");
-        if (matches.get(matchName).isFull())
+        if (matches.get(matchName).isFull() && !matches.get(matchName).isRejoinable())
             throw new ChosenMatchException("The chosen match is already full");
 
         Match chosenMatch = matches.get(matchName);
