@@ -35,6 +35,11 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
         super(username, match);
     }
 
+    @Override
+    public void matchResumed() {
+        //TODO Implement
+    }
+
     /**
      * Sets the internal View attribute to the given argument; if it has already been called, it won't
      * do anything, since it's call is allowed once per PlayerController object.

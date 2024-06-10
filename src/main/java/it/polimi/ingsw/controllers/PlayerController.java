@@ -7,6 +7,8 @@ import it.polimi.ingsw.gamemodel.Match;
 import it.polimi.ingsw.gamemodel.MatchObserver;
 import it.polimi.ingsw.gamemodel.Player;
 
+import java.util.Optional;
+
 /**
  * Controller for a match player, the only agent needing a view and so a controller in this
  * application. This class subclasses instances are given (in RMI case) / reachable (in TCP case) on
@@ -34,6 +36,11 @@ public abstract sealed class PlayerController implements MatchObserver permits P
         this.match = match;
     }
 
+    public PlayerController(Player player, Match match) {
+        this.player = player;
+        this.match = match;
+    }
+
     /**
      * Gets the player linked to this PlayerController instance.
      *
@@ -56,11 +63,32 @@ public abstract sealed class PlayerController implements MatchObserver permits P
         }
 
         try {
-            match.subscribeObserver(this);
-            this.match.addPlayer(this.player);
+            synchronized (match) {
+                if (!match.isRejoinable()) {
+                    match.subscribeObserver(this);
+                    match.addPlayer(this.player);
+                } else {
+                    // Rejoin a match
+                    // Get the player with the same username and not already connected
+                    Optional<Player> playerOptional = match.getPlayers().stream()
+                            .filter((p) -> p.getUsername().equals(player.getUsername()))
+                            .filter((p) -> !p.isConnected())
+                            .findFirst();
+                    if (playerOptional.isPresent()) {
+                        player = playerOptional.get();
+                        player.setConnected(true);
+                        match.subscribeObserver(this);
+                    } else {
+                        throw new WrongStateException("There is no disconnected player with this username");
+                    }
+                }
+            }
+            this.matchResumed();
         } catch (AlreadyUsedUsernameException | IllegalArgumentException e) {
             match.unsubscribeObserver(this);
             throw e;
         }
     }
+
+    public abstract void matchResumed();
 }
