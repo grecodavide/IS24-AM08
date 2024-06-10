@@ -7,10 +7,7 @@ import it.polimi.ingsw.utils.LeaderboardEntry;
 import it.polimi.ingsw.utils.Pair;
 import it.polimi.ingsw.utils.RequestStatus;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public abstract class GraphicalView {
     protected NetworkView networkView;
@@ -195,6 +192,60 @@ public abstract class GraphicalView {
     public void matchStarted(Map<String, Color> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands,
                              Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards,
                              Pair<Symbol, Symbol> decksTopReign) {
+        this.setupMatch(playersUsernamesAndPawns, playersHands, visibleObjectives, visiblePlayableCards, decksTopReign);
+        this.notifyMatchStarted();
+        this.nextPlayer();
+    }
+
+    /**
+     * Resumes match on the client side, setting all variables to their initial values
+     *
+     * @param playersUsernamesAndPawns Map containing all players' pawns, indexed by their username
+     * @param playersHands             Map containing all the players' hands, indexed by their username
+     * @param visibleObjectives        The two objectives common to every player
+     * @param visiblePlayableCards     The four cards that can be drawn, visible to everyone
+     * @param decksTopReign            the reigns of the two decks' top
+     * @param secretObjective          Secret objective of the current player
+     * @param availableResources       Available resources of all the players
+     * @param placedCards              Placed cards of all the players
+     * @param playerPoints             Points of all the players
+     * @param currentPlayer            The current player
+     */
+    public void resumeMatch(Map<String, Color> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands,
+                            Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards,
+                            Pair<Symbol, Symbol> decksTopReign, Objective secretObjective, Map<Player, Map<Symbol, Integer>> availableResources,
+                            Map<String, Map<Pair<Integer, Integer>, PlacedCard>> placedCards, Map<Player, Integer> playerPoints, String currentPlayer) {
+        this.setupMatch(playersUsernamesAndPawns, playersHands, visibleObjectives, visiblePlayableCards, decksTopReign);
+        this.clientBoards.get(username).setSecretObjective(secretObjective);
+        for (String player : placedCards.keySet()) {
+            ClientBoard clientBoard = this.clientBoards.get(player);
+            Map<Pair<Integer, Integer>, PlacedCard> playerBoard = placedCards.get(player);
+            List<Pair<Integer, Integer>> orderedCards = playerBoard.keySet().stream()
+                    .sorted(Comparator.comparingInt(c -> playerBoard.get(c).getTurn()))
+                    .toList();
+            for (Pair<Integer, Integer> cardCoord : orderedCards) {
+                if (cardCoord.equals(new Pair<>(0, 0))) {
+                    clientBoard.placeInitial(playerBoard.get(cardCoord).getPlayedSide(),
+                            availableResources.get(player));
+                } else {
+                    clientBoard.placeCard(cardCoord,
+                            (PlayableCard) playerBoard.get(cardCoord).getCard(),
+                            playerBoard.get(cardCoord).getPlayedSide(),
+                            playerPoints.get(player), availableResources.get(player)
+                    );
+                }
+            }
+        }
+        this.currentPlayer = currentPlayer;
+        this.notifyMatchResumed();
+        if (this.currentPlayer.equals(this.username)) {
+            this.makeMove();
+        }
+    }
+
+    private void setupMatch(Map<String, Color> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands,
+                            Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards,
+                            Pair<Symbol, Symbol> decksTopReign) {
         this.players = new ArrayList<>();
         this.clientBoards = new HashMap<>();
         Color curr;
@@ -229,17 +280,17 @@ public abstract class GraphicalView {
         this.visiblePlayableCards = visiblePlayableCards;
         this.visibleObjectives = visibleObjectives;
         this.decksTopReign = decksTopReign;
-
-        this.notifyMatchStarted();
-        this.nextPlayer();
     }
-
 
     /**
      * Method that shows the user that the match has started
      */
     protected abstract void notifyMatchStarted();
 
+    /**
+     * Method that shows the user that the match has resumed
+     */
+    protected abstract void notifyMatchResumed();
 
     public void receiveAvailableMatches(List<AvailableMatch> availableMatches) {
         this.setLastRequestStatus(RequestStatus.SUCCESSFUL);
@@ -343,12 +394,12 @@ public abstract class GraphicalView {
     /**
      * Handles the replacement of the last card drawn, and changes turn
      *
-     * @param someoneUsername      Player who drew the card
-     * @param source               From where he drew the card
-     * @param card                 The card he drew
-     * @param replacementCard      The replacement card, which will be null if the {@link DrawSource} is a
-     *                             deck
-     * @param deckTopReigns Current deck top reigns
+     * @param someoneUsername Player who drew the card
+     * @param source          From where he drew the card
+     * @param card            The card he drew
+     * @param replacementCard The replacement card, which will be null if the {@link DrawSource} is a
+     *                        deck
+     * @param deckTopReigns   Current deck top reigns
      */
     public void someoneDrewCard(String someoneUsername, DrawSource source, PlayableCard card, PlayableCard replacementCard,
                                 Pair<Symbol, Symbol> deckTopReigns) {

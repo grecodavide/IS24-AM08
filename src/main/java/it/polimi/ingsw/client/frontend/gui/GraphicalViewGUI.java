@@ -132,6 +132,11 @@ public class GraphicalViewGUI extends GraphicalView {
     }
 
     @Override
+    protected void notifyMatchResumed() {
+        //TODO Implement
+    }
+
+    @Override
     public void giveInitialCard(InitialCard initialCard) {
         super.giveInitialCard(initialCard);
         this.changePlayer();

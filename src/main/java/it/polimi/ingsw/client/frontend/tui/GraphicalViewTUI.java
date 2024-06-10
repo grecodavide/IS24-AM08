@@ -667,7 +667,14 @@ public class GraphicalViewTUI extends GraphicalView {
     }
 
     @Override
-    protected void notifyMatchStarted() {}
+    protected void notifyMatchStarted() {
+        // TODO Implement
+    }
+
+    @Override
+    protected void notifyMatchResumed() {
+
+    }
 
     @Override
     public void someoneSentPrivateText(String someoneUsername, String text) {
