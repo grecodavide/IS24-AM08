@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 import it.polimi.ingsw.client.frontend.ClientBoard;
 import it.polimi.ingsw.client.frontend.GraphicalView;
 import it.polimi.ingsw.client.frontend.ShownCard;
@@ -172,7 +171,6 @@ public class GraphicalViewTUI extends GraphicalView {
 
     private void parsePlayerControl() {
         ClientBoard board = this.clientBoards.get(this.username);
-        ClientBoard currentPlayerBoard = this.clientBoards.get(this.currentPlayer);
         String userIn, command, argument, player;
 
         userIn = this.inputHandler.getNextLine();
