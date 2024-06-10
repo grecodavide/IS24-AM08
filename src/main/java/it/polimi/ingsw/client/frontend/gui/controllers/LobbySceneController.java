@@ -109,7 +109,7 @@ public class LobbySceneController extends SceneController {
         matchCard.setAlignment(Pos.CENTER);
 
         RadioButton button = new RadioButton();
-        button.setDisable(players == maxPlayers);
+        //button.setDisable(players == maxPlayers);
         button.setAlignment(Pos.CENTER);
         button.getStyleClass().add("radio");
         button.getStyleClass().add("lobby-radio");

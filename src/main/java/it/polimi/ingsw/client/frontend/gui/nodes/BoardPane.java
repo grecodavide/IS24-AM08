@@ -70,8 +70,8 @@ public class BoardPane extends Pane {
      * @return converted coordinates
      */
     public Pair<Double, Double> convertCoordinates(Pair<Integer, Integer> coords) {
-        double boardWidth = super.getWidth();
-        double boardHeight = super.getHeight();
+        double boardWidth = super.getPrefWidth();
+        double boardHeight = super.getPrefHeight();
         double w = boardWidth/2 + (coords.first() * (cardWidth - cardBorderW));
         double h = boardHeight/2 - (coords.second() * (cardHeight - cardBorderH));
         return new Pair<>(w, h);

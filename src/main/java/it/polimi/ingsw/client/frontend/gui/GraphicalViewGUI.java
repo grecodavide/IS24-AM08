@@ -1,7 +1,9 @@
 package it.polimi.ingsw.client.frontend.gui;
 
+import it.polimi.ingsw.client.frontend.ClientBoard;
 import it.polimi.ingsw.client.frontend.GraphicalView;
 import it.polimi.ingsw.client.frontend.MatchStatus;
+import it.polimi.ingsw.client.frontend.ShownCard;
 import it.polimi.ingsw.client.frontend.gui.controllers.*;
 import it.polimi.ingsw.client.frontend.gui.nodes.CardView;
 import it.polimi.ingsw.gamemodel.*;
@@ -86,9 +88,27 @@ public class GraphicalViewGUI extends GraphicalView {
 
     @Override
     protected void notifyMatchStarted() {
+        this.setupMatch(false);
+    }
+
+    @Override
+    protected void notifyMatchResumed() {
+        this.setupMatch(true);
+    }
+
+    /**
+     * Set match scene and populate elements on match start
+     * @param matchResumed if the match is resumed
+     */
+    private void setupMatch(boolean matchResumed) {
         matchState = MatchStatus.MATCH_STATE;
         Platform.runLater(() -> {
             try {
+                if (waitingSceneController == null) {
+                    waitingSceneController = new WaitingSceneController();
+                    waitingSceneController.setGraphicalView(this);
+                    waitingSceneController.setStage(stage);
+                }
                 matchSceneController = waitingSceneController.showMatch();
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -128,12 +148,34 @@ public class GraphicalViewGUI extends GraphicalView {
 
             // By default, disable draw sources interactions
             matchSceneController.enableDrawSourcesInteractions(false);
+            if (matchResumed) this.setupResumedMatch();
         });
     }
 
-    @Override
-    protected void notifyMatchResumed() {
-        //TODO Implement
+    /**
+     * Populate extra elements after match resumed
+     */
+    private void setupResumedMatch() {
+        playerTabControllers.forEach(((username, playerTabController) -> {
+            ClientBoard playerBoard = clientBoards.get(username);
+            playerTabController.setSecretObjective(playerBoard.getObjective());
+
+            // Place the initial card
+            playerTabController.getBoard().addCard(new Pair<>(0, 0), (InitialCard) playerBoard.getPlaced().get(0).card(), playerBoard.getPlaced().get(0).side());
+
+            // Place all the other cards
+            Map<Integer, ShownCard> placed = playerBoard.getPlaced();
+            for (Integer turn : placed.keySet()) {
+                if (turn > 0) {
+                    playerTabController.getBoard().addCard(placed.get(turn).coords(), (PlayableCard) placed.get(turn).card(), placed.get(turn).side());
+                }
+            }
+
+            // Set points and available resources
+            playerTabController.setPoints(playerBoard.getPoints());
+            matchSceneController.plateauPane.setPoints(username, playerBoard.getPoints());
+            playerTabController.setResources(playerBoard.getAvailableResources());
+        }));
     }
 
     @Override
