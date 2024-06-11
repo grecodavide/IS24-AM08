@@ -130,6 +130,13 @@ public class PlayerTabController extends SceneController {
                 Side side = (Side) card.getProperties().get("Side");
                 Side newSide = side.equals(Side.BACK) ? Side.FRONT : Side.BACK;
                 card.setCard((PlayableCard) card.getProperties().get("Card"), newSide);
+            } else if (clickEvent.getButton() == MouseButton.MIDDLE) {
+                // Compatibility with Hyprland
+                if (this.temporaryDragAreas.size() > 0) {
+                    this.removeDragAreas();
+                } else {
+                    this.createDragArea((PlayableCard) card.getProperties().get("Card"), (Side) card.getProperties().get("Side"));
+                }
             }
         });
     }
@@ -189,6 +196,14 @@ public class PlayerTabController extends SceneController {
             // Play the card
             view.playCard(pcoords, card, side);
             event.consume();
+        });
+        dragArea.setOnMouseClicked(event -> {
+            if (event.getButton().equals(MouseButton.PRIMARY)) {
+                this.removeDragAreas();
+                // Play the card
+                view.playCard(pcoords, card, side);
+                event.consume();
+            }
         });
 
         // When you enter the area change style
