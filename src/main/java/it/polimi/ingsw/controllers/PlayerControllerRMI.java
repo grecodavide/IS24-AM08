@@ -71,7 +71,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
 
             try {
                 view.matchResumed(playersUsernamesAndPawns, playersHands, visibleObjectives, visiblePlayableCards, decksTopReigns,
-                        player.getSecretObjective(), availableResources, playerBoards, playerPoints, match.getCurrentPlayer().getUsername());
+                        player.getSecretObjective(), availableResources, playerBoards, playerPoints, match.getCurrentPlayer().getUsername(), match.getCurrentState().getClass().equals(AfterMoveState.class));
             } catch (RemoteException e) {
                 onConnectionError();
             }

@@ -210,11 +210,12 @@ public abstract class GraphicalView {
      * @param placedCards              Placed cards of all the players
      * @param playerPoints             Points of all the players
      * @param currentPlayer            The current player
+     * @param drawPhase                If the match is resumed in draw phase
      */
     public void resumeMatch(Map<String, Color> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands,
                             Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards,
                             Pair<Symbol, Symbol> decksTopReign, Objective secretObjective, Map<String, Map<Symbol, Integer>> availableResources,
-                            Map<String, Map<Pair<Integer, Integer>, PlacedCard>> placedCards, Map<String, Integer> playerPoints, String currentPlayer) {
+                            Map<String, Map<Pair<Integer, Integer>, PlacedCard>> placedCards, Map<String, Integer> playerPoints, String currentPlayer, boolean drawPhase) {
         this.setupMatch(playersUsernamesAndPawns, playersHands, visibleObjectives, visiblePlayableCards, decksTopReign);
         this.clientBoards.get(username).setSecretObjective(secretObjective);
         for (String player : placedCards.keySet()) {

@@ -114,8 +114,8 @@ public abstract class NetworkView implements RemoteViewInterface {
     @Override
     public void matchResumed(Map<String, Color> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands,
                              Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards,
-                             Pair<Symbol, Symbol> decksTopReigns, Objective secretObjective, Map<String, Map<Symbol, Integer>> availableResources, Map<String, Map<Pair<Integer, Integer>, PlacedCard>> placedCards, Map<String, Integer> playerPoints, String currentPlayer) throws RemoteException {
-        graphicalView.resumeMatch(playersUsernamesAndPawns, playersHands, visibleObjectives, visiblePlayableCards, decksTopReigns, secretObjective, availableResources, placedCards, playerPoints, currentPlayer);
+                             Pair<Symbol, Symbol> decksTopReigns, Objective secretObjective, Map<String, Map<Symbol, Integer>> availableResources, Map<String, Map<Pair<Integer, Integer>, PlacedCard>> placedCards, Map<String, Integer> playerPoints, String currentPlayer, boolean drawPhase) throws RemoteException {
+        graphicalView.resumeMatch(playersUsernamesAndPawns, playersHands, visibleObjectives, visiblePlayableCards, decksTopReigns, secretObjective, availableResources, placedCards, playerPoints, currentPlayer, drawPhase);
     }
 
     @Override

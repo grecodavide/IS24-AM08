@@ -46,12 +46,19 @@ public interface RemoteViewInterface extends Remote {
      * @param visiblePlayableCards     Map having as values the visible common cards (the keys are just indexes).
      * @param decksTopReigns           Pair of reign symbols representing the two visible reigns symbols on top of the two decks;
      *                                 the first one is the gold deck one, the second one the resource deck one
+     * @param secretObjective          Secret objective of the current player
+     * @param availableResources       Available resources of all the players
+     * @param placedCards              Placed cards of all the players
+     * @param playerPoints             Points of all the players
+     * @param currentPlayer            The current player
+     * @param drawPhase                If the match is resumed in draw phase
+     *
      * @throws RemoteException If the remote object is considered not to be reachable anymore and cannot return as usual
      */
     void matchResumed(Map<String, Color> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands,
                       Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards,
                       Pair<Symbol, Symbol> decksTopReigns, Objective secretObjective, Map<String, Map<Symbol, Integer>> availableResources,
-                      Map<String, Map<Pair<Integer, Integer>, PlacedCard>> placedCards, Map<String, Integer> playerPoints, String currentPlayer) throws RemoteException;
+                      Map<String, Map<Pair<Integer, Integer>, PlacedCard>> placedCards, Map<String, Integer> playerPoints, String currentPlayer, boolean drawPhase) throws RemoteException;
 
     /**
      * Gives the graphical view a list of available matches
