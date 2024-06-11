@@ -239,10 +239,7 @@ public abstract class GraphicalView {
             }
         }
         this.currentPlayer = currentPlayer;
-        this.notifyMatchResumed();
-        if (this.currentPlayer.equals(this.username)) {
-            this.makeMove();
-        }
+        this.notifyMatchResumed(drawPhase);
     }
 
     private void setupMatch(Map<String, Color> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands,
@@ -292,7 +289,7 @@ public abstract class GraphicalView {
     /**
      * Method that shows the user that the match has resumed
      */
-    protected abstract void notifyMatchResumed();
+    protected abstract void notifyMatchResumed(boolean  drawPhase);
 
     public void receiveAvailableMatches(List<AvailableMatch> availableMatches) {
         this.setLastRequestStatus(RequestStatus.SUCCESSFUL);

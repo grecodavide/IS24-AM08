@@ -88,19 +88,19 @@ public class GraphicalViewGUI extends GraphicalView {
 
     @Override
     protected void notifyMatchStarted() {
-        this.setupMatch(false);
+        this.setupMatch(false, false);
     }
 
     @Override
-    protected void notifyMatchResumed() {
-        this.setupMatch(true);
+    protected void notifyMatchResumed(boolean drawPhase) {
+        this.setupMatch(true, drawPhase);
     }
 
     /**
      * Set match scene and populate elements on match start
      * @param matchResumed if the match is resumed
      */
-    private void setupMatch(boolean matchResumed) {
+    private void setupMatch(boolean matchResumed, boolean drawPhase) {
         matchState = MatchStatus.MATCH_STATE;
         Platform.runLater(() -> {
             try {
@@ -117,7 +117,6 @@ public class GraphicalViewGUI extends GraphicalView {
             matchSceneController.setObjectives(super.visibleObjectives);
             // Set visible draw sources
             super.visiblePlayableCards.forEach((drawSource, playableCard) -> {
-                System.out.println(drawSource + ": " + playableCard.getId());
                 matchSceneController.setDrawSource(drawSource, playableCard, playableCard.getReign());
             });
             matchSceneController.setDrawSource(DrawSource.GOLDS_DECK, null, super.decksTopReign.first());
@@ -148,14 +147,14 @@ public class GraphicalViewGUI extends GraphicalView {
 
             // By default, disable draw sources interactions
             matchSceneController.enableDrawSourcesInteractions(false);
-            if (matchResumed) this.setupResumedMatch();
+            if (matchResumed) this.setupResumedMatch(drawPhase);
         });
     }
 
     /**
      * Populate extra elements after match resumed
      */
-    private void setupResumedMatch() {
+    private void setupResumedMatch(boolean drawPhase) {
         playerTabControllers.forEach(((username, playerTabController) -> {
             ClientBoard playerBoard = clientBoards.get(username);
             playerTabController.setSecretObjective(playerBoard.getObjective());
@@ -176,6 +175,22 @@ public class GraphicalViewGUI extends GraphicalView {
             matchSceneController.plateauPane.setPoints(username, playerBoard.getPoints());
             playerTabController.setResources(playerBoard.getAvailableResources());
         }));
+
+        // Enable interactions if it is the current user turn
+        this.changePlayer();
+        if (currentPlayer.equals(username)) {
+            if (!drawPhase) {
+                this.makeMove();
+                playerTabControllers.get(username).enablePlaceCardInteractions(true);
+            } else {
+                // Draw interactions
+                // Set focus on the table
+                matchSceneController.setFocusToTable();
+                matchSceneController.setStateTitle("Draw a card");
+                // Enable draw sources interactions
+                matchSceneController.enableDrawSourcesInteractions(true);
+            }
+        }
     }
 
     @Override

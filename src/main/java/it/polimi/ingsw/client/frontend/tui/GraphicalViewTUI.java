@@ -672,7 +672,7 @@ public class GraphicalViewTUI extends GraphicalView {
     }
 
     @Override
-    protected void notifyMatchResumed() {
+    protected void notifyMatchResumed(boolean drawPhase) {
 
     }
 
