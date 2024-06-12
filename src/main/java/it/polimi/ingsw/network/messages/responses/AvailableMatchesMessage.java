@@ -30,6 +30,6 @@ public final class AvailableMatchesMessage extends ResponseMessage {
     }
 
     private final AvailableMatch encodeMatch(String name, Match match) {
-        return new AvailableMatch(name, match.getMaxPlayers(), match.getPlayers().size());
+        return new AvailableMatch(name, match.getMaxPlayers(), match.getPlayers().size(), match.isRejoinable());
     }
 }

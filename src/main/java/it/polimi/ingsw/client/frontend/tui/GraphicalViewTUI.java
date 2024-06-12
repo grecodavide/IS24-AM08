@@ -397,7 +397,7 @@ public class GraphicalViewTUI extends GraphicalView {
         String joinMatchPrompt = "Type the number corresponding to the match you want to join.";
 
         this.availableMatches.forEach(match -> {
-            if (match.currentPlayers() < match.maxPlayers()) {
+            if (match.currentPlayers() < match.maxPlayers() || match.isRejoinable()) {
                 joinables.add(match);
             } else {
                 notJoinables.add(match);

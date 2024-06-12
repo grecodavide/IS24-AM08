@@ -9,17 +9,15 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
-
 import it.polimi.ingsw.controllers.PlayerControllerRMI;
 import it.polimi.ingsw.controllers.PlayerControllerRMIInterface;
 import it.polimi.ingsw.exceptions.AlreadyUsedUsernameException;
 import it.polimi.ingsw.exceptions.ChosenMatchException;
 import it.polimi.ingsw.exceptions.WrongStateException;
-import it.polimi.ingsw.gamemodel.*;
+import it.polimi.ingsw.gamemodel.Match;
 import it.polimi.ingsw.network.tcp.TCPServer;
 import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.DeckCreator;
-import it.polimi.ingsw.utils.Pair;
 
 public class Server extends UnicastRemoteObject implements ServerRMIInterface {
     private final Map<String, Match> matches;
@@ -49,7 +47,7 @@ public class Server extends UnicastRemoteObject implements ServerRMIInterface {
             int maxPlayers = match.getMaxPlayers();
             int currentPlayers = match.getPlayers().size();
 
-            result.add(new AvailableMatch(name, maxPlayers, currentPlayers));
+            result.add(new AvailableMatch(name, maxPlayers, currentPlayers, match.isRejoinable()));
         }
 
         return result;

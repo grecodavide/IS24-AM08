@@ -10,7 +10,7 @@ import java.io.Serializable;
  * @param maxPlayers The max number of players allowed in the match
  * @param currentPlayers The number of currently joined players
  */
-public record AvailableMatch(String name, Integer maxPlayers, Integer currentPlayers) implements Serializable {
+public record AvailableMatch(String name, Integer maxPlayers, Integer currentPlayers, boolean isRejoinable) implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 }

@@ -1,13 +1,12 @@
 package it.polimi.ingsw.client.frontend;
 
+import java.util.*;
 import it.polimi.ingsw.client.network.NetworkView;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.LeaderboardEntry;
 import it.polimi.ingsw.utils.Pair;
 import it.polimi.ingsw.utils.RequestStatus;
-
-import java.util.*;
 
 public abstract class GraphicalView {
     protected NetworkView networkView;
