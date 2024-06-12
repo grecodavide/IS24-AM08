@@ -56,7 +56,7 @@ public class Match implements Serializable {
     private List<Pair<Player, Boolean>> playersFinalRanking;
 
     // List of observers
-    private final transient List<MatchObserver> observers;
+    private transient List<MatchObserver> observers;
 
     /**
      * Initializes main Match attributes and allocate the attribute players List, assuming no parameter is null.
@@ -75,7 +75,6 @@ public class Match implements Serializable {
         this.goldsDeck = goldsDeck;
         this.objectivesDeck = objectivesDeck;
         this.currentState = new WaitState(this);
-        this.observers = new ArrayList<>();
 
         if (goldsDeck.getSize() < maxPlayers + 2)
             throw new IllegalArgumentException("goldsDeck does not have enough cards");
@@ -743,6 +742,9 @@ public class Match implements Serializable {
      * @param observer The observer to be notified from now on when an event occurs
      */
     public void subscribeObserver(MatchObserver observer) {
+        if (observers == null) {
+            observers = new ArrayList<>();
+        }
         observers.add(observer);
     }
 
@@ -794,7 +796,7 @@ public class Match implements Serializable {
      * @param observerCallable The "method" to be called on each observer of the match
      */
     private void notifyObservers(MatchObserverCallable observerCallable) {
-        if(observers.isEmpty())
+        if(observers == null || observers.isEmpty())
             return;
 
         ExecutorService executor = Executors.newFixedThreadPool(observers.size());

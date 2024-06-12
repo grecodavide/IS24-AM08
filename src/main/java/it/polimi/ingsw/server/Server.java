@@ -1,5 +1,9 @@
 package it.polimi.ingsw.server;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -128,10 +132,37 @@ public class Server extends UnicastRemoteObject implements ServerRMIInterface {
             portTCP = Integer.parseInt(args[1]);
         }
 
+
         Server server = new Server(portRMI, portTCP);
 
+        server.loadCrashedMatches();
         server.startRMIServer();
         server.startTCPServer();
     }
 
+
+    public void loadCrashedMatches() {
+        // Look for *.match files in the current directory
+        File dir = new File(".");
+        File[] files = dir.listFiles((file, name) -> name.toLowerCase().endsWith(".match"));
+        // If any file is found
+        if (files != null) {
+            for (File file : files) {
+                try {
+                    // Read each .match file from disk
+                    FileInputStream fileIn = new FileInputStream(file);
+                    ObjectInputStream in = new ObjectInputStream(fileIn);
+
+                    // Deserialize the .match file in a Match object
+                    Match match = (Match) in.readObject();
+                    matches.put(file.getName().replaceAll("(?i)(.*)\\.match", "$1") + " [reloaded]", match);
+                    match.getPlayers().forEach((p) -> p.setConnected(false));
+                    in.close();
+                    fileIn.close();
+                } catch (IOException | ClassNotFoundException e) {
+                    System.err.println("A match couldn't be loaded from disk");
+                }
+            }
+        }
+    }
 }
