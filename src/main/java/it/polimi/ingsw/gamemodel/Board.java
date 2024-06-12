@@ -4,6 +4,8 @@ import it.polimi.ingsw.exceptions.CardException;
 import it.polimi.ingsw.exceptions.HandException;
 import it.polimi.ingsw.utils.Pair;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,7 +14,10 @@ import java.util.Map;
 /**
  * Board is the class that contains all the information relative to a {@link Player}'s status
  */
-public class Board {
+public class Board implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     private final List<PlayableCard> currentHand;
     private final Map<Pair<Integer, Integer>, PlacedCard> placed;
     private final Map<Symbol, Integer> availableResources;

@@ -1,5 +1,7 @@
 package it.polimi.ingsw.gamemodel;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -10,7 +12,10 @@ import it.polimi.ingsw.exceptions.DeckException;
  *
  * @param <T> the type of deck, which can be a {@link ResourceCard}, {@link GoldCard}, {@link InitialCard} or {@link Objective}
  */
-public class GameDeck<T> {
+public class GameDeck<T> implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     private List<T> cardsList;
 
     /**

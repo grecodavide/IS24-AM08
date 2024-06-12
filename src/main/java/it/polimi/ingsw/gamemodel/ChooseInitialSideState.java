@@ -1,6 +1,11 @@
 package it.polimi.ingsw.gamemodel;
 
-public class ChooseInitialSideState extends MatchState {
+import java.io.Serial;
+import java.io.Serializable;
+
+public class ChooseInitialSideState extends MatchState implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     public ChooseInitialSideState(Match match) {
         super(match);

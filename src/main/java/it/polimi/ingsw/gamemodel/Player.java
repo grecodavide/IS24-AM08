@@ -6,13 +6,18 @@ import it.polimi.ingsw.exceptions.WrongStateException;
 import it.polimi.ingsw.exceptions.WrongTurnException;
 import it.polimi.ingsw.utils.Pair;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
  * Represents each in-game user, so acts also as a gateway receiving input by the Controller.
  * It's also responsible for the board's logic, which is a slice of the game logic.
  */
-public class Player {
+public class Player implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     private final String username;
     private final Match match;
     private int points;

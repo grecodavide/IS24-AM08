@@ -2,6 +2,9 @@ package it.polimi.ingsw.gamemodel;
 
 import it.polimi.ingsw.exceptions.WrongStateException;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 /**
  * Represents an appendix of {@link Match}.
  * Match fully delegates to this class, through composition, the role of keeping track of the current game state: it
@@ -11,8 +14,15 @@ import it.polimi.ingsw.exceptions.WrongStateException;
  * that specific subclass; if not overridden, the MatchState version of the method will be called and thus an exception
  * will be thrown.
  */
-public abstract class MatchState {
-    Match match;
+public abstract class MatchState implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    protected Match match;
+
+    public MatchState() {
+
+    }
 
     protected MatchState(Match match) {
         this.match = match;

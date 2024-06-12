@@ -1,5 +1,7 @@
 package it.polimi.ingsw.gamemodel;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -15,7 +17,10 @@ import it.polimi.ingsw.utils.Pair;
  * Few methods are called by the current player of the match, used to trigger a change in the match and so notify that
  * an event occurred, such as nextPlayer(...).
  */
-public class Match {
+public class Match implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     private final List<Player> players;
     private final int maxPlayers;
     private Player currentPlayer;
@@ -51,7 +56,7 @@ public class Match {
     private List<Pair<Player, Boolean>> playersFinalRanking;
 
     // List of observers
-    private final List<MatchObserver> observers;
+    private final transient List<MatchObserver> observers;
 
     /**
      * Initializes main Match attributes and allocate the attribute players List, assuming no parameter is null.

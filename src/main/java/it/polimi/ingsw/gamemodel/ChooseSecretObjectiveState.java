@@ -1,6 +1,12 @@
 package it.polimi.ingsw.gamemodel;
 
-public class ChooseSecretObjectiveState extends MatchState {
+import java.io.Serial;
+import java.io.Serializable;
+
+public class ChooseSecretObjectiveState extends MatchState implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
 
     public ChooseSecretObjectiveState(Match match) {
         super(match);
