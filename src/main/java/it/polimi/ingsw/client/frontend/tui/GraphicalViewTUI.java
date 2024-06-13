@@ -700,25 +700,12 @@ public class GraphicalViewTUI extends GraphicalView {
     }
 
     @Override
-    public void resumeMatch(Map<String, Color> playersUsernamesAndPawns,
-            Map<String, List<PlayableCard>> playersHands,
-            Pair<Objective, Objective> visibleObjectives,
-            Map<DrawSource, PlayableCard> visiblePlayableCards, Pair<Symbol, Symbol> decksTopReign,
-            Objective secretObjective, Map<String, Map<Symbol, Integer>> availableResources,
-            Map<String, Map<Pair<Integer, Integer>, PlacedCard>> placedCards,
-            Map<String, Integer> playerPoints, String currentPlayer, boolean drawPhase) {
-        super.resumeMatch(playersUsernamesAndPawns, playersHands, visibleObjectives,
-                visiblePlayableCards, decksTopReign, secretObjective, availableResources,
-                placedCards, playerPoints, currentPlayer, drawPhase);
+    protected void notifyMatchResumed(boolean drawPhase) {
+        this.clientBoards.get(this.username).getPlaced().forEach((turn, shownCard) -> this.validPositions.addCard(new ShownCard(shownCard.card(), shownCard.side(), shownCard.coords())));
 
         this.players.forEach(this.playersWithObjective::add); // we resume match only if the game
                                                               // was in progress, so all players
                                                               // chose secret objectives
-    }
-
-    @Override
-    protected void notifyMatchResumed(boolean drawPhase) {
-        this.clientBoards.get(this.username).getPlaced().forEach((turn, shownCard) -> this.validPositions.addCard(new ShownCard(shownCard.card(), shownCard.side(), shownCard.coords())));
         if (this.username.equals(this.currentPlayer)) {
             if (drawPhase) {
                 this.makeUserDraw(this.clientBoards.get(this.username).getAvailableResources());
