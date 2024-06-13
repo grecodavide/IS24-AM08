@@ -239,6 +239,7 @@ public abstract class GraphicalView {
         }
         this.currentPlayer = currentPlayer;
         this.notifyMatchResumed(drawPhase);
+        this.setLastRequestStatus(RequestStatus.SUCCESSFUL);
     }
 
     private void setupMatch(Map<String, Color> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands,

@@ -28,15 +28,15 @@ public class GraphicalViewTUI extends GraphicalView {
     private final InputHandler inputHandler;
     private final ValidPositions validPositions;
     private final static List<String> helpMessage = List.of(
-        "players,     p -> show list of players",
-        "write,       w -> write message (add :username to send private text)",
-        "chat,        c -> show chat",
-        "board,       b -> show your board (or specify a number to show corresponding player's board)",
-        "objectives,  o -> show secret and common objectives",
-        "hand,        h -> show your hand"
-    ); 
+            "players,     p -> show list of players",
+            "write,       w -> write message (add :username to send private text)",
+            "chat,        c -> show chat",
+            "board,       b -> show your board (or specify a number to show corresponding player's board)",
+            "objectives,  o -> show secret and common objectives",
+            "hand,        h -> show your hand");
 
-    private final static String playerControlPrompt = "Type command, or 'help' for a list of available commands.";
+    private final static String playerControlPrompt =
+            "Type command, or 'help' for a list of available commands.";
 
     private List<String> chat;
 
@@ -132,7 +132,8 @@ public class GraphicalViewTUI extends GraphicalView {
         this.printer.clearTerminal();
         this.printer.printPlayableFrontAndBack(card, 0);
 
-        this.inputHandler.setPrompt("What side do you want to play the card on? (defaults to front)");
+        this.inputHandler
+                .setPrompt("What side do you want to play the card on? (defaults to front)");
         String userIn = this.inputHandler.askUser();
         return switch (userIn) {
             case "b", "back" -> Side.BACK;
@@ -141,7 +142,8 @@ public class GraphicalViewTUI extends GraphicalView {
     }
 
     private Pair<Integer, Integer> chooseCoords(ClientBoard board) {
-        Map<Pair<Integer, Integer>, Pair<Integer, Corner>> valids = this.validPositions.getValidPlaces();
+        Map<Pair<Integer, Integer>, Pair<Integer, Corner>> valids =
+                this.validPositions.getValidPlaces();
 
         Pair<Integer, Integer> coord = null;
 
@@ -187,7 +189,8 @@ public class GraphicalViewTUI extends GraphicalView {
 
         switch (command) {
             case "o", "objectives":
-                this.printer.printObjectives(username, board.getColor(), board.getObjective(), this.visibleObjectives);
+                this.printer.printObjectives(username, board.getColor(), board.getObjective(),
+                        this.visibleObjectives);
                 break;
             case "h", "hand":
                 this.printer.printHand(this.username, board.getColor(), board.getHand());
@@ -216,7 +219,8 @@ public class GraphicalViewTUI extends GraphicalView {
                         break;
 
                     default:
-                        this.printer.printPlayerBoard(this.username, this.clientBoards.get(this.username));
+                        this.printer.printPlayerBoard(this.username,
+                                this.clientBoards.get(this.username));
                         break;
                 }
                 break;
@@ -229,17 +233,25 @@ public class GraphicalViewTUI extends GraphicalView {
                         splitIndex = argument.indexOf(" ");
                         if (splitIndex != -1) {
                             String text = argument.substring(splitIndex + 1);
+                            String recipient = argument.substring(1, splitIndex);
                             if (!argument.equals("")) {
-                                this.sendPrivateText(argument.substring(1, splitIndex), text);
+                                this.sendPrivateText(recipient, text);
+                            }
+                            if (!this.getServerResponse()) {
+                                this.messages.add(this.lastError);
+                            } else {
+                                this.chat.add("(to: " + recipient + "): " + text);
                             }
                         }
                     } else {
                         this.sendBroadcastText(argument);
+                        if (!this.getServerResponse()) {
+                            this.messages.add(this.lastError);
+                        } else {
+                            this.chat.add("(you): " + argument);
+                        }
                     }
 
-                    if (!this.getServerResponse()) {
-                        this.messages.add(this.lastError);
-                    }
                     this.printer.clearTerminal();
                 }
                 break;
@@ -252,7 +264,8 @@ public class GraphicalViewTUI extends GraphicalView {
                 break;
 
             default:
-                this.printer.printCenteredMessage("Not a known command: '" + command + "'. Type 'help' to show a help message", 0);
+                this.printer.printCenteredMessage("Not a known command: '" + command
+                        + "'. Type 'help' to show a help message", 0);
                 break;
         }
 
@@ -319,7 +332,8 @@ public class GraphicalViewTUI extends GraphicalView {
                         this.setNetworkInterface(new NetworkViewRMI(this, IPAddr, port));
                         break;
                     default:
-                        this.inputHandler.setPrompt("Not a valid connection type! Choose connection type (1 for TCP, 2 for RMI)");
+                        this.inputHandler.setPrompt(
+                                "Not a valid connection type! Choose connection type (1 for TCP, 2 for RMI)");
                         break;
                 }
             } catch (Exception e) {
@@ -417,7 +431,8 @@ public class GraphicalViewTUI extends GraphicalView {
                     if (joinables.isEmpty())
                         joinMatchPrompt = "No matches available. " + joinMatchPrompt;
 
-                    this.inputHandler.setPrompt("Do you want to join a match or (c)reate one? (defaults to join)");
+                    this.inputHandler.setPrompt(
+                            "Do you want to join a match or (c)reate one? (defaults to join)");
                     String userIn = this.inputHandler.askUser();
                     this.printer.printMatchesLobby(joinables, notJoinables, 0);
                     switch (userIn) {
@@ -486,12 +501,14 @@ public class GraphicalViewTUI extends GraphicalView {
             this.giveInitialCard(initialCard);
         } else {
             this.printer.clearTerminal();
-            this.validPositions.addCard(new ShownCard(initialCard, side, new Pair<Integer, Integer>(0, 0)));
+            this.validPositions
+                    .addCard(new ShownCard(initialCard, side, new Pair<Integer, Integer>(0, 0)));
         }
     }
 
     @Override
-    public void someoneSetInitialSide(String someoneUsername, Side side, Map<Symbol, Integer> availableResources) {
+    public void someoneSetInitialSide(String someoneUsername, Side side,
+            Map<Symbol, Integer> availableResources) {
         this.printer.clearTerminal();
         if (this.username.equals(someoneUsername)) {
             this.printer.printPlayerBoard(this.username, this.clientBoards.get(this.username));
@@ -538,10 +555,13 @@ public class GraphicalViewTUI extends GraphicalView {
 
         new Thread(() -> {
             if (board.getPlaced().isEmpty()) { // choosing initial side
-                this.printer.printCenteredMessage(this.currentPlayer + " is choosing initial side!", 0);
+                this.printer.printCenteredMessage(this.currentPlayer + " is choosing initial side!",
+                        0);
                 this.printer.printPrompt("");
-            } else if (!this.playersWithObjective.contains(this.currentPlayer)) { // choosing objective
-                this.printer.printCenteredMessage(this.currentPlayer + " is choosing secret objective!", 0);
+            } else if (!this.playersWithObjective.contains(this.currentPlayer)) { // choosing
+                                                                                  // objective
+                this.printer.printCenteredMessage(
+                        this.currentPlayer + " is choosing secret objective!", 0);
                 this.printer.printPrompt("");
             } else {
                 this.inputHandler.setPrompt(playerControlPrompt);
@@ -595,12 +615,7 @@ public class GraphicalViewTUI extends GraphicalView {
         }
     }
 
-    @Override
-    public void someonePlayedCard(String someoneUsername, Pair<Integer, Integer> coords, PlayableCard card, Side side, int points,
-            Map<Symbol, Integer> availableResources) {
-        super.someonePlayedCard(someoneUsername, coords, card, side, points, availableResources);
-
-        if (this.username.equals(someoneUsername)) {
+    private void makeUserDraw(Map<Symbol, Integer> availableResources) {
             this.printer.clearTerminal();
             DrawSource source = null;
             this.printer.printAvailableResources(availableResources, 0);
@@ -638,9 +653,18 @@ public class GraphicalViewTUI extends GraphicalView {
 
             super.drawCard(source);
             if (!getServerResponse()) {
-                this.someonePlayedCard(someoneUsername, coords, card, side, points, availableResources);
+                this.makeUserDraw(availableResources);
                 return;
             }
+    }
+
+    @Override
+    public void someonePlayedCard(String someoneUsername, Pair<Integer, Integer> coords,
+            PlayableCard card, Side side, int points, Map<Symbol, Integer> availableResources) {
+        super.someonePlayedCard(someoneUsername, coords, card, side, points, availableResources);
+
+        if (this.username.equals(someoneUsername)) {
+            this.makeUserDraw(availableResources);
         }
     }
 
@@ -663,7 +687,7 @@ public class GraphicalViewTUI extends GraphicalView {
     @Override
     public void notifyError(Exception exception) {
         super.notifyError(exception);
-        this.lastError = exception.getMessage();
+        this.lastError = "(" + exception.getClass().getName() + ") " + exception.getMessage();
     }
 
     @Override
@@ -673,16 +697,20 @@ public class GraphicalViewTUI extends GraphicalView {
 
     @Override
     protected void notifyMatchResumed(boolean drawPhase) {
-
+        if (this.username.equals(this.currentPlayer)) {
+            if (drawPhase) {
+                this.makeUserDraw(this.clientBoards.get(this.username).getAvailableResources());
+            } else {
+                this.makeMove();
+            }
+        }
     }
 
     @Override
     public void someoneSentPrivateText(String someoneUsername, String text) {
         super.someoneSentPrivateText(someoneUsername, text);
 
-        if (this.username.equals(someoneUsername)) {
-            this.chat.add("(to: " + someoneUsername + "): " + text);
-        } else {
+        if (!this.username.equals(someoneUsername)) {
             this.chat.add("(" + someoneUsername + "): " + text);
             this.messages.add(someoneUsername + " sent a private text!");
             this.printer.printMessages(this.messages);
@@ -694,9 +722,7 @@ public class GraphicalViewTUI extends GraphicalView {
     public void someoneSentBroadcastText(String someoneUsername, String text) {
         super.someoneSentBroadcastText(someoneUsername, text);
 
-        if (this.username.equals(someoneUsername)) {
-            this.chat.add("[me]: " + text);
-        } else {
+        if (!this.username.equals(someoneUsername)) {
             this.chat.add("[" + someoneUsername + "]: " + text);
             this.messages.add(someoneUsername + " sent a text!");
             this.printer.printMessages(this.messages);

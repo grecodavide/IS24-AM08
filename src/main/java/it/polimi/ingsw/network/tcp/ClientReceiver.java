@@ -12,6 +12,7 @@ import it.polimi.ingsw.network.messages.errors.ErrorMessage;
 import it.polimi.ingsw.network.messages.responses.*;
 import it.polimi.ingsw.utils.CardsManager;
 import it.polimi.ingsw.utils.Pair;
+import it.polimi.ingsw.utils.PlacedCardRecord;
 
 /**
  * ClientSender
@@ -47,6 +48,24 @@ public class ClientReceiver implements Runnable {
         return card;
     }
 
+    private Map<Pair<Integer, Integer>, PlacedCard> getPlacedMap(
+            Map<Pair<Integer, Integer>, PlacedCardRecord> board) {
+        Map<Pair<Integer, Integer>, PlacedCard> result = new HashMap<>();
+
+        PlacedCardRecord placed;
+        for (Pair<Integer, Integer> coords : board.keySet()) {
+            placed = board.get(coords);
+            if (coords.first().equals(0) && coords.second().equals(0)) {
+                result.put(coords, new PlacedCard(this.initialCards.get(placed.cardID()),
+                        placed.side(), placed.turn()));
+            }
+            result.put(coords, new PlacedCard(this.getPlayable(placed.cardID()), placed.side(),
+                    placed.turn()));
+        }
+
+        return result;
+    }
+
     private void parseMessage(String message) {
         try {
             ResponseMessage response = (ResponseMessage) io.stringToMsg(message);
@@ -55,51 +74,117 @@ public class ClientReceiver implements Runnable {
                 case AvailableMatchesMessage msg:
                     this.networkView.receiveAvailableMatches(msg.getMatches());
                     break;
+
+                case MatchResumedMessage msg:
+                    Map<String, Color> playersUsernamesAndPawns = new HashMap<>();
+                    Map<String, List<PlayableCard>> playersHands = new HashMap<>();
+                    Pair<Objective, Objective> visibleObjectives;
+                    Map<DrawSource, PlayableCard> visiblePlayableCards = new HashMap<>();
+                    Pair<Symbol, Symbol> decksTopReigns;
+                    Objective secretObjective;
+                    Map<String, Map<Symbol, Integer>> availableResources = new HashMap<>();
+                    Map<String, Map<Pair<Integer, Integer>, PlacedCard>> placedCards =
+                            new HashMap<>();
+                    Map<String, Integer> playerPoints = new HashMap<>();
+                    String currentPlayer;
+                    boolean drawPhase;
+
+
+                    playersUsernamesAndPawns = msg.getPlayersUsernamesAndPawns();
+                    playersHands = msg.getPlayersHands().entrySet().stream()
+                            .collect(Collectors.toMap(Map.Entry::getKey,
+                                    entry -> entry.getValue().stream()
+                                            .map(cardID -> this.getPlayable(cardID))
+                                            .collect(Collectors.toList())));
+
+                    Pair<Integer, Integer> visibleObjectivesID = msg.getVisibleObjectives();
+                    visibleObjectives = new Pair<Objective, Objective>(
+                            this.objectives.get(visibleObjectivesID.first()),
+                            this.objectives.get(visibleObjectivesID.second()));
+
+                    visiblePlayableCards = msg.getVisiblePlayableCards().entrySet().stream()
+                            .collect(Collectors.toMap(Map.Entry::getKey,
+                                    entry -> this.getPlayable(entry.getValue())));
+
+                    decksTopReigns = msg.getDecksTopReigns();
+
+                    secretObjective = this.objectives.get(msg.getSecretObjective());
+
+                    availableResources = msg.getAvailableResources();
+
+                    msg.getPlacedCards().forEach(
+                            (player, board) -> placedCards.put(player, this.getPlacedMap(board)));
+
+                    playerPoints = msg.getPlayerPoints();
+
+                    currentPlayer = msg.getCurrentPlayer();
+
+                    drawPhase = msg.isDrawPhase();
+
+                    this.networkView.matchResumed(playersUsernamesAndPawns, playersHands,
+                            visibleObjectives, visiblePlayableCards, decksTopReigns,
+                            secretObjective, availableResources, placedCards, playerPoints,
+                            currentPlayer, drawPhase);
+                    break;
+
                 case MatchStartedMessage msg:
                     Map<String, List<PlayableCard>> hands = new HashMap<>();
-                    msg.getPlayerHands().forEach((player, hand) -> hands.put(player,
-                            List.of(hand).stream().map(card -> this.getPlayable(card)).collect(Collectors.toList())));
+                    msg.getPlayerHands()
+                            .forEach((player, hand) -> hands.put(player,
+                                    List.of(hand).stream().map(card -> this.getPlayable(card))
+                                            .collect(Collectors.toList())));
 
                     Pair<Objective, Objective> objectives = new Pair<Objective, Objective>(
-                            this.objectives.get(msg.getVisibleObjectives()[0]), this.objectives.get(msg.getVisibleObjectives()[1]));
+                            this.objectives.get(msg.getVisibleObjectives()[0]),
+                            this.objectives.get(msg.getVisibleObjectives()[1]));
 
                     Map<DrawSource, PlayableCard> visibles = new HashMap<>();
-                    msg.getVisibleCards().forEach((source, card) -> visibles.put(source, this.getPlayable(card)));
+                    msg.getVisibleCards().forEach(
+                            (source, card) -> visibles.put(source, this.getPlayable(card)));
 
-                    Pair<Symbol, Symbol> decksTop = new Pair<Symbol, Symbol>(msg.getVisibleDeckReigns()[0], msg.getVisibleDeckReigns()[1]);
+                    Pair<Symbol, Symbol> decksTop = new Pair<Symbol, Symbol>(
+                            msg.getVisibleDeckReigns()[0], msg.getVisibleDeckReigns()[1]);
 
-                    this.networkView.matchStarted(msg.getPlayerPawnColors(), hands, objectives, visibles, decksTop);
+                    this.networkView.matchStarted(msg.getPlayerPawnColors(), hands, objectives,
+                            visibles, decksTop);
                     break;
 
                 case SomeoneDrewInitialCardMessage msg:
                     if (username.equals(this.networkView.getUsername())) {
-                        this.networkView.giveInitialCard(this.initialCards.get(msg.getInitialCardID()));
+                        this.networkView
+                                .giveInitialCard(this.initialCards.get(msg.getInitialCardID()));
                     } else {
-                        this.networkView.someoneDrewInitialCard(username, this.initialCards.get(msg.getInitialCardID()));
+                        this.networkView.someoneDrewInitialCard(username,
+                                this.initialCards.get(msg.getInitialCardID()));
                     }
                     break;
                 case SomeoneDrewSecretObjectivesMessage msg:
                     if (username.equals(this.networkView.getUsername())) {
                         Pair<Objective, Objective> objs =
-                                new Pair<>(this.objectives.get(msg.getFirstID()), this.objectives.get(msg.getSecondID()));
+                                new Pair<>(this.objectives.get(msg.getFirstID()),
+                                        this.objectives.get(msg.getSecondID()));
                         this.networkView.giveSecretObjectives(objs);
                     } else {
                         this.networkView.someoneDrewSecretObjective(username);
                     }
                     break;
                 case SomeoneSetInitialSideMessage msg:
-                    this.networkView.someoneSetInitialSide(username, msg.getSide(), msg.getAvailableResources());
+                    this.networkView.someoneSetInitialSide(username, msg.getSide(),
+                            msg.getAvailableResources());
                     break;
                 case SomeoneChoseSecretObjectiveMessage msg:
                     this.networkView.someoneChoseSecretObjective(username);
                     break;
                 case SomeonePlayedCardMessage msg:
-                    Pair<Integer, Integer> coords = new Pair<Integer, Integer>(msg.getX(), msg.getY());
-                    this.networkView.someonePlayedCard(username, coords, this.getPlayable(msg.getCardID()), msg.getSide(), msg.getPoints(),
+                    Pair<Integer, Integer> coords =
+                            new Pair<Integer, Integer>(msg.getX(), msg.getY());
+                    this.networkView.someonePlayedCard(username, coords,
+                            this.getPlayable(msg.getCardID()), msg.getSide(), msg.getPoints(),
                             msg.getAvailableResources());
                     break;
                 case SomeoneDrewCardMessage msg:
-                    this.networkView.someoneDrewCard(username, msg.getDrawSource(), this.getPlayable(msg.getCardID()),
+                    this.networkView.someoneDrewCard(username, msg.getDrawSource(),
+                            this.getPlayable(msg.getCardID()),
                             this.getPlayable(msg.getReplacementCardID()), msg.getDeckTopReigns());
                     break;
                 case SomeoneJoinedMessage msg:
@@ -128,7 +213,7 @@ public class ClientReceiver implements Runnable {
 
     private void sendError(String message) {
         try {
-            ErrorMessage msg = (ErrorMessage)this.io.stringToMsg(message);
+            ErrorMessage msg = (ErrorMessage) this.io.stringToMsg(message);
             Exception exception = new Exception(msg.getMessage());
             this.networkView.notifyError(exception);
         } catch (Exception e) {

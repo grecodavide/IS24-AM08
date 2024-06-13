@@ -3,6 +3,7 @@ package it.polimi.ingsw.controllers;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import it.polimi.ingsw.exceptions.HandException;
 import it.polimi.ingsw.exceptions.WrongChoiceException;
 import it.polimi.ingsw.exceptions.WrongStateException;
@@ -13,6 +14,7 @@ import it.polimi.ingsw.network.messages.errors.ErrorMessage;
 import it.polimi.ingsw.network.messages.responses.*;
 import it.polimi.ingsw.network.tcp.IOHandler;
 import it.polimi.ingsw.utils.Pair;
+import it.polimi.ingsw.utils.PlacedCardRecord;
 
 public final class PlayerControllerTCP extends PlayerController {
     private IOHandler io;
@@ -201,13 +203,13 @@ public final class PlayerControllerTCP extends PlayerController {
     @Override
     public void matchResumed() {
         Map<String, Color> playersUsernamesAndPawns = new HashMap<>();
-        Map<String, List<PlayableCard>> playersHands = new HashMap<>();
-        Pair<Objective, Objective> visibleObjectives;
-        Map<DrawSource, PlayableCard> visiblePlayableCards = new HashMap<>();
+        Map<String, List<Integer>> playersHands = new HashMap<>();
+        Pair<Integer, Integer> visibleObjectives;
+        Map<DrawSource, Integer> visiblePlayableCards = new HashMap<>();
         Pair<Symbol, Symbol> decksTopReigns;
-        Objective secretObjective;
+        Integer secretObjective;
         Map<String, Map<Symbol, Integer>> availableResources = new HashMap<>();
-        Map<String, Map<Pair<Integer, Integer>, PlacedCard>> placedCards = new HashMap<>();
+        Map<String, Map<Pair<Integer, Integer>, PlacedCardRecord>> placedCards = new HashMap<>();
         Map<String, Integer> playerPoints = new HashMap<>();
         String currentPlayer;
         boolean drawPhase;
@@ -216,22 +218,34 @@ public final class PlayerControllerTCP extends PlayerController {
             String username = player.getUsername();
             Board board = player.getBoard();
             playersUsernamesAndPawns.put(username, player.getPawnColor());
-            playersHands.put(username, board.getCurrentHand());
+            playersHands.put(username, board.getCurrentHand().stream().map(card -> card.getId())
+                    .collect(Collectors.toList()));
             availableResources.put(username, board.getAvailableResources());
-            placedCards.put(username, board.getPlacedCards());
+
+            placedCards.put(username, board.getPlacedCards().entrySet().stream().collect(
+                Collectors.toMap(Map.Entry::getKey, 
+                entry -> new PlacedCardRecord(entry.getValue().getCard().getId(), entry.getValue().getTurn(), entry.getValue().getPlayedSide())
+                )
+            ));
             playerPoints.put(username, player.getPoints());
         });
 
-        visibleObjectives = this.match.getVisibleObjectives();
-        visiblePlayableCards = this.match.getVisiblePlayableCards();
+        Pair<Objective, Objective> visibleObjectivesValue = this.match.getVisibleObjectives();
+        // get a Set of Entry, which contains key and value, and create a new Hashmap with key and
+        // value.ID
+        visibleObjectives = new Pair<Integer, Integer>(visibleObjectivesValue.first().getID(),
+                visibleObjectivesValue.second().getID());
+        visiblePlayableCards = this.match.getVisiblePlayableCards().entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getId()));
         decksTopReigns = this.match.getDecksTopReigns();
-        secretObjective = this.player.getSecretObjective();
+        secretObjective = this.player.getSecretObjective().getID();
         currentPlayer = this.match.getCurrentPlayer().getUsername();
         drawPhase = this.match.getCurrentState().getClass().equals(AfterMoveState.class);
 
-        Message msg = new MatchResumedMessage(currentPlayer, drawPhase, playersUsernamesAndPawns,
-                playersHands, visibleObjectives, visiblePlayableCards, decksTopReigns,
-                secretObjective, availableResources, placedCards, playerPoints, currentPlayer);
+
+        Message msg = new MatchResumedMessage(playersUsernamesAndPawns, playersHands,
+                visibleObjectives, visiblePlayableCards, decksTopReigns, secretObjective,
+                availableResources, placedCards, playerPoints, currentPlayer, drawPhase);
 
         this.sendMessage(msg);
     }

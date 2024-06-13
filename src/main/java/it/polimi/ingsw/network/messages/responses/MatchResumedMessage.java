@@ -2,8 +2,11 @@ package it.polimi.ingsw.network.messages.responses;
 
 import java.util.List;
 import java.util.Map;
-import it.polimi.ingsw.gamemodel.*;
+import it.polimi.ingsw.gamemodel.Color;
+import it.polimi.ingsw.gamemodel.DrawSource;
+import it.polimi.ingsw.gamemodel.Symbol;
 import it.polimi.ingsw.utils.Pair;
+import it.polimi.ingsw.utils.PlacedCardRecord;
 
 /**
  * MatchResumedMessage
@@ -11,27 +14,24 @@ import it.polimi.ingsw.utils.Pair;
 
 public final class MatchResumedMessage extends ResponseMessage {
     private final Map<String, Color> playersUsernamesAndPawns;
-    private final Map<String, List<PlayableCard>> playersHands;
-    private final Pair<Objective, Objective> visibleObjectives;
-    private final Map<DrawSource, PlayableCard> visiblePlayableCards;
+    private final Map<String, List<Integer>> playersHands;
+    private final Pair<Integer, Integer> visibleObjectives;
+    private final Map<DrawSource, Integer> visiblePlayableCards;
     private final Pair<Symbol, Symbol> decksTopReigns;
-    private final Objective secretObjective;
+    private final Integer secretObjective;
     private final Map<String, Map<Symbol, Integer>> availableResources;
-    private final Map<String, Map<Pair<Integer, Integer>, PlacedCard>> placedCards;
+    private final Map<String, Map<Pair<Integer, Integer>, PlacedCardRecord>> placedCards;
     private final Map<String, Integer> playerPoints;
     private final String currentPlayer;
     private final boolean drawPhase;
 
-    public MatchResumedMessage(String username, boolean drawPhase,
-            Map<String, Color> playersUsernamesAndPawns,
-            Map<String, List<PlayableCard>> playersHands,
-            Pair<Objective, Objective> visibleObjectives,
-            Map<DrawSource, PlayableCard> visiblePlayableCards, Pair<Symbol, Symbol> decksTopReigns,
-            Objective secretObjective, Map<String, Map<Symbol, Integer>> availableResources,
-            Map<String, Map<Pair<Integer, Integer>, PlacedCard>> placedCards,
-            Map<String, Integer> playerPoints, String currentPlayer) {
-        super(username);
-        this.drawPhase = drawPhase;
+    public MatchResumedMessage(Map<String, Color> playersUsernamesAndPawns,
+            Map<String, List<Integer>> playersHands, Pair<Integer, Integer> visibleObjectives,
+            Map<DrawSource, Integer> visiblePlayableCards, Pair<Symbol, Symbol> decksTopReigns,
+            Integer secretObjective, Map<String, Map<Symbol, Integer>> availableResources,
+            Map<String, Map<Pair<Integer, Integer>, PlacedCardRecord>> placedCards,
+            Map<String, Integer> playerPoints, String currentPlayer, boolean drawPhase) {
+        super(null);
         this.playersUsernamesAndPawns = playersUsernamesAndPawns;
         this.playersHands = playersHands;
         this.visibleObjectives = visibleObjectives;
@@ -42,21 +42,22 @@ public final class MatchResumedMessage extends ResponseMessage {
         this.placedCards = placedCards;
         this.playerPoints = playerPoints;
         this.currentPlayer = currentPlayer;
+        this.drawPhase = drawPhase;
     }
 
     public Map<String, Color> getPlayersUsernamesAndPawns() {
         return playersUsernamesAndPawns;
     }
 
-    public Map<String, List<PlayableCard>> getPlayersHands() {
+    public Map<String, List<Integer>> getPlayersHands() {
         return playersHands;
     }
 
-    public Pair<Objective, Objective> getVisibleObjectives() {
+    public Pair<Integer, Integer> getVisibleObjectives() {
         return visibleObjectives;
     }
 
-    public Map<DrawSource, PlayableCard> getVisiblePlayableCards() {
+    public Map<DrawSource, Integer> getVisiblePlayableCards() {
         return visiblePlayableCards;
     }
 
@@ -64,7 +65,7 @@ public final class MatchResumedMessage extends ResponseMessage {
         return decksTopReigns;
     }
 
-    public Objective getSecretObjective() {
+    public Integer getSecretObjective() {
         return secretObjective;
     }
 
@@ -72,7 +73,7 @@ public final class MatchResumedMessage extends ResponseMessage {
         return availableResources;
     }
 
-    public Map<String, Map<Pair<Integer, Integer>, PlacedCard>> getPlacedCards() {
+    public Map<String, Map<Pair<Integer, Integer>, PlacedCardRecord>> getPlacedCards() {
         return placedCards;
     }
 
@@ -87,7 +88,4 @@ public final class MatchResumedMessage extends ResponseMessage {
     public boolean isDrawPhase() {
         return drawPhase;
     }
-
 }
-
-
