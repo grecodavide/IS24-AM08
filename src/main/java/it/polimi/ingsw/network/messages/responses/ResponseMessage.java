@@ -9,7 +9,7 @@ import it.polimi.ingsw.network.messages.Message;
 public sealed class ResponseMessage extends Message permits AvailableMatchesMessage, MatchFinishedMessage, MatchStartedMessage,
         SomeoneJoinedMessage, SomeoneQuitMessage, SomeoneChoseSecretObjectiveMessage, SomeoneDrewCardMessage, SomeoneDrewInitialCardMessage,
         SomeoneDrewSecretObjectivesMessage, SomeonePlayedCardMessage, SomeoneSetInitialSideMessage,
-        SomeoneSentBroadcastTextMessage, SomeoneSentPrivateTextMessage {
+        SomeoneSentBroadcastTextMessage, SomeoneSentPrivateTextMessage, MatchResumedMessage {
     private final String username;
     private final String response = this.getClass().getSimpleName().replace("Message", "");
 

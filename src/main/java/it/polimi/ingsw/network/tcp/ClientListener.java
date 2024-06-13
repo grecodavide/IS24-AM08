@@ -229,15 +229,13 @@ public class ClientListener extends Thread {
      * This will close socket and input/output handlers, if not null
      */
     private void close(Match match) {
-        match.removePlayer(this.playerController.getPlayer());
         try {
+            match.removePlayer(this.playerController.getPlayer());
             if (this.socket != null && !this.socket.isClosed()) {
                 this.io.close();
                 this.socket.close();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        } catch (IOException | NullPointerException e) { }
     }
 
     /**

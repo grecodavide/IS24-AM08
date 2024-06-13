@@ -1,5 +1,7 @@
 package it.polimi.ingsw.client.network;
 
+import java.io.IOException;
+import java.net.Socket;
 import it.polimi.ingsw.client.frontend.GraphicalView;
 import it.polimi.ingsw.gamemodel.DrawSource;
 import it.polimi.ingsw.gamemodel.Objective;
@@ -10,9 +12,6 @@ import it.polimi.ingsw.network.messages.actions.*;
 import it.polimi.ingsw.network.tcp.ClientReceiver;
 import it.polimi.ingsw.network.tcp.IOHandler;
 import it.polimi.ingsw.utils.Pair;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class NetworkViewTCP extends NetworkView {
     private final IOHandler io;

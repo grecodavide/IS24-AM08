@@ -1,5 +1,8 @@
 package it.polimi.ingsw.controllers;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import it.polimi.ingsw.exceptions.HandException;
 import it.polimi.ingsw.exceptions.WrongChoiceException;
 import it.polimi.ingsw.exceptions.WrongStateException;
@@ -10,8 +13,6 @@ import it.polimi.ingsw.network.messages.errors.ErrorMessage;
 import it.polimi.ingsw.network.messages.responses.*;
 import it.polimi.ingsw.network.tcp.IOHandler;
 import it.polimi.ingsw.utils.Pair;
-
-import java.util.Map;
 
 public final class PlayerControllerTCP extends PlayerController {
     private IOHandler io;
@@ -44,18 +45,20 @@ public final class PlayerControllerTCP extends PlayerController {
 
     @Override
     public void matchStarted() {
-        this.sendMessage(new MatchStartedMessage(match.getVisibleObjectives(), match.getVisiblePlayableCards(),
-                match.getDecksTopReigns(), match.getPlayers()));
+        this.sendMessage(new MatchStartedMessage(match.getVisibleObjectives(),
+                match.getVisiblePlayableCards(), match.getDecksTopReigns(), match.getPlayers()));
     }
 
     @Override
     public void someoneJoined(Player someone) {
-        this.sendMessage(new SomeoneJoinedMessage(someone.getUsername(), match.getPlayers(), match.getMaxPlayers()));
+        this.sendMessage(new SomeoneJoinedMessage(someone.getUsername(), match.getPlayers(),
+                match.getMaxPlayers()));
     }
 
     @Override
     public void someoneQuit(Player someone) {
-        this.sendMessage(new SomeoneQuitMessage(someone.getUsername(), match.getPlayers().size(), match.isFinished()));
+        this.sendMessage(new SomeoneQuitMessage(someone.getUsername(), match.getPlayers().size(),
+                match.isFinished()));
     }
 
     @Override
@@ -64,14 +67,16 @@ public final class PlayerControllerTCP extends PlayerController {
     }
 
     @Override
-    public void someoneSetInitialSide(Player someone, Side side, Map<Symbol, Integer> availableResources) {
-        this.sendMessage(new SomeoneSetInitialSideMessage(someone.getUsername(), side, availableResources));
+    public void someoneSetInitialSide(Player someone, Side side,
+            Map<Symbol, Integer> availableResources) {
+        this.sendMessage(
+                new SomeoneSetInitialSideMessage(someone.getUsername(), side, availableResources));
     }
 
     @Override
     public void someoneDrewSecretObjective(Player someone, Pair<Objective, Objective> objectives) {
-        Pair<Integer, Integer> IDs = new Pair<Integer, Integer>(objectives.first().getID(),
-                objectives.second().getID());
+        Pair<Integer, Integer> IDs =
+                new Pair<Integer, Integer>(objectives.first().getID(), objectives.second().getID());
         this.sendMessage(new SomeoneDrewSecretObjectivesMessage(someone.getUsername(), IDs));
     }
 
@@ -80,17 +85,20 @@ public final class PlayerControllerTCP extends PlayerController {
         Integer objectiveID = null;
         if (someone.equals(player))
             objectiveID = objective.getID();
-        this.sendMessage(new SomeoneChoseSecretObjectiveMessage(someone.getUsername(), objectiveID));
-    }
-
-    @Override
-    public void someonePlayedCard(Player someone, Pair<Integer, Integer> coords, PlayableCard card, Side side) {
         this.sendMessage(
-                new SomeonePlayedCardMessage(someone.getUsername(), coords, card.getId(), side, someone.getPoints(), someone.getBoard().getAvailableResources()));
+                new SomeoneChoseSecretObjectiveMessage(someone.getUsername(), objectiveID));
     }
 
     @Override
-    public void someoneDrewCard(Player someone, DrawSource source, PlayableCard card, PlayableCard replacementCard) {
+    public void someonePlayedCard(Player someone, Pair<Integer, Integer> coords, PlayableCard card,
+            Side side) {
+        this.sendMessage(new SomeonePlayedCardMessage(someone.getUsername(), coords, card.getId(),
+                side, someone.getPoints(), someone.getBoard().getAvailableResources()));
+    }
+
+    @Override
+    public void someoneDrewCard(Player someone, DrawSource source, PlayableCard card,
+            PlayableCard replacementCard) {
         Integer repId = null;
         if (replacementCard != null) {
             repId = replacementCard.getId();
@@ -149,7 +157,8 @@ public final class PlayerControllerTCP extends PlayerController {
     public void drawCard(DrawSource source) {
         try {
             this.player.drawCard(source);
-        } catch (HandException | WrongTurnException | WrongStateException | WrongChoiceException e) {
+        } catch (HandException | WrongTurnException | WrongStateException
+                | WrongChoiceException e) {
             this.sendMessage(this.createErrorMessage(e));
         }
     }
@@ -162,8 +171,10 @@ public final class PlayerControllerTCP extends PlayerController {
 
     @Override
     public void someoneSentPrivateText(Player someone, Player recipient, String text) {
-        if (recipient.getUsername().equals(this.player.getUsername()) || someone.getUsername().equals(this.player.getUsername())) {
-            Message msg = new SomeoneSentPrivateTextMessage(someone.getUsername(), recipient.getUsername(), text);
+        if (recipient.getUsername().equals(this.player.getUsername())
+                || someone.getUsername().equals(this.player.getUsername())) {
+            Message msg = new SomeoneSentPrivateTextMessage(someone.getUsername(),
+                    recipient.getUsername(), text);
             this.sendMessage(msg);
         }
     }
@@ -189,6 +200,39 @@ public final class PlayerControllerTCP extends PlayerController {
 
     @Override
     public void matchResumed() {
-        // TODO Implement
+        Map<String, Color> playersUsernamesAndPawns = new HashMap<>();
+        Map<String, List<PlayableCard>> playersHands = new HashMap<>();
+        Pair<Objective, Objective> visibleObjectives;
+        Map<DrawSource, PlayableCard> visiblePlayableCards = new HashMap<>();
+        Pair<Symbol, Symbol> decksTopReigns;
+        Objective secretObjective;
+        Map<String, Map<Symbol, Integer>> availableResources = new HashMap<>();
+        Map<String, Map<Pair<Integer, Integer>, PlacedCard>> placedCards = new HashMap<>();
+        Map<String, Integer> playerPoints = new HashMap<>();
+        String currentPlayer;
+        boolean drawPhase;
+
+        this.match.getPlayers().forEach(player -> {
+            String username = player.getUsername();
+            Board board = player.getBoard();
+            playersUsernamesAndPawns.put(username, player.getPawnColor());
+            playersHands.put(username, board.getCurrentHand());
+            availableResources.put(username, board.getAvailableResources());
+            placedCards.put(username, board.getPlacedCards());
+            playerPoints.put(username, player.getPoints());
+        });
+
+        visibleObjectives = this.match.getVisibleObjectives();
+        visiblePlayableCards = this.match.getVisiblePlayableCards();
+        decksTopReigns = this.match.getDecksTopReigns();
+        secretObjective = this.player.getSecretObjective();
+        currentPlayer = this.match.getCurrentPlayer().getUsername();
+        drawPhase = this.match.getCurrentState().getClass().equals(AfterMoveState.class);
+
+        Message msg = new MatchResumedMessage(currentPlayer, drawPhase, playersUsernamesAndPawns,
+                playersHands, visibleObjectives, visiblePlayableCards, decksTopReigns,
+                secretObjective, availableResources, placedCards, playerPoints, currentPlayer);
+
+        this.sendMessage(msg);
     }
 }
