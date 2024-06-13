@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import it.polimi.ingsw.client.frontend.ClientBoard;
 import it.polimi.ingsw.client.frontend.GraphicalView;
 import it.polimi.ingsw.client.frontend.ShownCard;
@@ -35,8 +36,7 @@ public class GraphicalViewTUI extends GraphicalView {
             "objectives,  o -> show secret and common objectives",
             "hand,        h -> show your hand");
 
-    private final static String playerControlPrompt =
-            "Type command, or 'help' for a list of available commands.";
+    private final static String playerControlPrompt = "Type command, or 'help' for a list of available commands.";
 
     private List<String> chat;
 
@@ -118,6 +118,8 @@ public class GraphicalViewTUI extends GraphicalView {
                 Integer index = Integer.parseInt(userIn) - 1;
                 if (index >= 0 && index < maxValue) {
                     card = hand.get(index);
+                } else {
+                    throw new NumberFormatException("Number not in range!");
                 }
             } catch (NumberFormatException e) {
                 this.inputHandler.setPrompt("Not a valid number! try again");
@@ -142,8 +144,7 @@ public class GraphicalViewTUI extends GraphicalView {
     }
 
     private Pair<Integer, Integer> chooseCoords(ClientBoard board) {
-        Map<Pair<Integer, Integer>, Pair<Integer, Corner>> valids =
-                this.validPositions.getValidPlaces();
+        Map<Pair<Integer, Integer>, Pair<Integer, Corner>> valids = this.validPositions.getValidPlaces();
 
         Pair<Integer, Integer> coord = null;
 
@@ -273,6 +274,12 @@ public class GraphicalViewTUI extends GraphicalView {
         this.inputHandler.showPrompt();
     }
 
+    private void enablePlayerControls() {
+        this.inputHandler.setPrompt(playerControlPrompt);
+        this.inputHandler.showPrompt();
+        this.playerControls.enable();
+    }
+
     private void startPlayerControls() {
         while (this.ongoing) {
             synchronized (this.playerControls) {
@@ -298,7 +305,6 @@ public class GraphicalViewTUI extends GraphicalView {
             }
         }
     }
-
 
     ////////////////////////
     // PRE MATCH METHODS //
@@ -564,9 +570,7 @@ public class GraphicalViewTUI extends GraphicalView {
                         this.currentPlayer + " is choosing secret objective!", 0);
                 this.printer.printPrompt("");
             } else {
-                this.inputHandler.setPrompt(playerControlPrompt);
-                this.inputHandler.showPrompt();
-                this.playerControls.enable();
+                this.enablePlayerControls();
             }
         }).start();
     }
@@ -710,19 +714,22 @@ public class GraphicalViewTUI extends GraphicalView {
         this.players.forEach(this.playersWithObjective::add); // we resume match only if the game
                                                               // was in progress, so all players
                                                               // chose secret objectives
-        placedCards.get(this.username).forEach((coords, placedCard) -> this.validPositions
-                .addCard(new ShownCard(placedCard.getCard(), placedCard.getPlayedSide(), coords)));
     }
 
     @Override
     protected void notifyMatchResumed(boolean drawPhase) {
+        this.clientBoards.get(this.username).getPlaced().forEach((turn, shownCard) -> this.validPositions.addCard(new ShownCard(shownCard.card(), shownCard.side(), shownCard.coords())));
         if (this.username.equals(this.currentPlayer)) {
             if (drawPhase) {
                 this.makeUserDraw(this.clientBoards.get(this.username).getAvailableResources());
             } else {
                 this.makeMove();
             }
+        } else {
+            this.printer.clearTerminal();
+            this.enablePlayerControls();
         }
+
     }
 
     @Override
