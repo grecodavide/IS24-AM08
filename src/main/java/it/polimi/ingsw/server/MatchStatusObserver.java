@@ -54,6 +54,7 @@ public class MatchStatusObserver implements MatchObserver {
 
     @Override
     public void someoneDrewCard(Player someone, DrawSource source, PlayableCard card, PlayableCard replacementCard) {
+        serializeMatch();
     }
 
     @Override
@@ -76,9 +77,12 @@ public class MatchStatusObserver implements MatchObserver {
         try {
             FileOutputStream fileOut = new FileOutputStream(matchName + ".match");
             ObjectOutputStream out = new ObjectOutputStream(fileOut);
-            out.writeObject(matches.get(matchName));
-            out.close();
-            fileOut.close();
+            Match m = matches.get(matchName);
+            synchronized (m) {
+                out.writeObject(m);
+                out.close();
+                fileOut.close();
+            }
         } catch (IOException e) {
             System.err.println("The match \"" + matchName + "\" cannot be serialized due to I/O errors");
         }
