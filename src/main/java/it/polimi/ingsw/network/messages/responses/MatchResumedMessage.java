@@ -20,7 +20,7 @@ public final class MatchResumedMessage extends ResponseMessage {
     private final Pair<Symbol, Symbol> decksTopReigns;
     private final Integer secretObjective;
     private final Map<String, Map<Symbol, Integer>> availableResources;
-    private final Map<String, Map<Pair<Integer, Integer>, PlacedCardRecord>> placedCards;
+    private final Map<String, Map<Integer, PlacedCardRecord>> placedCards;
     private final Map<String, Integer> playerPoints;
     private final String currentPlayer;
     private final boolean drawPhase;
@@ -29,7 +29,7 @@ public final class MatchResumedMessage extends ResponseMessage {
             Map<String, List<Integer>> playersHands, Pair<Integer, Integer> visibleObjectives,
             Map<DrawSource, Integer> visiblePlayableCards, Pair<Symbol, Symbol> decksTopReigns,
             Integer secretObjective, Map<String, Map<Symbol, Integer>> availableResources,
-            Map<String, Map<Pair<Integer, Integer>, PlacedCardRecord>> placedCards,
+            Map<String, Map<Integer, PlacedCardRecord>> placedCards,
             Map<String, Integer> playerPoints, String currentPlayer, boolean drawPhase) {
         super(null);
         this.playersUsernamesAndPawns = playersUsernamesAndPawns;
@@ -73,7 +73,7 @@ public final class MatchResumedMessage extends ResponseMessage {
         return availableResources;
     }
 
-    public Map<String, Map<Pair<Integer, Integer>, PlacedCardRecord>> getPlacedCards() {
+    public Map<String, Map<Integer, PlacedCardRecord>> getPlacedCards() {
         return placedCards;
     }
 

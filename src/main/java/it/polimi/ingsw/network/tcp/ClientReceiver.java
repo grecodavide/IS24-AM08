@@ -49,19 +49,20 @@ public class ClientReceiver implements Runnable {
     }
 
     private Map<Pair<Integer, Integer>, PlacedCard> getPlacedMap(
-            Map<Pair<Integer, Integer>, PlacedCardRecord> board) {
+            Map<Integer, PlacedCardRecord> board) {
         Map<Pair<Integer, Integer>, PlacedCard> result = new HashMap<>();
 
-        PlacedCardRecord placed;
-        for (Pair<Integer, Integer> coords : board.keySet()) {
-            placed = board.get(coords);
-            if (coords.first().equals(0) && coords.second().equals(0)) {
-                result.put(coords, new PlacedCard(this.initialCards.get(placed.cardID()),
-                        placed.side(), placed.turn()));
+        board.forEach((turn, placedCardRecord) -> {
+            if (placedCardRecord.x().equals(0) && placedCardRecord.y().equals(0)) {
+                result.put(new Pair<Integer, Integer>(placedCardRecord.x(), placedCardRecord.y()),
+                        new PlacedCard(this.initialCards.get(placedCardRecord.cardID()),
+                                placedCardRecord.side(), turn));
+            } else {
+                result.put(new Pair<Integer, Integer>(placedCardRecord.x(), placedCardRecord.y()),
+                        new PlacedCard(this.getPlayable(placedCardRecord.cardID()),
+                                placedCardRecord.side(), turn));
             }
-            result.put(coords, new PlacedCard(this.getPlayable(placed.cardID()), placed.side(),
-                    placed.turn()));
-        }
+        });
 
         return result;
     }
@@ -111,6 +112,7 @@ public class ClientReceiver implements Runnable {
                     secretObjective = this.objectives.get(msg.getSecretObjective());
 
                     availableResources = msg.getAvailableResources();
+
 
                     msg.getPlacedCards().forEach(
                             (player, board) -> placedCards.put(player, this.getPlacedMap(board)));

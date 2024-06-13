@@ -616,46 +616,46 @@ public class GraphicalViewTUI extends GraphicalView {
     }
 
     private void makeUserDraw(Map<Symbol, Integer> availableResources) {
-            this.printer.clearTerminal();
-            DrawSource source = null;
-            this.printer.printAvailableResources(availableResources, 0);
-            String userIn;
-            this.inputHandler.setPrompt("Choose a draw source: ");
-            while (source == null) {
-                this.printer.printDrawingScreen(decksTopReign, visiblePlayableCards);
+        this.printer.clearTerminal();
+        DrawSource source = null;
+        this.printer.printAvailableResources(availableResources, 0);
+        String userIn;
+        this.inputHandler.setPrompt("Choose a draw source: ");
+        while (source == null) {
+            this.printer.printDrawingScreen(decksTopReign, visiblePlayableCards);
 
-                this.inputHandler.setPrompt("Choose draw source:");
-                userIn = this.inputHandler.askUser();
-                switch (userIn) {
-                    case "G", "g":
-                        source = DrawSource.GOLDS_DECK;
-                        break;
-                    case "R", "r":
-                        source = DrawSource.RESOURCES_DECK;
-                        break;
-                    case "1":
-                        source = DrawSource.FIRST_VISIBLE;
-                        break;
-                    case "2":
-                        source = DrawSource.SECOND_VISIBLE;
-                        break;
-                    case "3":
-                        source = DrawSource.THIRD_VISIBLE;
-                        break;
-                    case "4":
-                        source = DrawSource.FOURTH_VISIBLE;
-                        break;
-                    default:
-                        this.inputHandler.setPrompt("Not a valid source! Try again.");
-                        break;
-                }
+            this.inputHandler.setPrompt("Choose draw source:");
+            userIn = this.inputHandler.askUser();
+            switch (userIn) {
+                case "G", "g":
+                    source = DrawSource.GOLDS_DECK;
+                    break;
+                case "R", "r":
+                    source = DrawSource.RESOURCES_DECK;
+                    break;
+                case "1":
+                    source = DrawSource.FIRST_VISIBLE;
+                    break;
+                case "2":
+                    source = DrawSource.SECOND_VISIBLE;
+                    break;
+                case "3":
+                    source = DrawSource.THIRD_VISIBLE;
+                    break;
+                case "4":
+                    source = DrawSource.FOURTH_VISIBLE;
+                    break;
+                default:
+                    this.inputHandler.setPrompt("Not a valid source! Try again.");
+                    break;
             }
+        }
 
-            super.drawCard(source);
-            if (!getServerResponse()) {
-                this.makeUserDraw(availableResources);
-                return;
-            }
+        super.drawCard(source);
+        if (!getServerResponse()) {
+            this.makeUserDraw(availableResources);
+            return;
+        }
     }
 
     @Override
@@ -693,6 +693,25 @@ public class GraphicalViewTUI extends GraphicalView {
     @Override
     protected void notifyMatchStarted() {
         // TODO Implement
+    }
+
+    @Override
+    public void resumeMatch(Map<String, Color> playersUsernamesAndPawns,
+            Map<String, List<PlayableCard>> playersHands,
+            Pair<Objective, Objective> visibleObjectives,
+            Map<DrawSource, PlayableCard> visiblePlayableCards, Pair<Symbol, Symbol> decksTopReign,
+            Objective secretObjective, Map<String, Map<Symbol, Integer>> availableResources,
+            Map<String, Map<Pair<Integer, Integer>, PlacedCard>> placedCards,
+            Map<String, Integer> playerPoints, String currentPlayer, boolean drawPhase) {
+        super.resumeMatch(playersUsernamesAndPawns, playersHands, visibleObjectives,
+                visiblePlayableCards, decksTopReign, secretObjective, availableResources,
+                placedCards, playerPoints, currentPlayer, drawPhase);
+
+        this.players.forEach(this.playersWithObjective::add); // we resume match only if the game
+                                                              // was in progress, so all players
+                                                              // chose secret objectives
+        placedCards.get(this.username).forEach((coords, placedCard) -> this.validPositions
+                .addCard(new ShownCard(placedCard.getCard(), placedCard.getPlayedSide(), coords)));
     }
 
     @Override

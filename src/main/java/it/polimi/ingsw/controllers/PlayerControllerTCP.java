@@ -209,7 +209,7 @@ public final class PlayerControllerTCP extends PlayerController {
         Pair<Symbol, Symbol> decksTopReigns;
         Integer secretObjective;
         Map<String, Map<Symbol, Integer>> availableResources = new HashMap<>();
-        Map<String, Map<Pair<Integer, Integer>, PlacedCardRecord>> placedCards = new HashMap<>();
+        Map<String, Map<Integer, PlacedCardRecord>> placedCards = new HashMap<>();
         Map<String, Integer> playerPoints = new HashMap<>();
         String currentPlayer;
         boolean drawPhase;
@@ -222,11 +222,13 @@ public final class PlayerControllerTCP extends PlayerController {
                     .collect(Collectors.toList()));
             availableResources.put(username, board.getAvailableResources());
 
-            placedCards.put(username, board.getPlacedCards().entrySet().stream().collect(
-                Collectors.toMap(Map.Entry::getKey, 
-                entry -> new PlacedCardRecord(entry.getValue().getCard().getId(), entry.getValue().getTurn(), entry.getValue().getPlayedSide())
-                )
-            ));
+            Map<Integer, PlacedCardRecord> placed = new HashMap<>();
+            board.getPlacedCards()
+                    .forEach((coords, placedCard) -> placed.put(placedCard.getTurn(),
+                            new PlacedCardRecord(placedCard.getCard().getId(), coords.first(),
+                                    coords.second(), placedCard.getPlayedSide())));
+
+            placedCards.put(username, placed);
             playerPoints.put(username, player.getPoints());
         });
 
@@ -244,8 +246,8 @@ public final class PlayerControllerTCP extends PlayerController {
 
 
         Message msg = new MatchResumedMessage(playersUsernamesAndPawns, playersHands,
-                visibleObjectives, visiblePlayableCards, decksTopReigns, secretObjective,
-                availableResources, placedCards, playerPoints, currentPlayer, drawPhase);
+        visibleObjectives, visiblePlayableCards, decksTopReigns, secretObjective,
+        availableResources, placedCards, playerPoints, currentPlayer, drawPhase);
 
         this.sendMessage(msg);
     }
