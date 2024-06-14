@@ -107,7 +107,9 @@ public class NetworkViewTCP extends NetworkView {
     public void ping() {
         Runnable pingServer = new Runnable() {
             public void run() {
-                if (socket == null || socket.isClosed() || !socket.isConnected()) {
+                try {
+                    io.writeMsg("ping");
+                } catch (IOException e) {
                     graphicalView.notifyConnectionLost();
                 }
             }
