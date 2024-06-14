@@ -2,6 +2,9 @@ package it.polimi.ingsw.client.network;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import it.polimi.ingsw.client.frontend.GraphicalView;
 import it.polimi.ingsw.gamemodel.DrawSource;
 import it.polimi.ingsw.gamemodel.Objective;
@@ -15,12 +18,14 @@ import it.polimi.ingsw.utils.Pair;
 
 public class NetworkViewTCP extends NetworkView {
     private final IOHandler io;
+    private final Socket socket;
 
     public NetworkViewTCP(GraphicalView graphicalView, String address, Integer port) throws IOException {
         super(graphicalView, address, port);
-        Socket socket = new Socket(address, port);
+        this.socket = new Socket(address, port);
         this.io = new IOHandler(socket);
         new Thread(new ClientReceiver(this, socket)).start();
+        this.ping();
     }
 
     public void notifyError(Exception exception) {
@@ -96,5 +101,21 @@ public class NetworkViewTCP extends NetworkView {
     @Override
     public void sendPrivateText(String recipient, String text) {
         this.sendMessage(new SendPrivateTextMessage(this.username, recipient, text));
+    }
+
+    @Override
+    public void ping() {
+        Runnable pingServer = new Runnable() {
+            public void run() {
+                if (socket == null || socket.isClosed() || !socket.isConnected()) {
+                    graphicalView.notifyConnectionLost();
+                }
+            }
+        };
+
+        // we create a thread pool of 1 thread
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+        // and we check every two second for connectivity
+        executor.scheduleAtFixedRate(pingServer, 0, 2, TimeUnit.SECONDS);
     }
 }

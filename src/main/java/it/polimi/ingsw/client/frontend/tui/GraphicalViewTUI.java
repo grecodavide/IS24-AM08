@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 import it.polimi.ingsw.client.frontend.ClientBoard;
 import it.polimi.ingsw.client.frontend.GraphicalView;
 import it.polimi.ingsw.client.frontend.ShownCard;
@@ -696,16 +695,17 @@ public class GraphicalViewTUI extends GraphicalView {
 
     @Override
     protected void notifyMatchStarted() {
-        // TODO Implement
     }
 
     @Override
     protected void notifyMatchResumed(boolean drawPhase) {
-        this.clientBoards.get(this.username).getPlaced().forEach((turn, shownCard) -> this.validPositions.addCard(new ShownCard(shownCard.card(), shownCard.side(), shownCard.coords())));
+        this.clientBoards.get(this.username).getPlaced().forEach((turn, shownCard) -> this.validPositions
+                .addCard(new ShownCard(shownCard.card(), shownCard.side(), shownCard.coords())));
 
-        this.players.forEach(this.playersWithObjective::add); // we resume match only if the game
-                                                              // was in progress, so all players
-                                                              // chose secret objectives
+        // we resume match only if the game was in progress, so all players chose secret
+        // objectives
+        this.players.forEach(this.playersWithObjective::add);
+
         if (this.username.equals(this.currentPlayer)) {
             if (drawPhase) {
                 this.makeUserDraw(this.clientBoards.get(this.username).getAvailableResources());
@@ -748,5 +748,12 @@ public class GraphicalViewTUI extends GraphicalView {
         tui.startInterface();
         while (tui.ongoing) {
         }
+    }
+
+    @Override
+    public void notifyConnectionLost() {
+        this.printer.clearTerminal();
+        this.printer.printCenteredMessage("Connection Lost!", 0);
+        System.exit(1);
     }
 }

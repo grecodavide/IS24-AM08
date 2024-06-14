@@ -475,4 +475,6 @@ public abstract class GraphicalView {
             this.setLastRequestStatus(RequestStatus.SUCCESSFUL);
         }
     }
+
+    public abstract void notifyConnectionLost();
 }

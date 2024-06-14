@@ -1,19 +1,20 @@
 package it.polimi.ingsw.client.network;
 
-import it.polimi.ingsw.client.frontend.GraphicalView;
-import it.polimi.ingsw.controllers.PlayerControllerRMIInterface;
-import it.polimi.ingsw.gamemodel.*;
-import it.polimi.ingsw.server.ServerRMIInterface;
-import it.polimi.ingsw.utils.AvailableMatch;
-import it.polimi.ingsw.utils.Pair;
-
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.List;
-import java.util.Map;
+import it.polimi.ingsw.client.frontend.GraphicalView;
+import it.polimi.ingsw.controllers.PlayerControllerRMIInterface;
+import it.polimi.ingsw.gamemodel.DrawSource;
+import it.polimi.ingsw.gamemodel.Objective;
+import it.polimi.ingsw.gamemodel.PlayableCard;
+import it.polimi.ingsw.gamemodel.Side;
+import it.polimi.ingsw.server.ServerRMIInterface;
+import it.polimi.ingsw.utils.AvailableMatch;
+import it.polimi.ingsw.utils.Pair;
 
 public class NetworkViewRMI extends NetworkView {
     private final ServerRMIInterface server;
@@ -136,5 +137,11 @@ public class NetworkViewRMI extends NetworkView {
         } catch (Exception e) {
             this.graphicalView.notifyError(e);
         }
+    }
+
+    @Override
+    public void ping() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'ping'");
     }
 }

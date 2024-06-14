@@ -1,5 +1,9 @@
 package it.polimi.ingsw.client.frontend.gui;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import it.polimi.ingsw.client.frontend.ClientBoard;
 import it.polimi.ingsw.client.frontend.GraphicalView;
 import it.polimi.ingsw.client.frontend.MatchStatus;
@@ -15,11 +19,6 @@ import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class GraphicalViewGUI extends GraphicalView {
     private final Stage stage;
@@ -455,5 +454,11 @@ public class GraphicalViewGUI extends GraphicalView {
 
     public static void main(String[] args) {
         Application.launch(GraphicalApplication.class, args);
+    }
+
+    @Override
+    public void notifyConnectionLost() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'notifyConnectionLost'");
     }
 }
