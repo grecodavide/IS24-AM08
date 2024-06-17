@@ -6,6 +6,7 @@ import java.util.List;
 import it.polimi.ingsw.controllers.PlayerControllerRMIInterface;
 import it.polimi.ingsw.exceptions.AlreadyUsedUsernameException;
 import it.polimi.ingsw.exceptions.ChosenMatchException;
+import it.polimi.ingsw.exceptions.WrongNameException;
 import it.polimi.ingsw.exceptions.WrongStateException;
 import it.polimi.ingsw.utils.AvailableMatch;
 
@@ -35,8 +36,9 @@ public interface ServerRMIInterface extends Remote {
      * @throws ChosenMatchException         If the chosen match is either already full or doesn't exist
      * @throws AlreadyUsedUsernameException If the given username is already taken
      * @throws WrongStateException          If the match is in a state during which doesn't allow players to join any more
+     * @throws WrongNameException           If the name is not valid
      */
-    PlayerControllerRMIInterface joinMatch(String matchName, String username) throws RemoteException, ChosenMatchException, AlreadyUsedUsernameException, WrongStateException;
+    PlayerControllerRMIInterface joinMatch(String matchName, String username) throws RemoteException, ChosenMatchException, AlreadyUsedUsernameException, WrongStateException, WrongNameException;
 
     /**
      * Lets the calling view create a new match.
@@ -46,7 +48,7 @@ public interface ServerRMIInterface extends Remote {
      * @throws RemoteException      If the remote server is considered not to be reachable any more and cannot return as usual
      * @throws ChosenMatchException If the given match name is already taken
      */
-    void createMatch(String matchName, int maxPlayers) throws RemoteException, ChosenMatchException;
+    void createMatch(String matchName, int maxPlayers) throws RemoteException, ChosenMatchException, WrongNameException;
 
     /**
      * Ping the server

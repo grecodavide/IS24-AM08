@@ -23,6 +23,10 @@ public class GuiUtil {
         return loader.load();
     }
 
+    public static boolean isValidName(String name) {
+        return name.matches("^[a-zA-Z0-9]{1,32}$");
+    }
+
     /**
      * Get the loader from the specified path
      * @param path file path of fxml

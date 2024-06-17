@@ -2,10 +2,12 @@ package it.polimi.ingsw.controllers;
 
 import it.polimi.ingsw.exceptions.AlreadyUsedUsernameException;
 import it.polimi.ingsw.exceptions.ChosenMatchException;
+import it.polimi.ingsw.exceptions.WrongNameException;
 import it.polimi.ingsw.exceptions.WrongStateException;
 import it.polimi.ingsw.gamemodel.Match;
 import it.polimi.ingsw.gamemodel.MatchObserver;
 import it.polimi.ingsw.gamemodel.Player;
+import it.polimi.ingsw.utils.GuiUtil;
 
 import java.util.Optional;
 
@@ -52,7 +54,10 @@ public abstract sealed class PlayerController implements MatchObserver permits P
      * @throws AlreadyUsedUsernameException if the username is already taken
      * @throws WrongStateException          if the match currently does not accept new players
      */
-    public void sendJoined() throws IllegalArgumentException, AlreadyUsedUsernameException, WrongStateException, ChosenMatchException {
+    public void sendJoined() throws IllegalArgumentException, AlreadyUsedUsernameException, WrongStateException, ChosenMatchException, WrongNameException {
+        if (!GuiUtil.isValidName(this.player.getUsername())) {
+            throw new WrongNameException("The match name must be alphanumeric with maximum 32 characters");
+        }
         if (match == null) {
             throw new ChosenMatchException("The specified match does not exist");
         }

@@ -11,16 +11,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.PatternSyntaxException;
 
-import it.polimi.ingsw.exceptions.ChosenMatchException;
-import it.polimi.ingsw.exceptions.WrongTurnException;
+import it.polimi.ingsw.exceptions.*;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.LeaderboardEntry;
 import org.junit.Test;
 
 import it.polimi.ingsw.client.network.RemoteViewInterface;
-import it.polimi.ingsw.exceptions.AlreadyUsedUsernameException;
-import it.polimi.ingsw.exceptions.WrongStateException;
 import it.polimi.ingsw.utils.Pair;
 
 public class PlayerControllerRMITest {
@@ -37,7 +34,8 @@ public class PlayerControllerRMITest {
         try {
             player1 = new PlayerControllerRMI("player1", match);
             player1.registerView(new TestView());
-        } catch (AlreadyUsedUsernameException | WrongStateException | ChosenMatchException | RemoteException e) {
+        } catch (AlreadyUsedUsernameException | WrongStateException | ChosenMatchException | RemoteException |
+                 WrongNameException e) {
             fail("player1 init shouldn't throw exception: " + e.getMessage());
         }
 
@@ -48,7 +46,7 @@ public class PlayerControllerRMITest {
             fail("player 2 init should have thrown AlreadyUsedUsernameException");
         } catch (AlreadyUsedUsernameException e) {
             // this exception should be thrown
-        } catch (WrongStateException | ChosenMatchException e) {
+        } catch (WrongStateException | ChosenMatchException | WrongNameException e) {
             fail("player2 initialization shouldn't thrown this specific exception exception: " + e.getMessage());
         } catch (RemoteException e) {
             throw new RuntimeException(e);
@@ -61,7 +59,7 @@ public class PlayerControllerRMITest {
             player1.registerView(new TestView());
             // An exception is supposed to be thrown here
             fail("player 3 init should have thrown WrongStateException");
-        } catch (AlreadyUsedUsernameException | ChosenMatchException | RemoteException e) {
+        } catch (AlreadyUsedUsernameException | ChosenMatchException | RemoteException | WrongNameException e) {
             fail("player2 initialization shouldn't thrown this specific exception exception: " + e.getMessage());
         } catch (WrongStateException e) {
             // this exception should be thrown
@@ -673,15 +671,15 @@ public class PlayerControllerRMITest {
 
         match = new Match(maxPlayers, initialsDeck, resourcesDeck, goldsDeck, objectivesDeck);
 
-        player1 = new PlayerControllerRMI("Oingo", match);
-        view1 = new TestView();
-        player1.registerView(view1);
-
-        player2 = new PlayerControllerRMI("Boingo", match);
-        view2 = new TestView();
-        player2.registerView(view2);
-
         try {
+            player1 = new PlayerControllerRMI("Oingo", match);
+            view1 = new TestView();
+            player1.registerView(view1);
+
+            player2 = new PlayerControllerRMI("Boingo", match);
+            view2 = new TestView();
+            player2.registerView(view2);
+
             for (int i = 0; i < maxPlayers; i++) {
                 match.getCurrentPlayer().drawInitialCard();
                 match.getCurrentPlayer().chooseInitialCardSide(Side.FRONT);

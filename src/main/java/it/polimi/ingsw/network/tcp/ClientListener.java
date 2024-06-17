@@ -8,6 +8,7 @@ import com.google.gson.JsonParseException;
 import it.polimi.ingsw.controllers.PlayerControllerTCP;
 import it.polimi.ingsw.exceptions.AlreadyUsedUsernameException;
 import it.polimi.ingsw.exceptions.ChosenMatchException;
+import it.polimi.ingsw.exceptions.WrongNameException;
 import it.polimi.ingsw.exceptions.WrongStateException;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.network.messages.actions.*;
@@ -139,7 +140,7 @@ public class ClientListener extends Thread {
             } catch (JsonParseException | ClassNotFoundException e) {
                 // message is not correctly formatted, ignore
             } catch (ChosenMatchException | WrongStateException | AlreadyUsedUsernameException
-                    | IllegalArgumentException e) {
+                     | IllegalArgumentException | WrongNameException e) {
                 this.sendError(e.getMessage(), e);
             } catch (IOException e) {
                 this.close(match);
@@ -160,7 +161,7 @@ public class ClientListener extends Thread {
      */
     private void createPlayerController(String username, Match match)
             throws AlreadyUsedUsernameException, IllegalArgumentException, WrongStateException,
-            ChosenMatchException {
+            ChosenMatchException, WrongNameException {
         this.playerController = new PlayerControllerTCP(username, match, this.io);
         this.playerController.sendJoined();
     }

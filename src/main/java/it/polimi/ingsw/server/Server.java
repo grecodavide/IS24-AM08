@@ -13,11 +13,13 @@ import it.polimi.ingsw.controllers.PlayerControllerRMI;
 import it.polimi.ingsw.controllers.PlayerControllerRMIInterface;
 import it.polimi.ingsw.exceptions.AlreadyUsedUsernameException;
 import it.polimi.ingsw.exceptions.ChosenMatchException;
+import it.polimi.ingsw.exceptions.WrongNameException;
 import it.polimi.ingsw.exceptions.WrongStateException;
 import it.polimi.ingsw.gamemodel.Match;
 import it.polimi.ingsw.network.tcp.TCPServer;
 import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.DeckCreator;
+import it.polimi.ingsw.utils.GuiUtil;
 
 public class Server extends UnicastRemoteObject implements ServerRMIInterface {
     private final Map<String, Match> matches;
@@ -54,7 +56,9 @@ public class Server extends UnicastRemoteObject implements ServerRMIInterface {
     }
 
     @Override
-    public PlayerControllerRMIInterface joinMatch(String matchName, String username) throws RemoteException, ChosenMatchException, WrongStateException, AlreadyUsedUsernameException {
+    public PlayerControllerRMIInterface joinMatch(String matchName, String username) throws RemoteException, ChosenMatchException, WrongStateException, AlreadyUsedUsernameException, WrongNameException {
+        if (!GuiUtil.isValidName(username))
+            throw new WrongNameException("The username must be alphanumeric with maximum 32 characters");
         if (!matches.containsKey(matchName))
             throw new ChosenMatchException("The chosen match doesn't exist");
         if (matches.get(matchName).isFull() && !matches.get(matchName).isRejoinable())
@@ -69,7 +73,10 @@ public class Server extends UnicastRemoteObject implements ServerRMIInterface {
     }
 
     @Override
-    public void createMatch(String matchName, int maxPlayers) throws RemoteException, ChosenMatchException {
+    public void createMatch(String matchName, int maxPlayers) throws RemoteException, ChosenMatchException, WrongNameException {
+        if (!GuiUtil.isValidName(matchName)) {
+            throw new WrongNameException("The match name must be alphanumeric with maximum 32 characters");
+        }
         synchronized (matches) {
             if (matches.containsKey(matchName))
                 throw new ChosenMatchException("A match with the chosen name already exists");

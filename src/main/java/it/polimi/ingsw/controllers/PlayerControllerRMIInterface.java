@@ -26,7 +26,7 @@ public interface PlayerControllerRMIInterface extends Remote {
      *
      * @param view The View to save in the PlayerController internal state
      */
-    void registerView(RemoteViewInterface view) throws RemoteException, ChosenMatchException, WrongStateException, AlreadyUsedUsernameException;
+    void registerView(RemoteViewInterface view) throws RemoteException, ChosenMatchException, WrongStateException, AlreadyUsedUsernameException, WrongNameException;
 
     /**
      * Draws an initial card for the player.
