@@ -710,7 +710,7 @@ public class GraphicalViewTUI extends GraphicalView {
             if (drawPhase) {
                 this.makeUserDraw(this.clientBoards.get(this.username).getAvailableResources());
             } else {
-                this.makeMove();
+                new Thread(this::makeMove).start();
             }
         } else {
             this.printer.clearTerminal();
