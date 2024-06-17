@@ -19,6 +19,7 @@ import it.polimi.ingsw.utils.Pair;
 public class NetworkViewTCP extends NetworkView {
     private final IOHandler io;
     private final Socket socket;
+    private boolean connected = true;
 
     public NetworkViewTCP(GraphicalView graphicalView, String address, Integer port) throws IOException {
         super(graphicalView, address, port);
@@ -105,18 +106,22 @@ public class NetworkViewTCP extends NetworkView {
 
     @Override
     public void ping() {
+
+        // we create a thread pool of 1 thread
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+
         Runnable pingServer = new Runnable() {
             public void run() {
                 try {
                     io.writeMsg("ping");
                 } catch (IOException e) {
                     graphicalView.notifyConnectionLost();
+                    // Shutdown connection check
+                    executor.shutdown();
                 }
             }
         };
 
-        // we create a thread pool of 1 thread
-        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
         // and we check every two second for connectivity
         executor.scheduleAtFixedRate(pingServer, 0, 2, TimeUnit.SECONDS);
     }
