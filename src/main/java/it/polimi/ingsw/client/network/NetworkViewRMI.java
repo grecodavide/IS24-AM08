@@ -19,6 +19,7 @@ import it.polimi.ingsw.utils.Pair;
 public class NetworkViewRMI extends NetworkView {
     private final ServerRMIInterface server;
     private PlayerControllerRMIInterface controller;
+    private boolean exported = false;
 
     public NetworkViewRMI(GraphicalView graphicalView, String ipAddress, int port) throws RemoteException {
         super(graphicalView, ipAddress, port);
@@ -49,8 +50,11 @@ public class NetworkViewRMI extends NetworkView {
         try {
             controller = server.joinMatch(matchName, this.username);
 
-            UnicastRemoteObject.exportObject(this, 0);
-
+            // Export the object only if it was not previously exported
+            if (!exported) {
+                UnicastRemoteObject.exportObject(this, 0);
+                exported = true;
+            }
             controller.registerView(this);
         } catch (Exception e) {
             this.graphicalView.notifyError(e);
