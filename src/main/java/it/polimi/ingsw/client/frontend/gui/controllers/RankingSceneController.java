@@ -77,7 +77,7 @@ public class RankingSceneController extends SceneController {
         }
     }
 
-    private void showConnectionScene() throws IOException {
+    public void showConnectionScene() throws IOException {
         view = new GraphicalViewGUI(stage);
         StackPane root = this.loadScene("/fxml/connection.fxml");
         // Add stylesheet

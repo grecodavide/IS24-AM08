@@ -1,6 +1,7 @@
 package it.polimi.ingsw.client.frontend.gui;
 
 import java.io.IOException;
+import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -458,7 +459,16 @@ public class GraphicalViewGUI extends GraphicalView {
 
     @Override
     public void notifyConnectionLost() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'notifyConnectionLost'");
+        notifyError(new RemoteException("Connection to the server lost"));
+        RankingSceneController r = new RankingSceneController();
+            Platform.runLater(() -> {
+                try {
+                    r.setStage(stage);
+                    r.setGraphicalView(this);
+                    r.showConnectionScene();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
     }
 }
