@@ -152,9 +152,11 @@ public class Server extends UnicastRemoteObject implements ServerRMIInterface {
                     ObjectInputStream in = new ObjectInputStream(fileIn);
 
                     // Deserialize the .match file in a Match object
+                    String matchName = file.getName().replaceAll("(?i)(.*)\\.match", "$1");
                     Match match = (Match) in.readObject();
-                    matches.put(file.getName().replaceAll("(?i)(.*)\\.match", "$1") + " [reloaded]", match);
+                    matches.put(matchName, match);
                     match.getPlayers().forEach((p) -> p.setConnected(false));
+                    match.subscribeObserver(new MatchStatusObserver(matchName, matches));
                     in.close();
                     fileIn.close();
                 } catch (IOException | ClassNotFoundException e) {

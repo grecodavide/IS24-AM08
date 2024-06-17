@@ -3,10 +3,7 @@ package it.polimi.ingsw.server;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.Pair;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.util.Map;
 
 public class MatchStatusObserver implements MatchObserver {
@@ -68,6 +65,7 @@ public class MatchStatusObserver implements MatchObserver {
     @Override
     public void matchFinished() {
         matches.remove(matchName);
+        removeSerializedMatch();
     }
 
     /**
@@ -86,6 +84,11 @@ public class MatchStatusObserver implements MatchObserver {
         } catch (IOException e) {
             System.err.println("The match \"" + matchName + "\" cannot be serialized due to I/O errors");
         }
+    }
+
+    private void removeSerializedMatch() {
+        File file = new File(matchName + ".match");
+        file.delete();
     }
 }
 
