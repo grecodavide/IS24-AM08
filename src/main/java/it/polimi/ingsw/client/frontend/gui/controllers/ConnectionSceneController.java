@@ -146,6 +146,10 @@ public class ConnectionSceneController extends SceneController {
                 GuiUtil.applyCSS(root, "/css/style.css");
                 LobbySceneController controller = (LobbySceneController) root.getProperties().get("Controller");
                 List<AvailableMatch> matches = new ArrayList<>();
+                matches.add(new AvailableMatch("New", 3, 2, true));
+                matches.add(new AvailableMatch("New2", 3, 3, false));
+                matches.add(new AvailableMatch("New3", 0, 3, false));
+                controller.updateMatches(matches);
                 Scene lobbyScene = new Scene(root, GraphicalApplication.screenWidth, GraphicalApplication.screenHeight);
                 stage.setScene(lobbyScene);
 
