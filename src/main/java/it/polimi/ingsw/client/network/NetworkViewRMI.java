@@ -33,7 +33,8 @@ public class NetworkViewRMI extends NetworkView {
         Registry registry = LocateRegistry.getRegistry(ipAddress, port);
         try {
             this.server = (ServerRMIInterface) registry.lookup("CodexNaturalisRMIServer");
-            this.ping();
+            connected = true;
+            this.startConnectionCheck();
         } catch (NotBoundException e) {
             // If the registry exists but the lookup string isn't found, exit the application since it's
             // a programmatic error (it regards the code, not the app life cycle)
@@ -150,22 +151,16 @@ public class NetworkViewRMI extends NetworkView {
     }
 
     @Override
-    public void ping() {
+    public void disconnect() {
+        connected = false;
+    }
 
-        // we create a thread pool of 1 thread
-        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-
-        Runnable pingServer = () -> {
-            try {
-                server.ping();
-            } catch (RemoteException e) {
-                graphicalView.notifyConnectionLost();
-                // Shutdown connection check
-                executor.shutdown();
-            }
-        };
-
-        // and we check every two second for connectivity
-        executor.scheduleAtFixedRate(pingServer, 0, 2, TimeUnit.SECONDS);
+    @Override
+    public boolean ping() {
+        try {
+            return server.ping();
+        } catch (RemoteException e) {
+            return false;
+        }
     }
 }

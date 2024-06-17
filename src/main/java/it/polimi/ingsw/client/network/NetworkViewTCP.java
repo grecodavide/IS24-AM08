@@ -19,14 +19,14 @@ import it.polimi.ingsw.utils.Pair;
 public class NetworkViewTCP extends NetworkView {
     private final IOHandler io;
     private final Socket socket;
-    private boolean connected = true;
 
     public NetworkViewTCP(GraphicalView graphicalView, String address, Integer port) throws IOException {
         super(graphicalView, address, port);
         this.socket = new Socket(address, port);
         this.io = new IOHandler(socket);
         new Thread(new ClientReceiver(this, socket)).start();
-        this.ping();
+        connected = true;
+        super.startConnectionCheck();
     }
 
     public void notifyError(Exception exception) {
@@ -105,22 +105,18 @@ public class NetworkViewTCP extends NetworkView {
     }
 
     @Override
-    public void ping() {
+    public void disconnect() {
+        connected = false;
+    }
 
-        // we create a thread pool of 1 thread
-        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+    @Override
+    public boolean ping() {
 
-        Runnable pingServer = () -> {
-            try {
-                io.writeMsg("ping");
-            } catch (IOException e) {
-                graphicalView.notifyConnectionLost();
-                // Shutdown connection check
-                executor.shutdown();
-            }
-        };
-
-        // and we check every two second for connectivity
-        executor.scheduleAtFixedRate(pingServer, 0, 2, TimeUnit.SECONDS);
+        try {
+            io.writeMsg("ping");
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
     }
 }

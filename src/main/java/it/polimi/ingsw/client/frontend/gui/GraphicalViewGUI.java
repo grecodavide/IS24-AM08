@@ -471,4 +471,8 @@ public class GraphicalViewGUI extends GraphicalView {
                 }
             });
     }
+
+    public void disconnect() {
+        networkView.disconnect();
+    }
 }

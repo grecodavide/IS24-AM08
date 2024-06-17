@@ -1,8 +1,13 @@
 package it.polimi.ingsw.client.network;
 
+import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import it.polimi.ingsw.client.frontend.GraphicalView;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.AvailableMatch;
@@ -14,6 +19,7 @@ public abstract class NetworkView implements RemoteViewInterface {
     protected String username;
     protected String ipAddress;
     protected int port;
+    protected boolean connected = false;
 
     /**
      * Initialize the instance all its internal attributes.
@@ -26,6 +32,33 @@ public abstract class NetworkView implements RemoteViewInterface {
         this.graphicalView = graphicalView;
         this.ipAddress = ipAddress;
         this.port = port;
+    }
+
+    /**
+     * Periodically check the connection status
+     */
+    public void startConnectionCheck() {
+        // we create a thread pool of 1 thread
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+
+        Runnable pingServer = () -> {
+            if (!connected) {
+                // If the connection lost is already acknowledged
+                // shutdown the executor
+                executor.shutdown();
+            } else {
+                if (!ping()) {
+                    // If there is a connection error
+                    // notify the client and shutdown the executor
+                    disconnect();
+                    graphicalView.notifyConnectionLost();
+                    executor.shutdown();
+                }
+            }
+        };
+
+        // and we check every two second for connectivity
+        executor.scheduleAtFixedRate(pingServer, 0, 2, TimeUnit.SECONDS);
     }
 
     /**
@@ -46,7 +79,7 @@ public abstract class NetworkView implements RemoteViewInterface {
     /**
      * This method will check connectivity
      */
-    public abstract void ping();
+    public abstract boolean ping();
 
     // Action Methods
 
@@ -193,4 +226,6 @@ public abstract class NetworkView implements RemoteViewInterface {
     public abstract void sendBroadcastText(String text);
 
     public abstract void sendPrivateText(String recipient, String text);
+
+    public abstract void disconnect();
 }
