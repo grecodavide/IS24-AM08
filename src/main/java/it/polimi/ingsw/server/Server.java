@@ -80,6 +80,11 @@ public class Server extends UnicastRemoteObject implements ServerRMIInterface {
         }
     }
 
+    @Override
+    public boolean ping() throws RemoteException {
+        return true;
+    }
+
     public Map<String, Match> getJoinableMatchesMap() {
         synchronized (matches) {
             HashMap<String, Match> result = new HashMap<>();

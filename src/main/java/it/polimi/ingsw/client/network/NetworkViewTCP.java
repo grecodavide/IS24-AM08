@@ -110,15 +110,13 @@ public class NetworkViewTCP extends NetworkView {
         // we create a thread pool of 1 thread
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
 
-        Runnable pingServer = new Runnable() {
-            public void run() {
-                try {
-                    io.writeMsg("ping");
-                } catch (IOException e) {
-                    graphicalView.notifyConnectionLost();
-                    // Shutdown connection check
-                    executor.shutdown();
-                }
+        Runnable pingServer = () -> {
+            try {
+                io.writeMsg("ping");
+            } catch (IOException e) {
+                graphicalView.notifyConnectionLost();
+                // Shutdown connection check
+                executor.shutdown();
             }
         };
 

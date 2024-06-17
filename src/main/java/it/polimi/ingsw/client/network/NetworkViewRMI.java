@@ -1,11 +1,16 @@
 package it.polimi.ingsw.client.network;
 
+import java.io.IOException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import it.polimi.ingsw.client.frontend.GraphicalView;
 import it.polimi.ingsw.controllers.PlayerControllerRMIInterface;
 import it.polimi.ingsw.gamemodel.DrawSource;
@@ -28,6 +33,7 @@ public class NetworkViewRMI extends NetworkView {
         Registry registry = LocateRegistry.getRegistry(ipAddress, port);
         try {
             this.server = (ServerRMIInterface) registry.lookup("CodexNaturalisRMIServer");
+            this.ping();
         } catch (NotBoundException e) {
             // If the registry exists but the lookup string isn't found, exit the application since it's
             // a programmatic error (it regards the code, not the app life cycle)
@@ -145,7 +151,21 @@ public class NetworkViewRMI extends NetworkView {
 
     @Override
     public void ping() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'ping'");
+
+        // we create a thread pool of 1 thread
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+
+        Runnable pingServer = () -> {
+            try {
+                server.ping();
+            } catch (RemoteException e) {
+                graphicalView.notifyConnectionLost();
+                // Shutdown connection check
+                executor.shutdown();
+            }
+        };
+
+        // and we check every two second for connectivity
+        executor.scheduleAtFixedRate(pingServer, 0, 2, TimeUnit.SECONDS);
     }
 }

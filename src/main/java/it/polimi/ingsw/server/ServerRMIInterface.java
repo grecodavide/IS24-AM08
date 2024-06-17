@@ -47,4 +47,10 @@ public interface ServerRMIInterface extends Remote {
      * @throws ChosenMatchException If the given match name is already taken
      */
     void createMatch(String matchName, int maxPlayers) throws RemoteException, ChosenMatchException;
+
+    /**
+     * Ping the server
+     */
+    boolean ping() throws RemoteException;
+
 }
