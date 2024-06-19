@@ -2,18 +2,13 @@ package it.polimi.ingsw.client.frontend.tui;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
 import org.jline.terminal.Terminal;
 import it.polimi.ingsw.client.frontend.ClientBoard;
 import it.polimi.ingsw.client.frontend.ShownCard;
 import it.polimi.ingsw.exceptions.CardException;
-import it.polimi.ingsw.exceptions.InvalidResourceException;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.Pair;
@@ -909,12 +904,16 @@ public class TuiPrinter {
         
 
         // print list of joinable matches
-        String white = "\033[0m", green = "\033[32m";
+        String white = "\033[0m", green = "\033[32m", yellow = "\033[33m";
         int matchIndex = 1;
         for (AvailableMatch m1 : joinableMatches){
 
-            // color = (match.maxPlayers() == match.currentPlayers()) ? "\033[31m" : "\033[35m";
-            System.out.printf("%s║ [%02d] %s%-31s %s/%s%s  ║", prefix, matchIndex, green, m1.name().toString(), m1.currentPlayers().toString(), m1.maxPlayers().toString(), white);     // manually adjust according to maxWidth
+            if (joinableMatches.get(matchIndex-1).isRejoinable()) {
+                System.out.printf("%s║ %s[%02d] %-31s    %s  ║", prefix, yellow, matchIndex, m1.name().toString(), white);     // manually adjust according to maxWidth
+            } else {
+                System.out.printf("%s║ %s[%02d] %-31s %s/%s%s  ║", prefix, green, matchIndex, m1.name().toString(), m1.currentPlayers().toString(), m1.maxPlayers().toString(), white);     // manually adjust according to maxWidth
+            }
+
             prefix = setPosition(xCoord, ++yCoord);
             matchIndex++;
         }
