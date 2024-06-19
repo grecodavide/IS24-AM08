@@ -1,20 +1,18 @@
 package it.polimi.ingsw.client.network;
 
-import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
 import it.polimi.ingsw.client.frontend.GraphicalView;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.LeaderboardEntry;
 import it.polimi.ingsw.utils.Pair;
 
-public abstract class NetworkView implements RemoteViewInterface {
+public abstract class NetworkHandler implements RemoteViewInterface {
     protected GraphicalView graphicalView;
     protected String username;
     protected String ipAddress;
@@ -28,7 +26,7 @@ public abstract class NetworkView implements RemoteViewInterface {
      * @param ipAddress     The server IP address
      * @param port          The server port
      */
-    public NetworkView(GraphicalView graphicalView, String ipAddress, int port) {
+    public NetworkHandler(GraphicalView graphicalView, String ipAddress, int port) {
         this.graphicalView = graphicalView;
         this.ipAddress = ipAddress;
         this.port = port;

@@ -1,13 +1,18 @@
 package it.polimi.ingsw.client.frontend.gui.controllers;
 
+import java.io.IOException;
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.List;
 import it.polimi.ingsw.client.frontend.gui.GraphicalApplication;
 import it.polimi.ingsw.client.frontend.gui.nodes.CardView;
-import it.polimi.ingsw.client.network.NetworkView;
-import it.polimi.ingsw.client.network.NetworkViewRMI;
-import it.polimi.ingsw.client.network.NetworkViewTCP;
+import it.polimi.ingsw.client.network.NetworkHandler;
+import it.polimi.ingsw.client.network.NetworkHandlerRMI;
+import it.polimi.ingsw.client.network.NetworkHandlerTCP;
 import it.polimi.ingsw.gamemodel.Color;
-import it.polimi.ingsw.gamemodel.Side;
-import it.polimi.ingsw.utils.*;
+import it.polimi.ingsw.utils.AvailableMatch;
+import it.polimi.ingsw.utils.GuiUtil;
+import it.polimi.ingsw.utils.LeaderboardEntry;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -16,11 +21,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-
-import java.io.IOException;
-import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Controller for the connection scene
@@ -56,10 +56,10 @@ public class ConnectionSceneController extends SceneController {
         if (debuggingKeys()) {
             return;
         }
-        NetworkView networkHandler = null;
+        NetworkHandler networkHandler = null;
         if (TCPButton.isSelected()) {
             try {
-                networkHandler = new NetworkViewTCP(view, serverAddress.getText(), Integer.valueOf(serverPort.getText()));
+                networkHandler = new NetworkHandlerTCP(view, serverAddress.getText(), Integer.valueOf(serverPort.getText()));
                 view.setNetworkInterface(networkHandler);
                 showLobby();
             } catch (Exception e) {
@@ -67,7 +67,7 @@ public class ConnectionSceneController extends SceneController {
             }
         } else {
             try {
-                networkHandler = new NetworkViewRMI(view, serverAddress.getText(), Integer.parseInt(serverPort.getText()));
+                networkHandler = new NetworkHandlerRMI(view, serverAddress.getText(), Integer.parseInt(serverPort.getText()));
                 view.setNetworkInterface(networkHandler);
                 showLobby();
             } catch (Exception e) {

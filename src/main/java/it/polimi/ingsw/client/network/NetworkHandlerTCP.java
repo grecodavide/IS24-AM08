@@ -2,9 +2,6 @@ package it.polimi.ingsw.client.network;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import it.polimi.ingsw.client.frontend.GraphicalView;
 import it.polimi.ingsw.gamemodel.DrawSource;
 import it.polimi.ingsw.gamemodel.Objective;
@@ -16,11 +13,11 @@ import it.polimi.ingsw.network.tcp.ClientReceiver;
 import it.polimi.ingsw.network.tcp.IOHandler;
 import it.polimi.ingsw.utils.Pair;
 
-public class NetworkViewTCP extends NetworkView {
+public class NetworkHandlerTCP extends NetworkHandler {
     private final IOHandler io;
     private final Socket socket;
 
-    public NetworkViewTCP(GraphicalView graphicalView, String address, Integer port) throws IOException {
+    public NetworkHandlerTCP(GraphicalView graphicalView, String address, Integer port) throws IOException {
         super(graphicalView, address, port);
         this.socket = new Socket(address, port);
         this.io = new IOHandler(socket);

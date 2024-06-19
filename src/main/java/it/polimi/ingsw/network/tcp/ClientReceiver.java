@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import it.polimi.ingsw.client.network.NetworkViewTCP;
+import it.polimi.ingsw.client.network.NetworkHandlerTCP;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.network.messages.errors.ErrorMessage;
 import it.polimi.ingsw.network.messages.responses.*;
@@ -19,7 +19,7 @@ import it.polimi.ingsw.utils.PlacedCardRecord;
  */
 
 public class ClientReceiver implements Runnable {
-    private NetworkViewTCP networkView;
+    private NetworkHandlerTCP networkView;
     private Socket socket;
     private IOHandler io;
     private Map<Integer, InitialCard> initialCards;
@@ -27,7 +27,7 @@ public class ClientReceiver implements Runnable {
     private Map<Integer, GoldCard> goldCards;
     private Map<Integer, Objective> objectives;
 
-    public ClientReceiver(NetworkViewTCP networkView, Socket socket) throws IOException {
+    public ClientReceiver(NetworkHandlerTCP networkView, Socket socket) throws IOException {
         this.networkView = networkView;
         this.socket = socket;
         this.io = new IOHandler(socket);
