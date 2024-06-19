@@ -1,16 +1,11 @@
 package it.polimi.ingsw.client.network;
 
-import java.io.IOException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
 import it.polimi.ingsw.client.frontend.GraphicalView;
 import it.polimi.ingsw.controllers.PlayerControllerRMIInterface;
 import it.polimi.ingsw.gamemodel.DrawSource;
@@ -21,12 +16,12 @@ import it.polimi.ingsw.server.ServerRMIInterface;
 import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.Pair;
 
-public class NetworkViewRMI extends NetworkView {
+public class NetworkHandlerRMI extends NetworkHandler {
     private final ServerRMIInterface server;
     private PlayerControllerRMIInterface controller;
     private boolean exported = false;
 
-    public NetworkViewRMI(GraphicalView graphicalView, String ipAddress, int port) throws RemoteException {
+    public NetworkHandlerRMI(GraphicalView graphicalView, String ipAddress, int port) throws RemoteException {
         super(graphicalView, ipAddress, port);
 
         // Try to get a remote Server instance from the network

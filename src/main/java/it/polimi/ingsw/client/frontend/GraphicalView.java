@@ -1,7 +1,7 @@
 package it.polimi.ingsw.client.frontend;
 
 import java.util.*;
-import it.polimi.ingsw.client.network.NetworkView;
+import it.polimi.ingsw.client.network.NetworkHandler;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.LeaderboardEntry;
@@ -9,7 +9,7 @@ import it.polimi.ingsw.utils.Pair;
 import it.polimi.ingsw.utils.RequestStatus;
 
 public abstract class GraphicalView {
-    protected NetworkView networkView;
+    protected NetworkHandler networkView;
     protected Map<String, ClientBoard> clientBoards;
     protected List<String> players; // ordered by turn
     protected String currentPlayer;
@@ -53,7 +53,7 @@ public abstract class GraphicalView {
      *
      * @param networkView the interface to communicate
      */
-    public void setNetworkInterface(NetworkView networkView) {
+    public void setNetworkInterface(NetworkHandler networkView) {
         this.networkView = networkView;
     }
 
@@ -131,7 +131,7 @@ public abstract class GraphicalView {
      */
     public void playCard(Pair<Integer, Integer> coords, PlayableCard card, Side side) {
         this.setLastRequestStatus(RequestStatus.PENDING);
-        this.networkView.playCard(coords, card, side);
+        new Thread(() -> this.networkView.playCard(coords, card, side)).start();
     }
 
     /**

@@ -7,8 +7,8 @@ import java.util.Map;
 import it.polimi.ingsw.client.frontend.ClientBoard;
 import it.polimi.ingsw.client.frontend.GraphicalView;
 import it.polimi.ingsw.client.frontend.ShownCard;
-import it.polimi.ingsw.client.network.NetworkViewRMI;
-import it.polimi.ingsw.client.network.NetworkViewTCP;
+import it.polimi.ingsw.client.network.NetworkHandlerRMI;
+import it.polimi.ingsw.client.network.NetworkHandlerTCP;
 import it.polimi.ingsw.exceptions.WrongInputFormatException;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.AvailableMatch;
@@ -35,7 +35,8 @@ public class GraphicalViewTUI extends GraphicalView {
             "objectives,  o -> show secret and common objectives",
             "hand,        h -> show your hand");
 
-    private final static String playerControlPrompt = "Type command, or 'help' for a list of available commands.";
+    private final static String playerControlPrompt =
+            "Type command, or 'help' for a list of available commands.";
 
     private List<String> chat;
 
@@ -143,7 +144,8 @@ public class GraphicalViewTUI extends GraphicalView {
     }
 
     private Pair<Integer, Integer> chooseCoords(ClientBoard board) {
-        Map<Pair<Integer, Integer>, Pair<Integer, Corner>> valids = this.validPositions.getValidPlaces();
+        Map<Pair<Integer, Integer>, Pair<Integer, Corner>> valids =
+                this.validPositions.getValidPlaces();
 
         Pair<Integer, Integer> coord = null;
 
@@ -331,10 +333,10 @@ public class GraphicalViewTUI extends GraphicalView {
             try {
                 switch (userIn) {
                     case "1", "tcp", "TCP":
-                        this.setNetworkInterface(new NetworkViewTCP(this, IPAddr, port));
+                        this.setNetworkInterface(new NetworkHandlerTCP(this, IPAddr, port));
                         break;
                     case "2", "rmi", "RMI":
-                        this.setNetworkInterface(new NetworkViewRMI(this, IPAddr, port));
+                        this.setNetworkInterface(new NetworkHandlerRMI(this, IPAddr, port));
                         break;
                     default:
                         this.inputHandler.setPrompt(
@@ -694,29 +696,35 @@ public class GraphicalViewTUI extends GraphicalView {
     }
 
     @Override
-    protected void notifyMatchStarted() {
-    }
+    protected void notifyMatchStarted() {}
 
     @Override
     protected void notifyMatchResumed(boolean drawPhase) {
-        this.clientBoards.get(this.username).getPlaced().forEach((turn, shownCard) -> this.validPositions
-                .addCard(new ShownCard(shownCard.card(), shownCard.side(), shownCard.coords())));
+        new Thread(() -> {
 
-        // we resume match only if the game was in progress, so all players chose secret
-        // objectives
-        this.players.forEach(this.playersWithObjective::add);
+            this.clientBoards.get(this.username).getPlaced()
+                    .forEach((turn, shownCard) -> this.validPositions.addCard(
+                            new ShownCard(shownCard.card(), shownCard.side(), shownCard.coords())));
 
-        if (this.username.equals(this.currentPlayer)) {
-            if (drawPhase) {
-                this.makeUserDraw(this.clientBoards.get(this.username).getAvailableResources());
-            } else {
-                new Thread(this::makeMove).start();
-            }
-        } else {
+            // we resume match only if the game was in progress, so all players chose secret
+            // objectives
+            this.players.forEach(this.playersWithObjective::add);
+
             this.printer.clearTerminal();
-            this.enablePlayerControls();
-        }
+            if (this.username.equals(this.currentPlayer)) {
+                if (drawPhase) {
+                    this.makeUserDraw(this.clientBoards.get(this.username).getAvailableResources());
+                    // new Thread(() ->
+                    // this.makeUserDraw(this.clientBoards.get(this.username).getAvailableResources())).start();;
+                } else {
+                    // new Thread(this::makeMove).start();
+                    this.makeMove();
+                }
+            } else {
+                this.enablePlayerControls();
+            }
 
+        }).start();
     }
 
     @Override
