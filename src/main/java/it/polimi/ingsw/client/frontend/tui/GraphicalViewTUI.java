@@ -457,7 +457,7 @@ public class GraphicalViewTUI extends GraphicalView {
                     }
                 }
             } catch (WrongInputFormatException e) {
-                this.inputHandler.setPrompt(e.getMessage() + "! try again.");
+                this.inputHandler.setPrompt(e.getMessage() + "! Try again.");
             }
         }
 
@@ -692,7 +692,10 @@ public class GraphicalViewTUI extends GraphicalView {
     @Override
     public void notifyError(Exception exception) {
         super.notifyError(exception);
-        this.lastError = "(" + exception.getClass().getName() + ") " + exception.getMessage();
+        this.lastError = exception.getMessage();
+        if (this.lastError == null) {
+            this.lastError = exception.getClass().getName();
+        }
     }
 
     @Override
