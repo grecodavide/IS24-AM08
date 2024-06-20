@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import it.polimi.ingsw.client.frontend.GraphicalView;
 import it.polimi.ingsw.client.network.NetworkHandlerTCP;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.network.messages.errors.ErrorMessage;
@@ -17,7 +18,6 @@ import it.polimi.ingsw.utils.PlacedCardRecord;
 /**
  * ClientSender
  */
-
 public class ClientReceiver implements Runnable {
     private NetworkHandlerTCP networkView;
     private Socket socket;
@@ -27,6 +27,15 @@ public class ClientReceiver implements Runnable {
     private Map<Integer, GoldCard> goldCards;
     private Map<Integer, Objective> objectives;
 
+
+    /**
+     * Class constructor.
+     * 
+     * @param networkView The network view that should call the {@link GraphicalView} methods
+     * @param socket The socket opened
+     * 
+     * @throws IOException If there was an error with the socket's streams
+     */
     public ClientReceiver(NetworkHandlerTCP networkView, Socket socket) throws IOException {
         this.networkView = networkView;
         this.socket = socket;
@@ -40,6 +49,14 @@ public class ClientReceiver implements Runnable {
         this.objectives = cardsManager.getObjectives();
     }
 
+
+    /**
+     * Get a playable card by its ID.
+     * 
+     * @param cardID The card ID
+     * 
+     * @return The playable card
+     */
     private PlayableCard getPlayable(Integer cardID) {
         PlayableCard card = this.resourceCards.get(cardID);
         if (card == null) {
@@ -48,6 +65,14 @@ public class ClientReceiver implements Runnable {
         return card;
     }
 
+    /**
+     * Parses a map from coordinates to {@link PlacedCard} to a map from coordinates to
+     * {@link PlacedCardRecord}.
+     * 
+     * @param board The map from coordinates to {@link PlacedCard}
+     * 
+     * @return The map from coordinates to {@link PlacedCardRecord}
+     */
     private Map<Pair<Integer, Integer>, PlacedCard> getPlacedMap(
             Map<Integer, PlacedCardRecord> board) {
         Map<Pair<Integer, Integer>, PlacedCard> result = new HashMap<>();
@@ -66,7 +91,12 @@ public class ClientReceiver implements Runnable {
 
         return result;
     }
-
+    
+    /**
+     * Parses a message and calls the corresponding {@link it.polimi.ingsw.client.network.NetworkHandler}'s view.
+     * 
+     * @param message The message to be parsed
+     */
     private void parseMessage(String message) {
         try {
             ResponseMessage response = (ResponseMessage) io.stringToMsg(message);
@@ -213,6 +243,12 @@ public class ClientReceiver implements Runnable {
 
     }
 
+    
+    /**
+     * Sends an error to the server.
+     * 
+     * @param message The error message
+     */
     private void sendError(String message) {
         try {
             ErrorMessage msg = (ErrorMessage) this.io.stringToMsg(message);
@@ -234,7 +270,6 @@ public class ClientReceiver implements Runnable {
                     this.parseMessage(finalMessage);
                 }).start();
             } catch (IOException | ClassNotFoundException e) {
-                // TODO: something bad happened
             }
         }
     }

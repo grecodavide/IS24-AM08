@@ -14,6 +14,13 @@ public final class ChooseSecretObjectiveMessage extends ActionMessage {
         return objectiveID;
     }
 
+    
+    /**
+     * Class constructor.
+     * 
+     * @param username The username of the player that wants to choose secret objective
+     * @param objectiveID The chosen objective's ID
+     */
     public ChooseSecretObjectiveMessage(String username, Integer objectiveID) {
         super(username);
         this.objectiveID = objectiveID;

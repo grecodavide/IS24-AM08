@@ -11,23 +11,42 @@ import it.polimi.ingsw.gamemodel.Symbol;
 import it.polimi.ingsw.utils.Pair;
 
 /**
- * ValidPositions
+ * Valid positions of a board, ie all the points a new card can be linked to
  */
-
 public class ValidPositions {
     private final Map<Pair<Integer, Integer>, BoardPosition> coordinates;
     private static final Map<Corner, Pair<Integer, Integer>> offsets =
             Map.of(Corner.TOP_LEFT, new Pair<Integer, Integer>(-1, 1), Corner.TOP_RIGHT, new Pair<Integer, Integer>(1, 1),
                     Corner.BOTTOM_LEFT, new Pair<Integer, Integer>(-1, -1), Corner.BOTTOM_RIGHT, new Pair<Integer, Integer>(1, -1));
 
+    
+    /**
+     * Class constructor.
+     */
     public ValidPositions() {
         this.coordinates = new HashMap<>();
     }
-
+    
+    /**
+     * Sums two coordinates.
+     * 
+     * @param coord First coordinate
+     * @param offset Second coordinate
+     * 
+     * @return The sum of the two coordinates
+     */
     private Pair<Integer, Integer> offsetCoord(Pair<Integer, Integer> coord, Pair<Integer, Integer> offset) {
         return new Pair<Integer, Integer>(coord.first() + offset.first(), coord.second() + offset.second());
     }
 
+    
+    /**
+     * Checks if a coordinate is a valid link point.
+     * 
+     * @param coord The coordinate to check
+     * 
+     * @return whether the coordinate is a valid link point or not
+     */
     public boolean isValid(Pair<Integer, Integer> coord) {
         if (this.coordinates.get(coord) == null) {
             return false;
@@ -36,6 +55,11 @@ public class ValidPositions {
         return this.coordinates.get(coord).isValid();
     }
 
+    /**
+     * Gets all the valid linking points.
+     * 
+     * @return A map from coordinate to anchor's corner and linking point's index
+     */
     public Map<Pair<Integer, Integer>, Pair<Integer, Corner>> getValidPlaces() {
         Map<Pair<Integer, Integer>, Pair<Integer, Corner>> valids = new HashMap<>();
         int pos = 1;
@@ -48,7 +72,12 @@ public class ValidPositions {
 
         return valids;
     }
-
+    
+    /**
+     * Adds a card, updating all the valid linking points.
+     * 
+     * @param card The added card
+     */
     public void addCard(ShownCard card) {
         CardFace cardFace = card.card().getSide(card.side());
         Pair<Integer, Integer> coord = card.coords();

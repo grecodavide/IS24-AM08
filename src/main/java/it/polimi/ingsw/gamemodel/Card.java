@@ -34,6 +34,10 @@ public abstract class Card implements Serializable {
         };
     }
 
+    
+    /**
+     * @return The card ID
+     */
     public Integer getId() {
         return this.id;
     }

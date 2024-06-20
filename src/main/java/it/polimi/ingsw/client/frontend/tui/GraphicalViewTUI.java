@@ -17,7 +17,7 @@ import it.polimi.ingsw.utils.Pair;
 import it.polimi.ingsw.utils.RequestStatus;
 
 /**
- * Class that handles client game loop from TUI
+ * Class that handles client game loop from TUI.
  */
 public class GraphicalViewTUI extends GraphicalView {
     private final TuiPrinter printer;
@@ -35,13 +35,15 @@ public class GraphicalViewTUI extends GraphicalView {
             "objectives,  o -> show secret and common objectives",
             "hand,        h -> show your hand");
 
+    private List<String> chat;
+    private List<String> messages;
     private final static String playerControlPrompt =
             "Type command, or 'help' for a list of available commands.";
 
-    private List<String> chat;
 
-    private List<String> messages;
-
+    /**
+     * Class constructor. Starts the interface and creates all auxiliary objects.
+     */
     public GraphicalViewTUI() {
         super();
         this.ongoing = true;
@@ -61,6 +63,10 @@ public class GraphicalViewTUI extends GraphicalView {
 
     }
 
+
+    /**
+     * Actually start the interface, then handling the pre match.
+     */
     private void startInterface() {
         this.printer.clearTerminal();
         this.setNetworkView();
@@ -72,6 +78,13 @@ public class GraphicalViewTUI extends GraphicalView {
     ///////////////////////
     // AUXILIARY METHODS //
     ///////////////////////
+
+    /**
+     * Sets the last request's status, and notifies all threads in case the server sent a response
+     * message.
+     * 
+     * @param status The last request's status
+     */
     @Override
     public void setLastRequestStatus(RequestStatus status) {
         synchronized (this.lastRequest) {
@@ -82,6 +95,13 @@ public class GraphicalViewTUI extends GraphicalView {
         }
     }
 
+
+    /**
+     * Waits for the server response after any action was performed. Until the server does not send
+     * a response (or an error), the thread goes to sleep.
+     * 
+     * @return Whether the last action was successful or not
+     */
     private boolean getServerResponse() {
         this.printer.printCenteredMessage("Waiting for server...", 1);
         try {
@@ -97,19 +117,30 @@ public class GraphicalViewTUI extends GraphicalView {
 
     }
 
-    private synchronized String printHand(ClientBoard board) {
+
+    /**
+     * Shows the player's board and hand.
+     * 
+     * @param board the player's board
+     */
+    private synchronized void showHand(ClientBoard board) {
         this.printer.printPlayerBoard(this.username, board);
         this.printer.printHandAtBottom(board.getHand());
-
-        this.inputHandler.setPrompt("What card do you want to play?");
-        return this.inputHandler.askUser();
     }
 
+    /**
+     * Asks the user which card he wants to play.
+     * 
+     * @param board The player's board
+     * 
+     * @return The chosen card
+     */
     private PlayableCard chooseCardFromHand(ClientBoard board) {
         List<PlayableCard> hand = board.getHand();
 
         this.inputHandler.setPrompt("Choose card to play (1, 2, 3):");
-        String userIn = this.printHand(board);
+        this.showHand(board);
+        String userIn = this.inputHandler.askUser();
 
         PlayableCard card = null;
         Integer maxValue = hand.size();
@@ -123,13 +154,22 @@ public class GraphicalViewTUI extends GraphicalView {
                 }
             } catch (NumberFormatException e) {
                 this.inputHandler.setPrompt("Not a valid number! try again");
-                userIn = this.printHand(board);
+                this.showHand(board);
+                userIn = this.inputHandler.askUser();
             }
         }
 
         return card;
     }
 
+
+    /**
+     * Asks the user which side he wants to play the chosen cards.
+     * 
+     * @param card The card chosen by the player, that must be played
+     * 
+     * @return The chosen side
+     */
     private Side chooseCardSide(PlayableCard card) {
         this.printer.clearTerminal();
         this.printer.printPlayableFrontAndBack(card, 0);
@@ -143,6 +183,14 @@ public class GraphicalViewTUI extends GraphicalView {
         };
     }
 
+
+    /**
+     * Asks the user where he wants to play the card.
+     * 
+     * @param board The current player's board
+     * 
+     * @return The chosen coordinates
+     */
     private Pair<Integer, Integer> chooseCoords(ClientBoard board) {
         Map<Pair<Integer, Integer>, Pair<Integer, Corner>> valids =
                 this.validPositions.getValidPlaces();
@@ -169,10 +217,13 @@ public class GraphicalViewTUI extends GraphicalView {
                 this.inputHandler.setPrompt("Not a valid number! try again");
             }
         }
-
         return coord;
     }
 
+
+    /**
+     * Gets the player's input while it's not his turn, and then performs the corresponding action.
+     */
     private void parsePlayerControl() {
         ClientBoard board = this.clientBoards.get(this.username);
         String userIn, command, argument, player;
@@ -275,6 +326,10 @@ public class GraphicalViewTUI extends GraphicalView {
         this.inputHandler.showPrompt();
     }
 
+
+    /**
+     * Enables the player to use custom commands while it's not his turn.
+     */
     private void enablePlayerControls() {
         this.inputHandler.setPrompt(playerControlPrompt);
         this.inputHandler.showPrompt();
@@ -310,6 +365,10 @@ public class GraphicalViewTUI extends GraphicalView {
     ////////////////////////
     // PRE MATCH METHODS //
     ///////////////////////
+
+    /**
+     * Sets the network view, asking the player how he wants to connect.
+     */
     private void setNetworkView() {
         String userIn, IPAddr;
         Integer port = null;
@@ -352,6 +411,10 @@ public class GraphicalViewTUI extends GraphicalView {
         }
     }
 
+
+    /**
+     * Asks the player to choose an username.
+     */
     private void chooseUsername() {
         String userIn = "";
         this.inputHandler.setPrompt("Choose username:");
@@ -362,6 +425,10 @@ public class GraphicalViewTUI extends GraphicalView {
         super.setUsername(userIn);
     }
 
+
+    /**
+     * Asks the server for a list of available matches and waits for it.
+     */
     private void getAvailableMatches() {
         this.lastRequest.setStatus(RequestStatus.PENDING);
         this.networkView.getAvailableMatches();
@@ -374,6 +441,12 @@ public class GraphicalViewTUI extends GraphicalView {
         }
     }
 
+
+    /**
+     * Tries to create a new match, asking the player for match name and max players.
+     * 
+     * @throws WrongInputFormatException if the max number of players was not specified
+     */
     private void createMatch() throws WrongInputFormatException {
         String userIn = this.inputHandler.askUser();
         Integer splitIndex = userIn.indexOf(" ");
@@ -392,6 +465,15 @@ public class GraphicalViewTUI extends GraphicalView {
         super.createMatch(matchName, maxPlayers);
     }
 
+
+    /**
+     * Tries to join a match, showing the player a list of matches and their relative index, and
+     * asking him which he wants to join.
+     * 
+     * @param joinables List of matches the player can join
+     * 
+     * @throws WrongInputFormatException if the player did not specify a valid index
+     */
     private void joinMatch(List<AvailableMatch> joinables) throws WrongInputFormatException {
         String userIn = this.inputHandler.askUser();
         Integer matchIndex;
@@ -408,6 +490,13 @@ public class GraphicalViewTUI extends GraphicalView {
         super.joinMatch(joinables.get(matchIndex).name());
     }
 
+
+    /**
+     * Tries to set the match, either creating it or joining an already existing one.
+     * 
+     * @see GraphicalViewTUI#joinMatch(List)
+     * @see GraphicalViewTUI#createMatch()
+     */
     private void setMatch() {
         List<AvailableMatch> joinables = new ArrayList<>(), notJoinables = new ArrayList<>();
         this.chooseUsername();
@@ -470,6 +559,13 @@ public class GraphicalViewTUI extends GraphicalView {
 
     }
 
+
+    /**
+     * Show the list of players in the match.
+     * 
+     * @param someoneUsername Last player who joined the match
+     * @param joinedPlayers List of all the other players
+     */
     @Override
     public void someoneJoined(String someoneUsername, List<String> joinedPlayers) {
         super.someoneJoined(someoneUsername, joinedPlayers);
@@ -485,6 +581,12 @@ public class GraphicalViewTUI extends GraphicalView {
     ///////////////////
     // MATCH METHODS //
     ///////////////////
+
+    /**
+     * Asks the user which side he wants to play the initial card.
+     * 
+     * @param initialCard The initial card he drew
+     */
     @Override
     public void giveInitialCard(InitialCard initialCard) {
         super.giveInitialCard(initialCard);
@@ -513,17 +615,12 @@ public class GraphicalViewTUI extends GraphicalView {
         }
     }
 
-    @Override
-    public void someoneSetInitialSide(String someoneUsername, Side side,
-            Map<Symbol, Integer> availableResources) {
-        this.printer.clearTerminal();
-        if (this.username.equals(someoneUsername)) {
-            this.printer.printPlayerBoard(this.username, this.clientBoards.get(this.username));
-            this.printer.printMessage("Correctly played card! waiting for others to choose theirs");
-        }
-        super.someoneSetInitialSide(someoneUsername, side, availableResources);
-    }
 
+    /**
+     * Asks the user which secret objective he wants to keep between the two random given to him.
+     * 
+     * @param secretObjectives the pair of objectives the player has to choose from
+     */
     @Override
     public void giveSecretObjectives(Pair<Objective, Objective> secretObjectives) {
         super.giveSecretObjectives(secretObjectives);
@@ -548,13 +645,24 @@ public class GraphicalViewTUI extends GraphicalView {
         }
     }
 
+
+    /**
+     * Adds to the list of player with objectives the last player who chose his secret objective.
+     * This is used to determine whether the player currently playing has already chosen secret
+     * objective (and so should play a regular turn) or not.
+     * 
+     * @param someoneUsername the username of the last player who chose secret objective
+     */
     @Override
     public void someoneChoseSecretObjective(String someoneUsername) {
         super.someoneChoseSecretObjective(someoneUsername);
         this.playersWithObjective.add(someoneUsername);
     }
 
-    // gets called only on others, never on current player
+
+    /**
+     * Notifies all players (but the current one) that someone is playing their turn.
+     */
     @Override
     public void changePlayer() {
         this.printer.clearTerminal();
@@ -576,6 +684,11 @@ public class GraphicalViewTUI extends GraphicalView {
         }).start();
     }
 
+
+    /**
+     * Ask a player to choose a card to play, the side on which the card should be played, and the
+     * coordinates in which the card should be played; finally trying to actually play the card.
+     */
     @Override
     public void makeMove() {
         this.playerControls.disable();
@@ -620,6 +733,12 @@ public class GraphicalViewTUI extends GraphicalView {
         }
     }
 
+    
+    /**
+     * Asks the player from where he wants to draw.
+     * 
+     * @param availableResources All the possible draw sources
+     */
     private void makeUserDraw(Map<Symbol, Integer> availableResources) {
         this.printer.clearTerminal();
         DrawSource source = null;
@@ -663,6 +782,17 @@ public class GraphicalViewTUI extends GraphicalView {
         }
     }
 
+    
+    /**
+     * Notifies all players that someone played a card, and updates the relative player's board.
+     * 
+     * @param someoneUsername The player that played the card
+     * @param coords The chosen coordinates
+     * @param card The chosen played card
+     * @param side The chosen side
+     * @param points The points of that player
+     * @param availableResources The resources of that player
+     */
     @Override
     public void someonePlayedCard(String someoneUsername, Pair<Integer, Integer> coords,
             PlayableCard card, Side side, int points, Map<Symbol, Integer> availableResources) {
@@ -673,11 +803,23 @@ public class GraphicalViewTUI extends GraphicalView {
         }
     }
 
+    
+    /**
+     * Notifies everyone else that a player left.
+     * 
+     * @param someoneUsername Player's username
+     */
     @Override
     public void someoneQuit(String someoneUsername) {
         this.printer.printCenteredMessage(someoneUsername + " quit!", 0);
     }
 
+    
+    /**
+     * Shows whether the current player won or lost.
+     * 
+     * @param ranking Match ranking
+     */
     @Override
     public void matchFinished(List<LeaderboardEntry> ranking) {
         this.printer.clearTerminal();
@@ -689,6 +831,12 @@ public class GraphicalViewTUI extends GraphicalView {
         this.ongoing = false;
     }
 
+    
+    /**
+     * Sets the last error message to what the server responded.
+     * 
+     * @param exception The thrown exception
+     */
     @Override
     public void notifyError(Exception exception) {
         super.notifyError(exception);
@@ -698,9 +846,19 @@ public class GraphicalViewTUI extends GraphicalView {
         }
     }
 
+    
+    /**
+     * Notifies that the match has started.
+     */
     @Override
     protected void notifyMatchStarted() {}
 
+    
+    /**
+     * Notifies that the player correctly rejoined a match, and makes him play his turn.
+     * 
+     * @param drawPhase whether the player should draw or play
+     */
     @Override
     protected void notifyMatchResumed(boolean drawPhase) {
         new Thread(() -> {
@@ -730,6 +888,13 @@ public class GraphicalViewTUI extends GraphicalView {
         }).start();
     }
 
+    
+    /**
+     * Adds to the chat a broadcast text.
+     * 
+     * @param someoneUsername The player who sent the broadcast
+     * @param text The sent text
+     */
     @Override
     public void someoneSentPrivateText(String someoneUsername, String text) {
         super.someoneSentPrivateText(someoneUsername, text);
@@ -742,6 +907,13 @@ public class GraphicalViewTUI extends GraphicalView {
         }
     }
 
+    
+    /**
+     * Adds to the chat a private text.
+     * 
+     * @param someoneUsername The player who sent the private text
+     * @param text The sent text
+     */
     @Override
     public void someoneSentBroadcastText(String someoneUsername, String text) {
         super.someoneSentBroadcastText(someoneUsername, text);
@@ -754,17 +926,21 @@ public class GraphicalViewTUI extends GraphicalView {
         }
     }
 
-    public static void main(String[] args) {
-        GraphicalViewTUI tui = new GraphicalViewTUI();
-        tui.startInterface();
-        while (tui.ongoing) {
-        }
-    }
-
+    /**
+     * Notifies that there has been a connection error. We only care about server crashes, but it could be anything
+     */
     @Override
     public void notifyConnectionLost() {
         this.printer.clearTerminal();
         this.printer.printCenteredMessage("Connection Lost!", 0);
         System.exit(1);
+    }
+
+    
+    public static void main(String[] args) {
+        GraphicalViewTUI tui = new GraphicalViewTUI();
+        tui.startInterface();
+        while (tui.ongoing) {
+        }
     }
 }

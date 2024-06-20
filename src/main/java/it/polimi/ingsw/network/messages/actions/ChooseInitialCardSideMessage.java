@@ -16,6 +16,13 @@ public final class ChooseInitialCardSideMessage extends ActionMessage {
         return side;
     }
 
+    
+    /**
+     * Class constructor.
+     * 
+     * @param username The username of the player that wants to choose the initial card side
+     * @param side The chosen card side
+     */
     public ChooseInitialCardSideMessage(String username, Side side) {
         super(username);
         this.side = side;

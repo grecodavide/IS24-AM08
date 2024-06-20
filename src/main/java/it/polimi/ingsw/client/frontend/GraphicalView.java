@@ -21,20 +21,36 @@ public abstract class GraphicalView {
     protected String username;
     protected final LastRequest lastRequest;
 
+    /**
+     * Class constructor.
+     */
     public GraphicalView() {
         this.lastRequest = new LastRequest();
         this.lastRequest.setStatus(RequestStatus.PENDING);
     }
-
+    
+    /**
+     * Sets the username of the corresponding player.
+     * 
+     * @param username The chosen username
+     */
     protected void setUsername(String username) {
         this.username = username;
         this.networkView.setUsername(username);
     }
-
+    
+    /**
+     * @return Whether is the last turn or not.
+     */
     public boolean isLastTurn() {
         return this.lastTurn;
     }
-
+    
+    /**
+     * Sets the last request's status.
+     * 
+     * @param status Last request's status
+     */
     public void setLastRequestStatus(RequestStatus status) {
         this.lastRequest.setStatus(status);
     }
@@ -58,7 +74,7 @@ public abstract class GraphicalView {
     }
 
     /**
-     * Tries to create a match
+     * Tries to create a match.
      *
      * @param matchName The match's name
      */
@@ -68,7 +84,7 @@ public abstract class GraphicalView {
     }
 
     /**
-     * Tries to join a match
+     * Tries to join a match.
      *
      * @param matchName the match's name
      */
@@ -77,10 +93,21 @@ public abstract class GraphicalView {
         this.networkView.joinMatch(matchName);
     }
 
+    /**
+     * Sends a broadcast text.
+     * 
+     * @param text The content
+     */
     public void sendBroadcastText(String text) {
         this.networkView.sendBroadcastText(text);
     }
-
+    
+    /**
+     * Sends a private text.
+     * 
+     * @param recipient The recipient
+     * @param text The content
+     */
     public void sendPrivateText(String recipient, String text) {
         this.networkView.sendPrivateText(recipient, text);
     }
@@ -145,7 +172,7 @@ public abstract class GraphicalView {
     }
 
     /**
-     * Method used to show the turn has changed
+     * Method used to show the turn has changed.
      */
     public abstract void changePlayer();
 
@@ -174,13 +201,13 @@ public abstract class GraphicalView {
 
 
     /**
-     * Ask the user to make a play. Must call {@link GraphicalView#playCard(Pair, PlayableCard, Side)}
+     * Ask the user to make a play. Must call {@link GraphicalView#playCard(Pair, PlayableCard, Side)}.
      */
     public abstract void makeMove();
 
 
     /**
-     * Starts match on the client side, setting all variables to their initial values
+     * Starts match on the client side, setting all variables to their initial values.
      *
      * @param playersUsernamesAndPawns Map containing all players' pawns, indexed by their username
      * @param playersHands             Map containing all the players' hands, indexed by their username
@@ -197,7 +224,7 @@ public abstract class GraphicalView {
     }
 
     /**
-     * Resumes match on the client side, setting all variables to their initial values
+     * Resumes match on the client side, setting all variables to their initial values.
      *
      * @param playersUsernamesAndPawns Map containing all players' pawns, indexed by their username
      * @param playersHands             Map containing all the players' hands, indexed by their username
@@ -242,6 +269,16 @@ public abstract class GraphicalView {
         this.setLastRequestStatus(RequestStatus.SUCCESSFUL);
     }
 
+    
+    /**
+     * Initialize everything about the match.
+     * 
+     * @param playersUsernamesAndPawns Map from player's username to pawn color
+     * @param playersHands Map from player's username to hand
+     * @param visibleObjectives Common objectives
+     * @param visiblePlayableCards Common cards that can be drawn
+     * @param decksTopReign The two decks' top cards
+     */
     private void setupMatch(Map<String, Color> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands,
                             Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards,
                             Pair<Symbol, Symbol> decksTopReign) {
@@ -282,12 +319,12 @@ public abstract class GraphicalView {
     }
 
     /**
-     * Method that shows the user that the match has started
+     * Method that shows the user that the match has started.
      */
     protected abstract void notifyMatchStarted();
 
     /**
-     * Method that shows the user that the match has resumed
+     * Method that shows the user that the match has resumed.
      */
     protected abstract void notifyMatchResumed(boolean  drawPhase);
 
@@ -297,7 +334,7 @@ public abstract class GraphicalView {
     }
 
     /**
-     * Give the user its initial card
+     * Give the user its initial card.
      *
      * @param initialCard the player's initial card
      */
@@ -308,7 +345,7 @@ public abstract class GraphicalView {
 
 
     /**
-     * Gives the player two secret objectives to choose from
+     * Gives the player two secret objectives to choose from.
      *
      * @param secretObjectives the two objectives to choose from
      */
@@ -317,7 +354,7 @@ public abstract class GraphicalView {
     }
 
     /**
-     * Notifies other players that someone drew the initial card
+     * Notifies other players that someone drew the initial card.
      *
      * @param someoneUsername Player who drew the initial
      * @param card            The card he drew
@@ -332,7 +369,7 @@ public abstract class GraphicalView {
 
     /**
      * Effectively place the initial card on the player's board, on the right side. Note that the card
-     * must have already been set
+     * must have already been set.
      *
      * @param someoneUsername Player who chose the initial card's side
      * @param side            Chosen side
@@ -348,7 +385,7 @@ public abstract class GraphicalView {
 
     /**
      * Notifies other players that someone is choosing the secret objective. They should not know from
-     * which objective he is choosing, so they are not passed
+     * which objective he is choosing, so they are not passed.
      *
      * @param someoneUsername Player who is choosing
      */
@@ -357,7 +394,12 @@ public abstract class GraphicalView {
             this.setLastRequestStatus(RequestStatus.SUCCESSFUL);
         }
     }
-
+    
+    /**
+     * Changes the current player and updates last request's status to {@link RequestStatus#SUCCESSFUL}.
+     * 
+     * @param someoneUsername The player who chose the objective
+     */
     public void someoneChoseSecretObjective(String someoneUsername) {
         if (this.username.equals(someoneUsername)) {
             this.setLastRequestStatus(RequestStatus.SUCCESSFUL);
@@ -368,7 +410,7 @@ public abstract class GraphicalView {
 
     /**
      * Actually places a card on the player's board (so the Player tried to place a card and it was a
-     * valid move)
+     * valid move).
      *
      * @param someoneUsername    The player who made the move
      * @param coords             where he placed the card
@@ -391,7 +433,7 @@ public abstract class GraphicalView {
 
 
     /**
-     * Handles the replacement of the last card drawn, and changes turn
+     * Handles the replacement of the last card drawn, and changes turn.
      *
      * @param someoneUsername Player who drew the card
      * @param source          From where he drew the card
@@ -420,14 +462,14 @@ public abstract class GraphicalView {
     }
 
     /**
-     * Notifies the player that this is the last turn he can play
+     * Notifies the player that this is the last turn he can play.
      */
     public void notifyLastTurn() {
         this.lastTurn = true;
     }
 
     /**
-     * Notifies the player that someone joined the lobby
+     * Notifies the player that someone joined the lobby.
      *
      * @param someoneUsername Player who joined
      */
@@ -438,7 +480,7 @@ public abstract class GraphicalView {
     }
 
     /**
-     * Notifies the player that someone quit the lobby
+     * Notifies the player that someone quit the lobby.
      *
      * @param someoneUsername Player who quit
      */
@@ -446,14 +488,14 @@ public abstract class GraphicalView {
 
 
     /**
-     * Shows the player the match's leaderboard after the game ended
+     * Shows the player the match's leaderboard after the game ended.
      *
      * @param ranking Ranking of players
      */
     public abstract void matchFinished(List<LeaderboardEntry> ranking);
 
     /**
-     * Notifies that someone sent a broadcast text
+     * Notifies that someone sent a broadcast text.
      *
      * @param someoneUsername Player who sent the text
      * @param text            Text he sent
@@ -465,7 +507,7 @@ public abstract class GraphicalView {
     }
 
     /**
-     * Notifies the player that someone sent him a private text
+     * Notifies the player that someone sent him a private text.
      *
      * @param someoneUsername Player who sent the private text
      * @param text            Text he sent

@@ -13,6 +13,12 @@ public final class AvailableMatchesMessage extends ResponseMessage {
 
     private final List<AvailableMatch> matches;
 
+    
+    /**
+     * Class constructor.
+     * 
+     * @param availableMatches The available matches present on server
+     */
     public AvailableMatchesMessage(Map<String, Match> availableMatches) {
         super(null);
         matches = new ArrayList<>();
