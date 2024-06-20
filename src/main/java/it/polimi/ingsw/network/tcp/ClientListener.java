@@ -198,7 +198,7 @@ public class ClientListener extends Thread {
                         this.playerController.sendBroadcastText(actionMsg.getText());
                         break;
                     case SendPrivateTextMessage actionMsg:
-                        this.playerController.sendPrivateText(actionMsg.getRecpient(),
+                        this.playerController.sendPrivateText(actionMsg.getRecipient(),
                                 actionMsg.getText());
                         break;
                     case PlayCardMessage actionMsg:

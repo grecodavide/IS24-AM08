@@ -17,13 +17,14 @@ Implemented actions:
 - [GetAvailableMatches](#GetAvailableMatches)
 - [CreateMatch](#CreateMatch)
 - [JoinMatch](#JoinMatch)
-- [SendText](#SendText)
 - [DrawInitialCard](#DrawInitialCard)
 - [ChooseInitialCardSide](#ChooseInitialCardSide)
 - [DrawSecretObjectives](#DrawSecretObjectives)
 - [ChooseSecretObjective](#ChooseSecretObjective)
 - [PlayCard](#PlayCard)
 - [DrawCard](#DrawCard)
+- [SendBroadcastText](#SendBroadcastText)
+- [SendPrivateText](#SendPrivateText)
 
 ### GetAvailableMatches
 The action does not need additional parameters. 
@@ -39,19 +40,11 @@ The action communicates (to the server) the intention of a client to create a ne
 | `maxPlayers` | Integer | Number of maximum players (must be between 2 and 4) |
 
 ### JoinMatch
-The action communicates the intention of a client to join a match.
+The action communicates the intention of a client to join (or reconnect to) a match.
 
 | Parameter |  Type  | Description               |
 | :-------- | :----: | :------------------------ |
 | `matchName` | String | Name of the match to join |
-
-### SendText
-The action sends a text message in the chat.
-
-| Parameter |        Type         | Description                                                                       |
-| :-------- | :-----------------: | :-------------------------------------------------------------------------------- |
-| `text`      |       String        | Content of the message                                                            |
-| `recipient`  | String (*optional*) | Recipient's name of the private message. Otherwise, messages are public by default. |
 
 ### DrawInitialCard
 The action does not need additional parameters.
@@ -97,12 +90,30 @@ If the action is successful, a [SomeonePlayedCard](#SomeonePlayedCard) response 
 ### DrawCard
 The action communicates the intention of a player to draw a card. It can only happen during the player's own turn.
 
-
 | Parameter  |  Type  | Description                                                                                                                                                            |
 | :--------- | :----: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `drawSource` | String | Source from which drawing the card. It can be `FIRST_VISIBLE_CARD`, `SECOND_VISIBLE_CARD`, `THIRD_VISIBLE_CARD`, `FOURTH_VISIBLE_CARD`, `GOLDS_DECK`, `RESOURCES_DECK` |
 
 If the action is successful, a [SomeoneDrewInitialCard](#SomeoneDrewInitialCard) response is sent to every client.
+
+### SendBroadcastText
+The action communicates the intention of the player to write a text in the chat, visible to every member of the game
+
+| Parameter |  Type   | Description                                     |
+| :-------- | :-----: | :---------------------------------------------- |
+| `text`      | String  | The content of the text                         |
+
+If the action is successful, a [SomeoneSentBroadcastText](#SomeoneSentBroadcastText) response is sent to every client.
+
+### SendPrivateText
+The action communicates the intention of the player to write a private text, visible only to himself and the player specified
+
+| Parameter    |  Type   | Description                                     |
+| :--------    | :-----: | :---------------------------------------------- |
+| `recipient`    | String  | The username of the recipient                         |
+| `text`         | String  | The content of the text                         |
+
+If the action is successful, a [SomeoneSentPrivateText](#SomeoneSentPrivateText) response is sent to the current and the specified player
 
 ## Responses
 Responses always have the following parameter:
@@ -115,7 +126,6 @@ Response can either be:
 - [AvailableMatches](#AvailableMatches)
 - [SomeoneJoined](#SomeoneJoined)
 - [SomeoneQuit](#SomeoneQuit)
-- [SomeoneSentText](#SomeoneSentText)
 - [MatchStarted](#MatchStarted)
 - [SomeoneDrewInitialCard](#SomeoneDrewInitialCard)
 - [SomeoneSetInitialSide](#SomeoneSetInitialSide)
@@ -124,6 +134,10 @@ Response can either be:
 - [SomeonePlayedCardMessage](#SomeonePlayedCardMessage)
 - [SomeoneDrewCard](#SomeoneDrewCard)
 - [MatchFinishedMessage](#MatchFinishedMessage)
+- [SomeoneSentBroadcastText](#SomeoneSentBroadcastText)
+- [SomeoneSentPrivateText](#SomeoneSentPrivateText)
+- [MatchResumed](#MatchResumed)
+
 ### AvailableMatches
 This response is sent when a user is connected to the server.
 
@@ -157,15 +171,6 @@ This response is sent when a player quits the current match.
 | `username`      | String  | Username of the player that just quit the match   |
 | `joinedPlayers` | Integer | Number of players that currently joined the match |
 | `endMatch`     | bool     | true if the quit caused the match to interrupt, false otherwise|
-
-### SomeoneSentText
-This response is sent when another player sends a message in the chat. If the message is set to be private, the response is only sent to the interested user.
-
-| Parameter |  Type  | Description                                            |
-| :-------- | :----: | :----------------------------------------------------- |
-| `username`  | String | Username of the player that sent the message           |
-| `text`      | String | Text of the message sent                               |
-| `isPrivate`   |  bool  | If the message is private to the user that receives it |
 
 ### MatchStarted
 Sent when the required amount of players is reached and the match is about to start.
@@ -294,11 +299,11 @@ This response is sent to each user in the match when a user plays a card.
 ### Rank
 Rank is a JSON object containing the results of a single player.
 
-| Parameter |  Type   | Description                    |
-| :-------- | :-----: | :----------------------------- |
-| `username`  | String  | Username of the current player         |
-| `points`    | Integer | Amount of the final points (after post-match objective counting)        |
-| `winner`    |  bool   | If the current player is also the winner of the game |
+| Parameter |  Type   | Description                                                         |
+| :-------- | :-----: | :-------------------------------------------------------------------|
+| `username`  | String  | Username of the current player                                      |
+| `points`    | Integer | Amount of the final points (after post-match objective counting)    |
+| `winner`    |  bool   | If the current player is also the winner of the game                |
 
 #### Example
 ```JSON
@@ -318,6 +323,38 @@ Rank is a JSON object containing the results of a single player.
   "response": "MatchFinished"
 }
 ```
+### SomeoneSentBroadcastText
+This response is sent to each user in the match when a user sends a text in the chat.
+
+| Parameter            |        Type        | Description                                       |
+| :------------------- | :----------------: | :------------------------------------------------ |
+| `text`                 |       String       | The content of the text                           |
+
+### SomeoneSentBroadcastText
+This response is sent to the user who sent the message and to the recipient.
+
+| Parameter            |        Type        | Description                                        |
+| :------------------- | :----------------: | :------------------------------------------------ |
+| `recipient`            |       String       | The recipient of the private text                 |
+| `text`                 |       String       | The content of the text                           |
+
+### MatchResumed
+This response is sent to the user who just rejoined a match. All the parameters refer to the status of the match before the server crashed
+
+| Parameter                 |        Type                                   | Description                                             |
+| :------------------------ | :-------------------------------------------: | :------------------------------------------------------ |
+| `playersUsernamesAndPawns`  | Map<String, Color>                            | Map from players' username to pawn color                |
+| `playersHands`              | Map<String, List<Integer>>                    | Map from players' username to their hand                |
+| `visibleObjectives`         | Pair<Integer, Integer>                        | The two visible objectives common to every player       |
+| `visiblePlayableCards`      | Map<DrawSource, Integer>                      | The four drawable cards visible to everyone             |
+| `decksTopReigns`            | Pair<Symbol, Symbol>                          | The reign of the two decks (resource and gold)          |
+| `secretObjective`           | Integer                                       | The secret objective ID of the player                   |
+| `availableResources`        | Map<String, Map<Symbol, Integer>>             | Map from players' username to their available resources |
+| `placedCards`               | Map<String, Map<Integer, PlacedCardRecord>>   | Map from players' username to their board               |
+| `playerPoints`              | Map<String, Integer>                          | Map from players' username to their points              |
+| `currentPlayer`             | String                                        | Username of the player currently playing his turn       |
+| `drawPhase`                 | boolean                                       | Whether the current player should play or draw a card   |
+
 
 ## Errors
 An error always contains these parameters:
