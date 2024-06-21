@@ -5,32 +5,32 @@ classDiagram
     Server --> PlayerControllerRMI
     PlayerControllerTCP --> IOHandler
     PlayerControllerRMI --> ViewInterface
-    
+    Server --|> ServerRMIInterface
+    MatchStatusObserver --|> MatchObserver
     class MatchObserver{
         <<Interface>>
-      +matchStarted() void
-      +someoneJoined(Player someone)
-      +someoneQuit(Player someone)
-      +someoneDrewInitialCard(Player someone, InitialCard card) void
-      +someoneSetInitialSide(Player someone, Side side) void
-      +someoneDrewSecretObjectives(Player someone, Pair~Objective, Objective~) void
-      +someoneChoseSecretObjective(Player someone, Objective objective) void
-      +someonePlayedCard(Player someone, Pair~Integer, Integer~ coords, PlayableCard card, Side side) void
-      +someoneDrewCard(Player someone, DrawSource source, PlayableCard card, PlayebleCard replacementCard) void
-      +matchFinished() void
-    }
-    
+        + someoneSetInitialSide(Player someone, Side side, Map~Symbol, Integer~ availableResources) void
+        + someoneJoined(Player someone) void
+        + someoneQuit(Player someone) void
+        + someoneChoseSecretObjective(Player someone, Objective objective) void
+        + matchFinished() void
+        + someoneDrewSecretObjective(Player someone, Pair~Objective, Objective~ objectives) void
+        + someoneSentBroadcastText(Player someone, String content) void
+        + someoneDrewCard(Player someone, DrawSource drawSource, PlayableCard card, PlayableCard replacementCard) void
+        + someoneSentPrivateText(Player someone, Player receiver, String content) void
+        + someoneDrewInitialCard(Player someone, InitialCard card) void
+        + someonePlayedCard(Player someone, Pair~Integer, Integer~ coords, PlayableCard card, Side side) void
+        + matchStarted() void
+    } 
+
+  
     class PlayerController{
       - Player player
       - Match match
-      +PlayerController()
-      +drawInitialCard(Side side) void
-      +chooseInitialCardSide() void
-      +drawSecretObjectives() void
-      +playeCard(Pair~Integer, Integer~ coords, PlayableCard card, Side side, int points) void
-      +drawCard(DrawSource source)
-      +chooseSecretObjective(Objective objective) void 
-      +drawSecretObjectives() void
+      + PlayerController()
+      + getPlayer() Player
+      + matchResumed() void
+      + sendJoined() void  
     }
     
     class PlayerControllerTCP{
@@ -41,18 +41,23 @@ classDiagram
       +matchStarted() void
       +someoneDrewInitialCard(Player someone, InitialCard card) void
       +someoneSetInitialSide(Player someone, Side side) void
-      +someoneDrewSecretObjectives(Player someone, Pair~Objective, Objective~) void
+      +someoneDrewSecretObjectives(Player someone, Pair~Objective, Objective~ objectives) void
       +someoneChoseSecretObjective(Player someone, Objective objective) void
       +someonePlayedCard(Player someone, Pair~Integer, Integer~ coords, PlayableCard card, Side side) void
       +someoneDrewCard(Player someone, DrawSource source, PlayableCard card, PlayebleCard replacementCard) void
       +matchFinished() void
-      +drawInitialCard(Side side) void
-      +chooseInitialCardSide() void
+      +drawInitialCard() void
+      +chooseInitialCardSide(Side side) void
       +drawSecretObjectives() void
-      +playeCard(Pair~Integer, Integer~ coords, PlayableCard card, Side side, int points) void
+      +playCard(Pair~Integer, Integer~ coords, PlayableCard card, Side side, int points) void
       +drawCard(DrawSource source)
       +chooseSecretObjective(Objective objective) void 
       +drawSecretObjectives() void
+      +sendBroadcastText(String text) void
+      +sendPrivateText(Player receiver, String text) void
+      +someoneSentBroadcastText(Player someone, String text) void
+      +someoneSentPrivateText(Player someone, Player receiver, String text) void
+
       - sendMessage(Message msg) void
       - connectionError() void
       - createErrorMessage(Exception e) ErrorMessage
@@ -60,25 +65,38 @@ classDiagram
     
     class PlayerControllerRMI {
       - ViewInterface view
-      +PlayerControllerRMI(String nickname, Match match, int port)
+      +PlayerControllerRMI(String nickname, Match match)
+      + registerView(RemoteViewInterface view)
       +someoneJoined(Player someone) void
       +someoneQuit(Player someone) void
       +matchStarted() void
       +someoneDrewInitialCard(Player someone, InitialCard card) void
       +someoneSetInitialSide(Player someone, Side side) void
-      +someoneDrewSecretObjectives(Player someone, Pair~Objective, Objective~) void
+      +someoneDrewSecretObjectives(Player someone, Pair~Objective, Objective~ objectives) void
       +someoneChoseSecretObjective(Player someone, Objective objective) void
       +someonePlayedCard(Player someone, Pair~Integer, Integer~ coords, PlayableCard card, Side side) void
       +someoneDrewCard(Player someone, DrawSource source, PlayableCard card, PlayebleCard replacementCard) void
       +matchFinished() void
-      +drawInitialCard(Side side) void
-      +chooseInitialCardSide() void
+      +drawInitialCard() void
+      +chooseInitialCardSide(Side side) void
       +drawSecretObjectives() void
-      +playeCard(Pair~Integer, Integer~ coords, PlayableCard card, Side side, int points) void
+      +playCard(Pair~Integer, Integer~ coords, PlayableCard card, Side side, int points) void
       +drawCard(DrawSource source)
       +chooseSecretObjective(Objective objective) void 
       +drawSecretObjectives() void
+      +sendBroadcastText(String text) void
+      +sendPrivateText(Player receiver, String text) void
+      +someoneSentBroadcastText(Player someone, String text) void
+      +someoneSentPrivateText(Player someone, Player receiver, String text) void
       -onConnectionError() void
+    }
+
+    class ServerRMIInterface {
+      <<Interface>>
+      + createMatch(String name, int maxPlayers) void
+      + getJoinableMatches() List~AvailableMatch~
+      + joinMatch(String matchName, String username) PlayerControllerRMIInterface
+      + ping() boolean
     }
     
     class Server {
@@ -90,12 +108,15 @@ classDiagram
         - int portTCP
         + Server(int portRMI, int portTCP)
         + main() void
-        + joinMatch(String matchName, String nickname) PlayerControllerRMI
+        + loadCrashedMatches() void
+        + joinMatch(String matchName, String nickname) PlayerControllerRMIInterface
         + createMatch(String matchName, int maxPlayers) void
         + getNewMatch(int maxPlayers) Match
-        + getJoinableMatches() Map~String, Match~
+        + getJoinableMatches() List~AvailableMatch~
+        + getJoinableMatchesMap() Map~String, List&ltMatch&gt~
         + startRMIServer() void
         + startTCPServer() void
+        + ping() boolean
     }
     
     class IOHandler {
@@ -119,3 +140,21 @@ classDiagram
       + someoneDrewCard(Player someone, DrawSource source, Card card) void
       + matchFinished() void
     }
+
+class MatchStatusObserver {
+  + MatchStatusObserver(String, Map~String, Match~) 
+  + someoneJoined(Player) void
+  + someonePlayedCard(Player, Pair~Integer, Integer~, PlayableCard, Side) void
+  + someoneSentBroadcastText(Player, String) void
+  + someoneChoseSecretObjective(Player, Objective) void
+  + matchStarted() void
+  + someoneDrewCard(Player, DrawSource, PlayableCard, PlayableCard) void
+  + someoneQuit(Player) void
+  - removeSerializedMatch() void
+  + someoneSetInitialSide(Player, Side, Map~Symbol, Integer~) void
+  + someoneDrewInitialCard(Player, InitialCard) void
+  + matchFinished() void
+  - serializeMatch() void
+  + someoneSentPrivateText(Player, Player, String) void
+  + someoneDrewSecretObjective(Player, Pair~Objective, Objective~) void
+}
