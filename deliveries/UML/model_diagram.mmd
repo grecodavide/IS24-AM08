@@ -164,7 +164,7 @@ classDiagram
 
         + Player(String nickname, Match match)
         + playCard(Pair<Integer, Integer> coord, PlayableCard card, Side side) void
-        + drawSecretObjective Pair~Objective, Objective~
+        + drawSecretObjective() Pair~Objective, Objective~
         + drawInitialCard() InitialCard
         + drawCard(DrawSource source) void
         + chooseSecretObjective(Objective objective) void
@@ -230,10 +230,11 @@ classDiagram
         - objectivesDeck: GameDeck~Objective~
         - visiblePlayableCards: Map~DrawSource, PlayableCard~
         - visibleObjectives: Pair~Objective, Objective~
+        - decksTopReigns: Pair~Symbol, Symbol~
         - currentProposedObjectives: Pair~Objective, Objective~
         - currentGivenInitialCard: InitialCard
         - started: boolean
-        - initialTurn: boolean
+        - initialTurnFinished: boolean
         - lastTurn: boolean
         - finished: boolean
 
@@ -252,6 +253,8 @@ classDiagram
         + getVisibleObjectives() Pair~Objective, Objective~
         + getDeckVisibleReign() Pair~Symbol, Symbol~
         + getPlayersFinalRanking() List~Pair~Player, Boolean~~
+        + subscribeObserver(MatchObserver) void
+        + unsubscribeObserver(MatchObserver) void
         # getPoints() int
         # addPoints() void
         # setSecretObjective(Objective obj) void
@@ -269,22 +272,26 @@ classDiagram
         # setupBoards() void
         # nextPlayer() void
         # decideWinner() void
+        # sendBroadcastText(Player sender, String content) void
+        # sendPrivateText(Player sender, Player receiver, String content) void
         - checkObjectivesAchievement() Map~Player, Integer~      
         - notifyObservers(MatchObserverCallable matchObserver) void
     }
       class MatchObserver{
         <<Interface>>
-      +playerQuit(Player p) void
-      +playerJoined(Player p) void
-      +matchStarted() void
-      +someoneDrewInitialCard(Player someone, InitialCard card) void
-      +someoneSetInitialSide(Player someone, Side side) void
-      +someoneDrewSecretObjectives(Player someone, Pair~Objective, Objective~) void
-      +someoneChoseSecretObjective(Player someone, Objective objective) void
-      +someonePlayedCard(Player someone, Pair~Integer, Integer~ coords, PlayableCard card, Side side) void
-      +someoneDrewCard(Player someone, DrawSource source, PlayableCard card, PlayebleCard replacementCard) void
-      +matchFinished() void
-    }
+        + someoneSetInitialSide(Player someone, Side side, Map~Symbol, Integer~ availableResources) void
+        + someoneJoined(Player someone) void
+        + someoneQuit(Player someone) void
+        + someoneChoseSecretObjective(Player someone, Objective objective) void
+        + matchFinished() void
+        + someoneDrewSecretObjective(Player someone, Pair~Objective, Objective~ objectives) void
+        + someoneSentBroadcastText(Player someone, String content) void
+        + someoneDrewCard(Player someone, DrawSource drawSource, PlayableCard card, PlayableCard replacementCard) void
+        + someoneSentPrivateText(Player someone, Player receiver, String content) void
+        + someoneDrewInitialCard(Player someone, InitialCard card) void
+        + someonePlayedCard(Player someone, Pair~Integer, Integer~ coords, PlayableCard card, Side side) void
+        + matchStarted() void
+      } 
 
     class MatchObserverCallable {
       <<FunctionalInterface>>
