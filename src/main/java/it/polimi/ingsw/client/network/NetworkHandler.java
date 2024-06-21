@@ -22,7 +22,7 @@ public abstract class NetworkHandler implements RemoteViewInterface {
     /**
      * Initialize the instance all its internal attributes.
      *
-     * @param graphicalView The GraphicalView to be subscribed to this NetworkView instance
+     * @param graphicalView The GraphicalView to be subscribed to this NetworkHandler instance
      * @param ipAddress     The server IP address
      * @param port          The server port
      */

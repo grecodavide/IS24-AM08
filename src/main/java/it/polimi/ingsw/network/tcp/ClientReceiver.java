@@ -19,7 +19,7 @@ import it.polimi.ingsw.utils.PlacedCardRecord;
  * ClientSender
  */
 public class ClientReceiver implements Runnable {
-    private NetworkHandlerTCP networkView;
+    private NetworkHandlerTCP networkHandler;
     private Socket socket;
     private IOHandler io;
     private Map<Integer, InitialCard> initialCards;
@@ -31,16 +31,16 @@ public class ClientReceiver implements Runnable {
     /**
      * Class constructor.
      * 
-     * @param networkView The network view that should call the {@link GraphicalView} methods
+     * @param networkHandler The network view that should call the {@link GraphicalView} methods
      * @param socket The socket opened
      * 
      * @throws IOException If there was an error with the socket's streams
      */
-    public ClientReceiver(NetworkHandlerTCP networkView, Socket socket) throws IOException {
-        this.networkView = networkView;
+    public ClientReceiver(NetworkHandlerTCP networkHandler, Socket socket) throws IOException {
+        this.networkHandler = networkHandler;
         this.socket = socket;
         this.io = new IOHandler(socket);
-        this.io = networkView.getIO();
+        this.io = networkHandler.getIO();
 
         CardsManager cardsManager = CardsManager.getInstance();
         this.initialCards = cardsManager.getInitialCards();
@@ -103,7 +103,7 @@ public class ClientReceiver implements Runnable {
             String username = response.getUsername();
             switch (response) {
                 case AvailableMatchesMessage msg:
-                    this.networkView.receiveAvailableMatches(msg.getMatches());
+                    this.networkHandler.receiveAvailableMatches(msg.getMatches());
                     break;
 
                 case MatchResumedMessage msg:
@@ -153,7 +153,7 @@ public class ClientReceiver implements Runnable {
 
                     drawPhase = msg.isDrawPhase();
 
-                    this.networkView.matchResumed(playersUsernamesAndPawns, playersHands,
+                    this.networkHandler.matchResumed(playersUsernamesAndPawns, playersHands,
                             visibleObjectives, visiblePlayableCards, decksTopReigns,
                             secretObjective, availableResources, placedCards, playerPoints,
                             currentPlayer, drawPhase);
@@ -177,62 +177,62 @@ public class ClientReceiver implements Runnable {
                     Pair<Symbol, Symbol> decksTop = new Pair<Symbol, Symbol>(
                             msg.getVisibleDeckReigns()[0], msg.getVisibleDeckReigns()[1]);
 
-                    this.networkView.matchStarted(msg.getPlayerPawnColors(), hands, objectives,
+                    this.networkHandler.matchStarted(msg.getPlayerPawnColors(), hands, objectives,
                             visibles, decksTop);
                     break;
 
                 case SomeoneDrewInitialCardMessage msg:
-                    if (username.equals(this.networkView.getUsername())) {
-                        this.networkView
+                    if (username.equals(this.networkHandler.getUsername())) {
+                        this.networkHandler
                                 .giveInitialCard(this.initialCards.get(msg.getInitialCardID()));
                     } else {
-                        this.networkView.someoneDrewInitialCard(username,
+                        this.networkHandler.someoneDrewInitialCard(username,
                                 this.initialCards.get(msg.getInitialCardID()));
                     }
                     break;
                 case SomeoneDrewSecretObjectivesMessage msg:
-                    if (username.equals(this.networkView.getUsername())) {
+                    if (username.equals(this.networkHandler.getUsername())) {
                         Pair<Objective, Objective> objs =
                                 new Pair<>(this.objectives.get(msg.getFirstID()),
                                         this.objectives.get(msg.getSecondID()));
-                        this.networkView.giveSecretObjectives(objs);
+                        this.networkHandler.giveSecretObjectives(objs);
                     } else {
-                        this.networkView.someoneDrewSecretObjective(username);
+                        this.networkHandler.someoneDrewSecretObjective(username);
                     }
                     break;
                 case SomeoneSetInitialSideMessage msg:
-                    this.networkView.someoneSetInitialSide(username, msg.getSide(),
+                    this.networkHandler.someoneSetInitialSide(username, msg.getSide(),
                             msg.getAvailableResources());
                     break;
                 case SomeoneChoseSecretObjectiveMessage msg:
-                    this.networkView.someoneChoseSecretObjective(username);
+                    this.networkHandler.someoneChoseSecretObjective(username);
                     break;
                 case SomeonePlayedCardMessage msg:
                     Pair<Integer, Integer> coords =
                             new Pair<Integer, Integer>(msg.getX(), msg.getY());
-                    this.networkView.someonePlayedCard(username, coords,
+                    this.networkHandler.someonePlayedCard(username, coords,
                             this.getPlayable(msg.getCardID()), msg.getSide(), msg.getPoints(),
                             msg.getAvailableResources());
                     break;
                 case SomeoneDrewCardMessage msg:
-                    this.networkView.someoneDrewCard(username, msg.getDrawSource(),
+                    this.networkHandler.someoneDrewCard(username, msg.getDrawSource(),
                             this.getPlayable(msg.getCardID()),
                             this.getPlayable(msg.getReplacementCardID()), msg.getDeckTopReigns());
                     break;
                 case SomeoneJoinedMessage msg:
-                    this.networkView.someoneJoined(username, msg.getJoinedPlayers());
+                    this.networkHandler.someoneJoined(username, msg.getJoinedPlayers());
                     break;
                 case SomeoneQuitMessage msg:
-                    this.networkView.someoneQuit(username);
+                    this.networkHandler.someoneQuit(username);
                     break;
                 case MatchFinishedMessage msg:
-                    this.networkView.matchFinished(msg.getRanking());
+                    this.networkHandler.matchFinished(msg.getRanking());
                     break;
                 case SomeoneSentBroadcastTextMessage msg:
-                    this.networkView.someoneSentBroadcastText(username, msg.getText());
+                    this.networkHandler.someoneSentBroadcastText(username, msg.getText());
                     break;
                 case SomeoneSentPrivateTextMessage msg:
-                    this.networkView.someoneSentPrivateText(username, msg.getText());
+                    this.networkHandler.someoneSentPrivateText(username, msg.getText());
                     break;
                 default:
                     break;
@@ -253,7 +253,7 @@ public class ClientReceiver implements Runnable {
         try {
             ErrorMessage msg = (ErrorMessage) this.io.stringToMsg(message);
             Exception exception = new Exception(msg.getMessage());
-            this.networkView.notifyError(exception);
+            this.networkHandler.notifyError(exception);
         } catch (Exception e) {
             // Nothing to do, received an invalid object
         }

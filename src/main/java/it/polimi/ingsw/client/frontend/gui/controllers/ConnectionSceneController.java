@@ -60,7 +60,7 @@ public class ConnectionSceneController extends SceneController {
         if (TCPButton.isSelected()) {
             try {
                 networkHandler = new NetworkHandlerTCP(view, serverAddress.getText(), Integer.valueOf(serverPort.getText()));
-                view.setNetworkInterface(networkHandler);
+                view.setNetworkHandler(networkHandler);
                 showLobby();
             } catch (Exception e) {
                 view.notifyError(new RemoteException("Cannot connect to the server!"));
@@ -68,7 +68,7 @@ public class ConnectionSceneController extends SceneController {
         } else {
             try {
                 networkHandler = new NetworkHandlerRMI(view, serverAddress.getText(), Integer.parseInt(serverPort.getText()));
-                view.setNetworkInterface(networkHandler);
+                view.setNetworkHandler(networkHandler);
                 showLobby();
             } catch (Exception e) {
                 view.notifyError(e);

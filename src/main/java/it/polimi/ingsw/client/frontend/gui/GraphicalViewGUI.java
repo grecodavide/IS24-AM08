@@ -430,7 +430,7 @@ public class GraphicalViewGUI extends GraphicalView {
 
     public void setUsername(String username) {
         this.username = username;
-        networkView.setUsername(username);
+        networkHandler.setUsername(username);
     }
 
     public String getUsername() {
@@ -439,7 +439,7 @@ public class GraphicalViewGUI extends GraphicalView {
 
     public void getAvailableMatches() {
         this.setLastRequestStatus(RequestStatus.PENDING);
-        this.networkView.getAvailableMatches();
+        this.networkHandler.getAvailableMatches();
     }
 
     public void receiveAvailableMatches(List<AvailableMatch> availableMatches) {
@@ -473,6 +473,6 @@ public class GraphicalViewGUI extends GraphicalView {
     }
 
     public void disconnect() {
-        networkView.disconnect();
+        networkHandler.disconnect();
     }
 }

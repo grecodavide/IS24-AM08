@@ -9,7 +9,7 @@ import it.polimi.ingsw.utils.Pair;
 import it.polimi.ingsw.utils.RequestStatus;
 
 public abstract class GraphicalView {
-    protected NetworkHandler networkView;
+    protected NetworkHandler networkHandler;
     protected Map<String, ClientBoard> clientBoards;
     protected List<String> players; // ordered by turn
     protected String currentPlayer;
@@ -36,7 +36,7 @@ public abstract class GraphicalView {
      */
     protected void setUsername(String username) {
         this.username = username;
-        this.networkView.setUsername(username);
+        this.networkHandler.setUsername(username);
     }
     
     /**
@@ -67,10 +67,10 @@ public abstract class GraphicalView {
     /**
      * Sets the network interface in order to communicate.
      *
-     * @param networkView the interface to communicate
+     * @param networkHandler the interface to communicate
      */
-    public void setNetworkInterface(NetworkHandler networkView) {
-        this.networkView = networkView;
+    public void setNetworkHandler(NetworkHandler networkHandler) {
+        this.networkHandler = networkHandler;
     }
 
     /**
@@ -80,7 +80,7 @@ public abstract class GraphicalView {
      */
     public void createMatch(String matchName, Integer maxPlayers) {
         this.setLastRequestStatus(RequestStatus.PENDING);
-        this.networkView.createMatch(matchName, maxPlayers);
+        this.networkHandler.createMatch(matchName, maxPlayers);
     }
 
     /**
@@ -90,7 +90,7 @@ public abstract class GraphicalView {
      */
     public void joinMatch(String matchName) {
         this.setLastRequestStatus(RequestStatus.PENDING);
-        this.networkView.joinMatch(matchName);
+        this.networkHandler.joinMatch(matchName);
     }
 
     /**
@@ -99,7 +99,7 @@ public abstract class GraphicalView {
      * @param text The content
      */
     public void sendBroadcastText(String text) {
-        this.networkView.sendBroadcastText(text);
+        this.networkHandler.sendBroadcastText(text);
     }
     
     /**
@@ -109,7 +109,7 @@ public abstract class GraphicalView {
      * @param text The content
      */
     public void sendPrivateText(String recipient, String text) {
-        this.networkView.sendPrivateText(recipient, text);
+        this.networkHandler.sendPrivateText(recipient, text);
     }
 
     /**
@@ -117,7 +117,7 @@ public abstract class GraphicalView {
      */
     public void drawInitialCard() {
         this.setLastRequestStatus(RequestStatus.PENDING);
-        this.networkView.drawInitialCard();
+        this.networkHandler.drawInitialCard();
     }
 
     /**
@@ -127,7 +127,7 @@ public abstract class GraphicalView {
      */
     public void chooseInitialCardSide(Side side) {
         this.setLastRequestStatus(RequestStatus.PENDING);
-        this.networkView.chooseInitialCardSide(side);
+        this.networkHandler.chooseInitialCardSide(side);
     }
 
     /**
@@ -135,7 +135,7 @@ public abstract class GraphicalView {
      */
     public void drawSecretObjectives() {
         this.setLastRequestStatus(RequestStatus.PENDING);
-        this.networkView.drawSecretObjectives();
+        this.networkHandler.drawSecretObjectives();
     }
 
     /**
@@ -146,7 +146,7 @@ public abstract class GraphicalView {
     public void chooseSecretObjective(Objective objective) {
         this.setLastRequestStatus(RequestStatus.PENDING);
         this.clientBoards.get(this.username).setSecretObjective(objective);
-        this.networkView.chooseSecretObjective(objective);
+        this.networkHandler.chooseSecretObjective(objective);
     }
 
     /**
@@ -158,7 +158,7 @@ public abstract class GraphicalView {
      */
     public void playCard(Pair<Integer, Integer> coords, PlayableCard card, Side side) {
         this.setLastRequestStatus(RequestStatus.PENDING);
-        new Thread(() -> this.networkView.playCard(coords, card, side)).start();
+        new Thread(() -> this.networkHandler.playCard(coords, card, side)).start();
     }
 
     /**
@@ -168,7 +168,7 @@ public abstract class GraphicalView {
      */
     public void drawCard(DrawSource source) {
         this.setLastRequestStatus(RequestStatus.PENDING);
-        this.networkView.drawCard(source);
+        this.networkHandler.drawCard(source);
     }
 
     /**

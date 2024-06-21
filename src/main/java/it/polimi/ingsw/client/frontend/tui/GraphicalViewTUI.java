@@ -69,7 +69,7 @@ public class GraphicalViewTUI extends GraphicalView {
      */
     private void startInterface() {
         this.printer.clearTerminal();
-        this.setNetworkView();
+        this.setNetworkHandler();
         this.printer.clearTerminal();
         this.setMatch();
         new Thread(this::startPlayerControls).start();
@@ -369,7 +369,7 @@ public class GraphicalViewTUI extends GraphicalView {
     /**
      * Sets the network view, asking the player how he wants to connect.
      */
-    private void setNetworkView() {
+    private void setNetworkHandler() {
         String userIn, IPAddr;
         Integer port = null;
 
@@ -386,16 +386,16 @@ public class GraphicalViewTUI extends GraphicalView {
         }
 
         this.inputHandler.setPrompt("Choose connection type (1 for TCP, 2 for RMI)");
-        this.networkView = null;
-        while (this.networkView == null) {
+        this.networkHandler = null;
+        while (this.networkHandler == null) {
             userIn = this.inputHandler.askUser();
             try {
                 switch (userIn) {
                     case "1", "tcp", "TCP":
-                        this.setNetworkInterface(new NetworkHandlerTCP(this, IPAddr, port));
+                        this.setNetworkHandler(new NetworkHandlerTCP(this, IPAddr, port));
                         break;
                     case "2", "rmi", "RMI":
-                        this.setNetworkInterface(new NetworkHandlerRMI(this, IPAddr, port));
+                        this.setNetworkHandler(new NetworkHandlerRMI(this, IPAddr, port));
                         break;
                     default:
                         this.inputHandler.setPrompt(
@@ -405,7 +405,7 @@ public class GraphicalViewTUI extends GraphicalView {
             } catch (Exception e) {
                 this.printer.clearTerminal();
                 this.printer.printMessage("Could not connect! Try again");
-                this.setNetworkView();
+                this.setNetworkHandler();
                 return;
             }
         }
@@ -431,7 +431,7 @@ public class GraphicalViewTUI extends GraphicalView {
      */
     private void getAvailableMatches() {
         this.lastRequest.setStatus(RequestStatus.PENDING);
-        this.networkView.getAvailableMatches();
+        this.networkHandler.getAvailableMatches();
 
         if (!this.getServerResponse()) {
             this.printer.clearTerminal();
