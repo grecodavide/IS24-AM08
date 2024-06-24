@@ -131,7 +131,7 @@ Response can either be:
 - [SomeoneSetInitialSide](#SomeoneSetInitialSide)
 - [SomeoneDrewSecretObjectives](#SomeoneDrewSecretObjectives)
 - [SomeoneChoseSecretObjective](#SomeoneChoseSecretObjective)
-- [SomeonePlayedCardMessage](#SomeonePlayedCardMessage)
+- [SomeonePlayedCard](#SomeonePlayedCard)
 - [SomeoneDrewCard](#SomeoneDrewCard)
 - [MatchFinishedMessage](#MatchFinishedMessage)
 - [SomeoneSentBroadcastText](#SomeoneSentBroadcastText)
@@ -330,7 +330,7 @@ This response is sent to each user in the match when a user sends a text in the 
 | :------------------- | :----------------: | :------------------------------------------------ |
 | `text`                 |       String       | The content of the text                           |
 
-### SomeoneSentBroadcastText
+### SomeoneSentPrivateText
 This response is sent to the user who sent the message and to the recipient.
 
 | Parameter            |        Type        | Description                                        |
