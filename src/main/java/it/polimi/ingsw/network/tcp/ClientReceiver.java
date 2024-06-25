@@ -16,7 +16,7 @@ import it.polimi.ingsw.utils.Pair;
 import it.polimi.ingsw.utils.PlacedCardRecord;
 
 /**
- * ClientSender
+ * Receives messages from server to client
  */
 public class ClientReceiver implements Runnable {
     private NetworkHandlerTCP networkHandler;
@@ -91,9 +91,55 @@ public class ClientReceiver implements Runnable {
 
         return result;
     }
-    
+
+
     /**
-     * Parses a message and calls the corresponding {@link it.polimi.ingsw.client.network.NetworkHandler}'s view.
+     * Parses the message and resumes the match.
+     * 
+     * @param msg The message containing the match status
+     * 
+     * @throws IOException if there was a problem with the socket stream
+     */
+    private void resumeMatch(MatchResumedMessage msg) throws IOException {
+        Map<String, Color> playersUsernamesAndPawns = new HashMap<>();
+        Map<String, List<PlayableCard>> playersHands = new HashMap<>();
+        Pair<Objective, Objective> visibleObjectives;
+        Map<DrawSource, PlayableCard> visiblePlayableCards = new HashMap<>();
+        Pair<Symbol, Symbol> decksTopReigns;
+        Objective secretObjective;
+        Map<String, Map<Symbol, Integer>> availableResources = new HashMap<>();
+        Map<String, Map<Pair<Integer, Integer>, PlacedCard>> placedCards = new HashMap<>();
+        Map<String, Integer> playerPoints = new HashMap<>();
+        String currentPlayer;
+        boolean drawPhase;
+
+        playersUsernamesAndPawns = msg.getPlayersUsernamesAndPawns();
+        playersHands = msg.getPlayersHands().entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().stream()
+                        .map(cardID -> this.getPlayable(cardID)).collect(Collectors.toList())));
+        Pair<Integer, Integer> visibleObjectivesID = msg.getVisibleObjectives();
+        visibleObjectives =
+                new Pair<Objective, Objective>(this.objectives.get(visibleObjectivesID.first()),
+                        this.objectives.get(visibleObjectivesID.second()));
+        visiblePlayableCards = msg.getVisiblePlayableCards().entrySet().stream().collect(
+                Collectors.toMap(Map.Entry::getKey, entry -> this.getPlayable(entry.getValue())));
+        decksTopReigns = msg.getDecksTopReigns();
+        secretObjective = this.objectives.get(msg.getSecretObjective());
+        availableResources = msg.getAvailableResources();
+        msg.getPlacedCards()
+                .forEach((player, board) -> placedCards.put(player, this.getPlacedMap(board)));
+        playerPoints = msg.getPlayerPoints();
+        currentPlayer = msg.getCurrentPlayer();
+        drawPhase = msg.isDrawPhase();
+
+        this.networkHandler.matchResumed(playersUsernamesAndPawns, playersHands, visibleObjectives,
+                visiblePlayableCards, decksTopReigns, secretObjective, availableResources,
+                placedCards, playerPoints, currentPlayer, drawPhase);
+    }
+
+    /**
+     * Parses a message and calls the corresponding
+     * {@link it.polimi.ingsw.client.network.NetworkHandler}'s view.
      * 
      * @param message The message to be parsed
      */
@@ -105,60 +151,9 @@ public class ClientReceiver implements Runnable {
                 case AvailableMatchesMessage msg:
                     this.networkHandler.receiveAvailableMatches(msg.getMatches());
                     break;
-
                 case MatchResumedMessage msg:
-                    Map<String, Color> playersUsernamesAndPawns = new HashMap<>();
-                    Map<String, List<PlayableCard>> playersHands = new HashMap<>();
-                    Pair<Objective, Objective> visibleObjectives;
-                    Map<DrawSource, PlayableCard> visiblePlayableCards = new HashMap<>();
-                    Pair<Symbol, Symbol> decksTopReigns;
-                    Objective secretObjective;
-                    Map<String, Map<Symbol, Integer>> availableResources = new HashMap<>();
-                    Map<String, Map<Pair<Integer, Integer>, PlacedCard>> placedCards =
-                            new HashMap<>();
-                    Map<String, Integer> playerPoints = new HashMap<>();
-                    String currentPlayer;
-                    boolean drawPhase;
-
-
-                    playersUsernamesAndPawns = msg.getPlayersUsernamesAndPawns();
-                    playersHands = msg.getPlayersHands().entrySet().stream()
-                            .collect(Collectors.toMap(Map.Entry::getKey,
-                                    entry -> entry.getValue().stream()
-                                            .map(cardID -> this.getPlayable(cardID))
-                                            .collect(Collectors.toList())));
-
-                    Pair<Integer, Integer> visibleObjectivesID = msg.getVisibleObjectives();
-                    visibleObjectives = new Pair<Objective, Objective>(
-                            this.objectives.get(visibleObjectivesID.first()),
-                            this.objectives.get(visibleObjectivesID.second()));
-
-                    visiblePlayableCards = msg.getVisiblePlayableCards().entrySet().stream()
-                            .collect(Collectors.toMap(Map.Entry::getKey,
-                                    entry -> this.getPlayable(entry.getValue())));
-
-                    decksTopReigns = msg.getDecksTopReigns();
-
-                    secretObjective = this.objectives.get(msg.getSecretObjective());
-
-                    availableResources = msg.getAvailableResources();
-
-
-                    msg.getPlacedCards().forEach(
-                            (player, board) -> placedCards.put(player, this.getPlacedMap(board)));
-
-                    playerPoints = msg.getPlayerPoints();
-
-                    currentPlayer = msg.getCurrentPlayer();
-
-                    drawPhase = msg.isDrawPhase();
-
-                    this.networkHandler.matchResumed(playersUsernamesAndPawns, playersHands,
-                            visibleObjectives, visiblePlayableCards, decksTopReigns,
-                            secretObjective, availableResources, placedCards, playerPoints,
-                            currentPlayer, drawPhase);
+                    this.resumeMatch(msg);
                     break;
-
                 case MatchStartedMessage msg:
                     Map<String, List<PlayableCard>> hands = new HashMap<>();
                     msg.getPlayerHands()
@@ -180,7 +175,6 @@ public class ClientReceiver implements Runnable {
                     this.networkHandler.matchStarted(msg.getPlayerPawnColors(), hands, objectives,
                             visibles, decksTop);
                     break;
-
                 case SomeoneDrewInitialCardMessage msg:
                     if (username.equals(this.networkHandler.getUsername())) {
                         this.networkHandler
@@ -243,7 +237,7 @@ public class ClientReceiver implements Runnable {
 
     }
 
-    
+
     /**
      * Sends an error to the server.
      * 
@@ -259,6 +253,10 @@ public class ClientReceiver implements Runnable {
         }
     }
 
+    
+    /**
+     * Receives answers from the server and tries to parse it (in a new thread)
+     */
     @Override
     public void run() {
         String message;

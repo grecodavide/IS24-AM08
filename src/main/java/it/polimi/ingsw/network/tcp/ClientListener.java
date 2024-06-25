@@ -29,12 +29,15 @@ import it.polimi.ingsw.utils.Pair;
 
 /**
  * Every time a socket gets accepted by the TCP server, a new ClientListener will be created with
- * it, and it will: - Acquire the client's username - Make the client (which is still not a
- * {@link Player}) choose/create a {@link Match} to join - Create its {@link PlayerControllerTCP},
- * which will also make him join such {@link Match} - Listen for any message received and, execute
- * the corresponding action
- * <p>
- * Note that this will just require the action to be executed, but its {@link PlayerControllerTCP}
+ * it, and it will:
+ * <ul>
+ * <li>Acquire the client's username
+ * <li>Make the client (which is still not a {@link Player}) choose/create a {@link Match} to join
+ * <li>Create its {@link PlayerControllerTCP}, which will also make him join such {@link Match}
+ * <li>Listen for any message received and, execute the corresponding action.
+ * </ul>
+ * 
+ * Note that this will just require the action to be executed, but it's {@link PlayerControllerTCP}
  * that actually calls the {@link Player} methods
  */
 public class ClientListener extends Thread {
@@ -140,7 +143,7 @@ public class ClientListener extends Thread {
             } catch (JsonParseException | ClassNotFoundException e) {
                 // message is not correctly formatted, ignore
             } catch (ChosenMatchException | WrongStateException | AlreadyUsedUsernameException
-                     | IllegalArgumentException | WrongNameException e) {
+                    | IllegalArgumentException | WrongNameException e) {
                 this.sendError(e.getMessage(), e);
             } catch (IOException e) {
                 this.close(match);
@@ -169,6 +172,8 @@ public class ClientListener extends Thread {
     /**
      * This parses the message received from socket's input stream and executes the request such
      * message carried. If the message is not one of the expected types, it will just be ignored
+     *
+     * @param msg The received message (received as a string)
      *
      * @see ActionMessage
      */

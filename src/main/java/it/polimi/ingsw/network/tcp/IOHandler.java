@@ -7,7 +7,7 @@ import it.polimi.ingsw.network.messages.Message;
 import it.polimi.ingsw.utils.MessageJsonParser;
 
 /**
- * This class will handle all the IO operations for a certain socket
+ * This class will handle all the IO operations for a certain socket.
  *
  * @see ObjectInputStream
  * @see ObjectOutputStream
@@ -23,7 +23,7 @@ public class IOHandler {
 
     /**
      * Class constructor. It takes a {@link Socket} as a parameter to open its
-     * {@link ObjectOutputStream} and {@link ObjectInputStream}
+     * {@link ObjectOutputStream} and {@link ObjectInputStream}.
      */
     public IOHandler(Socket socket) throws IOException {
 
@@ -35,7 +35,7 @@ public class IOHandler {
     }
 
     /**
-     * Acquires a {@link Message} from the socket's input stream
+     * Acquires a {@link Message} from the socket's input stream.
      *
      * @return the string representing the message
      * @throws IOException if the remote communication failed
@@ -46,7 +46,7 @@ public class IOHandler {
     }
 
     /**
-     * Writes a {@link Message} to the socket's output stream
+     * Writes a {@link Message} to the socket's output stream.
      *
      * @param msg The (parsed) message to write
      * @throws IOException if the remote communication failed
@@ -58,7 +58,7 @@ public class IOHandler {
     }
 
     /**
-     * Writes a {@link Message} to the socket's output stream
+     * Writes a {@link Message} to the socket's output stream.
      *
      * @param msg The (not yet parsed) message to write
      * @throws IOException if the remote communication failed
@@ -70,7 +70,7 @@ public class IOHandler {
     }
 
     /**
-     * Converts a {@link Message} to its corresponding Json
+     * Converts a {@link Message} to its corresponding Json.
      *
      * @param msg The message to be parsed
      * @return the corresponding Json
@@ -80,7 +80,7 @@ public class IOHandler {
     }
 
     /**
-     * Converts a Json string to its corresponding {@link Message}
+     * Converts a Json string to its corresponding {@link Message}.
      *
      * @param msg The Json to be parsed
      * @return the corresponding object
@@ -90,7 +90,7 @@ public class IOHandler {
     }
 
     /**
-     * Closes the input and output streams, if not null
+     * Closes the input and output streams, if not null.
      *
      * @throws IOException if the streams could not be accessed
      */

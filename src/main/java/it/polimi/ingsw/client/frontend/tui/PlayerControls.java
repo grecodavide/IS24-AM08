@@ -1,7 +1,7 @@
 package it.polimi.ingsw.client.frontend.tui;
 
 /**
- * Object used to synchronyze methods that should be ran only during other player's turns.
+ * Class used to synchronyze methods that should be ran only during other player's turns.
  */
 public class PlayerControls {
     private boolean enabled;

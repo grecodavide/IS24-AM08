@@ -63,9 +63,8 @@ public class GraphicalViewTUI extends GraphicalView {
 
     }
 
-
     /**
-     * Actually start the interface, then handling the pre match.
+     * Actually starts the interface, then handles the pre-match.
      */
     private void startInterface() {
         this.printer.clearTerminal();
@@ -78,10 +77,8 @@ public class GraphicalViewTUI extends GraphicalView {
     ///////////////////////
     // AUXILIARY METHODS //
     ///////////////////////
-
     /**
-     * Sets the last request's status, and notifies all threads in case the server sent a response
-     * message.
+     * Sets the last request's status, eventually notifying all threads of the server's response.
      * 
      * @param status The last request's status
      */
@@ -98,7 +95,7 @@ public class GraphicalViewTUI extends GraphicalView {
 
     /**
      * Waits for the server response after any action was performed. Until the server does not send
-     * a response (or an error), the thread goes to sleep.
+     * a response (or an error), the thread is stopped.
      * 
      * @return Whether the last action was successful or not
      */
@@ -164,9 +161,9 @@ public class GraphicalViewTUI extends GraphicalView {
 
 
     /**
-     * Asks the user which side he wants to play the chosen cards.
+     * Asks the user which side he wants to play the chosen card.
      * 
-     * @param card The card chosen by the player, that must be played
+     * @param card The card to be placed on the board
      * 
      * @return The chosen side
      */
@@ -185,7 +182,7 @@ public class GraphicalViewTUI extends GraphicalView {
 
 
     /**
-     * Asks the user where he wants to play the card.
+     * Asks the user where he wants to play the chosen card.
      * 
      * @param board The current player's board
      * 
@@ -336,6 +333,12 @@ public class GraphicalViewTUI extends GraphicalView {
         this.playerControls.enable();
     }
 
+
+    /**
+     * Starts the handling of player controls. If enables, polls for user input and as soon as there
+     * is something calls {@link GraphicalViewTUI#parsePlayerControl()}. If disabled, stops the
+     * thread
+     */
     private void startPlayerControls() {
         while (this.ongoing) {
             synchronized (this.playerControls) {
@@ -365,9 +368,8 @@ public class GraphicalViewTUI extends GraphicalView {
     ////////////////////////
     // PRE MATCH METHODS //
     ///////////////////////
-
     /**
-     * Sets the network view, asking the player how he wants to connect.
+     * Sets the network view, asking the player how he wants to connect (host, port, RMI vs TCP).
      */
     private void setNetworkHandler() {
         String userIn, IPAddr;
@@ -581,7 +583,6 @@ public class GraphicalViewTUI extends GraphicalView {
     ///////////////////
     // MATCH METHODS //
     ///////////////////
-
     /**
      * Asks the user which side he wants to play the initial card.
      * 
@@ -617,7 +618,7 @@ public class GraphicalViewTUI extends GraphicalView {
 
 
     /**
-     * Asks the user which secret objective he wants to keep between the two random given to him.
+     * Asks the user which secret objective he wants to keep between the random two given to him.
      * 
      * @param secretObjectives the pair of objectives the player has to choose from
      */
@@ -733,7 +734,7 @@ public class GraphicalViewTUI extends GraphicalView {
         }
     }
 
-    
+
     /**
      * Asks the player from where he wants to draw.
      * 
@@ -774,7 +775,6 @@ public class GraphicalViewTUI extends GraphicalView {
                     break;
             }
         }
-
         super.drawCard(source);
         if (!getServerResponse()) {
             this.makeUserDraw(availableResources);
@@ -782,7 +782,7 @@ public class GraphicalViewTUI extends GraphicalView {
         }
     }
 
-    
+
     /**
      * Notifies all players that someone played a card, and updates the relative player's board.
      * 
@@ -803,7 +803,7 @@ public class GraphicalViewTUI extends GraphicalView {
         }
     }
 
-    
+
     /**
      * Notifies everyone else that a player left.
      * 
@@ -814,7 +814,7 @@ public class GraphicalViewTUI extends GraphicalView {
         this.printer.printCenteredMessage(someoneUsername + " quit!", 0);
     }
 
-    
+
     /**
      * Shows whether the current player won or lost.
      * 
@@ -831,7 +831,7 @@ public class GraphicalViewTUI extends GraphicalView {
         this.ongoing = false;
     }
 
-    
+
     /**
      * Sets the last error message to what the server responded.
      * 
@@ -846,14 +846,14 @@ public class GraphicalViewTUI extends GraphicalView {
         }
     }
 
-    
+
     /**
      * Notifies that the match has started.
      */
     @Override
     protected void notifyMatchStarted() {}
 
-    
+
     /**
      * Notifies that the player correctly rejoined a match, and makes him play his turn.
      * 
@@ -888,7 +888,7 @@ public class GraphicalViewTUI extends GraphicalView {
         }).start();
     }
 
-    
+
     /**
      * Adds to the chat a broadcast text.
      * 
@@ -907,7 +907,7 @@ public class GraphicalViewTUI extends GraphicalView {
         }
     }
 
-    
+
     /**
      * Adds to the chat a private text.
      * 
@@ -927,7 +927,8 @@ public class GraphicalViewTUI extends GraphicalView {
     }
 
     /**
-     * Notifies that there has been a connection error. We only care about server crashes, but it could be anything
+     * Notifies that there has been a connection error. We only care about server crashes, but it
+     * could be anything
      */
     @Override
     public void notifyConnectionLost() {
@@ -936,7 +937,7 @@ public class GraphicalViewTUI extends GraphicalView {
         System.exit(1);
     }
 
-    
+
     public static void main(String[] args) {
         GraphicalViewTUI tui = new GraphicalViewTUI();
         tui.startInterface();
