@@ -20,6 +20,8 @@ public abstract class GraphicalView {
     protected List<AvailableMatch> availableMatches;
     protected String username;
     protected final LastRequest lastRequest;
+    private boolean matchStarted = false;
+    private final Boolean sync = true;
 
     /**
      * Class constructor.
@@ -282,42 +284,45 @@ public abstract class GraphicalView {
     private void setupMatch(Map<String, Color> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands,
                             Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards,
                             Pair<Symbol, Symbol> decksTopReign) {
-        this.players = new ArrayList<>();
-        this.clientBoards = new HashMap<>();
-        Color curr;
-        playersUsernamesAndPawns.forEach((player, pawn) -> this.players.add(player));
+        synchronized (sync) {
+            this.players = new ArrayList<>();
+            this.clientBoards = new HashMap<>();
+            Color curr;
+            playersUsernamesAndPawns.forEach((player, pawn) -> this.players.add(player));
 
-        for (String username : playersUsernamesAndPawns.keySet()) {
-            curr = playersUsernamesAndPawns.get(username);
-            switch (curr) {
-                case Color.RED:
-                    this.players.set(0, username);
-                    break;
-                case Color.BLUE:
-                    this.players.set(1, username);
-                    break;
-                case Color.GREEN:
-                    this.players.set(2, username);
-                    break;
-                case Color.YELLOW:
-                    this.players.set(3, username);
-                    break;
-                default:
-                    break;
+            for (String username : playersUsernamesAndPawns.keySet()) {
+                curr = playersUsernamesAndPawns.get(username);
+                switch (curr) {
+                    case Color.RED:
+                        this.players.set(0, username);
+                        break;
+                    case Color.BLUE:
+                        this.players.set(1, username);
+                        break;
+                    case Color.GREEN:
+                        this.players.set(2, username);
+                        break;
+                    case Color.YELLOW:
+                        this.players.set(3, username);
+                        break;
+                    default:
+                        break;
+                }
             }
+
+            this.currentPlayer = null;
+
+            playersHands.forEach((username, hand) -> {
+                this.clientBoards.put(username, new ClientBoard(playersUsernamesAndPawns.get(username), hand));
+            });
+
+            this.visiblePlayableCards = visiblePlayableCards;
+            this.visibleObjectives = visibleObjectives;
+            this.decksTopReign = decksTopReign;
+            matchStarted = true;
+            sync.notifyAll();
         }
-
-        this.currentPlayer = null;
-
-        playersHands.forEach((username, hand) -> {
-            this.clientBoards.put(username, new ClientBoard(playersUsernamesAndPawns.get(username), hand));
-        });
-
-        this.visiblePlayableCards = visiblePlayableCards;
-        this.visibleObjectives = visibleObjectives;
-        this.decksTopReign = decksTopReign;
     }
-
     /**
      * Method that shows the user that the match has started.
      */
@@ -363,7 +368,18 @@ public abstract class GraphicalView {
         if (this.username.equals(someoneUsername)) {
             this.setLastRequestStatus(RequestStatus.SUCCESSFUL);
         }
-        this.clientBoards.get(someoneUsername).setInitial(card);
+        new Thread( () -> {
+            synchronized (sync) {
+                while (!matchStarted) {
+                    try {
+                        sync.wait();
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                this.clientBoards.get(someoneUsername).setInitial(card);
+            }
+        }).start();
     }
 
 
