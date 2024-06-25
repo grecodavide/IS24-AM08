@@ -133,6 +133,9 @@ public class ConnectionSceneController extends SceneController {
                 CardView cardView = new CardView();
                 ChatPaneController chatPaneController = controller.getChatPane();
                 chatPaneController.addPlayer("Oingo");
+                controller.setPlateauPoints("Boingo", 3);
+                controller.setPlateauPoints("Oingo", 3);
+
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

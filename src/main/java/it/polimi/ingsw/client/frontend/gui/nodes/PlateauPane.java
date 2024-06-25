@@ -65,7 +65,6 @@ public class PlateauPane extends Pane {
         img.setFitHeight(pawnSize);
         players.put(player, img);
         setPoints(player, 0);
-        this.getChildren().add(img);
     }
 
     /**
@@ -78,14 +77,20 @@ public class PlateauPane extends Pane {
         if (points > 29) {
             return;
         }
-        Pair<Double, Double> position = convertCoords(positions.get(points));
-        // Calculate offset because of players in the same position
-        int offset = this.playersAtPosition(points);
-        this.points.put(player, points);
+        if (!this.points.containsKey(player) || this.points.get(player) != points) {
+            Pair<Double, Double> position = convertCoords(positions.get(points));
+            // Calculate offset because of players in the same position
+            int offset = this.playersAtPosition(points);
+            this.points.put(player, points);
 
-        ImageView playerPawn = players.get(player);
-        playerPawn.setLayoutX(position.first());
-        playerPawn.setLayoutY(position.second() + offset * positionOffset);
+            ImageView playerPawn = players.get(player);
+            playerPawn.setLayoutX(position.first());
+            playerPawn.setLayoutY(position.second() + offset * positionOffset);
+
+            if (this.getChildren().contains(playerPawn))
+                this.getChildren().remove(playerPawn);
+            this.getChildren().add(playerPawn);
+        }
     }
 
     /**
