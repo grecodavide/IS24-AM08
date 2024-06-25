@@ -22,6 +22,10 @@ public class TuiPrinter {
     private final Integer infoLineOffset;
     private static final Integer cardRows = 6, cardCols = 18, cornerRows = 3, cornerCols = 5;
 
+    /**
+     * Class constructor, it creates auxiliary objects to communicate with the terminal and the card parser.
+     * @throws IOException
+     */
     public TuiPrinter() throws IOException {
         this.terminal = org.jline.terminal.TerminalBuilder.terminal();
         this.parser = new TUICardParser();
