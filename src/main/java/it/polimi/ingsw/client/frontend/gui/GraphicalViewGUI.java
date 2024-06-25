@@ -301,7 +301,7 @@ public class GraphicalViewGUI extends GraphicalView {
                 waitingSceneController.removePlayer(someoneUsername);
                 waitingSceneController.setCurrentPlayers(waitingSceneController.getCurrentPlayers()-1);
             });
-        } else {
+        } else if (networkHandler.isConnected()) {
             notifyError("Player Quit", "Match finished because " + someoneUsername + " quit");
         }
     }

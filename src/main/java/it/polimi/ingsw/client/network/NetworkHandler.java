@@ -136,6 +136,13 @@ public abstract class NetworkHandler implements RemoteViewInterface {
      */
     public abstract void drawCard(DrawSource source);
 
+    /**
+     * If the connection is still open
+     * @return if it is connected
+     */
+    public boolean isConnected() {
+        return connected;
+    }
     public void receiveAvailableMatches(List<AvailableMatch> availableMatches) {
         graphicalView.receiveAvailableMatches(availableMatches);
     }

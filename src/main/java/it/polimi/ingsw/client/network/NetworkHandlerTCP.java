@@ -108,7 +108,6 @@ public class NetworkHandlerTCP extends NetworkHandler {
 
     @Override
     public boolean ping() {
-
         try {
             io.writeMsg("ping");
             return true;
