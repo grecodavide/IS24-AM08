@@ -20,6 +20,9 @@ public abstract class MatchState implements Serializable {
 
     protected Match match;
 
+    /**
+     * Empty constructor needed for deserialization.
+     */
     public MatchState() {
 
     }

@@ -24,7 +24,9 @@ public class Player implements Serializable {
     private final Board board;
     private Color pawnColor;
     private Objective secretObjective;
-    /** If the player is connected */
+    /**
+     * If the player is connected
+     */
     private boolean connected;
 
     /**
@@ -46,7 +48,7 @@ public class Player implements Serializable {
     /**
      * Initializes the current instance from a copy reference
      *
-     * @param player
+     * @param player The player to make a copy of
      */
     public Player(Player player) {
         this.username = player.username;
@@ -247,9 +249,9 @@ public class Player implements Serializable {
     }
 
     public boolean isConnected() {
-       synchronized (match) {
-           return connected;
-       }
+        synchronized (match) {
+            return connected;
+        }
     }
 
     public void setConnected(boolean connected) {

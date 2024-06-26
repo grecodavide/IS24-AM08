@@ -3,14 +3,26 @@ package it.polimi.ingsw.gamemodel;
 import java.io.Serial;
 import java.io.Serializable;
 
+/**
+ * Subclass of {@link MatchState}. This is the state in which the match is when accepting new players or them leaving,
+ * that is to say: before the match is full and so it starts.
+ */
 public class WaitState extends MatchState implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Initializes this instance.
+     *
+     * @param match The match in this state
+     */
     public WaitState(Match match) {
         super(match);
     }
 
+    /**
+     * Transitions to {@link NextTurnState}.
+     */
     @Override
     public void transition() {
         synchronized (match) {
@@ -28,10 +40,16 @@ public class WaitState extends MatchState implements Serializable {
         }
     }
 
+    /**
+     * This method call is allowed by this class instances.
+     */
     @Override
     public void removePlayer() {
     }
 
+    /**
+     * This method call is allowed by this class instances.
+     */
     @Override
     public void addPlayer() {
     }
