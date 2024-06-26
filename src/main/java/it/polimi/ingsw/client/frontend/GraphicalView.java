@@ -8,6 +8,9 @@ import it.polimi.ingsw.utils.LeaderboardEntry;
 import it.polimi.ingsw.utils.Pair;
 import it.polimi.ingsw.utils.RequestStatus;
 
+/**
+ * Class to manage graphical clients
+ */
 public abstract class GraphicalView {
     protected NetworkHandler networkHandler;
     protected Map<String, ClientBoard> clientBoards;
@@ -78,6 +81,7 @@ public abstract class GraphicalView {
     /**
      * Tries to create a match.
      *
+     * @param maxPlayers maximum amount of players
      * @param matchName The match's name
      */
     public void createMatch(String matchName, Integer maxPlayers) {
@@ -333,6 +337,10 @@ public abstract class GraphicalView {
      */
     protected abstract void notifyMatchResumed(boolean  drawPhase);
 
+    /**
+     * Receive the list of matches currently available
+     * @param availableMatches the list of available matches
+     */
     public void receiveAvailableMatches(List<AvailableMatch> availableMatches) {
         this.setLastRequestStatus(RequestStatus.SUCCESSFUL);
         this.availableMatches = availableMatches;
@@ -387,6 +395,7 @@ public abstract class GraphicalView {
      * Effectively place the initial card on the player's board, on the right side. Note that the card
      * must have already been set.
      *
+     * @param availableResources Currently available resources for the player
      * @param someoneUsername Player who chose the initial card's side
      * @param side            Chosen side
      */
@@ -487,6 +496,7 @@ public abstract class GraphicalView {
     /**
      * Notifies the player that someone joined the lobby.
      *
+     * @param joinedPlayers List of the players currently in the match
      * @param someoneUsername Player who joined
      */
     public void someoneJoined(String someoneUsername, List<String> joinedPlayers) {
@@ -534,5 +544,9 @@ public abstract class GraphicalView {
         }
     }
 
+    /**
+     * Notify the client that the connection with the server
+     * has been lost.
+     */
     public abstract void notifyConnectionLost();
 }

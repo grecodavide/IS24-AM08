@@ -67,6 +67,11 @@ public class LobbySceneController extends SceneController {
         matchNumberContainer.getChildren().forEach((button) -> {((RadioButton) button).setToggleGroup(matchNumberToggle);});
     }
 
+    /**
+     * Show the wait scene
+     * @return the wait scene controller
+     * @throws IOException in case of file error
+     */
     public WaitingSceneController showWaitScene() throws IOException {
         StackPane root = loadScene("/fxml/waiting.fxml");
         GuiUtil.applyCSS(root, "/css/match.css");
@@ -103,6 +108,7 @@ public class LobbySceneController extends SceneController {
      * @param name name of the match
      * @param players current amount of players
      * @param maxPlayers maximum number of players allowed in the match
+     * @param isRejoinable if the match is rejoinable
      */
     public void addMatchCard(String name, int players, int maxPlayers, boolean isRejoinable) {
         Color c;

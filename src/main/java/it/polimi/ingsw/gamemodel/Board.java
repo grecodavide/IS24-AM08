@@ -195,7 +195,6 @@ public class Board implements Serializable {
         if (placed.containsKey(coord)) {
             return PlacementOutcome.INVALID_COORDS;
         }
-        // TODO: To test again
         if (card instanceof GoldCard gold && side == Side.FRONT) {
             if (gold.getRequirement().timesMet(this) == 0)
                 return PlacementOutcome.INVALID_ENOUGH_RESOURCES;

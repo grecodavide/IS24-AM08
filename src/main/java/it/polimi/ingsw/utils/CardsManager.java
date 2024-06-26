@@ -29,7 +29,6 @@ public final class CardsManager {
      * Read from the JSON files, de-serialise the content in Map<Integer, XXX> objects, initialize the private attributes
      * with these values.
      */
-    // TODO: Implement Requirement deserializer
     private CardsManager() {
         CardJsonParser parser = new CardJsonParser();
         Gson gson = parser.getCardBuilder();
@@ -102,6 +101,11 @@ public final class CardsManager {
         return objectives;
     }
 
+    /**
+     * Getter for the playable cards
+     *
+     * @return Map that matches an int ID to the corresponding playable card
+     */
     public Map<Integer, PlayableCard> getPlayableCards() {
         Map<Integer, PlayableCard> playableCards = new HashMap<>();
         playableCards.putAll(goldCards);

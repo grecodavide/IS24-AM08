@@ -205,7 +205,7 @@ public class NetworkHandlerTCP extends NetworkHandler {
         try {
             this.io.writeMsg(msg);
         } catch (IOException e) {
-            // TODO: handle IO
+            // handle IO
         }
     }
 }

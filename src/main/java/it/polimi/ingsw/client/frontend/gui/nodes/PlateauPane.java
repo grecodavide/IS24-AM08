@@ -10,6 +10,9 @@ import javafx.scene.layout.Pane;
 
 import java.util.HashMap;
 
+/**
+ * JavaFX node, Pane showing all the player pawns and points
+ */
 public class PlateauPane extends Pane {
     public static double pawnSize = 64;
     public static double positionOffset = -6;
@@ -17,6 +20,9 @@ public class PlateauPane extends Pane {
     HashMap<String, ImageView> players;
     HashMap<String, Integer> points;
 
+    /**
+     * Constructor of the node
+     */
     public PlateauPane() {
         players = new HashMap<>();
         positions = new HashMap<>();

@@ -13,6 +13,9 @@ import javafx.scene.layout.VBox;
 
 import java.io.IOException;
 
+/**
+ * JavaFX Controller of the ranking scene, shows the leaderboard after the match is finished
+ */
 public class RankingSceneController extends SceneController {
 
     public VBox leaderboardContainer;
@@ -77,6 +80,10 @@ public class RankingSceneController extends SceneController {
         }
     }
 
+    /**
+     * Show the connection scene
+     * @throws IOException in case of file errors
+     */
     public void showConnectionScene() throws IOException {
         view.disconnect();
         view = new GraphicalViewGUI(stage);

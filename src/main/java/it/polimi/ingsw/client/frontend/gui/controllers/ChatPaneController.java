@@ -17,7 +17,9 @@ import javafx.util.Duration;
 
 import java.util.*;
 
-// TODO: to finish implementation
+/**
+ * JavaFX controller for the chat pane
+ */
 public class ChatPaneController extends SceneController {
     @FXML
     private Button sendMessageBtn;

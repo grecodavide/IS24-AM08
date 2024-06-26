@@ -14,13 +14,21 @@ import javafx.scene.layout.Pane;
 import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ * Game board, manages card display
+ */
 public class BoardPane extends Pane {
+    // Card dimensions
     public static double cardWidth = CardView.cardWidth;
     public static double cardHeight = CardView.cardHeight;
     public static double cardBorderW = 44.8;
     public static double cardBorderH = 52.6;
+    // Currently placed cards
     public List<Pair<Integer, Integer>> takenSpots = new ArrayList<>();
+
+    /**
+     * Constructor of BoardPane
+     */
     public BoardPane() {
         super();
     }
@@ -43,6 +51,7 @@ public class BoardPane extends Pane {
      * @param position relative coordinates of the card
      * @param card card to add
      * @param side side of the card to add
+     * @return the added CardView
      */
     public CardView addCard(Pair<Integer, Integer> position, InitialCard card, Side side) {
         CardView c = new CardView(card, side);

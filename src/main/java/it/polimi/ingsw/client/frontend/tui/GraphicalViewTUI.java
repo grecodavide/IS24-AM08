@@ -938,6 +938,10 @@ public class GraphicalViewTUI extends GraphicalView {
     }
 
 
+    /**
+     * Launch the TUI client
+     * @param args command line arguments
+     */
     public static void main(String[] args) {
         GraphicalViewTUI tui = new GraphicalViewTUI();
         tui.startInterface();

@@ -19,22 +19,29 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CardView extends Pane {
+    // Card dimensions
     public static double cardWidth = 199;
     public static double cardHeight = 132;
     public static double cardBorderW = 44.8;
     public static double cardBorderH = 52.6;
+
+    /** Pawn dimensions (at center of the initial card) */
     public static double tokenRadius = 28;
 
+    /** Path to what to show when a card is missing */
     public static String noCardPath = "/images/no_resource2.png";
+    // Card corners
     public Pane topLeftCorner;
     public Pane topRightCorner;
     public Pane bottomLeftCorner;
     public Pane bottomRightCorner;
-    public double startX;
-    public double startY;
+
     private Image image;
     private Rectangle cardRectangle;
 
+    /**
+     * Initialize an empty CardView
+     */
     public CardView() {
         super();
         String imagePath = noCardPath;
@@ -42,6 +49,12 @@ public class CardView extends Pane {
         this.getProperties().put("Side", null);
         this.addProperties(imagePath);
     }
+
+    /**
+     * Initialize a CardView of an Initial Card
+     * @param card initial card
+     * @param side side to show
+     */
     public CardView(InitialCard card, Side side) {
         super();
         String imagePath = GuiUtil.getImagePath(card, side);
@@ -50,6 +63,11 @@ public class CardView extends Pane {
         this.addProperties(imagePath);
     }
 
+    /**
+     * Initialize a CardView of a Playable Card
+     * @param card playable card
+     * @param side side to show
+     */
     public CardView(PlayableCard card, Side side) {
         super();
         String imagePath = GuiUtil.getImagePath(card, side);
@@ -58,6 +76,11 @@ public class CardView extends Pane {
         this.addProperties(imagePath);
     }
 
+    /**
+     * Initialize a CardView of an Objective Card
+     * @param card objective
+     * @param side side to show
+     */
     public CardView(Objective card, Side side) {
         super();
         String imagePath = GuiUtil.getImagePath(card, side);

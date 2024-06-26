@@ -8,7 +8,15 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * Serialize game cards into json
+ */
 public class CardsSerializer {
+
+    /**
+     * Function that serializes the cards
+     * @param args arguments
+     */
     public static void main(String[] args) {
         // cards
         InitialCard initialCard;

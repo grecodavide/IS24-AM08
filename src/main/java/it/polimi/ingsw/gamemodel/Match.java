@@ -84,7 +84,6 @@ public class Match implements Serializable {
             throw new IllegalArgumentException("initialDeck does not have enough cards");
         else if (objectivesDeck.getSize() < 6)
             throw new IllegalArgumentException("objectivesDeck does not have enough cards");
-        // TODO: handle this exception!!!
         else if (maxPlayers < 2 || maxPlayers > 4)
             throw new IllegalArgumentException("The players must be at least 2 or maximum 4");
 
@@ -97,10 +96,10 @@ public class Match implements Serializable {
      * Note: Called by the Controller when a player joins the match.
      *
      * @param player player to be added to the match
-     * @throws IllegalArgumentException if the player is already in the match or too many players would be in the match
      * @throws WrongStateException      if called while in a state that doesn't allow adding players
+     * @throws AlreadyUsedUsernameException if there is already a player in the match that has the same username
      */
-    public void addPlayer(Player player) throws IllegalArgumentException, WrongStateException, AlreadyUsedUsernameException {
+    public void addPlayer(Player player) throws WrongStateException, AlreadyUsedUsernameException {
         synchronized (this) {
             List<String> playersUsernames = getPlayers().stream().map(Player::getUsername).toList();
 
@@ -807,6 +806,10 @@ public class Match implements Serializable {
         executor.shutdown();
     }
 
+    /**
+     * If the match is rejoinable (not every player is connected)
+     * @return if the match is rejoinable
+     */
     public synchronized boolean isRejoinable() {
         return players.stream().anyMatch((p) -> !p.isConnected()) && isStarted();
     }

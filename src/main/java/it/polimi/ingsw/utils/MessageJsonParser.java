@@ -53,7 +53,6 @@ public class MessageJsonParser {
         }
 
         private Message convertError(String type, JsonObject messageObject, JsonDeserializationContext context) {
-            //TODO better error handling
             return context.deserialize(messageObject, ErrorMessage.class);
         }
 

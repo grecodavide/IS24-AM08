@@ -10,6 +10,10 @@ import javafx.scene.layout.VBox;
 import java.io.IOException;
 import java.util.HashMap;
 
+/**
+ * JavaFX controller for the waiting scene. It shows all the current players
+ * waiting for the match to start
+ */
 public class WaitingSceneController extends SceneController {
 
     public Label matchName;
@@ -65,10 +69,17 @@ public class WaitingSceneController extends SceneController {
         updateLabel();
     }
 
+    /**
+     * Get the amount of current players
+     * @return the amount of current players in the match
+     */
     public int getCurrentPlayers() {
         return players;
     }
 
+    /**
+     * Update the players count, match name and max players
+     */
     public void updateLabel() {
         matchName.setText(name + " " + players + "/" + maxPlayers);
     }
@@ -83,6 +94,11 @@ public class WaitingSceneController extends SceneController {
         }
     }
 
+    /**
+     * Show the match scene when the match is started
+     * @return the match scene controller
+     * @throws IOException if there was a file error
+     */
     public MatchSceneController showMatch() throws IOException {
         VBox root = loadScene("/fxml/match.fxml");
         GuiUtil.applyCSS(root, "/css/match.css");

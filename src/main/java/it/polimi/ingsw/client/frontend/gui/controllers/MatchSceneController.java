@@ -24,6 +24,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * JavaFX controller of the match scene
+ */
 public class MatchSceneController extends SceneController {
     public Tab tableTab;
     public Label stateTitle;
@@ -67,6 +70,13 @@ public class MatchSceneController extends SceneController {
         matchPane.getChildren().add(chatPane);
     }
 
+    /**
+     * Add the tab of the given player
+     * @param username username of the player
+     * @param color color of the player
+     * @return controller of the created player tab
+     * @throws IOException if there are file errors
+     */
     public PlayerTabController addPlayerTab(String username, Color color) throws IOException {
         // Load the tab
         FXMLLoader loader = GuiUtil.getLoader("/fxml/player_tab.fxml");
@@ -124,6 +134,11 @@ public class MatchSceneController extends SceneController {
         this.plateauPane.setPoints(username, points);
     }
 
+    /**
+     * Show the ranking scene on match end
+     * @return ranking scene controller
+     * @throws IOException on file errors
+     */
     public RankingSceneController showRankingScene() throws IOException {
         StackPane root = loadScene("/fxml/ranking.fxml");
         Scene rankingScene = new Scene(root, GraphicalApplication.screenWidth, GraphicalApplication.screenHeight);
@@ -132,6 +147,10 @@ public class MatchSceneController extends SceneController {
         return (RankingSceneController) root.getProperties().get("Controller");
     }
 
+    /**
+     * Get the chat pane controller
+     * @return the chat pane controller
+     */
     public ChatPaneController getChatPane() {
         return (ChatPaneController) chatPane.getProperties().get("Controller");
     }
@@ -165,6 +184,10 @@ public class MatchSceneController extends SceneController {
         fourthVisible.setDisable(!enable);
     }
 
+    /**
+     * Set the current state title to express an action while playing
+     * @param text title
+     */
     public void setStateTitle(String text) {
         stateTitle.setText(text);
     }

@@ -17,9 +17,14 @@ import java.io.IOException;
 public class GraphicalApplication extends Application {
     private GraphicalViewGUI view;
     private Stage primaryStage;
+    // Window size
     public static double screenWidth = 1920.0;
     public static double screenHeight = 1020.0;
 
+    /**
+     * Launch the application
+     * @param args args
+     */
     public static void main(String[] args) {
         launch(args);
     }
@@ -45,7 +50,7 @@ public class GraphicalApplication extends Application {
         Scene connectionScene = new Scene(root, screenWidth, screenHeight);
         // Show the window
 
-        /* Not working yet
+        /* Disabled by default
         // Fullscreen
         primaryStage.setFullScreen(true);
         primaryStage.setMaximized(true);

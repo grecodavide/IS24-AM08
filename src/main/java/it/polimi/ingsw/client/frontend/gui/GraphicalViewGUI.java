@@ -21,6 +21,9 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+/**
+ * JavaFX implementation of Codex Naturalis client
+ */
 public class GraphicalViewGUI extends GraphicalView {
     private final Stage stage;
     // Controllers
@@ -39,6 +42,10 @@ public class GraphicalViewGUI extends GraphicalView {
     private List<AvailableMatch> lastAvailableMatches;
     private Integer maxPlayers;
 
+    /**
+     * Initialize on a given JavaFX stage
+     * @param stage the main stage of the application
+     */
     public GraphicalViewGUI(Stage stage) {
         this.stage = stage;
     }
@@ -396,6 +403,11 @@ public class GraphicalViewGUI extends GraphicalView {
         this.notifyError(GuiUtil.getExceptionTitle(exception), exception.getMessage());
     }
 
+    /**
+     * Notify an error
+     * @param title title of the error
+     * @param description description of the error
+     */
     public void notifyError(String title, String description) {
         Platform.runLater(() -> {
             try {
@@ -433,26 +445,42 @@ public class GraphicalViewGUI extends GraphicalView {
         networkHandler.setUsername(username);
     }
 
+    /**
+     * Getter for the client username
+     * @return client username
+     */
     public String getUsername() {
         return username;
     }
 
+    /**
+     * Request available matches to the server
+     */
     public void getAvailableMatches() {
         this.setLastRequestStatus(RequestStatus.PENDING);
         this.networkHandler.getAvailableMatches();
     }
 
+    @Override
     public void receiveAvailableMatches(List<AvailableMatch> availableMatches) {
         super.receiveAvailableMatches(availableMatches);
         lastAvailableMatches = availableMatches;
         Platform.runLater(() -> lobbySceneController.updateMatches(availableMatches));
     }
 
+    /**
+     * Set the lobby scene controller
+     * @param lobbySceneController controller of the lobby scene
+     */
     public void setLobbySceneController(LobbySceneController lobbySceneController) {
         this.lobbySceneController = lobbySceneController;
         this.getAvailableMatches();
     }
 
+    /**
+     * Main class to launch the applicaiton
+     * @param args command line arguments
+     */
     public static void main(String[] args) {
         Application.launch(GraphicalApplication.class, args);
     }
@@ -472,6 +500,9 @@ public class GraphicalViewGUI extends GraphicalView {
             });
     }
 
+    /**
+     * Request disconnection from the network
+     */
     public void disconnect() {
         networkHandler.disconnect();
     }

@@ -18,7 +18,6 @@ import it.polimi.ingsw.utils.PlacedCardRecord;
 
 /**
  * Subclass of {@link PlayerController} that implements its abstract methods through TCP interactions.
- * // TODO: finish
  */
 public final class PlayerControllerTCP extends PlayerController {
     private final IOHandler io;
