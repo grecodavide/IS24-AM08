@@ -530,7 +530,6 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
     private void onConnectionError() {
         match.unsubscribeObserver(this);
         match.removePlayer(player);
-        System.err.println("There has been a connection error with player: " + player.getUsername());
     }
 
     /**

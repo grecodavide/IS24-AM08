@@ -597,6 +597,35 @@ public class PlayerControllerRMITest {
     }
 
     @Test
+    public void matchResumed() {
+        this.initializeUnstartedMatch(2);
+        this.addTwoPlayerWithView();
+        view1.waitingCall = "matchResumed";
+        player1.matchResumed();
+        player2.matchResumed();
+
+        view1.waitForCall("matchResumed");
+        Map<String, Object> args = view1.getLastCallArguments();
+        Map<Color, String> pawns = (Map<Color, String>) args.get("pawns");
+        Map<String, List<PlayableCard>> hands = (Map<String, List<PlayableCard>>) args.get("hands");
+        Map<DrawSource, PlayableCard> visbile = (Map<DrawSource, PlayableCard>) args.get("playable");
+
+        assertEquals(match.getVisibleObjectives().first(), ((Pair<Objective, Objective>)args.get("objectives")).first());
+        assertEquals(match.getVisibleObjectives().second(), ((Pair<Objective, Objective>)args.get("objectives")).second());
+        assertEquals(match.getDecksTopReigns().first(), ((Pair<Symbol, Symbol>) args.get("decksTopReigns")).first());
+        assertEquals(match.getDecksTopReigns().second(), ((Pair<Symbol, Symbol>) args.get("decksTopReigns")).second());
+        for (Player p : match.getPlayers()) {
+            assertEquals(p.getPawnColor(), pawns.get(p.getUsername()));
+            for (PlayableCard c : p.getBoard().getCurrentHand()) {
+                assertTrue(hands.get(p.getUsername()).contains(c));
+            }
+        }
+        for (DrawSource s : visbile.keySet()) {
+            assertEquals(match.getVisiblePlayableCards().get(s), visbile.get(s));
+        }
+    }
+
+    @Test
     public void registerView() {
         this.initializeUnstartedMatch(3);
 
@@ -776,13 +805,21 @@ public class PlayerControllerRMITest {
         }
 
         @Override
-        public void matchResumed(Map<String, Color> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands, Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards, Pair<Symbol, Symbol> decksTopReigns, Objective secretObjective, Map<String, Map<Symbol, Integer>> availableResources, Map<String, Map<Pair<Integer, Integer>, PlacedCard>> placedCards, Map<String, Integer> playerPoints, String currentPlayer, boolean drawPhase) throws RemoteException {
-            //TODO test
+        public synchronized void matchResumed(Map<String, Color> playersUsernamesAndPawns, Map<String, List<PlayableCard>> playersHands, Pair<Objective, Objective> visibleObjectives, Map<DrawSource, PlayableCard> visiblePlayableCards, Pair<Symbol, Symbol> decksTopReigns, Objective secretObjective, Map<String, Map<Symbol, Integer>> availableResources, Map<String, Map<Pair<Integer, Integer>, PlacedCard>> placedCards, Map<String, Integer> playerPoints, String currentPlayer, boolean drawPhase) throws RemoteException {
+            if (waitingCall != null && waitingCall.equals("matchResumed")) {
+                lastCall = "matchResumed";
+                args = new HashMap<>();
+                args.put("pawns", playersUsernamesAndPawns);
+                args.put("hands", playersHands);
+                args.put("objectives", visibleObjectives);
+                args.put("playable", visiblePlayableCards);
+                args.put("decksTopReigns", decksTopReigns);
+                this.notifyAll();
+            }
         }
 
         @Override
         public void receiveAvailableMatches(List<AvailableMatch> availableMatchs) throws RemoteException {
-            // TODO: finish
         }
 
         public synchronized void someoneDrewInitialCard(String someoneUsername, InitialCard card) throws RemoteException {
