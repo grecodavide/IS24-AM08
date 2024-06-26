@@ -79,6 +79,10 @@ public class Player implements Serializable {
      * @param coords x and y position in which the card is played (where 0, 0 is the initial card)
      * @param card   the card to be placed
      * @param side   whether the card should be placed on the front or on the back
+     * @throws WrongChoiceException If the chosen card cannot be player (placement not allowed, or not enough resources,
+     *                              or card not in the player's hand)
+     * @throws WrongStateException  If a card cannot be played in this match state
+     * @throws WrongTurnException   If it's the turn of this player.
      */
     public void playCard(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws WrongTurnException, WrongStateException, WrongChoiceException {
         synchronized (match) {
@@ -145,6 +149,7 @@ public class Player implements Serializable {
      * @throws WrongTurnException   if called by the player when it's not its turn
      * @throws WrongChoiceException if called on a drawing source which is empty (e.g. empty deck)
      * @throws WrongStateException  if called during the wrong match state
+     * @throws HandException if the player already has three cards in their hand
      */
     public void drawCard(DrawSource source) throws HandException, WrongStateException, WrongChoiceException, WrongTurnException {
         synchronized (match) {

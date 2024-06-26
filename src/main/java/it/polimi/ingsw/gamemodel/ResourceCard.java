@@ -5,8 +5,8 @@ import it.polimi.ingsw.exceptions.InvalidResourceException;
 import java.io.Serial;
 import java.io.Serializable;
 
-/*
- * Card that does not require any conditions to be played
+/**
+ * Card that does not require any conditions to be played.
  */
 public final class ResourceCard extends PlayableCard implements Serializable {
     @Serial

@@ -1,14 +1,15 @@
 package it.polimi.ingsw.server;
 
-import java.rmi.Remote;
-import java.rmi.RemoteException;
-import java.util.List;
 import it.polimi.ingsw.controllers.PlayerControllerRMIInterface;
 import it.polimi.ingsw.exceptions.AlreadyUsedUsernameException;
 import it.polimi.ingsw.exceptions.ChosenMatchException;
 import it.polimi.ingsw.exceptions.WrongNameException;
 import it.polimi.ingsw.exceptions.WrongStateException;
 import it.polimi.ingsw.utils.AvailableMatch;
+
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+import java.util.List;
 
 /**
  * RMI interface used to declare all and only the methods callable on a remote Server instance implementing this
@@ -18,7 +19,7 @@ import it.polimi.ingsw.utils.AvailableMatch;
  */
 public interface ServerRMIInterface extends Remote {
     /**
-     * Returns the available matches (those not full yet) as {@link AvailableMatch} instances.
+     * Returns the available matches as {@link AvailableMatch} instances.
      *
      * @return The list of Match which are not full yet.
      * @throws RemoteException If the remote server is considered not to be reachable any more and cannot return as usual
@@ -47,12 +48,15 @@ public interface ServerRMIInterface extends Remote {
      * @param maxPlayers The maximum number of player allowed on the new match
      * @throws RemoteException      If the remote server is considered not to be reachable any more and cannot return as usual
      * @throws ChosenMatchException If the given match name is already taken
+     * @throws WrongNameException   If the chosen player username doesn't meet the alphanumerical criteria
      */
     void createMatch(String matchName, int maxPlayers) throws RemoteException, ChosenMatchException, WrongNameException;
 
     /**
-     * Ping the server
+     * Pings the server in order to perceive if the connection is still alive and working.
+     *
+     * @throws RemoteException If the connection to this class instance is not alive anymore
+     * @return True if the connection is alive, false otherwise
      */
     boolean ping() throws RemoteException;
-
 }
