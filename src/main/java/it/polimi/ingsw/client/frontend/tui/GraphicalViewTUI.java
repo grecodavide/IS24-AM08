@@ -823,12 +823,8 @@ public class GraphicalViewTUI extends GraphicalView {
     @Override
     public void matchFinished(List<LeaderboardEntry> ranking) {
         this.printer.clearTerminal();
-        ranking.forEach(entry -> {
-            if (this.username.equals(entry.username())) {
-                this.printer.printEndScreen(entry.winner());
-            }
-        });
         this.ongoing = false;
+        this.printer.printEndScreen(ranking, this.username);
     }
 
 

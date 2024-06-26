@@ -10,6 +10,7 @@ import it.polimi.ingsw.client.frontend.ShownCard;
 import it.polimi.ingsw.exceptions.CardException;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.AvailableMatch;
+import it.polimi.ingsw.utils.LeaderboardEntry;
 import it.polimi.ingsw.utils.Pair;
 import it.polimi.ingsw.utils.TUICardParser;
 
@@ -23,7 +24,9 @@ public class TuiPrinter {
     private static final Integer cardRows = 6, cardCols = 18, cornerRows = 3, cornerCols = 5;
 
     /**
-     * Class constructor, it creates auxiliary objects to communicate with the terminal and the card parser.
+     * Class constructor, it creates auxiliary objects to communicate with the terminal and the card
+     * parser.
+     * 
      * @throws IOException
      */
     public TuiPrinter() throws IOException {
@@ -852,28 +855,55 @@ public class TuiPrinter {
      * 
      * @param isVictorious whether the player won or not
      */
-    public void printEndScreen(Boolean isVictorious) {
-        int maxHeight = this.getHeight() - this.infoLineOffset;
+    public void printEndScreen(List<LeaderboardEntry> ranking, String username) {
         int maxWidth = this.getWidth() - 2;
 
-        int msgHeight, msgWidth;
-        int x, y;
-        int verticalOffset = -10;
-        if (isVictorious) {
-            msgHeight = 7;
-            msgWidth = 78 + 2; // width must be even (pari)
-            x = getDimStart(maxWidth, msgWidth);
-            y = getDimStart(maxHeight, msgHeight);
-            printYouWinScreen(x, y + verticalOffset);
+        List<String> winning = new ArrayList<String>();
+        List<String> losing = new ArrayList<String>();
+        for (LeaderboardEntry leaderboardEntry : ranking) {
+            String user = leaderboardEntry.username();
+            if (user.equals(username)) {
+                String color;
+                if (leaderboardEntry.winner()) {
+                    color = "\033[31m";
+                } else {
+                    color = "\033[33m";
+                }
 
-        } else {
-            msgHeight = 10;
-            msgWidth = 70 + 2; // width must be even (pari)
-            x = getDimStart(maxWidth, msgWidth);
-            y = getDimStart(maxHeight, msgHeight);
-            printYouLoseScreen(x, y + verticalOffset);
-
+                user = color + "YOU" + "\033[0m";
+            }
+            String entry = user + " (" + leaderboardEntry.points() + ")";
+            if (leaderboardEntry.winner()) {
+                winning.add(entry);
+            } else {
+                losing.add(entry);
+            }
         }
+
+        String winningTitle = winning.size() == 1 ? "Winner: " : "Draw:";
+        String losingTitle = "Losers:";
+
+        final int startPos = (maxWidth - winningTitle.length()) / 2;
+        System.out.println(this.setPosition(startPos, 2) + winningTitle);
+        int i = 0;
+        final int base = 3;
+        for (String winner : winning) {
+            System.out.println(this.setPosition(startPos, base + i) + winner);
+            i++;
+        }
+
+        if (losing.size() > 0) {
+            i++;
+            System.out.println(this.setPosition(startPos, base + i) + losingTitle);
+            i++;
+            for (String loser : losing) {
+                System.out.println(this.setPosition(startPos, base + i) + loser);
+                i++;
+            }
+        }
+
+        System.out.println(this.setPosition(0, this.getHeight()) + " ");
+        System.exit(0);
     }
 
     /**
@@ -1132,7 +1162,7 @@ public class TuiPrinter {
     }
 
     /**
-     * Prints a list of strings.
+     * Prints a list of strings with a box around them.
      *
      * @param stringList list of strings
      * @param msg message to display

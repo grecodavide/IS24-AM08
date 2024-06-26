@@ -54,7 +54,6 @@ public final class PlayerControllerTCP extends PlayerController {
      * Utility method called when there's a connection error, it removes the player from the match.
      */
     private void connectionError() {
-        System.out.println("There was a connection error with player " + this.player.getUsername());
         match.removePlayer(player);
         match.unsubscribeObserver(this);
     }
