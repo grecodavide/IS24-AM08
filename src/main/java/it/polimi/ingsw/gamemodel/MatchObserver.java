@@ -1,7 +1,8 @@
 package it.polimi.ingsw.gamemodel;
 
-import java.util.Map;
 import it.polimi.ingsw.utils.Pair;
+
+import java.util.Map;
 
 /**
  * Interface to be implemented by any class that wants to be an observer of {@link Match}, so wants to be able to
@@ -46,8 +47,9 @@ public interface MatchObserver {
      * Note that Match calls this method on all MatchObservers instance subscribed to itself, then
      * even the MatchObserver causing this event gets notified.
      *
-     * @param someone The player instance that has chosen the side
-     * @param side    The chosen initial card side
+     * @param someone            The player instance that has chosen the side
+     * @param side               The chosen initial card side
+     * @param availableResources The resources available at the moment to the player that set its initial card side
      */
     void someoneSetInitialSide(Player someone, Side side, Map<Symbol, Integer> availableResources);
 
@@ -97,8 +99,21 @@ public interface MatchObserver {
      */
     void someoneDrewCard(Player someone, DrawSource source, PlayableCard card, PlayableCard replacementCard);
 
+    /**
+     * Notifies that someone has sent a broadcast message.
+     *
+     * @param someone The sender username
+     * @param text    The message content
+     */
     void someoneSentBroadcastText(Player someone, String text);
 
+    /**
+     * Notifies that someone has sent a private message to this player.
+     *
+     * @param someone   The sender username
+     * @param recipient The recipient username
+     * @param text      The message content
+     */
     void someoneSentPrivateText(Player someone, Player recipient, String text);
 
     /**

@@ -16,6 +16,9 @@ public abstract class Card implements Serializable {
     protected CardFace back;
     protected Integer id;
 
+    /**
+     * Empty constructor used for deserialization.
+     */
     public Card() {
 
     }
