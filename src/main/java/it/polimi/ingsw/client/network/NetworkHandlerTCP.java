@@ -1,5 +1,8 @@
 package it.polimi.ingsw.client.network;
 
+import java.io.IOException;
+import java.net.Socket;
+import java.rmi.RemoteException;
 import it.polimi.ingsw.client.frontend.GraphicalView;
 import it.polimi.ingsw.controllers.PlayerControllerTCP;
 import it.polimi.ingsw.gamemodel.DrawSource;
@@ -14,13 +17,9 @@ import it.polimi.ingsw.server.Server;
 import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.Pair;
 
-import java.io.IOException;
-import java.net.Socket;
-import java.rmi.RemoteException;
-
 /**
- * Class used by a generic client to receive from and transmit to a remote {@link Server} instance and a
- * remote {@link PlayerControllerTCP} instance using the TCP protocol.
+ * Class used by a generic client to receive from and transmit to a remote {@link Server} instance
+ * and a remote {@link PlayerControllerTCP} instance using the TCP protocol.
  */
 public class NetworkHandlerTCP extends NetworkHandler {
     private final IOHandler io;
@@ -30,11 +29,13 @@ public class NetworkHandlerTCP extends NetworkHandler {
      * Initialize the instance all its internal attributes.
      *
      * @param graphicalView The GraphicalView to be subscribed to this NetworkHandler instance
-     * @param ipAddress     The server IP address
-     * @param port          The server port
-     * @throws RemoteException If the remote server is considered not reachable any more and cannot return as usual
+     * @param ipAddress The server IP address
+     * @param port The server port
+     * @throws RemoteException If the remote server is considered not reachable any more and cannot
+     *         return as usual
      */
-    public NetworkHandlerTCP(GraphicalView graphicalView, String ipAddress, Integer port) throws IOException {
+    public NetworkHandlerTCP(GraphicalView graphicalView, String ipAddress, Integer port)
+            throws IOException {
         super(graphicalView, ipAddress, port);
         this.socket = new Socket(ipAddress, port);
         this.io = new IOHandler(socket);
@@ -81,7 +82,7 @@ public class NetworkHandlerTCP extends NetworkHandler {
     /**
      * Asks to create a match.
      *
-     * @param matchName  The match name
+     * @param matchName The match name
      * @param maxPlayers The match maximum number of players
      */
     @Override
@@ -139,8 +140,8 @@ public class NetworkHandlerTCP extends NetworkHandler {
      * Plays a card.
      *
      * @param coords The coordinates on which to place the card
-     * @param card   The PlayableCard to play
-     * @param side   The side on which to play the chosen card
+     * @param card The PlayableCard to play
+     * @param side The side on which to play the chosen card
      */
     @Override
     public void playCard(Pair<Integer, Integer> coords, PlayableCard card, Side side) {
@@ -171,7 +172,7 @@ public class NetworkHandlerTCP extends NetworkHandler {
      * Sends a private message to a match player
      *
      * @param recipient The recipient username
-     * @param text      The content of the message
+     * @param text The content of the message
      */
     @Override
     public void sendPrivateText(String recipient, String text) {
@@ -201,11 +202,18 @@ public class NetworkHandlerTCP extends NetworkHandler {
         }
     }
 
+
+    /**
+     * Utility to send a message to the socket's output stream. If there was an error, it means the
+     * connection crashed, and so tries to disconnect the player
+     * 
+     * @param msg The message to send
+     */
     private void sendMessage(Message msg) {
         try {
             this.io.writeMsg(msg);
         } catch (IOException e) {
-            // handle IO
+            this.disconnect();
         }
     }
 }

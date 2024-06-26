@@ -4,31 +4,33 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import it.polimi.ingsw.client.network.RemoteViewInterface;
-import it.polimi.ingsw.exceptions.*;
+import it.polimi.ingsw.exceptions.HandException;
+import it.polimi.ingsw.exceptions.WrongChoiceException;
+import it.polimi.ingsw.exceptions.WrongStateException;
+import it.polimi.ingsw.exceptions.WrongTurnException;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.network.messages.Message;
 import it.polimi.ingsw.network.messages.errors.ErrorMessage;
 import it.polimi.ingsw.network.messages.responses.*;
 import it.polimi.ingsw.network.tcp.IOHandler;
-import it.polimi.ingsw.server.Server;
 import it.polimi.ingsw.utils.Pair;
 import it.polimi.ingsw.utils.PlacedCardRecord;
 
 /**
- * Subclass of {@link PlayerController} that implements its abstract methods through TCP interactions.
+ * Subclass of {@link PlayerController} that implements its abstract methods through TCP
+ * interactions.
  */
 public final class PlayerControllerTCP extends PlayerController {
     private final IOHandler io;
 
     /**
-     * Instantiates the internal Player with the given username and sets the internal Match reference to the given one,
-     * add the new Player instance to the match and subscribe this class instance to the match observers.
+     * Instantiates the internal Player with the given username and sets the internal Match
+     * reference to the given one, add the new Player instance to the match and subscribe this class
+     * instance to the match observers.
      *
      * @param username The username of the new player of the Match
-     * @param match    The match to which this PlayerClass must pertain
-     * @param io       The I/O handler to be attached to this instance
+     * @param match The match to which this PlayerClass must pertain
+     * @param io The I/O handler to be attached to this instance
      */
     public PlayerControllerTCP(String username, Match match, IOHandler io) {
         super(username, match);
@@ -52,6 +54,7 @@ public final class PlayerControllerTCP extends PlayerController {
      * Utility method called when there's a connection error, it removes the player from the match.
      */
     private void connectionError() {
+        System.out.println("There was a connection error with player " + this.player.getUsername());
         match.removePlayer(player);
         match.unsubscribeObserver(this);
     }
@@ -67,8 +70,7 @@ public final class PlayerControllerTCP extends PlayerController {
     }
 
     /**
-     * Notifies that the match has just started.
-     * Note that is supposed to be called by the match.
+     * Notifies that the match has just started. Note that is supposed to be called by the match.
      */
     @Override
     public void matchStarted() {
@@ -77,10 +79,10 @@ public final class PlayerControllerTCP extends PlayerController {
     }
 
     /**
-     * Notifies that someone has joined the match.
-     * Note that this method is supposed to be called by a match, moreover the match calls this method on all the
-     * MatchObservers instance subscribed to itself, then even the MatchObserver causing this event gets notified.
-     * If and only if the PlayerController receiving this method call is the one linked to given `someone`, it notifies
+     * Notifies that someone has joined the match. Note that this method is supposed to be called by
+     * a match, moreover the match calls this method on all the MatchObservers instance subscribed
+     * to itself, then even the MatchObserver causing this event gets notified. If and only if the
+     * PlayerController receiving this method call is the one linked to given `someone`, it notifies
      * the view about the current lobby information.
      *
      * @param someone The Player instance that has joined
@@ -92,9 +94,9 @@ public final class PlayerControllerTCP extends PlayerController {
     }
 
     /**
-     * Notifies that someone has quit from the match.
-     * Note that Match calls this method on all MatchObservers instance subscribed to itself, then
-     * even the MatchObserver causing this event gets notified.
+     * Notifies that someone has quit from the match. Note that Match calls this method on all
+     * MatchObservers instance subscribed to itself, then even the MatchObserver causing this event
+     * gets notified.
      *
      * @param someone The Player instance that has quit
      */
@@ -105,14 +107,14 @@ public final class PlayerControllerTCP extends PlayerController {
     }
 
     /**
-     * Notifies that someone has drawn its initial card.
-     * Note that this method is supposed to be called by a match, moreover the match calls this method on all the
-     * MatchObservers instance subscribed to itself, then even the MatchObserver causing this event gets notified.
-     * If and only if the PlayerController receiving this method call is the one linked to given `someone`, it notifies
-     * the view that it received an initial card.
+     * Notifies that someone has drawn its initial card. Note that this method is supposed to be
+     * called by a match, moreover the match calls this method on all the MatchObservers instance
+     * subscribed to itself, then even the MatchObserver causing this event gets notified. If and
+     * only if the PlayerController receiving this method call is the one linked to given `someone`,
+     * it notifies the view that it received an initial card.
      *
      * @param someone The player instance that has drawn the card
-     * @param card    The initial card that has been drawn
+     * @param card The initial card that has been drawn
      */
     @Override
     public void someoneDrewInitialCard(Player someone, InitialCard card) {
@@ -120,12 +122,12 @@ public final class PlayerControllerTCP extends PlayerController {
     }
 
     /**
-     * Notifies that someone has chosen its initial card side.
-     * Note that this method is supposed to be called by a match, moreover the match calls this method on all the
-     * MatchObservers instance subscribed to itself, then even the MatchObserver causing this event gets notified.
+     * Notifies that someone has chosen its initial card side. Note that this method is supposed to
+     * be called by a match, moreover the match calls this method on all the MatchObservers instance
+     * subscribed to itself, then even the MatchObserver causing this event gets notified.
      *
      * @param someone The player instance that has chosen the side
-     * @param side    The chosen initial card side
+     * @param side The chosen initial card side
      */
     @Override
     public void someoneSetInitialSide(Player someone, Side side,
@@ -135,13 +137,14 @@ public final class PlayerControllerTCP extends PlayerController {
     }
 
     /**
-     * Notifies that someone has drawn two secret objectives.
-     * Note that this method is supposed to be called by a match, moreover the match calls this method on all the
-     * MatchObservers instance subscribed to itself, then even the MatchObserver causing this event gets notified.
-     * If and only if the PlayerController receiving this method call is the one linked to given `someone`, it notifies
-     * the view about the proposed objectives, the other views will just receive a notification about the player's username.
+     * Notifies that someone has drawn two secret objectives. Note that this method is supposed to
+     * be called by a match, moreover the match calls this method on all the MatchObservers instance
+     * subscribed to itself, then even the MatchObserver causing this event gets notified. If and
+     * only if the PlayerController receiving this method call is the one linked to given `someone`,
+     * it notifies the view about the proposed objectives, the other views will just receive a
+     * notification about the player's username.
      *
-     * @param someone    The player instance that has drawn the objectives
+     * @param someone The player instance that has drawn the objectives
      * @param objectives The two proposed objectives
      */
     @Override
@@ -152,12 +155,12 @@ public final class PlayerControllerTCP extends PlayerController {
     }
 
     /**
-     * Notifies that someone has chosen the secret objective.
-     * Note that this method is supposed to be called by a match, moreover the match calls this method on all the
-     * MatchObservers instance subscribed to itself, then even the MatchObserver causing this event gets notified.
-     * The view will just receive `someone` username, no the objective.
+     * Notifies that someone has chosen the secret objective. Note that this method is supposed to
+     * be called by a match, moreover the match calls this method on all the MatchObservers instance
+     * subscribed to itself, then even the MatchObserver causing this event gets notified. The view
+     * will just receive `someone` username, no the objective.
      *
-     * @param someone   The player instance that has chosen the secret objective
+     * @param someone The player instance that has chosen the secret objective
      * @param objective The chosen secret objective
      */
     @Override
@@ -170,14 +173,14 @@ public final class PlayerControllerTCP extends PlayerController {
     }
 
     /**
-     * Notifies that someone has played a card.
-     * Note that this method is supposed to be called by a match, moreover the match calls this method on all the
-     * MatchObservers instance subscribed to itself, then even the MatchObserver causing this event gets notified.
+     * Notifies that someone has played a card. Note that this method is supposed to be called by a
+     * match, moreover the match calls this method on all the MatchObservers instance subscribed to
+     * itself, then even the MatchObserver causing this event gets notified.
      *
      * @param someone The Player instance that has played a card
-     * @param coords  The coordinates on which the card has been placed
-     * @param card    The PlayableCard that has been played
-     * @param side    The side on which the card has been placed
+     * @param coords The coordinates on which the card has been placed
+     * @param card The PlayableCard that has been played
+     * @param side The side on which the card has been placed
      */
     @Override
     public void someonePlayedCard(Player someone, Pair<Integer, Integer> coords, PlayableCard card,
@@ -187,16 +190,17 @@ public final class PlayerControllerTCP extends PlayerController {
     }
 
     /**
-     * Notifies that someone has drawn a card.
-     * The replacement card is the one that has taken the place of the drawn one, it's needed since observers have to
-     * know the reign of the new card on top of the decks.
-     * Note that this method is supposed to be called by a match, moreover the match calls this method on all the
-     * MatchObservers instance subscribed to itself, then even the MatchObserver causing this event gets notified.
+     * Notifies that someone has drawn a card. The replacement card is the one that has taken the
+     * place of the drawn one, it's needed since observers have to know the reign of the new card on
+     * top of the decks. Note that this method is supposed to be called by a match, moreover the
+     * match calls this method on all the MatchObservers instance subscribed to itself, then even
+     * the MatchObserver causing this event gets notified.
      *
-     * @param someone         The Player instance that has drawn a card
-     * @param source          The drawing source from which the card has been drawn
-     * @param card            The card that has been drawn
-     * @param replacementCard The card that has replaced the drawn card, null if the draw source is a deck
+     * @param someone The Player instance that has drawn a card
+     * @param source The drawing source from which the card has been drawn
+     * @param card The card that has been drawn
+     * @param replacementCard The card that has replaced the drawn card, null if the draw source is
+     *        a deck
      */
     @Override
     public void someoneDrewCard(Player someone, DrawSource source, PlayableCard card,
@@ -213,7 +217,7 @@ public final class PlayerControllerTCP extends PlayerController {
      * Notifies that someone sent a message in the public chat.
      *
      * @param someone The player that send the message
-     * @param text    Content of the message
+     * @param text Content of the message
      */
     @Override
     public void someoneSentBroadcastText(Player someone, String text) {
@@ -222,13 +226,12 @@ public final class PlayerControllerTCP extends PlayerController {
     }
 
     /**
-     * Notifies that someone sent a private message to another user.
-     * If the recipient is the current player, then the view is notified,
-     * otherwise the message is ignored.
+     * Notifies that someone sent a private message to another user. If the recipient is the current
+     * player, then the view is notified, otherwise the message is ignored.
      *
-     * @param someone   The player that sent the message
+     * @param someone The player that sent the message
      * @param recipient The recipient of the message
-     * @param text      Content of the message
+     * @param text Content of the message
      */
     @Override
     public void someoneSentPrivateText(Player someone, Player recipient, String text) {
@@ -249,6 +252,11 @@ public final class PlayerControllerTCP extends PlayerController {
     }
 
 
+    /**
+     * Tries to get the player initial card, unless there was a {@link WrongTurnException} or a
+     * {@link WrongStateException}, in which case a new {@link ErrorMessage} is sent with the
+     * exception content
+     */
     public void drawInitialCard() {
         try {
             this.player.drawInitialCard();
@@ -258,6 +266,13 @@ public final class PlayerControllerTCP extends PlayerController {
     }
 
 
+    /**
+     * Tries to set the player's initial card's side, unless there was a {@link WrongTurnException}
+     * or a {@link WrongStateException}, in which case a new {@link ErrorMessage} is sent with the
+     * exception content
+     *
+     * @param side The chosen card
+     */
     public void chooseInitialCardSide(Side side) {
         try {
             this.player.chooseInitialCardSide(side);
@@ -266,6 +281,11 @@ public final class PlayerControllerTCP extends PlayerController {
         }
     }
 
+    /**
+     * Tries to get the player's secret objectives pair (from which he will have to choose one),
+     * unless there was a {@link WrongTurnException} or a {@link WrongStateException}, in which case
+     * a new {@link ErrorMessage} is sent with the exception content
+     */
     public void drawSecretObjectives() {
         try {
             this.player.drawSecretObjectives();
@@ -274,6 +294,13 @@ public final class PlayerControllerTCP extends PlayerController {
         }
     }
 
+    /**
+     * Tries to set the player's secret objective, unless there was a {@link WrongTurnException} or
+     * a {@link WrongStateException}, in which case a new {@link ErrorMessage} is sent with the
+     * exception content
+     *
+     * @param objective The chosen objective
+     */
     public void chooseSecretObjective(Objective objective) {
         try {
             this.player.chooseSecretObjective(objective);
@@ -282,6 +309,14 @@ public final class PlayerControllerTCP extends PlayerController {
         }
     }
 
+    /**
+     * Tries to place a card on the player's board, unless there was a {@link WrongStateException},
+     * in which case a new {@link ErrorMessage} is sent with the exception content
+     *
+     * @param coords The chosen coordinates
+     * @param card The chosen card
+     * @param side The chosen side
+     */
     public void playCard(Pair<Integer, Integer> coords, PlayableCard card, Side side) {
         try {
             this.player.playCard(coords, card, side);
@@ -290,6 +325,12 @@ public final class PlayerControllerTCP extends PlayerController {
         }
     }
 
+    /**
+     * Tries to draw a card, unless there was a {@link WrongStateException}, in which case a new
+     * {@link ErrorMessage} is sent with the exception content
+     *
+     * @param source The chosen source
+     */
     public void drawCard(DrawSource source) {
         try {
             this.player.drawCard(source);
@@ -312,7 +353,7 @@ public final class PlayerControllerTCP extends PlayerController {
      * Sends a private message in the chat.
      *
      * @param recipientUsername username of the recipient
-     * @param text      text of the message
+     * @param text text of the message
      */
     public void sendPrivateText(String recipientUsername, String text) {
         Player recipient = null;
@@ -350,7 +391,8 @@ public final class PlayerControllerTCP extends PlayerController {
             String username = player.getUsername();
             Board board = player.getBoard();
             playersUsernamesAndPawns.put(username, player.getPawnColor());
-            playersHands.put(username, board.getCurrentHand().stream().map(Card::getId).collect(Collectors.toList()));
+            playersHands.put(username,
+                    board.getCurrentHand().stream().map(Card::getId).collect(Collectors.toList()));
             availableResources.put(username, board.getAvailableResources());
 
             Map<Integer, PlacedCardRecord> placed = new HashMap<>();
@@ -364,8 +406,10 @@ public final class PlayerControllerTCP extends PlayerController {
         });
 
         Pair<Objective, Objective> visibleObjectivesValue = this.match.getVisibleObjectives();
-        // Get a Set of Entry, which contains key and value, and create a new Hashmap with key and value.ID
-        visibleObjectives = new Pair<>(visibleObjectivesValue.first().getID(), visibleObjectivesValue.second().getID());
+        // Get a Set of Entry, which contains key and value, and create a new Hashmap with key and
+        // value.ID
+        visibleObjectives = new Pair<>(visibleObjectivesValue.first().getID(),
+                visibleObjectivesValue.second().getID());
         visiblePlayableCards = this.match.getVisiblePlayableCards().entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getId()));
         decksTopReigns = this.match.getDecksTopReigns();
@@ -375,8 +419,8 @@ public final class PlayerControllerTCP extends PlayerController {
 
 
         Message msg = new MatchResumedMessage(playersUsernamesAndPawns, playersHands,
-        visibleObjectives, visiblePlayableCards, decksTopReigns, secretObjective,
-        availableResources, placedCards, playerPoints, currentPlayer, drawPhase);
+                visibleObjectives, visiblePlayableCards, decksTopReigns, secretObjective,
+                availableResources, placedCards, playerPoints, currentPlayer, drawPhase);
 
         this.sendMessage(msg);
     }
