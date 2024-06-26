@@ -851,9 +851,10 @@ public class TuiPrinter {
     }
 
     /**
-     * Prints the end screen (win/lose) in the middle of the tui view.
+     * Prints the game's ranking.
      * 
-     * @param isVictorious whether the player won or not
+     * @param ranking The Leaderboard
+     * @param username The player's username, used to highlight your rank
      */
     public void printEndScreen(List<LeaderboardEntry> ranking, String username) {
         int maxWidth = this.getWidth() - 2;
