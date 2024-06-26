@@ -35,6 +35,9 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
         super(username, match);
     }
 
+    /**
+     * Notifies the view that match has resumed after a server crash.
+     */
     @Override
     public void matchResumed() {
         if (view == null) {
@@ -483,8 +486,15 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
         }
     }
 
-    private LeaderboardEntry createLeaderboardEntry(Player p, Boolean b) {
-        return new LeaderboardEntry(p.getUsername(), p.getPoints(), b);
+    /**
+     * Creates a {@link LeaderboardEntry} instance from the given parameters.
+     *
+     * @param player The player of the {@link LeaderboardEntry}
+     * @param winner True if the player is the winner
+     * @return The new {@link LeaderboardEntry} instance
+     */
+    private LeaderboardEntry createLeaderboardEntry(Player player, Boolean winner) {
+        return new LeaderboardEntry(player.getUsername(), player.getPoints(), winner);
     }
 
     /**
@@ -505,6 +515,11 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
         }
     }
 
+    /**
+     * Getter for the view associated to this instance.
+     *
+     * @return The {@link RemoteViewInterface} of this instance
+     */
     public RemoteViewInterface getView() {
         return view;
     }
@@ -518,6 +533,9 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
         System.err.println("There has been a connection error with player: " + player.getUsername());
     }
 
+    /**
+     * Prints an error in stderr when this instance is being used without a view attached to it.
+     */
     private void onUnregisteredView() {
         System.err.println("The PlayerControllerRMI of player " + player.getUsername() + " hasn't got a corresponding view");
     }

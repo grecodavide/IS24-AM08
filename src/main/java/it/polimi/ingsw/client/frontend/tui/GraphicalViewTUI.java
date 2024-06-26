@@ -415,7 +415,7 @@ public class GraphicalViewTUI extends GraphicalView {
 
 
     /**
-     * Asks the player to choose an username.
+     * Asks the player to choose a username.
      */
     private void chooseUsername() {
         String userIn = "";

@@ -23,7 +23,7 @@ import java.util.Optional;
  */
 public abstract sealed class PlayerController implements MatchObserver permits PlayerControllerRMI, PlayerControllerTCP {
     protected Player player;
-    protected Match match;
+    protected final Match match;
 
     /**
      * Instantiates the internal Player with the given username and sets the internal Match reference to
@@ -49,10 +49,13 @@ public abstract sealed class PlayerController implements MatchObserver permits P
 
     /**
      * Tries to effectively join a match, adding himself to the list of observers and the corresponding
-     * player to the match, if the username is valid
+     * player to the match, if the username is valid.
      *
-     * @throws AlreadyUsedUsernameException if the username is already taken
-     * @throws WrongStateException          if the match currently does not accept new players
+     * @throws AlreadyUsedUsernameException If the username is already taken
+     * @throws WrongStateException          If the match currently does not accept new players
+     * @throws ChosenMatchException         If the chosen match is not valid
+     * @throws WrongNameException           If the chosen username is not acceptable due to alphabetical restrictions
+     * @throws IllegalArgumentException     If the player is already in the match or too many players would be in the match
      */
     public void sendJoined() throws IllegalArgumentException, AlreadyUsedUsernameException, WrongStateException, ChosenMatchException, WrongNameException {
         if (!GuiUtil.isValidName(this.player.getUsername())) {
@@ -90,5 +93,8 @@ public abstract sealed class PlayerController implements MatchObserver permits P
         }
     }
 
+    /**
+     * Notifies the view that match has resumed after a server crash.
+     */
     public abstract void matchResumed();
 }

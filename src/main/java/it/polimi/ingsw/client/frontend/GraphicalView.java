@@ -58,7 +58,7 @@ public abstract class GraphicalView {
     }
 
     /**
-     * Sets the internal state according to the occurance of an error.
+     * Sets the internal state according to the occurrence of an error.
      *
      * @param exception The thrown exception
      */
