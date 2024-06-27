@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NextTurnState.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.gamemodel</a> &gt; <span class="el_source">NextTurnState.java</span></div><h1>NextTurnState.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.gamemodel;
+
+import it.polimi.ingsw.exceptions.WrongStateException;
+
+import java.io.Serial;
+import java.io.Serializable;
+
+/**
+ * Subclass of {@link MatchState}. This is the state in which the match decides whether it must give initial cards, give
+ * secret objectives, or wait for someone to play a card, according to the current match flow.
+ */
+public class NextTurnState extends MatchState implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * Initializes this instance.
+     *
+     * @param match The match in this state
+     */
+    public NextTurnState(Match match) {
+<span class="fc" id="L22">        super(match);</span>
+<span class="fc" id="L23">        match.nextPlayer();</span>
+<span class="fc" id="L24">    }</span>
+
+    /**
+     * This method call is allowed by this class instances if and only if the match hasn't started yet
+     * and the initial card side choosing has already finished.
+     *
+     * @throws WrongStateException If called when the match has already started or the initial card side choosing
+     *                             hasn't finished yet.
+     */
+    @Override
+    public void proposeSecretObjectives() throws WrongStateException {
+<span class="pc bpc" id="L35" title="1 of 4 branches missed.">        if (match.isStarted() || !match.isInitialTurnFinished())</span>
+<span class="fc" id="L36">            throw new WrongStateException(&quot;proposeSecretObjectives called after the match was started&quot;);</span>
+<span class="fc" id="L37">    }</span>
+
+    /**
+     * This method call is allowed by this class instances if and only if the match has already started.
+     * @throws WrongStateException If called when the match hasn't started yet
+     */
+    @Override
+    public void makeMove() throws WrongStateException {
+<span class="pc bpc" id="L45" title="1 of 2 branches missed.">        if (!match.isStarted())</span>
+<span class="nc" id="L46">            throw new WrongStateException(&quot;makeMove called when match was not started yet&quot;);</span>
+<span class="fc" id="L47">    }</span>
+
+    /**
+     * This method call is allowed by this class instances if and only if the initial card side choosing
+     * hasn't finished yet.
+     * @throws WrongStateException If called when the initial card side choosing has already finished.
+     */
+    @Override
+    public void drawInitialCard() throws WrongStateException {
+<span class="pc bpc" id="L56" title="1 of 2 branches missed.">        if (match.isInitialTurnFinished())</span>
+<span class="nc" id="L57">            throw new WrongStateException(&quot;drawInitialCard called after the initial turn was finished&quot;);</span>
+<span class="fc" id="L58">    }</span>
+
+    /**
+     * Transitions to:
+     *  - {@link AfterMoveState} if the match has already started;
+     *  - {@link ChooseInitialSideState} if the initial card side choosing hasn't finished yet;
+     *  - {@link ChooseSecretObjectiveState} if the match hasn't started yet and the initial card side choosing has
+     *    already finished;
+     */
+    @Override
+    public void transition() {
+        MatchState nextState;
+
+<span class="fc bfc" id="L71" title="All 2 branches covered.">        if (match.isStarted())</span>
+<span class="fc" id="L72">            nextState = new AfterMoveState(match);</span>
+<span class="fc bfc" id="L73" title="All 2 branches covered.">        else if (!match.isInitialTurnFinished())</span>
+<span class="fc" id="L74">            nextState = new ChooseInitialSideState(match);</span>
+        else
+<span class="fc" id="L76">            nextState = new ChooseSecretObjectiveState(match);</span>
+
+<span class="fc" id="L78">        match.setState(nextState);</span>
+<span class="fc" id="L79">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

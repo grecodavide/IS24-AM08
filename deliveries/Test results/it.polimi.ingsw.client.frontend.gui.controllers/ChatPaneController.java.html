@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ChatPaneController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.client.frontend.gui.controllers</a> &gt; <span class="el_source">ChatPaneController.java</span></div><h1>ChatPaneController.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.client.frontend.gui.controllers;
+
+import javafx.animation.TranslateTransition;
+import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
+import javafx.util.Duration;
+
+import java.util.*;
+
+/**
+ * JavaFX controller for the chat pane
+ */
+<span class="nc" id="L23">public class ChatPaneController extends SceneController {</span>
+    @FXML
+    private Button sendMessageBtn;
+    @FXML
+    private TextFlow chatHistoryText;
+    @FXML
+    private HBox chatPane;
+    @FXML
+    private Button showChatBtn;
+    @FXML
+    private TextField chatInputText;
+    @FXML
+    private ChoiceBox&lt;String&gt; chatSelector;
+
+    public ScrollPane chatHistoryScrollPane;
+    public VBox chatContainer;
+<span class="nc" id="L39">    private final Map&lt;String, String&gt; chatHistory = new HashMap&lt;&gt;();</span>
+    private boolean isVisible;
+    private Queue&lt;String&gt; unconfirmedPrivateMessagesReceivers;
+
+    @Override
+    public void initialize() {
+<span class="nc" id="L45">        chatHistoryScrollPane.getStyleClass().clear();</span>
+<span class="nc" id="L46">        isVisible = false;</span>
+<span class="nc" id="L47">        chatPane.setTranslateX(460);</span>
+<span class="nc" id="L48">        setIconStatus(false);</span>
+
+<span class="nc" id="L50">        unconfirmedPrivateMessagesReceivers = new LinkedList&lt;&gt;();</span>
+
+        // Add the broadcast item as an entry in the chatSelector and set it as default item
+<span class="nc" id="L53">        chatHistory.put(&quot;broadcast&quot;, &quot;&quot;);</span>
+<span class="nc" id="L54">        chatSelector.getItems().add(&quot;broadcast&quot;);</span>
+<span class="nc" id="L55">        chatSelector.getSelectionModel().select(&quot;broadcast&quot;);</span>
+
+        // Show/hide the chat pane when the outer button is clicked
+<span class="nc" id="L58">        showChatBtn.setOnMouseClicked((mouseEvent -&gt; {</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">            isVisible = !isVisible;</span>
+<span class="nc" id="L60">            changeVisibility();</span>
+<span class="nc" id="L61">        }));</span>
+
+        // Send message written in input box on send message button clicked
+<span class="nc" id="L64">        sendMessageBtn.setOnMouseClicked(mouseEvent -&gt; {</span>
+<span class="nc" id="L65">            this.submitMessage();</span>
+<span class="nc" id="L66">        });</span>
+<span class="nc" id="L67">        chatInputText.setOnKeyPressed(keyEvent -&gt; {</span>
+<span class="nc bnc" id="L68" title="All 2 branches missed.">            if (keyEvent.getCode() == KeyCode.ENTER)  {</span>
+<span class="nc" id="L69">                this.submitMessage();</span>
+            }
+<span class="nc" id="L71">        });</span>
+
+        // Switch to chat when a chatSelector item is clicked
+<span class="nc" id="L74">        chatSelector.setOnAction(actionEvent -&gt; {</span>
+<span class="nc" id="L75">            String selectedChatName = chatSelector.getSelectionModel().getSelectedItem();</span>
+<span class="nc" id="L76">            String selectedChatHistory = chatHistory.get(selectedChatName);</span>
+
+<span class="nc" id="L78">            chatHistoryText.getChildren().clear();</span>
+<span class="nc" id="L79">            chatHistoryText.getChildren().add(new Text(selectedChatHistory));</span>
+<span class="nc" id="L80">        });</span>
+<span class="nc" id="L81">    }</span>
+
+    /**
+     * Submit a message written in the chat. Calls the network and
+     * clears the input field
+     */
+    private void submitMessage() {
+<span class="nc" id="L88">        String inputText = chatInputText.getText();</span>
+<span class="nc" id="L89">        String selectedChatName = chatSelector.getSelectionModel().getSelectedItem();</span>
+
+<span class="nc bnc" id="L91" title="All 2 branches missed.">        if (!inputText.isBlank()) {</span>
+<span class="nc bnc" id="L92" title="All 2 branches missed.">            if (selectedChatName.equals(&quot;broadcast&quot;)) {</span>
+<span class="nc" id="L93">                super.view.sendBroadcastText(inputText);</span>
+            } else {
+<span class="nc" id="L95">                super.view.sendPrivateText(selectedChatName, inputText);</span>
+<span class="nc" id="L96">                unconfirmedPrivateMessagesReceivers.offer(selectedChatName);</span>
+            }
+        }
+
+<span class="nc" id="L100">        chatInputText.clear();</span>
+<span class="nc" id="L101">    }</span>
+    /**
+     * Adds a player to the chat.
+     *
+     * @param playerUsername The player's username
+     */
+    public void addPlayer(String playerUsername) {
+<span class="nc" id="L108">        chatHistory.put(playerUsername, &quot;&quot;);</span>
+<span class="nc" id="L109">        chatSelector.getItems().add(playerUsername);</span>
+<span class="nc" id="L110">    }</span>
+
+    /**
+     * Handles the receipt of a broadcast message from a user who's not the current client.
+     * For this purpose the method confirmSubmitBroadcastMessage(...) can be used.
+     *
+     * @param senderUsername The username of the player that sent the message
+     * @param message        The message sent
+     */
+    public void receiveBroadcastMessage(String senderUsername, String message) {
+<span class="nc" id="L120">        addMessage(&quot;broadcast&quot;, senderUsername, message);</span>
+<span class="nc" id="L121">    }</span>
+
+    /**
+     * Handles the receipt of a private message from a user who's not the current client.
+     * For this purpose the method confirmSubmitPrivateMessage(...) can be used.
+     *
+     * @param senderUsername The username of the player that sent the message
+     * @param message        The message sent
+     */
+    public void receivePrivateMessage(String senderUsername, String message) {
+<span class="nc" id="L131">        addMessage(senderUsername, senderUsername, message);</span>
+<span class="nc" id="L132">    }</span>
+
+    /**
+     * Handles the receipt of confirmation of successful submit of a broadcast message
+     * from this client to the server (either broadcast or private).
+     *
+     * @param message The message to be confirmed
+     */
+    public void confirmSubmitBroadcastMessage(String message) {
+<span class="nc" id="L141">        addMessage(&quot;broadcast&quot;, super.view.getUsername(), message);</span>
+<span class="nc" id="L142">    }</span>
+
+    /**
+     * Handles the receipt of confirmation of successful submit of a private message
+     * from this client to the server (either broadcast or private).
+     *
+     * @param message The message to be confirmed
+     */
+    public void confirmSubmitPrivateMessage(String message) {
+<span class="nc" id="L151">        String receiverUsername = unconfirmedPrivateMessagesReceivers.poll();</span>
+<span class="nc" id="L152">        addMessage(receiverUsername, super.view.getUsername(), message);</span>
+<span class="nc" id="L153">    }</span>
+
+    /**
+     * Utility method to add a message to the chat pane
+     *
+     * @param chatName       The chat in which to put the message
+     * @param senderUsername The sender's username
+     * @param message        Text message text content
+     */
+    private void addMessage(String chatName, String senderUsername, String message) {
+<span class="nc" id="L163">        String textMessage = senderUsername + &quot;: &quot; + message + &quot;\n&quot;;</span>
+
+        // Update the specific chat history associated to the sender
+<span class="nc" id="L166">        String updatedHistory = chatHistory.get(chatName) + textMessage;</span>
+<span class="nc" id="L167">        chatHistory.put(chatName, updatedHistory);</span>
+
+        // If it's the currently selected chat is this one
+<span class="nc bnc" id="L170" title="All 2 branches missed.">        if (chatSelector.getSelectionModel().getSelectedItem().equals(chatName)) {</span>
+            // Visually update the chat pane
+<span class="nc" id="L172">            chatHistoryText.getChildren().clear();</span>
+<span class="nc" id="L173">            chatHistoryText.getChildren().add(new Text(updatedHistory));</span>
+        }
+<span class="nc" id="L175">    }</span>
+
+    /**
+     * Switches the chat pane from visible to not visible and viceversa.
+     */
+    private void changeVisibility() {
+<span class="nc" id="L181">        TranslateTransition tt = new TranslateTransition(Duration.millis(200), chatPane);</span>
+<span class="nc bnc" id="L182" title="All 2 branches missed.">        if (isVisible) {</span>
+<span class="nc" id="L183">            tt.setToX(0);</span>
+<span class="nc" id="L184">            setIconStatus(true);</span>
+        } else {
+<span class="nc" id="L186">            tt.setToX(460);</span>
+<span class="nc" id="L187">            setIconStatus(false);</span>
+        }
+<span class="nc" id="L189">        tt.play();</span>
+<span class="nc" id="L190">    }</span>
+
+    /**
+     * Changes the icon of the button to open the chat.
+     *
+     * @param opened True if the chat is opened, false otherwise
+     */
+    private void setIconStatus(boolean opened) {
+        String path;
+<span class="nc bnc" id="L199" title="All 2 branches missed.">        if (opened) {</span>
+<span class="nc" id="L200">            path = &quot;/images/icons/right.png&quot;;</span>
+        } else {
+<span class="nc" id="L202">            path = &quot;/images/icons/left.png&quot;;</span>
+        }
+<span class="nc" id="L204">        ImageView img = new ImageView(new Image(path));</span>
+<span class="nc" id="L205">        img.setFitHeight(35);</span>
+<span class="nc" id="L206">        img.setFitWidth(35);</span>
+<span class="nc" id="L207">        showChatBtn.setGraphic(img);</span>
+<span class="nc" id="L208">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

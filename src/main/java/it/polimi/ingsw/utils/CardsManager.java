@@ -5,6 +5,7 @@ import com.google.gson.reflect.TypeToken;
 import it.polimi.ingsw.gamemodel.*;
 
 import java.io.FileReader;
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,7 +29,6 @@ public final class CardsManager {
      * Read from the JSON files, de-serialise the content in Map<Integer, XXX> objects, initialize the private attributes
      * with these values.
      */
-    // TODO: Implement Requirement deserializer
     private CardsManager() {
         CardJsonParser parser = new CardJsonParser();
         Gson gson = parser.getCardBuilder();
@@ -39,11 +39,19 @@ public final class CardsManager {
         Type objectivesType = new TypeToken<Map<Integer, Objective>>() {}.getType();
 
         try {
-            initialCards = gson.fromJson(new FileReader("src/main/resources/json/initial_card.json"), initialCardsType);
-            goldCards = gson.fromJson(new FileReader("src/main/resources/json/gold_card.json"), goldCardsType);
-            resourceCards = gson.fromJson(new FileReader("src/main/resources/json/resource_card.json"), resourceCardsType);
-            objectives = gson.fromJson(new FileReader("src/main/resources/json/objective_card.json"), objectivesType);
+            initialCards = gson.fromJson(getResource("/json/initial_card.json"), initialCardsType);
+            goldCards = gson.fromJson(getResource("/json/gold_card.json"), goldCardsType);
+            resourceCards = gson.fromJson(getResource("/json/resource_card.json"), resourceCardsType);
+            objectives = gson.fromJson(getResource("/json/objective_card.json"), objectivesType);
         } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String getResource(String path) {
+        try {
+            return new String(this.getClass().getResourceAsStream(path).readAllBytes());
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -93,6 +101,11 @@ public final class CardsManager {
         return objectives;
     }
 
+    /**
+     * Getter for the playable cards
+     *
+     * @return Map that matches an int ID to the corresponding playable card
+     */
     public Map<Integer, PlayableCard> getPlayableCards() {
         Map<Integer, PlayableCard> playableCards = new HashMap<>();
         playableCards.putAll(goldCards);

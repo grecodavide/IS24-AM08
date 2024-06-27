@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MatchStartedMessage.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.network.messages.responses</a> &gt; <span class="el_source">MatchStartedMessage.java</span></div><h1>MatchStartedMessage.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.network.messages.responses;
+
+import it.polimi.ingsw.gamemodel.*;
+import it.polimi.ingsw.utils.Pair;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Sent when the required amount of players is reached and the match is about to start.
+ */
+public final class MatchStartedMessage extends ResponseMessage {
+    private final Integer[] visibleObjectives;
+    private final Map&lt;DrawSource, Integer&gt; visibleCards;
+    private final Symbol[] visibleDeckReigns;
+    private final Map&lt;String, Integer[]&gt; playerHands;
+    private final Map&lt;String, Color&gt; playerPawnColors;
+
+    /**
+     * @return IDs of the visible objectives
+     */
+    public Integer[] getVisibleObjectives() {
+<span class="nc" id="L24">        return visibleObjectives;</span>
+    }
+
+    /**
+     * @return a Map that maps to each visible draw source the ID of the card
+     */
+    public Map&lt;DrawSource, Integer&gt; getVisibleCards() {
+<span class="nc" id="L31">        return visibleCards;</span>
+    }
+
+    /**
+     * @return Array of Symbol that contains the reign of top-card
+     * of both the gold and the resource deck, in the first and second slot respectively
+     */
+    public Symbol[] getVisibleDeckReigns() {
+<span class="nc" id="L39">        return visibleDeckReigns;</span>
+    }
+
+    /**
+     * @return Map mapping to each player username, the list of the cards they have in the hand
+     */
+    public Map&lt;String, Integer[]&gt; getPlayerHands() {
+<span class="nc" id="L46">        return playerHands;</span>
+    }
+
+    /**
+     * @return Map containing for each palyer username, the Color of their pawn
+     */
+    public Map&lt;String, Color&gt; getPlayerPawnColors() {
+<span class="nc" id="L53">        return playerPawnColors;</span>
+    }
+
+
+    /**
+     * Calculates the needed parameters given some information from the match
+     *
+     * @param objectives Pair containing the two visible objectives
+     * @param cards      Map that for each visible draw source maps the visible card
+     * @param deckReigns Pair containing the reign of the two visible cards on top of the deck.
+     *                   The first is for the Golds deck, while the second for the resources deck.
+     * @param players    List of the players in the match
+     */
+    public MatchStartedMessage(Pair&lt;Objective, Objective&gt; objectives, Map&lt;DrawSource, PlayableCard&gt; cards, Pair&lt;Symbol, Symbol&gt; deckReigns, List&lt;Player&gt; players) {
+<span class="fc" id="L67">        super(null);</span>
+<span class="fc" id="L68">        this.visibleObjectives = new Integer[]{null, null};</span>
+<span class="fc" id="L69">        this.visibleDeckReigns = new Symbol[]{null, null};</span>
+<span class="fc" id="L70">        visibleObjectives[0] = objectives.first().getID();</span>
+<span class="fc" id="L71">        visibleObjectives[1] = objectives.second().getID();</span>
+<span class="fc" id="L72">        visibleCards = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L73">        cards.forEach((d, c) -&gt; visibleCards.put(d, c.getId()));</span>
+<span class="fc" id="L74">        visibleDeckReigns[0] = deckReigns.first();</span>
+<span class="fc" id="L75">        visibleDeckReigns[1] = deckReigns.second();</span>
+        // Calculate player hands and colors
+<span class="fc" id="L77">        playerHands = new HashMap&lt;String, Integer[]&gt;();</span>
+<span class="fc" id="L78">        playerPawnColors = new HashMap&lt;String, Color&gt;();</span>
+<span class="fc bfc" id="L79" title="All 2 branches covered.">        for (Player p : players) {</span>
+            Integer[] result;
+<span class="fc" id="L81">            result = p.getBoard().getCurrentHand().stream()</span>
+<span class="fc" id="L82">                    .mapToInt(Card::getId)</span>
+<span class="fc" id="L83">                    .boxed().toArray(Integer[]::new);</span>
+<span class="fc" id="L84">            playerPawnColors.put(p.getUsername(), p.getPawnColor());</span>
+<span class="fc" id="L85">            playerHands.put(p.getUsername(), result);</span>
+<span class="fc" id="L86">        }</span>
+<span class="fc" id="L87">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

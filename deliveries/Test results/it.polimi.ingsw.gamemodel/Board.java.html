@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Board.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.gamemodel</a> &gt; <span class="el_source">Board.java</span></div><h1>Board.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.gamemodel;
+
+import it.polimi.ingsw.exceptions.CardException;
+import it.polimi.ingsw.exceptions.HandException;
+import it.polimi.ingsw.utils.Pair;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Board is the class that contains all the information relative to a {@link Player}'s status
+ */
+public class Board implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    private final List&lt;PlayableCard&gt; currentHand;
+    private final Map&lt;Pair&lt;Integer, Integer&gt;, PlacedCard&gt; placed;
+    private final Map&lt;Symbol, Integer&gt; availableResources;
+
+<span class="fc" id="L25">    private static final Map&lt;Pair&lt;Integer, Integer&gt;, Corner&gt; diagonalOffsets = Map.of(</span>
+<span class="fc" id="L26">            new Pair&lt;&gt;(-1, +1), Corner.BOTTOM_RIGHT,</span>
+<span class="fc" id="L27">            new Pair&lt;&gt;(+1, +1), Corner.BOTTOM_LEFT,</span>
+<span class="fc" id="L28">            new Pair&lt;&gt;(-1, -1), Corner.TOP_RIGHT,</span>
+<span class="fc" id="L29">            new Pair&lt;&gt;(+1, -1), Corner.TOP_LEFT</span>
+    );
+
+    /**
+     * Class constructor. No inputs taken as the board starts empty
+     */
+<span class="fc" id="L35">    public Board() {</span>
+<span class="fc" id="L36">        currentHand = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L37">        placed = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L38">        availableResources = new HashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L39" title="All 2 branches covered.">        for (Symbol s : Symbol.getBasicResources()) {</span>
+<span class="fc" id="L40">            availableResources.put(s, 0);</span>
+<span class="fc" id="L41">        }</span>
+<span class="fc" id="L42">    }</span>
+
+    /**
+     * Getter for the total resources of a player
+     *
+     * @return the resources of a player
+     */
+    public Map&lt;Symbol, Integer&gt; getAvailableResources() {
+<span class="fc" id="L50">        return this.availableResources;</span>
+    }
+
+    /**
+     * Getter for the board's placed cards
+     *
+     * @return map containing all the placed cards indexed by their coordinates
+     */
+    public Map&lt;Pair&lt;Integer, Integer&gt;, PlacedCard&gt; getPlacedCards() {
+<span class="fc" id="L59">        return this.placed;</span>
+    }
+
+    /**
+     * Getter for the hand of the player (which must be composed of three {@link PlayableCard}), which is visible
+     * to every player
+     *
+     * @return the player's hand
+     */
+    public List&lt;PlayableCard&gt; getCurrentHand() {
+<span class="fc" id="L69">        return this.currentHand;</span>
+    }
+
+    /**
+     * Removes a card from the hand of the player
+     *
+     * @param card the card that must be removed from the player's hand
+     * @throws HandException if the player does not have exactly 3 cards in his hand
+     */
+    protected void removeHandCard(PlayableCard card) throws HandException {
+<span class="pc bpc" id="L79" title="1 of 2 branches missed.">        if (currentHand.size() != 3) {</span>
+<span class="nc" id="L80">            throw new HandException(&quot;Tried to remove a card from an empty hand!&quot;);</span>
+        }
+<span class="fc" id="L82">        currentHand.remove(card);</span>
+<span class="fc" id="L83">    }</span>
+
+    /**
+     * Adds a card to the player's hand (which is visible to every player)
+     *
+     * @param card the card to put in the hand
+     * @throws HandException if the player already has 3 cards
+     */
+    protected void addHandCard(PlayableCard card) throws HandException {
+<span class="pc bpc" id="L92" title="1 of 2 branches missed.">        if (currentHand.size() &gt; 2) { // la mano ha 3 carte max</span>
+<span class="nc" id="L93">            throw new HandException(&quot;Tried to draw a card with a full hand!&quot;);</span>
+        }
+<span class="fc" id="L95">        currentHand.addLast(card);</span>
+<span class="fc" id="L96">    }</span>
+
+    /**
+     * Places the initial card in the (0, 0) coordinates, on the desired side
+     *
+     * @param card the initial card
+     * @param side the desired side
+     * @throws CardException if the (0, 0) position is already occupied
+     */
+    protected void setInitialCard(InitialCard card, Side side) throws CardException {
+<span class="pc bpc" id="L106" title="1 of 2 branches missed.">        if (placed.get(new Pair&lt;&gt;(0, 0)) != null) {</span>
+<span class="nc" id="L107">            throw new CardException(&quot;Tried to add initial card, but one already exists!&quot;);</span>
+        }
+<span class="fc" id="L109">        placed.put(new Pair&lt;&gt;(0, 0), new PlacedCard(card, side, 0));</span>
+
+<span class="fc" id="L111">        increaseResources(card, side);</span>
+
+<span class="fc bfc" id="L113" title="All 2 branches covered.">        for (Symbol s : card.getSide(side).getCenter()) {</span>
+<span class="pc bpc" id="L114" title="1 of 2 branches missed.">            if (Symbol.getBasicResources().contains(s)) {</span>
+<span class="fc" id="L115">                availableResources.put(s, availableResources.get(s) + 1);</span>
+            }
+<span class="fc" id="L117">        }</span>
+<span class="fc" id="L118">    }</span>
+
+    /**
+     * This method will add to the board the given card (assuming the positioning is valid), and update the player's resources
+     *
+     * @param coord the x and y coordinates in which the card must be placed
+     * @param card  the card to be placed
+     * @param side  the side of the card to be placed
+     * @param turn  the turn of the game in which the card is played
+     * @return the points gained from playing card
+     * @throws CardException if the card type is not known (neither a {@link ResourceCard} nor a {@link GoldCard})
+     */
+    protected int placeCard(Pair&lt;Integer, Integer&gt; coord, PlayableCard card, Side side, int turn) throws CardException {
+<span class="fc" id="L131">        PlacedCard last = new PlacedCard(card, side, turn);</span>
+<span class="fc" id="L132">        this.placed.put(coord, last);</span>
+<span class="fc" id="L133">        int points = 0;</span>
+
+        Symbol cornerSymbol;
+<span class="fc" id="L136">        Integer x = coord.first();</span>
+<span class="fc" id="L137">        Integer y = coord.second();</span>
+
+<span class="fc bfc" id="L139" title="All 2 branches covered.">        for (Pair&lt;Integer, Integer&gt; diagOffset : diagonalOffsets.keySet()) {</span>
+            try {
+<span class="fc" id="L141">                cornerSymbol = this.getSymbolIfPresent(new Pair&lt;&gt;(x + diagOffset.first(), y + diagOffset.second()), diagonalOffsets.get(diagOffset));</span>
+<span class="fc bfc" id="L142" title="All 2 branches covered.">                if (cornerSymbol != null) {</span>
+<span class="fc bfc" id="L143" title="All 2 branches covered.">                    if (Symbol.getBasicResources().contains(cornerSymbol)) {</span>
+<span class="fc" id="L144">                        availableResources.put(cornerSymbol, availableResources.get(cornerSymbol) - 1);</span>
+                    }
+                }
+<span class="nc" id="L147">            } catch (CardException e) {</span>
+<span class="nc" id="L148">                System.err.println(e.getMessage());</span>
+<span class="fc" id="L149">            }</span>
+<span class="fc" id="L150">        }</span>
+
+<span class="fc" id="L152">        increaseResources(card, side);</span>
+
+<span class="fc bfc" id="L154" title="All 2 branches covered.">        for (Symbol s : card.getSide(side).getCenter()) {</span>
+<span class="pc bpc" id="L155" title="1 of 2 branches missed.">            if (Symbol.getBasicResources().contains(s)) {</span>
+<span class="fc" id="L156">                availableResources.put(s, availableResources.get(s) + 1);</span>
+            }
+<span class="fc" id="L158">        }</span>
+<span class="fc bfc" id="L159" title="All 2 branches covered.">        if (side.equals(Side.FRONT)) {</span>
+<span class="pc bpc" id="L160" title="1 of 3 branches missed.">            switch (card) {</span>
+<span class="fc" id="L161">                case GoldCard gold -&gt; points = gold.calculatePoints(this, coord);</span>
+<span class="fc" id="L162">                case ResourceCard resource -&gt; points = resource.getPoints();</span>
+<span class="nc" id="L163">                default -&gt; throw new CardException(&quot;Unknown card type: &quot; + card.getClass() + &quot;!&quot;);</span>
+            }
+        }
+
+<span class="fc" id="L167">        return points;</span>
+    }
+
+    private Symbol getSymbolIfPresent(Pair&lt;Integer, Integer&gt; coord, Corner corner) throws CardException {
+<span class="fc" id="L171">        PlacedCard placedCard = placed.get(coord);</span>
+<span class="fc bfc" id="L172" title="All 2 branches covered.">        if (placedCard == null) {</span>
+<span class="fc" id="L173">            return null;</span>
+        }
+<span class="fc" id="L175">        return placedCard.getCard().getSide(placedCard.getPlayedSide()).getCorner(corner);</span>
+    }
+
+    /**
+     * Checks whether the positioning is valid: the card has to be in the player's hand (note that this method won't be called on the initial card),
+     * the given coordinates must be valid, and if the card has a requirement it must be met
+     *
+     * @param coord the coordinates in which the card should be played
+     * @param card  the card to check on
+     * @param side  the side of the card (needed for requirement check)
+     * @return the outcome for the placement, which is valid only if all conditions are met
+     * @throws CardException if the card is not in the player's hand
+     */
+    public PlacementOutcome verifyCardPlacement(Pair&lt;Integer, Integer&gt; coord, Card card, Side side) throws CardException {
+<span class="fc bfc" id="L189" title="All 2 branches covered.">        if (coord.equals(new Pair&lt;&gt;(0, 0))) {</span>
+<span class="fc" id="L190">            return PlacementOutcome.INVALID_COORDS;</span>
+        }
+<span class="fc bfc" id="L192" title="All 2 branches covered.">        if (!currentHand.contains(card)) {</span>
+<span class="fc" id="L193">            throw new CardException(&quot;The card is not in the player's hand!&quot;);</span>
+        }
+<span class="pc bpc" id="L195" title="1 of 2 branches missed.">        if (placed.containsKey(coord)) {</span>
+<span class="nc" id="L196">            return PlacementOutcome.INVALID_COORDS;</span>
+        }
+<span class="fc bfc" id="L198" title="All 4 branches covered.">        if (card instanceof GoldCard gold &amp;&amp; side == Side.FRONT) {</span>
+<span class="fc bfc" id="L199" title="All 2 branches covered.">            if (gold.getRequirement().timesMet(this) == 0)</span>
+<span class="fc" id="L200">                return PlacementOutcome.INVALID_ENOUGH_RESOURCES;</span>
+        }
+
+
+<span class="fc" id="L204">        Integer[] offsets = {-1, +1};</span>
+
+        Pair&lt;Integer, Integer&gt; cmp;
+
+        // cross-check: none exists
+<span class="fc bfc" id="L209" title="All 2 branches covered.">        for (Integer offset : offsets) {</span>
+<span class="fc" id="L210">            cmp = new Pair&lt;&gt;(coord.first() + offset, coord.second());</span>
+<span class="pc bpc" id="L211" title="1 of 2 branches missed.">            if (placed.containsKey(cmp)) {</span>
+<span class="nc" id="L212">                return PlacementOutcome.INVALID_COORDS;</span>
+            }
+
+<span class="fc" id="L215">            cmp = new Pair&lt;&gt;(coord.first(), coord.second() + offset);</span>
+<span class="pc bpc" id="L216" title="1 of 2 branches missed.">            if (placed.containsKey(cmp)) {</span>
+<span class="nc" id="L217">                return PlacementOutcome.INVALID_COORDS;</span>
+            }
+        }
+
+<span class="fc" id="L221">        boolean hasAdjacent = false;</span>
+
+<span class="fc" id="L223">        Integer x = coord.first();</span>
+<span class="fc" id="L224">        Integer y = coord.second();</span>
+
+<span class="fc bfc" id="L226" title="All 2 branches covered.">        for (Pair&lt;Integer, Integer&gt; diagOffset : Board.diagonalOffsets.keySet()) {</span>
+<span class="fc" id="L227">            cmp = new Pair&lt;&gt;(x + diagOffset.first(), y + diagOffset.second());</span>
+
+<span class="fc bfc" id="L229" title="All 2 branches covered.">            if (placed.get(cmp) != null) {</span>
+<span class="fc" id="L230">                hasAdjacent = true;</span>
+<span class="fc bfc" id="L231" title="All 2 branches covered.">                if (placed.get(cmp).getPlayedCardFace().getCorner(diagonalOffsets.get(diagOffset)) == Symbol.EMPTY_CORNER) {</span>
+<span class="fc" id="L232">                    return PlacementOutcome.INVALID_COORDS;</span>
+                }
+            }
+<span class="fc" id="L235">        }</span>
+
+<span class="fc bfc" id="L237" title="All 2 branches covered.">        if (!hasAdjacent) {</span>
+<span class="fc" id="L238">            return PlacementOutcome.INVALID_COORDS;</span>
+        }
+
+<span class="fc" id="L241">        return PlacementOutcome.VALID;</span>
+    }
+
+    private void increaseResources(Card card, Side side) throws CardException {
+        Symbol cornerSymbol;
+<span class="fc bfc" id="L246" title="All 2 branches covered.">        for (Corner c : Corner.values()) {</span>
+<span class="fc" id="L247">            cornerSymbol = card.getSide(side).getCorner(c);</span>
+<span class="fc bfc" id="L248" title="All 2 branches covered.">            if (Symbol.getBasicResources().contains(cornerSymbol)) {</span>
+<span class="fc" id="L249">                availableResources.put(cornerSymbol, availableResources.get(cornerSymbol) + 1);</span>
+            }
+        }
+<span class="fc" id="L252">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

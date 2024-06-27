@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Symbol.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.gamemodel</a> &gt; <span class="el_source">Symbol.java</span></div><h1>Symbol.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.gamemodel;
+
+import java.util.EnumSet;
+
+/**
+ * Contains all the possible symbols a corner can store or a multiplier can have.
+ * Besides the basic 4 factions and 3 symbols, there is also EMPTY_CORNER, which represents a corner without the
+ * possibility of placing another card on top of it (missing slot), FULL_CORNER which represents a valid corner without any symbol and
+ * CORNER_OBJ which represents a {@link QuantityRequirement} in which the multiplier is how many corners the card covered
+ */
+<span class="fc" id="L11">public enum Symbol {</span>
+<span class="fc" id="L12">    ANIMAL,</span>
+<span class="fc" id="L13">    PLANT,</span>
+<span class="fc" id="L14">    INSECT,</span>
+<span class="fc" id="L15">    FUNGUS,</span>
+<span class="fc" id="L16">    FEATHER,</span>
+<span class="fc" id="L17">    INKWELL,</span>
+<span class="fc" id="L18">    PARCHMENT,</span>
+<span class="fc" id="L19">    EMPTY_CORNER,</span>
+<span class="fc" id="L20">    FULL_CORNER,</span>
+<span class="fc" id="L21">    NO_MULT,</span>
+<span class="fc" id="L22">    CORNER_OBJ;</span>
+
+    /**
+     * Generates subset containing only the four basic reigns
+     *
+     * @return the subset containing only the four basic reigns
+     */
+    static public EnumSet&lt;Symbol&gt; getReigns() {
+<span class="fc" id="L30">        return EnumSet.of(</span>
+                ANIMAL,
+                PLANT,
+                INSECT,
+                FUNGUS
+        );
+    }
+
+    /**
+     * Generates subset containing only the basic resources (4 reigns and 3 &quot;symbols&quot;)
+     *
+     * @return the subset containing only the basic resources (4 reigns and 3 &quot;symbols&quot;)
+     */
+    static public EnumSet&lt;Symbol&gt; getBasicResources() {
+<span class="fc" id="L44">        return EnumSet.of(</span>
+                ANIMAL,
+                PLANT,
+                INSECT,
+                FUNGUS,
+                FEATHER,
+                INKWELL,
+                PARCHMENT
+        );
+    }
+
+    /**
+     * Generates subset containing all the valid Symbols a corner can contain
+     *
+     * @return the subset containing all the valid Symbols a corner can contain
+     */
+    static public EnumSet&lt;Symbol&gt; getValidCorner() {
+<span class="fc" id="L61">        return EnumSet.of(</span>
+                ANIMAL,
+                PLANT,
+                INSECT,
+                FUNGUS,
+                FEATHER,
+                INKWELL,
+                PARCHMENT,
+                EMPTY_CORNER,
+                FULL_CORNER
+        );
+    }
+
+    /**
+     * Generates subset containing all the symbols a {@link GoldCard} multiplier can be
+     *
+     * @return the subset containing all the symbols a {@link GoldCard} multiplier can be
+     */
+    static public EnumSet&lt;Symbol&gt; getValidMultiplier() {
+<span class="fc" id="L80">        return EnumSet.of(</span>
+                ANIMAL,
+                PLANT,
+                INSECT,
+                FUNGUS,
+                FEATHER,
+                INKWELL,
+                PARCHMENT,
+                NO_MULT,
+                CORNER_OBJ
+        );
+    }
+
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

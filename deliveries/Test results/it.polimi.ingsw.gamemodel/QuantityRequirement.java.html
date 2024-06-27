@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>QuantityRequirement.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.gamemodel</a> &gt; <span class="el_source">QuantityRequirement.java</span></div><h1>QuantityRequirement.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.gamemodel;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.EnumSet;
+import java.util.Map;
+import it.polimi.ingsw.exceptions.InvalidResourceException;
+
+/**
+ * This class handles requirements involving relative positioning of cards, e.g. three red cards placed in the top right corner of each other
+ */
+public class QuantityRequirement extends Requirement implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    private Map&lt;Symbol, Integer&gt; reqs;
+
+    /**
+     * Class constructor. Only valid symbols are the ones returned by {@link Symbol#getBasicResources()}
+     *
+     * @param reqs how many resources of a certain type are needed to fulfill the requirement.
+     * @throws InvalidResourceException if a requirement is not made up only of those symbols
+     */
+<span class="fc" id="L24">    public QuantityRequirement(Map&lt;Symbol, Integer&gt; reqs) throws InvalidResourceException {</span>
+<span class="fc" id="L25">        EnumSet&lt;Symbol&gt; validResources = Symbol.getBasicResources();</span>
+<span class="fc bfc" id="L26" title="All 2 branches covered.">        for (Symbol s : reqs.keySet()) {</span>
+<span class="pc bpc" id="L27" title="1 of 2 branches missed.">            if (!validResources.contains(s)) {</span>
+<span class="nc" id="L28">                throw new InvalidResourceException(&quot;Resource &quot; + s.toString() + &quot; is not valid for a &quot; + this.getClass().toString());</span>
+            }
+<span class="fc" id="L30">        }</span>
+<span class="fc" id="L31">        this.reqs = reqs;</span>
+<span class="fc" id="L32">    }</span>
+
+    /**
+     * The requirement will be satisfied if the board has enough resources of the specified type
+     *
+     * @param board the board on which we check the requirement
+     * @return whether the requirement is satisfied or not
+     */
+    @Override
+    public int timesMet(Board board) {
+<span class="fc" id="L42">        Map&lt;Symbol, Integer&gt; availableResources = board.getAvailableResources();</span>
+<span class="fc" id="L43">        Integer min = null;</span>
+        Integer curr;
+
+<span class="fc bfc" id="L46" title="All 2 branches covered.">        for (Symbol req : reqs.keySet()) {</span>
+<span class="fc" id="L47">            curr = availableResources.get(req) / reqs.get(req);</span>
+<span class="pc bpc" id="L48" title="3 of 4 branches missed.">            if (min == null || curr &lt; min) {</span>
+<span class="fc" id="L49">                min = curr;</span>
+            }
+<span class="fc" id="L51">        }</span>
+
+<span class="fc" id="L53">        return min;</span>
+    }
+
+    /**
+     * Getter for the QuantityRequirement class
+     *
+     * @return Map representing the card's placement requirements
+     */
+    public Map&lt;Symbol, Integer&gt; getReqs() {
+<span class="nc" id="L62">        return this.reqs;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DeckCreator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.utils</a> &gt; <span class="el_source">DeckCreator.java</span></div><h1>DeckCreator.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.utils;
+
+import it.polimi.ingsw.gamemodel.*;
+
+import java.util.Map;
+
+/**
+ * This is a temporary class, used to have all the logic related to deck creation in a single place, so that
+ * when it will be implemented correctly we know where to modify it
+ */
+<span class="fc" id="L11">public class DeckCreator {</span>
+
+    /**
+     * Create the deck of initial cards
+     * @return a gamedeck of initial cards
+     */
+    public GameDeck&lt;InitialCard&gt; createInitialDeck() {
+<span class="fc" id="L18">        GameDeck&lt;InitialCard&gt; deck = new GameDeck&lt;&gt;();</span>
+<span class="fc" id="L19">        Map&lt;Integer, InitialCard&gt; cards = CardsManager.getInstance().getInitialCards();</span>
+
+<span class="fc bfc" id="L21" title="All 2 branches covered.">        for (InitialCard card : cards.values()) {</span>
+<span class="fc" id="L22">            deck.add(card);</span>
+<span class="fc" id="L23">        }</span>
+
+<span class="fc" id="L25">        return deck;</span>
+    }
+
+    /**
+     * Create the deck of resource cards
+     * @return a gamedeck of resource cards
+     */
+    public GameDeck&lt;ResourceCard&gt; createResourceDeck() {
+<span class="fc" id="L33">        GameDeck&lt;ResourceCard&gt; deck = new GameDeck&lt;&gt;();</span>
+<span class="fc" id="L34">        Map&lt;Integer, ResourceCard&gt; cards = CardsManager.getInstance().getResourceCards();</span>
+
+<span class="fc bfc" id="L36" title="All 2 branches covered.">        for (ResourceCard card : cards.values()) {</span>
+<span class="fc" id="L37">            deck.add(card);</span>
+<span class="fc" id="L38">        }</span>
+
+<span class="fc" id="L40">        return deck;</span>
+    }
+
+    /**
+     * Create the deck of gold cards
+     * @return a gamedeck of gold cards
+     */
+    public GameDeck&lt;GoldCard&gt; createGoldDeck() {
+<span class="fc" id="L48">        GameDeck&lt;GoldCard&gt; deck = new GameDeck&lt;&gt;();</span>
+<span class="fc" id="L49">        Map&lt;Integer, GoldCard&gt; cards = CardsManager.getInstance().getGoldCards();</span>
+
+<span class="fc bfc" id="L51" title="All 2 branches covered.">        for (GoldCard card : cards.values()) {</span>
+<span class="fc" id="L52">            deck.add(card);</span>
+<span class="fc" id="L53">        }</span>
+
+<span class="fc" id="L55">        return deck;</span>
+    }
+
+    /**
+     * Create the deck of objective cards
+     * @return a gamedeck of objective cards
+     */
+    public GameDeck&lt;Objective&gt; createObjectiveDeck() {
+<span class="fc" id="L63">        GameDeck&lt;Objective&gt; deck = new GameDeck&lt;&gt;();</span>
+<span class="fc" id="L64">        Map&lt;Integer, Objective&gt; cards = CardsManager.getInstance().getObjectives();</span>
+
+<span class="fc bfc" id="L66" title="All 2 branches covered.">        for (Objective card : cards.values()) {</span>
+<span class="fc" id="L67">            deck.add(card);</span>
+<span class="fc" id="L68">        }</span>
+
+<span class="fc" id="L70">        return deck;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

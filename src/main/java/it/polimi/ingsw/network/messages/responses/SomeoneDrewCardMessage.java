@@ -2,6 +2,9 @@ package it.polimi.ingsw.network.messages.responses;
 
 import it.polimi.ingsw.gamemodel.DrawSource;
 import it.polimi.ingsw.gamemodel.Symbol;
+import it.polimi.ingsw.utils.Pair;
+
+import javax.swing.plaf.synth.SynthButtonUI;
 
 /**
  * This response is sent to each user in the match when a user draws a card.
@@ -10,7 +13,7 @@ public final class SomeoneDrewCardMessage extends ResponseMessage {
     private final DrawSource drawSource;
     private final Integer cardID;
     private final Integer replacementCardID;
-    private final Symbol replacementCardReign;
+    private final Pair<Symbol, Symbol> deckTopReigns;
 
     /**
      * @return Source from which the card is drawn.
@@ -36,15 +39,15 @@ public final class SomeoneDrewCardMessage extends ResponseMessage {
     /**
      * @return Reign of the replaced card
      */
-    public Symbol getReplacementCardReign() {
-        return replacementCardReign;
+    public Pair<Symbol, Symbol> getDeckTopReigns() {
+        return deckTopReigns;
     }
 
-    public SomeoneDrewCardMessage(String username, DrawSource source, Integer cardID, Integer replacementCardID, Symbol replacementCardSymbol) {
+    public SomeoneDrewCardMessage(String username, DrawSource source, Integer cardID, Integer replacementCardID, Pair<Symbol, Symbol> deckTopReigns) {
         super(username);
         this.drawSource = source;
         this.cardID = cardID;
-        this.replacementCardReign = replacementCardSymbol;
+        this.deckTopReigns = deckTopReigns;
         if (!source.equals(DrawSource.GOLDS_DECK) && !source.equals(DrawSource.RESOURCES_DECK)) {
             this.replacementCardID = replacementCardID;
         } else {

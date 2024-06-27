@@ -1,10 +1,9 @@
 package it.polimi.ingsw.gamemodel;
 
-import it.polimi.ingsw.exceptions.CardException;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Set;
+import it.polimi.ingsw.exceptions.CardException;
 
 /**
  * Topological definition of a card's side
@@ -19,6 +18,16 @@ public class CardFace implements Serializable {
     private Symbol bottomRight;
     private Set<Symbol> center;
 
+    
+    /**
+     * Class constructor.
+     * 
+     * @param topLeft Top left corner
+     * @param topRight Top right corner
+     * @param bottomLeft Bottom left corner
+     * @param bottomRight Bottom right corner
+     * @param center Center of the card
+     */
     public CardFace(Symbol topLeft, Symbol topRight, Symbol bottomLeft, Symbol bottomRight, Set<Symbol> center) {
         this.topLeft = topLeft;
         this.topRight = topRight;

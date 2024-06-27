@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PlateauPane.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.client.frontend.gui.nodes</a> &gt; <span class="el_source">PlateauPane.java</span></div><h1>PlateauPane.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.client.frontend.gui.nodes;
+
+import it.polimi.ingsw.gamemodel.Color;
+import it.polimi.ingsw.utils.GuiUtil;
+import it.polimi.ingsw.utils.Pair;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
+import javafx.scene.layout.Pane;
+
+import java.util.HashMap;
+
+/**
+ * JavaFX node, Pane showing all the player pawns and points
+ */
+public class PlateauPane extends Pane {
+<span class="nc" id="L17">    public static double pawnSize = 64;</span>
+<span class="nc" id="L18">    public static double positionOffset = -6;</span>
+    HashMap&lt;Integer, Pair&lt;Double, Double&gt;&gt; positions;
+    HashMap&lt;String, ImageView&gt; players;
+    HashMap&lt;String, Integer&gt; points;
+
+    /**
+     * Constructor of the node
+     */
+<span class="nc" id="L26">    public PlateauPane() {</span>
+<span class="nc" id="L27">        players = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L28">        positions = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L29">        points = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L30">        positions.put(0, new Pair&lt;&gt;(104.0, 743.0));</span>
+<span class="nc" id="L31">        positions.put(1, new Pair&lt;&gt;(197.0, 741.0));</span>
+<span class="nc" id="L32">        positions.put(2, new Pair&lt;&gt;(291.0, 742.0));</span>
+<span class="nc" id="L33">        positions.put(3, new Pair&lt;&gt;(342.0, 656.0));</span>
+<span class="nc" id="L34">        positions.put(4, new Pair&lt;&gt;(246.0, 654.0));</span>
+<span class="nc" id="L35">        positions.put(5, new Pair&lt;&gt;(154.0, 652.0));</span>
+<span class="nc" id="L36">        positions.put(6, new Pair&lt;&gt;(56.0, 656.0));</span>
+<span class="nc" id="L37">        positions.put(7, new Pair&lt;&gt;(57.0, 571.0));</span>
+<span class="nc" id="L38">        positions.put(8, new Pair&lt;&gt;(152.0, 570.0));</span>
+<span class="nc" id="L39">        positions.put(9, new Pair&lt;&gt;(247.0, 570.0));</span>
+<span class="nc" id="L40">        positions.put(10, new Pair&lt;&gt;(338.0, 569.0));</span>
+<span class="nc" id="L41">        positions.put(11, new Pair&lt;&gt;(340.0, 482.0));</span>
+<span class="nc" id="L42">        positions.put(12, new Pair&lt;&gt;(243.0, 482.0));</span>
+<span class="nc" id="L43">        positions.put(13, new Pair&lt;&gt;(150.0, 483.0));</span>
+<span class="nc" id="L44">        positions.put(14, new Pair&lt;&gt;(55.0, 486.0));</span>
+<span class="nc" id="L45">        positions.put(15, new Pair&lt;&gt;(56.0, 397.0));</span>
+<span class="nc" id="L46">        positions.put(16, new Pair&lt;&gt;(151.0, 397.0));</span>
+<span class="nc" id="L47">        positions.put(17, new Pair&lt;&gt;(244.0, 395.0));</span>
+<span class="nc" id="L48">        positions.put(18, new Pair&lt;&gt;(340.0, 398.0));</span>
+<span class="nc" id="L49">        positions.put(19, new Pair&lt;&gt;(340.0, 313.0));</span>
+<span class="nc" id="L50">        positions.put(20, new Pair&lt;&gt;(200.0, 270.0));</span>
+<span class="nc" id="L51">        positions.put(21, new Pair&lt;&gt;(60.0, 315.0));</span>
+<span class="nc" id="L52">        positions.put(22, new Pair&lt;&gt;(59.0, 227.0));</span>
+<span class="nc" id="L53">        positions.put(23, new Pair&lt;&gt;(60.0, 140.0));</span>
+<span class="nc" id="L54">        positions.put(24, new Pair&lt;&gt;(114.0, 71.0));</span>
+<span class="nc" id="L55">        positions.put(25, new Pair&lt;&gt;(198.0, 54.0));</span>
+<span class="nc" id="L56">        positions.put(26, new Pair&lt;&gt;(287.0, 70.0));</span>
+<span class="nc" id="L57">        positions.put(27, new Pair&lt;&gt;(342.0, 141.0));</span>
+<span class="nc" id="L58">        positions.put(28, new Pair&lt;&gt;(342.0, 225.0));</span>
+<span class="nc" id="L59">        positions.put(29, new Pair&lt;&gt;(199.0, 158.0));</span>
+<span class="nc" id="L60">    }</span>
+
+    /**
+     * Set the color of a player
+     *
+     * @param player username of the player
+     * @param color  color of the player's pawn
+     */
+    public void setColor(String player, Color color) {
+<span class="nc" id="L69">        ImageView img = new ImageView(new Image(GuiUtil.getPawnImagePath(color)));</span>
+<span class="nc" id="L70">        img.setFitWidth(pawnSize);</span>
+<span class="nc" id="L71">        img.setFitHeight(pawnSize);</span>
+<span class="nc" id="L72">        players.put(player, img);</span>
+<span class="nc" id="L73">        setPoints(player, 0);</span>
+<span class="nc" id="L74">    }</span>
+
+    /**
+     * Set the amount of points of a player and move its pawn
+     *
+     * @param player username of the player
+     * @param points current number of points he has
+     */
+    public void setPoints(String player, int points) {
+<span class="nc bnc" id="L83" title="All 2 branches missed.">        if (points &gt; 29) {</span>
+<span class="nc" id="L84">            return;</span>
+        }
+<span class="nc bnc" id="L86" title="All 4 branches missed.">        if (!this.points.containsKey(player) || this.points.get(player) != points) {</span>
+<span class="nc" id="L87">            Pair&lt;Double, Double&gt; position = convertCoords(positions.get(points));</span>
+            // Calculate offset because of players in the same position
+<span class="nc" id="L89">            int offset = this.playersAtPosition(points);</span>
+<span class="nc" id="L90">            this.points.put(player, points);</span>
+
+<span class="nc" id="L92">            ImageView playerPawn = players.get(player);</span>
+<span class="nc" id="L93">            playerPawn.setLayoutX(position.first());</span>
+<span class="nc" id="L94">            playerPawn.setLayoutY(position.second() + offset * positionOffset);</span>
+
+<span class="nc bnc" id="L96" title="All 2 branches missed.">            if (this.getChildren().contains(playerPawn))</span>
+<span class="nc" id="L97">                this.getChildren().remove(playerPawn);</span>
+<span class="nc" id="L98">            this.getChildren().add(playerPawn);</span>
+        }
+<span class="nc" id="L100">    }</span>
+
+    /**
+     * Get the amount of players in a certain point
+     *
+     * @param points number of points
+     * @return number of players in that position
+     */
+    private int playersAtPosition(int points) {
+<span class="nc" id="L109">        int p = 0;</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">        for (String player : this.points.keySet()) {</span>
+<span class="nc bnc" id="L111" title="All 2 branches missed.">            if (points == this.points.get(player)) {</span>
+<span class="nc" id="L112">                p++;</span>
+            }
+<span class="nc" id="L114">        }</span>
+<span class="nc" id="L115">        return p;</span>
+    }
+
+    /**
+     * Convert relative coordinates of the pane to coordinates
+     * corrected to the pawn size
+     *
+     * @param coord coordinate to convert
+     * @return the converted coordinates
+     */
+    private Pair&lt;Double, Double&gt; convertCoords(Pair&lt;Double, Double&gt; coord) {
+<span class="nc" id="L126">        return new Pair&lt;&gt;(coord.first() - pawnSize / 2 + 2, coord.second() - pawnSize / 2);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

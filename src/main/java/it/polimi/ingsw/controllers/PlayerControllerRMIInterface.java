@@ -25,14 +25,20 @@ public interface PlayerControllerRMIInterface extends Remote {
      * instance.
      *
      * @param view The View to save in the PlayerController internal state
+     * @throws AlreadyUsedUsernameException If the player username is already taken
+     * @throws WrongNameException If the player username doesn't meet the alphanumerical criteria
+     * @throws RemoteException If the remote object is considered not to be reachable any more and cannot return as usual
+     * @throws ChosenMatchException If there's an error with the chosen match
+     * @throws WrongStateException If the current match state doesn't allow registering a view
      */
-    void registerView(RemoteViewInterface view) throws RemoteException, ChosenMatchException, WrongStateException, AlreadyUsedUsernameException;
+    void registerView(RemoteViewInterface view) throws RemoteException, ChosenMatchException, WrongStateException, AlreadyUsedUsernameException, WrongNameException;
 
     /**
      * Draws an initial card for the player.
      *
      * @throws WrongStateException If the current match state doesn't allow drawing an initial card
      * @throws WrongTurnException  If the current turn it's not the one of this player
+     * @throws RemoteException If the remote object is considered not to be reachable any more and cannot return as usual
      */
     void drawInitialCard() throws RemoteException, WrongStateException, WrongTurnException;
 
@@ -42,6 +48,7 @@ public interface PlayerControllerRMIInterface extends Remote {
      * @param side The side on which play the initial card drawn using {@link #drawInitialCard()}
      * @throws WrongStateException If the current match state doesn't allow setting the initial card side
      * @throws WrongTurnException  If the current turn it's not the one of this player
+     * @throws RemoteException If the remote object is considered not to be reachable any more and cannot return as usual
      */
     void chooseInitialCardSide(Side side) throws RemoteException, WrongStateException, WrongTurnException;
 
@@ -50,6 +57,7 @@ public interface PlayerControllerRMIInterface extends Remote {
      *
      * @throws WrongStateException If the current match state doesn't allow drawing secret objectives
      * @throws WrongTurnException  If the current turn it's not the one of this player
+     * @throws RemoteException If the remote object is considered not to be reachable any more and cannot return as usual
      */
     void drawSecretObjectives() throws RemoteException, WrongStateException, WrongTurnException;
 
@@ -60,6 +68,7 @@ public interface PlayerControllerRMIInterface extends Remote {
      * @throws WrongStateException  If the current match state doesn't allow choosing a secret objective
      * @throws WrongTurnException   If the current turn it's not the one of this player
      * @throws WrongChoiceException If the chosen objective is not one of the two drawn ones using {@link #drawSecretObjectives()}
+     * @throws RemoteException If the remote object is considered not to be reachable any more and cannot return as usual
      */
     void chooseSecretObjective(Objective objective) throws RemoteException, WrongStateException, WrongTurnException, WrongChoiceException;
 
@@ -72,6 +81,7 @@ public interface PlayerControllerRMIInterface extends Remote {
      * @throws WrongStateException  If the current match state doesn't allow playing cards
      * @throws WrongTurnException   If the current turn it's not the one of this player
      * @throws WrongChoiceException If the chosen card is not one of those in the player's current hand
+     * @throws RemoteException If the remote object is considered not to be reachable any more and cannot return as usual
      */
     void playCard(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws RemoteException, WrongStateException, WrongTurnException, WrongChoiceException;
 
@@ -83,18 +93,24 @@ public interface PlayerControllerRMIInterface extends Remote {
      * @throws WrongStateException  If the current match state doesn't allow drawing cards
      * @throws WrongTurnException   If the current turn it's not the one of this player
      * @throws WrongChoiceException If the chosen DrawSource doesn't have any card left (i.e. it's empty)
+     * @throws RemoteException If the remote object is considered not to be reachable any more and cannot return as usual
      */
     void drawCard(DrawSource source) throws RemoteException, HandException, WrongStateException, WrongTurnException, WrongChoiceException;
 
     /**
-     * @param text
-     * @throws RemoteException
+     * Sends a text to all the players in the match.
+     *
+     * @param text The text to be sent
+     * @throws RemoteException If the remote object is considered not to be reachable any more and cannot return as usual
      */
-    public void sendBroadcastText(String text) throws RemoteException;
+    void sendBroadcastText(String text) throws RemoteException;
 
     /**
-     * @param recipient
-     * @param text
+     * Sends a text just to a specific player in the match.
+     *
+     * @param recipient The username of the recipient
+     * @param text      The text to be sent to the recipient
+     * @throws RemoteException If the remote object is considered not to be reachable any more and cannot return as usual
      */
-    public void sendPrivateText(String recipient, String text) throws RemoteException;
+    void sendPrivateText(String recipient, String text) throws RemoteException;
 }

@@ -1,0 +1,916 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CardsSerializer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.utils</a> &gt; <span class="el_source">CardsSerializer.java</span></div><h1>CardsSerializer.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.utils;
+
+import com.google.gson.Gson;
+import it.polimi.ingsw.exceptions.InvalidResourceException;
+import it.polimi.ingsw.gamemodel.*;
+
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.*;
+
+/**
+ * Serialize game cards into json
+ */
+<span class="nc" id="L14">public class CardsSerializer {</span>
+
+    /**
+     * Function that serializes the cards
+     * @param args arguments
+     */
+    public static void main(String[] args) {
+        // cards
+        InitialCard initialCard;
+        Objective objectiveCard;
+        ResourceCard resourceCard;
+        GoldCard goldCard;
+
+        //placeholders
+        Symbol topLeft, topRight, bottomLeft, bottomRight, reign, multiplier;
+        int points;
+        QuantityRequirement requirements;
+
+        // maps
+<span class="nc" id="L33">        Map&lt;Integer, InitialCard&gt; initialCardMap = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L34">        Map&lt;Integer, Objective&gt; objectiveCardMap = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L35">        Map&lt;Integer, ResourceCard&gt; resourceCardMap = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L36">        Map&lt;Integer, GoldCard&gt; goldCardMap = new HashMap&lt;&gt;();</span>
+
+        //1) initial cards map----------------------------------------------------------------------------------------------
+<span class="nc" id="L39">        initialCard = new InitialCard(</span>
+<span class="nc" id="L40">                new CardFace(Symbol.INSECT, Symbol.FUNGUS, Symbol.PLANT, Symbol.ANIMAL, Collections.emptySet()),</span>
+                new CardFace(Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.EMPTY_CORNER, Symbol.EMPTY_CORNER,
+<span class="nc" id="L42">                        new HashSet&lt;&gt;(Set.of(Symbol.ANIMAL, Symbol.INSECT, Symbol.PLANT)))</span>
+        );
+<span class="nc" id="L44">        initialCardMap.put(initialCard.getId(), initialCard);</span>
+
+<span class="nc" id="L46">        initialCard = new InitialCard(</span>
+<span class="nc" id="L47">                new CardFace(Symbol.PLANT, Symbol.ANIMAL, Symbol.FUNGUS, Symbol.INSECT, Collections.emptySet()),</span>
+                new CardFace(Symbol.ANIMAL, Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.FUNGUS,
+<span class="nc" id="L49">                        new HashSet&lt;&gt;(Set.of(Symbol.FUNGUS)))</span>
+        );
+<span class="nc" id="L51">        initialCardMap.put(initialCard.getId(), initialCard);</span>
+
+<span class="nc" id="L53">        initialCard = new InitialCard(</span>
+<span class="nc" id="L54">                new CardFace(Symbol.INSECT, Symbol.ANIMAL, Symbol.FUNGUS, Symbol.PLANT, Collections.emptySet()),</span>
+                new CardFace(Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.FULL_CORNER,
+<span class="nc" id="L56">                        new HashSet&lt;&gt;(Set.of(Symbol.PLANT, Symbol.FUNGUS)))</span>
+        );
+<span class="nc" id="L58">        initialCardMap.put(initialCard.getId(), initialCard);</span>
+
+<span class="nc" id="L60">        initialCard = new InitialCard(</span>
+<span class="nc" id="L61">                new CardFace(Symbol.FUNGUS, Symbol.PLANT, Symbol.INSECT, Symbol.ANIMAL, Collections.emptySet()),</span>
+                new CardFace(Symbol.FULL_CORNER, Symbol.PLANT, Symbol.INSECT, Symbol.FULL_CORNER,
+<span class="nc" id="L63">                        new HashSet&lt;&gt;(Set.of(Symbol.INSECT)))</span>
+        );
+<span class="nc" id="L65">        initialCardMap.put(initialCard.getId(), initialCard);</span>
+
+<span class="nc" id="L67">        initialCard = new InitialCard(</span>
+<span class="nc" id="L68">                new CardFace(Symbol.PLANT, Symbol.INSECT, Symbol.ANIMAL, Symbol.FUNGUS, Collections.emptySet()),</span>
+                new CardFace(Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.FULL_CORNER,
+<span class="nc" id="L70">                        new HashSet&lt;&gt;(Set.of(Symbol.ANIMAL, Symbol.INSECT)))</span>
+        );
+<span class="nc" id="L72">        initialCardMap.put(initialCard.getId(), initialCard);</span>
+
+<span class="nc" id="L74">        initialCard = new InitialCard(</span>
+<span class="nc" id="L75">                new CardFace(Symbol.FUNGUS, Symbol.ANIMAL, Symbol.PLANT, Symbol.INSECT, Collections.emptySet()),</span>
+                new CardFace(Symbol.FULL_CORNER, Symbol.FULL_CORNER, Symbol.EMPTY_CORNER, Symbol.EMPTY_CORNER,
+<span class="nc" id="L77">                        new HashSet&lt;&gt;(Set.of(Symbol.PLANT, Symbol.ANIMAL, Symbol.FUNGUS)))</span>
+        );
+<span class="nc" id="L79">        initialCardMap.put(initialCard.getId(), initialCard);</span>
+
+        //2) objective cards map--------------------------------------------------------------------------------------------
+        //2.1) quantity objective
+
+        try {
+<span class="nc" id="L85">            objectiveCard = new Objective(2, new QuantityRequirement(Map.of(Symbol.INSECT, 3)));</span>
+<span class="nc" id="L86">            objectiveCardMap.put(objectiveCard.getID(), objectiveCard);</span>
+
+<span class="nc" id="L88">            objectiveCard = new Objective(2, new QuantityRequirement(Map.of(Symbol.FUNGUS, 3)));</span>
+<span class="nc" id="L89">            objectiveCardMap.put(objectiveCard.getID(), objectiveCard);</span>
+
+<span class="nc" id="L91">            objectiveCard = new Objective(2, new QuantityRequirement(Map.of(Symbol.ANIMAL, 3)));</span>
+<span class="nc" id="L92">            objectiveCardMap.put(objectiveCard.getID(), objectiveCard);</span>
+
+<span class="nc" id="L94">            objectiveCard = new Objective(2, new QuantityRequirement(Map.of(Symbol.PLANT, 3)));</span>
+<span class="nc" id="L95">            objectiveCardMap.put(objectiveCard.getID(), objectiveCard);</span>
+
+<span class="nc" id="L97">            objectiveCard = new Objective(3, new QuantityRequirement(</span>
+<span class="nc" id="L98">                    Map.of(Symbol.FEATHER, 1, Symbol.INKWELL, 1, Symbol.PARCHMENT, 1)));</span>
+<span class="nc" id="L99">            objectiveCardMap.put(objectiveCard.getID(), objectiveCard);</span>
+
+<span class="nc" id="L101">            objectiveCard = new Objective(2, new QuantityRequirement(Map.of(Symbol.FEATHER, 2)));</span>
+<span class="nc" id="L102">            objectiveCardMap.put(objectiveCard.getID(), objectiveCard);</span>
+
+<span class="nc" id="L104">            objectiveCard = new Objective(2, new QuantityRequirement(Map.of(Symbol.INKWELL, 2)));</span>
+<span class="nc" id="L105">            objectiveCardMap.put(objectiveCard.getID(), objectiveCard);</span>
+
+<span class="nc" id="L107">            objectiveCard = new Objective(2, new QuantityRequirement(Map.of(Symbol.PARCHMENT, 2)));</span>
+<span class="nc" id="L108">            objectiveCardMap.put(objectiveCard.getID(), objectiveCard);</span>
+<span class="nc" id="L109">        } catch (InvalidResourceException e) {</span>
+<span class="nc" id="L110">            throw new RuntimeException(e);</span>
+<span class="nc" id="L111">        }</span>
+
+        //2.2) positional objective - nb: coordinates are relative
+        try {
+<span class="nc" id="L115">            objectiveCard = new Objective(2, new PositionRequirement(Map.of(</span>
+<span class="nc" id="L116">                    new Pair&lt;&gt;(0, 0), Symbol.FUNGUS, new Pair&lt;&gt;(1, 1), Symbol.FUNGUS, new Pair&lt;&gt;(2, 2), Symbol.FUNGUS)));</span>
+<span class="nc" id="L117">            objectiveCardMap.put(objectiveCard.getID(), objectiveCard);</span>
+
+<span class="nc" id="L119">            objectiveCard = new Objective(2, new PositionRequirement(Map.of(</span>
+<span class="nc" id="L120">                    new Pair&lt;&gt;(0, 0), Symbol.ANIMAL, new Pair&lt;&gt;(1, 1), Symbol.ANIMAL, new Pair&lt;&gt;(2, 2), Symbol.ANIMAL)));</span>
+<span class="nc" id="L121">            objectiveCardMap.put(objectiveCard.getID(), objectiveCard);</span>
+
+<span class="nc" id="L123">            objectiveCard = new Objective(2, new PositionRequirement(Map.of(</span>
+<span class="nc" id="L124">                    new Pair&lt;&gt;(0, 0), Symbol.PLANT, new Pair&lt;&gt;(1, -1), Symbol.PLANT, new Pair&lt;&gt;(2, -2), Symbol.PLANT)));</span>
+<span class="nc" id="L125">            objectiveCardMap.put(objectiveCard.getID(), objectiveCard);</span>
+
+<span class="nc" id="L127">            objectiveCard = new Objective(2, new PositionRequirement(Map.of(</span>
+<span class="nc" id="L128">                    new Pair&lt;&gt;(0, 0), Symbol.INSECT, new Pair&lt;&gt;(1, -1), Symbol.INSECT, new Pair&lt;&gt;(2, -2), Symbol.INSECT)));</span>
+<span class="nc" id="L129">            objectiveCardMap.put(objectiveCard.getID(), objectiveCard);</span>
+
+<span class="nc" id="L131">            objectiveCard = new Objective(3, new PositionRequirement(Map.of(</span>
+<span class="nc" id="L132">                    new Pair&lt;&gt;(0, 0), Symbol.ANIMAL, new Pair&lt;&gt;(1, -1), Symbol.INSECT, new Pair&lt;&gt;(1, -2), Symbol.INSECT)));</span>
+<span class="nc" id="L133">            objectiveCardMap.put(objectiveCard.getID(), objectiveCard);</span>
+
+<span class="nc" id="L135">            objectiveCard = new Objective(3, new PositionRequirement(Map.of(</span>
+<span class="nc" id="L136">                    new Pair&lt;&gt;(0, 0), Symbol.FUNGUS, new Pair&lt;&gt;(-1, -1), Symbol.ANIMAL, new Pair&lt;&gt;(-1, -2), Symbol.ANIMAL)));</span>
+<span class="nc" id="L137">            objectiveCardMap.put(objectiveCard.getID(), objectiveCard);</span>
+
+<span class="nc" id="L139">            objectiveCard = new Objective(3, new PositionRequirement(Map.of(</span>
+<span class="nc" id="L140">                    new Pair&lt;&gt;(0, 0), Symbol.FUNGUS, new Pair&lt;&gt;(0, -1), Symbol.FUNGUS, new Pair&lt;&gt;(1, -2), Symbol.PLANT)));</span>
+<span class="nc" id="L141">            objectiveCardMap.put(objectiveCard.getID(), objectiveCard);</span>
+
+<span class="nc" id="L143">            objectiveCard = new Objective(3, new PositionRequirement(Map.of(</span>
+<span class="nc" id="L144">                    new Pair&lt;&gt;(0, 0), Symbol.PLANT, new Pair&lt;&gt;(0, -1), Symbol.PLANT, new Pair&lt;&gt;(-1, -2), Symbol.INSECT)));</span>
+<span class="nc" id="L145">            objectiveCardMap.put(objectiveCard.getID(), objectiveCard);</span>
+<span class="nc" id="L146">        } catch (InvalidResourceException e) {</span>
+<span class="nc" id="L147">            throw new RuntimeException(e);</span>
+<span class="nc" id="L148">        }</span>
+
+        //3) resource cards map---------------------------------------------------------------------------------------------
+        //3.1) zero points
+<span class="nc" id="L152">        points = 0;</span>
+
+        try {
+<span class="nc" id="L155">            reign = Symbol.INSECT;</span>
+<span class="nc" id="L156">            topLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L157">            topRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L158">            bottomLeft = Symbol.INSECT;</span>
+<span class="nc" id="L159">            bottomRight = Symbol.INSECT;</span>
+<span class="nc" id="L160">            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);</span>
+<span class="nc" id="L161">            resourceCardMap.put(resourceCard.getId(), resourceCard);</span>
+
+<span class="nc" id="L163">            reign = Symbol.INSECT;</span>
+<span class="nc" id="L164">            topLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L165">            topRight = Symbol.FEATHER;</span>
+<span class="nc" id="L166">            bottomLeft = Symbol.ANIMAL;</span>
+<span class="nc" id="L167">            bottomRight = Symbol.INSECT;</span>
+<span class="nc" id="L168">            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);</span>
+<span class="nc" id="L169">            resourceCardMap.put(resourceCard.getId(), resourceCard);</span>
+
+<span class="nc" id="L171">            reign = Symbol.INSECT;</span>
+<span class="nc" id="L172">            topLeft = Symbol.INSECT;</span>
+<span class="nc" id="L173">            topRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L174">            bottomLeft = Symbol.INSECT;</span>
+<span class="nc" id="L175">            bottomRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L176">            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);</span>
+<span class="nc" id="L177">            resourceCardMap.put(resourceCard.getId(), resourceCard);</span>
+
+<span class="nc" id="L179">            reign = Symbol.PLANT;</span>
+<span class="nc" id="L180">            topLeft = Symbol.PLANT;</span>
+<span class="nc" id="L181">            topRight = Symbol.PLANT;</span>
+<span class="nc" id="L182">            bottomLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L183">            bottomRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L184">            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);</span>
+<span class="nc" id="L185">            resourceCardMap.put(resourceCard.getId(), resourceCard);</span>
+
+<span class="nc" id="L187">            reign = Symbol.ANIMAL;</span>
+<span class="nc" id="L188">            topLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L189">            topRight = Symbol.ANIMAL;</span>
+<span class="nc" id="L190">            bottomLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L191">            bottomRight = Symbol.ANIMAL;</span>
+<span class="nc" id="L192">            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);</span>
+<span class="nc" id="L193">            resourceCardMap.put(resourceCard.getId(), resourceCard);</span>
+
+<span class="nc" id="L195">            reign = Symbol.INSECT;</span>
+<span class="nc" id="L196">            topLeft = Symbol.INSECT;</span>
+<span class="nc" id="L197">            topRight = Symbol.PLANT;</span>
+<span class="nc" id="L198">            bottomLeft = Symbol.INKWELL;</span>
+<span class="nc" id="L199">            bottomRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L200">            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);</span>
+<span class="nc" id="L201">            resourceCardMap.put(resourceCard.getId(), resourceCard);</span>
+
+<span class="nc" id="L203">            reign = Symbol.FUNGUS;</span>
+<span class="nc" id="L204">            topLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L205">            topRight = Symbol.FUNGUS;</span>
+<span class="nc" id="L206">            bottomLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L207">            bottomRight = Symbol.FUNGUS;</span>
+<span class="nc" id="L208">            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);</span>
+<span class="nc" id="L209">            resourceCardMap.put(resourceCard.getId(), resourceCard);</span>
+
+<span class="nc" id="L211">            reign = Symbol.FUNGUS;</span>
+<span class="nc" id="L212">            topLeft = Symbol.FUNGUS;</span>
+<span class="nc" id="L213">            topRight = Symbol.FUNGUS;</span>
+<span class="nc" id="L214">            bottomLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L215">            bottomRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L216">            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);</span>
+<span class="nc" id="L217">            resourceCardMap.put(resourceCard.getId(), resourceCard);</span>
+
+<span class="nc" id="L219">            reign = Symbol.ANIMAL;</span>
+<span class="nc" id="L220">            topLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L221">            topRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L222">            bottomLeft = Symbol.ANIMAL;</span>
+<span class="nc" id="L223">            bottomRight = Symbol.ANIMAL;</span>
+<span class="nc" id="L224">            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);</span>
+<span class="nc" id="L225">            resourceCardMap.put(resourceCard.getId(), resourceCard);</span>
+
+<span class="nc" id="L227">            reign = Symbol.FUNGUS;</span>
+<span class="nc" id="L228">            topLeft = Symbol.FUNGUS;</span>
+<span class="nc" id="L229">            topRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L230">            bottomLeft = Symbol.FUNGUS;</span>
+<span class="nc" id="L231">            bottomRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L232">            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);</span>
+<span class="nc" id="L233">            resourceCardMap.put(resourceCard.getId(), resourceCard);</span>
+
+<span class="nc" id="L235">            reign = Symbol.INSECT;</span>
+<span class="nc" id="L236">            topLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L237">            topRight = Symbol.INSECT;</span>
+<span class="nc" id="L238">            bottomLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L239">            bottomRight = Symbol.INSECT;</span>
+<span class="nc" id="L240">            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);</span>
+<span class="nc" id="L241">            resourceCardMap.put(resourceCard.getId(), resourceCard);</span>
+
+<span class="nc" id="L243">            reign = Symbol.PLANT;</span>
+<span class="nc" id="L244">            topLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L245">            topRight = Symbol.PLANT;</span>
+<span class="nc" id="L246">            bottomLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L247">            bottomRight = Symbol.PLANT;</span>
+<span class="nc" id="L248">            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);</span>
+<span class="nc" id="L249">            resourceCardMap.put(resourceCard.getId(), resourceCard);</span>
+
+<span class="nc" id="L251">            reign = Symbol.PLANT;</span>
+<span class="nc" id="L252">            topLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L253">            topRight = Symbol.INSECT;</span>
+<span class="nc" id="L254">            bottomLeft = Symbol.FEATHER;</span>
+<span class="nc" id="L255">            bottomRight = Symbol.PLANT;</span>
+<span class="nc" id="L256">            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);</span>
+<span class="nc" id="L257">            resourceCardMap.put(resourceCard.getId(), resourceCard);</span>
+
+<span class="nc" id="L259">            reign = Symbol.PLANT;</span>
+<span class="nc" id="L260">            topLeft = Symbol.FUNGUS;</span>
+<span class="nc" id="L261">            topRight = Symbol.PLANT;</span>
+<span class="nc" id="L262">            bottomLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L263">            bottomRight = Symbol.INKWELL;</span>
+<span class="nc" id="L264">            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);</span>
+<span class="nc" id="L265">            resourceCardMap.put(resourceCard.getId(), resourceCard);</span>
+
+<span class="nc" id="L267">            reign = Symbol.ANIMAL;</span>
+<span class="nc" id="L268">            topLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L269">            topRight = Symbol.INSECT;</span>
+<span class="nc" id="L270">            bottomLeft = Symbol.INKWELL;</span>
+<span class="nc" id="L271">            bottomRight = Symbol.ANIMAL;</span>
+<span class="nc" id="L272">            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);</span>
+<span class="nc" id="L273">            resourceCardMap.put(resourceCard.getId(), resourceCard);</span>
+
+<span class="nc" id="L275">            reign = Symbol.INSECT;</span>
+<span class="nc" id="L276">            topLeft = Symbol.PARCHMENT;</span>
+<span class="nc" id="L277">            topRight = Symbol.INSECT;</span>
+<span class="nc" id="L278">            bottomLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L279">            bottomRight = Symbol.FUNGUS;</span>
+<span class="nc" id="L280">            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);</span>
+<span class="nc" id="L281">            resourceCardMap.put(resourceCard.getId(), resourceCard);</span>
+
+<span class="nc" id="L283">            reign = Symbol.FUNGUS;</span>
+<span class="nc" id="L284">            topLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L285">            topRight = Symbol.FEATHER;</span>
+<span class="nc" id="L286">            bottomLeft = Symbol.PLANT;</span>
+<span class="nc" id="L287">            bottomRight = Symbol.FUNGUS;</span>
+<span class="nc" id="L288">            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);</span>
+<span class="nc" id="L289">            resourceCardMap.put(resourceCard.getId(), resourceCard);</span>
+
+<span class="nc" id="L291">            reign = Symbol.FUNGUS;</span>
+<span class="nc" id="L292">            topLeft = Symbol.FUNGUS;</span>
+<span class="nc" id="L293">            topRight = Symbol.INSECT;</span>
+<span class="nc" id="L294">            bottomLeft = Symbol.PARCHMENT;</span>
+<span class="nc" id="L295">            bottomRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L296">            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);</span>
+<span class="nc" id="L297">            resourceCardMap.put(resourceCard.getId(), resourceCard);</span>
+
+<span class="nc" id="L299">            reign = Symbol.FUNGUS;</span>
+<span class="nc" id="L300">            topLeft = Symbol.INKWELL;</span>
+<span class="nc" id="L301">            topRight = Symbol.FUNGUS;</span>
+<span class="nc" id="L302">            bottomLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L303">            bottomRight = Symbol.ANIMAL;</span>
+<span class="nc" id="L304">            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);</span>
+<span class="nc" id="L305">            resourceCardMap.put(resourceCard.getId(), resourceCard);</span>
+
+<span class="nc" id="L307">            reign = Symbol.ANIMAL;</span>
+<span class="nc" id="L308">            topLeft = Symbol.PLANT;</span>
+<span class="nc" id="L309">            topRight = Symbol.ANIMAL;</span>
+<span class="nc" id="L310">            bottomLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L311">            bottomRight = Symbol.PARCHMENT;</span>
+<span class="nc" id="L312">            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);</span>
+<span class="nc" id="L313">            resourceCardMap.put(resourceCard.getId(), resourceCard);</span>
+
+<span class="nc" id="L315">            reign = Symbol.FUNGUS;</span>
+<span class="nc" id="L316">            topLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L317">            topRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L318">            bottomLeft = Symbol.FUNGUS;</span>
+<span class="nc" id="L319">            bottomRight = Symbol.FUNGUS;</span>
+<span class="nc" id="L320">            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);</span>
+<span class="nc" id="L321">            resourceCardMap.put(resourceCard.getId(), resourceCard);</span>
+
+<span class="nc" id="L323">            reign = Symbol.ANIMAL;</span>
+<span class="nc" id="L324">            topLeft = Symbol.ANIMAL;</span>
+<span class="nc" id="L325">            topRight = Symbol.ANIMAL;</span>
+<span class="nc" id="L326">            bottomLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L327">            bottomRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L328">            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);</span>
+<span class="nc" id="L329">            resourceCardMap.put(resourceCard.getId(), resourceCard);</span>
+
+<span class="nc" id="L331">            reign = Symbol.PLANT;</span>
+<span class="nc" id="L332">            topLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L333">            topRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L334">            bottomLeft = Symbol.PLANT;</span>
+<span class="nc" id="L335">            bottomRight = Symbol.PLANT;</span>
+<span class="nc" id="L336">            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);</span>
+<span class="nc" id="L337">            resourceCardMap.put(resourceCard.getId(), resourceCard);</span>
+
+<span class="nc" id="L339">            reign = Symbol.PLANT;</span>
+<span class="nc" id="L340">            topLeft = Symbol.PARCHMENT;</span>
+<span class="nc" id="L341">            topRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L342">            bottomLeft = Symbol.PLANT;</span>
+<span class="nc" id="L343">            bottomRight = Symbol.ANIMAL;</span>
+<span class="nc" id="L344">            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);</span>
+<span class="nc" id="L345">            resourceCardMap.put(resourceCard.getId(), resourceCard);</span>
+
+<span class="nc" id="L347">            reign = Symbol.ANIMAL;</span>
+<span class="nc" id="L348">            topLeft = Symbol.FEATHER;</span>
+<span class="nc" id="L349">            topRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L350">            bottomLeft = Symbol.ANIMAL;</span>
+<span class="nc" id="L351">            bottomRight = Symbol.FUNGUS;</span>
+<span class="nc" id="L352">            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);</span>
+<span class="nc" id="L353">            resourceCardMap.put(resourceCard.getId(), resourceCard);</span>
+
+<span class="nc" id="L355">            reign = Symbol.PLANT;</span>
+<span class="nc" id="L356">            topLeft = Symbol.PLANT;</span>
+<span class="nc" id="L357">            topRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L358">            bottomLeft = Symbol.PLANT;</span>
+<span class="nc" id="L359">            bottomRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L360">            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);</span>
+<span class="nc" id="L361">            resourceCardMap.put(resourceCard.getId(), resourceCard);</span>
+
+<span class="nc" id="L363">            reign = Symbol.INSECT;</span>
+<span class="nc" id="L364">            topLeft = Symbol.INSECT;</span>
+<span class="nc" id="L365">            topRight = Symbol.INSECT;</span>
+<span class="nc" id="L366">            bottomLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L367">            bottomRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L368">            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);</span>
+<span class="nc" id="L369">            resourceCardMap.put(resourceCard.getId(), resourceCard);</span>
+<span class="nc" id="L370">        } catch (InvalidResourceException e) {</span>
+<span class="nc" id="L371">            throw new RuntimeException(e);</span>
+<span class="nc" id="L372">        }</span>
+
+        //3.2) one point
+<span class="nc" id="L375">        points = 1;</span>
+
+        try {
+<span class="nc" id="L378">            reign = Symbol.INSECT;</span>
+<span class="nc" id="L379">            topLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L380">            topRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L381">            bottomLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L382">            bottomRight = Symbol.INSECT;</span>
+<span class="nc" id="L383">            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);</span>
+<span class="nc" id="L384">            resourceCardMap.put(resourceCard.getId(), resourceCard);</span>
+
+<span class="nc" id="L386">            reign = Symbol.FUNGUS;</span>
+<span class="nc" id="L387">            topLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L388">            topRight = Symbol.FUNGUS;</span>
+<span class="nc" id="L389">            bottomLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L390">            bottomRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L391">            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);</span>
+<span class="nc" id="L392">            resourceCardMap.put(resourceCard.getId(), resourceCard);</span>
+
+<span class="nc" id="L394">            reign = Symbol.FUNGUS;</span>
+<span class="nc" id="L395">            topLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L396">            topRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L397">            bottomLeft = Symbol.FUNGUS;</span>
+<span class="nc" id="L398">            bottomRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L399">            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);</span>
+<span class="nc" id="L400">            resourceCardMap.put(resourceCard.getId(), resourceCard);</span>
+
+<span class="nc" id="L402">            reign = Symbol.ANIMAL;</span>
+<span class="nc" id="L403">            topLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L404">            topRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L405">            bottomLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L406">            bottomRight = Symbol.ANIMAL;</span>
+<span class="nc" id="L407">            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);</span>
+<span class="nc" id="L408">            resourceCardMap.put(resourceCard.getId(), resourceCard);</span>
+
+<span class="nc" id="L410">            reign = Symbol.PLANT;</span>
+<span class="nc" id="L411">            topLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L412">            topRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L413">            bottomLeft = Symbol.PLANT;</span>
+<span class="nc" id="L414">            bottomRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L415">            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);</span>
+<span class="nc" id="L416">            resourceCardMap.put(resourceCard.getId(), resourceCard);</span>
+
+<span class="nc" id="L418">            reign = Symbol.ANIMAL;</span>
+<span class="nc" id="L419">            topLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L420">            topRight = Symbol.ANIMAL;</span>
+<span class="nc" id="L421">            bottomLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L422">            bottomRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L423">            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);</span>
+<span class="nc" id="L424">            resourceCardMap.put(resourceCard.getId(), resourceCard);</span>
+
+<span class="nc" id="L426">            reign = Symbol.FUNGUS;</span>
+<span class="nc" id="L427">            topLeft = Symbol.FUNGUS;</span>
+<span class="nc" id="L428">            topRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L429">            bottomLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L430">            bottomRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L431">            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);</span>
+<span class="nc" id="L432">            resourceCardMap.put(resourceCard.getId(), resourceCard);</span>
+
+<span class="nc" id="L434">            reign = Symbol.ANIMAL;</span>
+<span class="nc" id="L435">            topLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L436">            topRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L437">            bottomLeft = Symbol.ANIMAL;</span>
+<span class="nc" id="L438">            bottomRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L439">            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);</span>
+<span class="nc" id="L440">            resourceCardMap.put(resourceCard.getId(), resourceCard);</span>
+
+<span class="nc" id="L442">            reign = Symbol.INSECT;</span>
+<span class="nc" id="L443">            topLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L444">            topRight = Symbol.INSECT;</span>
+<span class="nc" id="L445">            bottomLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L446">            bottomRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L447">            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);</span>
+<span class="nc" id="L448">            resourceCardMap.put(resourceCard.getId(), resourceCard);</span>
+
+<span class="nc" id="L450">            reign = Symbol.PLANT;</span>
+<span class="nc" id="L451">            topLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L452">            topRight = Symbol.PLANT;</span>
+<span class="nc" id="L453">            bottomLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L454">            bottomRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L455">            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);</span>
+<span class="nc" id="L456">            resourceCardMap.put(resourceCard.getId(), resourceCard);</span>
+
+<span class="nc" id="L458">            reign = Symbol.PLANT;</span>
+<span class="nc" id="L459">            topLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L460">            topRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L461">            bottomLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L462">            bottomRight = Symbol.PLANT;</span>
+<span class="nc" id="L463">            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);</span>
+<span class="nc" id="L464">            resourceCardMap.put(resourceCard.getId(), resourceCard);</span>
+
+<span class="nc" id="L466">            reign = Symbol.INSECT;</span>
+<span class="nc" id="L467">            topLeft = Symbol.INSECT;</span>
+<span class="nc" id="L468">            topRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L469">            bottomLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L470">            bottomRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L471">            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);</span>
+<span class="nc" id="L472">            resourceCardMap.put(resourceCard.getId(), resourceCard);</span>
+
+<span class="nc" id="L474">            reign = Symbol.ANIMAL;</span>
+<span class="nc" id="L475">            topLeft = Symbol.ANIMAL;</span>
+<span class="nc" id="L476">            topRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L477">            bottomLeft = Symbol.ANIMAL;</span>
+<span class="nc" id="L478">            bottomRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L479">            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, 0);</span>
+<span class="nc" id="L480">            resourceCardMap.put(resourceCard.getId(), resourceCard);</span>
+<span class="nc" id="L481">        } catch (InvalidResourceException e) {</span>
+<span class="nc" id="L482">            throw new RuntimeException(e);</span>
+<span class="nc" id="L483">        }</span>
+
+        //4) gold cards map-------------------------------------------------------------------------------------------------
+        //4.1) with object multiplier (1pt)
+<span class="nc" id="L487">        points = 1;</span>
+
+        try {
+<span class="nc" id="L490">            reign = Symbol.INSECT;</span>
+<span class="nc" id="L491">            topLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L492">            topRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L493">            bottomLeft = Symbol.PARCHMENT;</span>
+<span class="nc" id="L494">            bottomRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L495">            multiplier = Symbol.PARCHMENT;</span>
+<span class="nc" id="L496">            requirements = new QuantityRequirement(Map.of(Symbol.INSECT, 2, Symbol.ANIMAL, 1));</span>
+<span class="nc" id="L497">            goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);</span>
+<span class="nc" id="L498">            goldCardMap.put(goldCard.getId(), goldCard);</span>
+
+<span class="nc" id="L500">            reign = Symbol.FUNGUS;</span>
+<span class="nc" id="L501">            topLeft = Symbol.PARCHMENT;</span>
+<span class="nc" id="L502">            topRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L503">            bottomLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L504">            bottomRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L505">            multiplier = Symbol.PARCHMENT;</span>
+<span class="nc" id="L506">            requirements = new QuantityRequirement(Map.of(Symbol.FUNGUS, 2, Symbol.INSECT, 1));</span>
+<span class="nc" id="L507">            goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);</span>
+<span class="nc" id="L508">            goldCardMap.put(goldCard.getId(), goldCard);</span>
+
+<span class="nc" id="L510">            reign = Symbol.PLANT;</span>
+<span class="nc" id="L511">            topLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L512">            topRight = Symbol.PARCHMENT;</span>
+<span class="nc" id="L513">            bottomLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L514">            bottomRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L515">            multiplier = Symbol.PARCHMENT;</span>
+<span class="nc" id="L516">            requirements = new QuantityRequirement(Map.of(Symbol.PLANT, 2, Symbol.FUNGUS, 1));</span>
+<span class="nc" id="L517">            goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);</span>
+<span class="nc" id="L518">            goldCardMap.put(goldCard.getId(), goldCard);</span>
+
+<span class="nc" id="L520">            reign = Symbol.ANIMAL;</span>
+<span class="nc" id="L521">            topLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L522">            topRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L523">            bottomLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L524">            bottomRight = Symbol.PARCHMENT;</span>
+<span class="nc" id="L525">            multiplier = Symbol.PARCHMENT;</span>
+<span class="nc" id="L526">            requirements = new QuantityRequirement(Map.of(Symbol.ANIMAL, 2, Symbol.PLANT, 1));</span>
+<span class="nc" id="L527">            goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);</span>
+<span class="nc" id="L528">            goldCardMap.put(goldCard.getId(), goldCard);</span>
+
+<span class="nc" id="L530">            reign = Symbol.FUNGUS;</span>
+<span class="nc" id="L531">            topLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L532">            topRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L533">            bottomLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L534">            bottomRight = Symbol.FEATHER;</span>
+<span class="nc" id="L535">            multiplier = Symbol.FEATHER;</span>
+<span class="nc" id="L536">            requirements = new QuantityRequirement(Map.of(Symbol.FUNGUS, 2, Symbol.ANIMAL, 1));</span>
+<span class="nc" id="L537">            goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);</span>
+<span class="nc" id="L538">            goldCardMap.put(goldCard.getId(), goldCard);</span>
+
+<span class="nc" id="L540">            reign = Symbol.ANIMAL;</span>
+<span class="nc" id="L541">            topLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L542">            topRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L543">            bottomLeft = Symbol.FEATHER;</span>
+<span class="nc" id="L544">            bottomRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L545">            multiplier = Symbol.FEATHER;</span>
+<span class="nc" id="L546">            requirements = new QuantityRequirement(Map.of(Symbol.ANIMAL, 2, Symbol.FUNGUS, 1));</span>
+<span class="nc" id="L547">            goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);</span>
+<span class="nc" id="L548">            goldCardMap.put(goldCard.getId(), goldCard);</span>
+
+<span class="nc" id="L550">            reign = Symbol.PLANT;</span>
+<span class="nc" id="L551">            topLeft = Symbol.FEATHER;</span>
+<span class="nc" id="L552">            topRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L553">            bottomLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L554">            bottomRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L555">            multiplier = Symbol.FEATHER;</span>
+<span class="nc" id="L556">            requirements = new QuantityRequirement(Map.of(Symbol.PLANT, 2, Symbol.INSECT, 1));</span>
+<span class="nc" id="L557">            goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);</span>
+<span class="nc" id="L558">            goldCardMap.put(goldCard.getId(), goldCard);</span>
+
+<span class="nc" id="L560">            reign = Symbol.INSECT;</span>
+<span class="nc" id="L561">            topLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L562">            topRight = Symbol.FEATHER;</span>
+<span class="nc" id="L563">            bottomLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L564">            bottomRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L565">            multiplier = Symbol.FEATHER;</span>
+<span class="nc" id="L566">            requirements = new QuantityRequirement(Map.of(Symbol.INSECT, 2, Symbol.PLANT, 1));</span>
+<span class="nc" id="L567">            goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);</span>
+<span class="nc" id="L568">            goldCardMap.put(goldCard.getId(), goldCard);</span>
+
+<span class="nc" id="L570">            reign = Symbol.PLANT;</span>
+<span class="nc" id="L571">            topLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L572">            topRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L573">            bottomLeft = Symbol.INKWELL;</span>
+<span class="nc" id="L574">            bottomRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L575">            multiplier = Symbol.INKWELL;</span>
+<span class="nc" id="L576">            requirements = new QuantityRequirement(Map.of(Symbol.PLANT, 2, Symbol.ANIMAL, 1));</span>
+<span class="nc" id="L577">            goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);</span>
+<span class="nc" id="L578">            goldCardMap.put(goldCard.getId(), goldCard);</span>
+
+<span class="nc" id="L580">            reign = Symbol.INSECT;</span>
+<span class="nc" id="L581">            topLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L582">            topRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L583">            bottomLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L584">            bottomRight = Symbol.INKWELL;</span>
+<span class="nc" id="L585">            multiplier = Symbol.INKWELL;</span>
+<span class="nc" id="L586">            requirements = new QuantityRequirement(Map.of(Symbol.INSECT, 2, Symbol.FUNGUS, 1));</span>
+<span class="nc" id="L587">            goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);</span>
+<span class="nc" id="L588">            goldCardMap.put(goldCard.getId(), goldCard);</span>
+
+<span class="nc" id="L590">            reign = Symbol.ANIMAL;</span>
+<span class="nc" id="L591">            topLeft = Symbol.INKWELL;</span>
+<span class="nc" id="L592">            topRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L593">            bottomLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L594">            bottomRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L595">            multiplier = Symbol.INKWELL;</span>
+<span class="nc" id="L596">            requirements = new QuantityRequirement(Map.of(Symbol.ANIMAL, 2, Symbol.INSECT, 1));</span>
+<span class="nc" id="L597">            goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);</span>
+<span class="nc" id="L598">            goldCardMap.put(goldCard.getId(), goldCard);</span>
+
+<span class="nc" id="L600">            reign = Symbol.FUNGUS;</span>
+<span class="nc" id="L601">            topLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L602">            topRight = Symbol.INKWELL;</span>
+<span class="nc" id="L603">            bottomLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L604">            bottomRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L605">            multiplier = Symbol.INKWELL;</span>
+<span class="nc" id="L606">            requirements = new QuantityRequirement(Map.of(Symbol.FUNGUS, 2, Symbol.PLANT, 1));</span>
+<span class="nc" id="L607">            goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);</span>
+<span class="nc" id="L608">            goldCardMap.put(goldCard.getId(), goldCard);</span>
+<span class="nc" id="L609">        } catch (InvalidResourceException e) {</span>
+<span class="nc" id="L610">            throw new RuntimeException(e);</span>
+<span class="nc" id="L611">        }</span>
+
+        //4.2) with corner multiplier (2pt)
+<span class="nc" id="L614">        points = 2;</span>
+<span class="nc" id="L615">        multiplier = Symbol.CORNER_OBJ;</span>
+
+        try {
+<span class="nc" id="L618">            reign = Symbol.ANIMAL;</span>
+<span class="nc" id="L619">            topLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L620">            topRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L621">            bottomLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L622">            bottomRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L623">            requirements = new QuantityRequirement(Map.of(Symbol.ANIMAL, 3, Symbol.PLANT, 1));</span>
+<span class="nc" id="L624">            goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);</span>
+<span class="nc" id="L625">            goldCardMap.put(goldCard.getId(), goldCard);</span>
+
+<span class="nc" id="L627">            reign = Symbol.ANIMAL;</span>
+<span class="nc" id="L628">            topLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L629">            topRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L630">            bottomLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L631">            bottomRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L632">            requirements = new QuantityRequirement(Map.of(Symbol.ANIMAL, 3, Symbol.INSECT, 1));</span>
+<span class="nc" id="L633">            goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);</span>
+<span class="nc" id="L634">            goldCardMap.put(goldCard.getId(), goldCard);</span>
+
+<span class="nc" id="L636">            reign = Symbol.ANIMAL;</span>
+<span class="nc" id="L637">            topLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L638">            topRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L639">            bottomLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L640">            bottomRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L641">            requirements = new QuantityRequirement(Map.of(Symbol.ANIMAL, 3, Symbol.FUNGUS, 1));</span>
+<span class="nc" id="L642">            goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);</span>
+<span class="nc" id="L643">            goldCardMap.put(goldCard.getId(), goldCard);</span>
+
+<span class="nc" id="L645">            reign = Symbol.FUNGUS;</span>
+<span class="nc" id="L646">            topLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L647">            topRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L648">            bottomLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L649">            bottomRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L650">            requirements = new QuantityRequirement(Map.of(Symbol.FUNGUS, 3, Symbol.ANIMAL, 1));</span>
+<span class="nc" id="L651">            goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);</span>
+<span class="nc" id="L652">            goldCardMap.put(goldCard.getId(), goldCard);</span>
+
+<span class="nc" id="L654">            reign = Symbol.FUNGUS;</span>
+<span class="nc" id="L655">            topLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L656">            topRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L657">            bottomLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L658">            bottomRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L659">            requirements = new QuantityRequirement(Map.of(Symbol.FUNGUS, 3, Symbol.PLANT, 1));</span>
+<span class="nc" id="L660">            goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);</span>
+<span class="nc" id="L661">            goldCardMap.put(goldCard.getId(), goldCard);</span>
+
+<span class="nc" id="L663">            reign = Symbol.FUNGUS;</span>
+<span class="nc" id="L664">            topLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L665">            topRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L666">            bottomLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L667">            bottomRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L668">            requirements = new QuantityRequirement(Map.of(Symbol.FUNGUS, 3, Symbol.INSECT, 1));</span>
+<span class="nc" id="L669">            goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);</span>
+<span class="nc" id="L670">            goldCardMap.put(goldCard.getId(), goldCard);</span>
+
+<span class="nc" id="L672">            reign = Symbol.INSECT;</span>
+<span class="nc" id="L673">            topLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L674">            topRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L675">            bottomLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L676">            bottomRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L677">            requirements = new QuantityRequirement(Map.of(Symbol.INSECT, 3, Symbol.ANIMAL, 1));</span>
+<span class="nc" id="L678">            goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);</span>
+<span class="nc" id="L679">            goldCardMap.put(goldCard.getId(), goldCard);</span>
+
+<span class="nc" id="L681">            reign = Symbol.INSECT;</span>
+<span class="nc" id="L682">            topLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L683">            topRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L684">            bottomLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L685">            bottomRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L686">            requirements = new QuantityRequirement(Map.of(Symbol.INSECT, 3, Symbol.PLANT, 1));</span>
+<span class="nc" id="L687">            goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);</span>
+<span class="nc" id="L688">            goldCardMap.put(goldCard.getId(), goldCard);</span>
+
+<span class="nc" id="L690">            reign = Symbol.INSECT;</span>
+<span class="nc" id="L691">            topLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L692">            topRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L693">            bottomLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L694">            bottomRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L695">            requirements = new QuantityRequirement(Map.of(Symbol.INSECT, 3, Symbol.FUNGUS, 1));</span>
+<span class="nc" id="L696">            goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);</span>
+<span class="nc" id="L697">            goldCardMap.put(goldCard.getId(), goldCard);</span>
+
+<span class="nc" id="L699">            reign = Symbol.PLANT;</span>
+<span class="nc" id="L700">            topLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L701">            topRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L702">            bottomLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L703">            bottomRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L704">            requirements = new QuantityRequirement(Map.of(Symbol.PLANT, 3, Symbol.INSECT, 1));</span>
+<span class="nc" id="L705">            goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);</span>
+<span class="nc" id="L706">            goldCardMap.put(goldCard.getId(), goldCard);</span>
+
+<span class="nc" id="L708">            reign = Symbol.PLANT;</span>
+<span class="nc" id="L709">            topLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L710">            topRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L711">            bottomLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L712">            bottomRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L713">            requirements = new QuantityRequirement(Map.of(Symbol.PLANT, 3, Symbol.FUNGUS, 1));</span>
+<span class="nc" id="L714">            goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);</span>
+<span class="nc" id="L715">            goldCardMap.put(goldCard.getId(), goldCard);</span>
+
+<span class="nc" id="L717">            reign = Symbol.PLANT;</span>
+<span class="nc" id="L718">            topLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L719">            topRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L720">            bottomLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L721">            bottomRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L722">            requirements = new QuantityRequirement(Map.of(Symbol.PLANT, 3, Symbol.ANIMAL, 1));</span>
+<span class="nc" id="L723">            goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);</span>
+<span class="nc" id="L724">            goldCardMap.put(goldCard.getId(), goldCard);</span>
+<span class="nc" id="L725">        } catch (InvalidResourceException e) {</span>
+<span class="nc" id="L726">            throw new RuntimeException(e);</span>
+<span class="nc" id="L727">        }</span>
+
+        //4.3) with no multiplier (3/5pt)
+<span class="nc" id="L730">        points = 3;</span>
+<span class="nc" id="L731">        multiplier = Symbol.NO_MULT;</span>
+
+        try {
+<span class="nc" id="L734">            reign = Symbol.ANIMAL;</span>
+<span class="nc" id="L735">            topLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L736">            topRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L737">            bottomLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L738">            bottomRight = Symbol.FEATHER;</span>
+<span class="nc" id="L739">            requirements = new QuantityRequirement(Map.of(Symbol.ANIMAL, 3));</span>
+<span class="nc" id="L740">            goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);</span>
+<span class="nc" id="L741">            goldCardMap.put(goldCard.getId(), goldCard);</span>
+
+<span class="nc" id="L743">            reign = Symbol.ANIMAL;</span>
+<span class="nc" id="L744">            topLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L745">            topRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L746">            bottomLeft = Symbol.PARCHMENT;</span>
+<span class="nc" id="L747">            bottomRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L748">            requirements = new QuantityRequirement(Map.of(Symbol.ANIMAL, 3));</span>
+<span class="nc" id="L749">            goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);</span>
+<span class="nc" id="L750">            goldCardMap.put(goldCard.getId(), goldCard);</span>
+
+<span class="nc" id="L752">            reign = Symbol.ANIMAL;</span>
+<span class="nc" id="L753">            topLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L754">            topRight = Symbol.INKWELL;</span>
+<span class="nc" id="L755">            bottomLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L756">            bottomRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L757">            requirements = new QuantityRequirement(Map.of(Symbol.ANIMAL, 3));</span>
+<span class="nc" id="L758">            goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);</span>
+<span class="nc" id="L759">            goldCardMap.put(goldCard.getId(), goldCard);</span>
+
+<span class="nc" id="L761">            reign = Symbol.FUNGUS;</span>
+<span class="nc" id="L762">            topLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L763">            topRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L764">            bottomLeft = Symbol.INKWELL;</span>
+<span class="nc" id="L765">            bottomRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L766">            requirements = new QuantityRequirement(Map.of(Symbol.FUNGUS, 3));</span>
+<span class="nc" id="L767">            goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);</span>
+<span class="nc" id="L768">            goldCardMap.put(goldCard.getId(), goldCard);</span>
+
+<span class="nc" id="L770">            reign = Symbol.FUNGUS;</span>
+<span class="nc" id="L771">            topLeft = Symbol.FEATHER;</span>
+<span class="nc" id="L772">            topRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L773">            bottomLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L774">            bottomRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L775">            requirements = new QuantityRequirement(Map.of(Symbol.FUNGUS, 3));</span>
+<span class="nc" id="L776">            goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);</span>
+<span class="nc" id="L777">            goldCardMap.put(goldCard.getId(), goldCard);</span>
+
+<span class="nc" id="L779">            reign = Symbol.FUNGUS;</span>
+<span class="nc" id="L780">            topLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L781">            topRight = Symbol.PARCHMENT;</span>
+<span class="nc" id="L782">            bottomLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L783">            bottomRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L784">            requirements = new QuantityRequirement(Map.of(Symbol.FUNGUS, 3));</span>
+<span class="nc" id="L785">            goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);</span>
+<span class="nc" id="L786">            goldCardMap.put(goldCard.getId(), goldCard);</span>
+
+<span class="nc" id="L788">            reign = Symbol.INSECT;</span>
+<span class="nc" id="L789">            topLeft = Symbol.INKWELL;</span>
+<span class="nc" id="L790">            topRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L791">            bottomLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L792">            bottomRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L793">            requirements = new QuantityRequirement(Map.of(Symbol.INSECT, 3));</span>
+<span class="nc" id="L794">            goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);</span>
+<span class="nc" id="L795">            goldCardMap.put(goldCard.getId(), goldCard);</span>
+
+<span class="nc" id="L797">            reign = Symbol.INSECT;</span>
+<span class="nc" id="L798">            topLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L799">            topRight = Symbol.PARCHMENT;</span>
+<span class="nc" id="L800">            bottomLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L801">            bottomRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L802">            requirements = new QuantityRequirement(Map.of(Symbol.INSECT, 3));</span>
+<span class="nc" id="L803">            goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);</span>
+<span class="nc" id="L804">            goldCardMap.put(goldCard.getId(), goldCard);</span>
+
+<span class="nc" id="L806">            reign = Symbol.INSECT;</span>
+<span class="nc" id="L807">            topLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L808">            topRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L809">            bottomLeft = Symbol.FEATHER;</span>
+<span class="nc" id="L810">            bottomRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L811">            requirements = new QuantityRequirement(Map.of(Symbol.INSECT, 3));</span>
+<span class="nc" id="L812">            goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);</span>
+<span class="nc" id="L813">            goldCardMap.put(goldCard.getId(), goldCard);</span>
+
+<span class="nc" id="L815">            reign = Symbol.PLANT;</span>
+<span class="nc" id="L816">            topLeft = Symbol.PARCHMENT;</span>
+<span class="nc" id="L817">            topRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L818">            bottomLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L819">            bottomRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L820">            requirements = new QuantityRequirement(Map.of(Symbol.PLANT, 3));</span>
+<span class="nc" id="L821">            goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);</span>
+<span class="nc" id="L822">            goldCardMap.put(goldCard.getId(), goldCard);</span>
+
+<span class="nc" id="L824">            reign = Symbol.PLANT;</span>
+<span class="nc" id="L825">            topLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L826">            topRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L827">            bottomLeft = Symbol.FEATHER;</span>
+<span class="nc" id="L828">            bottomRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L829">            requirements = new QuantityRequirement(Map.of(Symbol.PLANT, 3));</span>
+<span class="nc" id="L830">            goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);</span>
+<span class="nc" id="L831">            goldCardMap.put(goldCard.getId(), goldCard);</span>
+
+<span class="nc" id="L833">            reign = Symbol.PLANT;</span>
+<span class="nc" id="L834">            topLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L835">            topRight = Symbol.INKWELL;</span>
+<span class="nc" id="L836">            bottomLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L837">            bottomRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L838">            requirements = new QuantityRequirement(Map.of(Symbol.PLANT, 3));</span>
+<span class="nc" id="L839">            goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);</span>
+<span class="nc" id="L840">            goldCardMap.put(goldCard.getId(), goldCard);</span>
+<span class="nc" id="L841">        } catch (InvalidResourceException e) {</span>
+<span class="nc" id="L842">            throw new RuntimeException(e);</span>
+<span class="nc" id="L843">        }</span>
+
+<span class="nc" id="L845">        points = 5;</span>
+<span class="nc" id="L846">        multiplier = Symbol.NO_MULT;</span>
+
+        try {
+<span class="nc" id="L849">            reign = Symbol.ANIMAL;</span>
+<span class="nc" id="L850">            topLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L851">            topRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L852">            bottomLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L853">            bottomRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L854">            requirements = new QuantityRequirement(Map.of(Symbol.ANIMAL, 5));</span>
+<span class="nc" id="L855">            goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);</span>
+<span class="nc" id="L856">            goldCardMap.put(goldCard.getId(), goldCard);</span>
+
+<span class="nc" id="L858">            reign = Symbol.FUNGUS;</span>
+<span class="nc" id="L859">            topLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L860">            topRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L861">            bottomLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L862">            bottomRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L863">            requirements = new QuantityRequirement(Map.of(Symbol.FUNGUS, 5));</span>
+<span class="nc" id="L864">            goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);</span>
+<span class="nc" id="L865">            goldCardMap.put(goldCard.getId(), goldCard);</span>
+
+<span class="nc" id="L867">            reign = Symbol.INSECT;</span>
+<span class="nc" id="L868">            topLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L869">            topRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L870">            bottomLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L871">            bottomRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L872">            requirements = new QuantityRequirement(Map.of(Symbol.INSECT, 5));</span>
+<span class="nc" id="L873">            goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);</span>
+<span class="nc" id="L874">            goldCardMap.put(goldCard.getId(), goldCard);</span>
+
+<span class="nc" id="L876">            reign = Symbol.PLANT;</span>
+<span class="nc" id="L877">            topLeft = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L878">            topRight = Symbol.FULL_CORNER;</span>
+<span class="nc" id="L879">            bottomLeft = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L880">            bottomRight = Symbol.EMPTY_CORNER;</span>
+<span class="nc" id="L881">            requirements = new QuantityRequirement(Map.of(Symbol.PLANT, 5));</span>
+<span class="nc" id="L882">            goldCard = new GoldCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, multiplier, points, requirements);</span>
+<span class="nc" id="L883">            goldCardMap.put(goldCard.getId(), goldCard);</span>
+<span class="nc" id="L884">        } catch (InvalidResourceException e) {</span>
+<span class="nc" id="L885">            throw new RuntimeException(e);</span>
+<span class="nc" id="L886">        }</span>
+
+        //5) to json--------------------------------------------------------------------------------------------------------
+<span class="nc" id="L889">        CardJsonParser parser = new CardJsonParser();</span>
+<span class="nc" id="L890">        Gson gson = parser.getCardBuilder();</span>
+        try {
+<span class="nc" id="L892">            String path = &quot;src/main/resources/json/&quot;;</span>
+<span class="nc" id="L893">            System.out.println(gson.toJson(initialCardMap));</span>
+            FileWriter file;
+<span class="nc" id="L895">            file = new FileWriter(path + &quot;initial_card.json&quot;);</span>
+<span class="nc" id="L896">            file.write(gson.toJson(initialCardMap));</span>
+<span class="nc" id="L897">            file.close();</span>
+
+<span class="nc" id="L899">            file = new FileWriter(path + &quot;objective_card.json&quot;);</span>
+<span class="nc" id="L900">            file.write(gson.toJson(objectiveCardMap));</span>
+<span class="nc" id="L901">            file.close();</span>
+
+<span class="nc" id="L903">            file = new FileWriter(path + &quot;resource_card.json&quot;);</span>
+<span class="nc" id="L904">            file.write(gson.toJson(resourceCardMap));</span>
+<span class="nc" id="L905">            file.close();</span>
+
+<span class="nc" id="L907">            file = new FileWriter(path + &quot;gold_card.json&quot;);</span>
+<span class="nc" id="L908">            file.write(gson.toJson(goldCardMap));</span>
+<span class="nc" id="L909">            file.close();</span>
+<span class="nc" id="L910">        } catch (IOException e) {</span>
+<span class="nc" id="L911">            throw new RuntimeException(e);</span>
+<span class="nc" id="L912">        }</span>
+
+<span class="nc" id="L914">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AvailableMatch.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.utils</a> &gt; <span class="el_source">AvailableMatch.java</span></div><h1>AvailableMatch.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.utils;
+
+import java.io.Serial;
+import java.io.Serializable;
+
+/**
+ * AvailableMatches
+ *
+ * @param name The match name
+ * @param maxPlayers The max number of players allowed in the match
+ * @param currentPlayers The number of currently joined players
+ * @param isRejoinable Whether the match has been resumed after a server crash
+ */
+<span class="fc" id="L14">public record AvailableMatch(String name, Integer maxPlayers, Integer currentPlayers, boolean isRejoinable) implements Serializable {</span>
+    @Serial
+    private static final long serialVersionUID = 1L;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

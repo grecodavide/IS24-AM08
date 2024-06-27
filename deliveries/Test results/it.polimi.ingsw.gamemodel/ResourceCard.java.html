@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ResourceCard.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.gamemodel</a> &gt; <span class="el_source">ResourceCard.java</span></div><h1>ResourceCard.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.gamemodel;
+
+import it.polimi.ingsw.exceptions.InvalidResourceException;
+
+import java.io.Serial;
+import java.io.Serializable;
+
+/**
+ * Card that does not require any conditions to be played.
+ */
+public final class ResourceCard extends PlayableCard implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * Class constructor. It needs to only take the front as an argument, since the back is handled by its superclass {@link PlayableCard}
+     *
+     * @param front  the front side of the card
+     * @param reign  the reign of the card
+     * @param points the number of points the card gives (must be an absolute value)
+     * @throws InvalidResourceException if the passed resource is not in {@link Symbol#getReigns()}
+     */
+    public ResourceCard(CardFace front, Symbol reign, int points) throws InvalidResourceException {
+<span class="fc" id="L24">        super(reign);</span>
+<span class="fc" id="L25">        this.front = front;</span>
+<span class="fc" id="L26">        this.points = points;</span>
+<span class="fc" id="L27">    }</span>
+
+    /**
+     * Getter for the ResourceCard class
+     *
+     * @return points held by the card
+     */
+    public int getPoints() {
+<span class="fc" id="L35">        return this.points;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

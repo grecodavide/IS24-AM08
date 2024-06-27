@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CardView.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.client.frontend.gui.nodes</a> &gt; <span class="el_source">CardView.java</span></div><h1>CardView.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.client.frontend.gui.nodes;
+
+
+import it.polimi.ingsw.gamemodel.*;
+import it.polimi.ingsw.utils.GuiUtil;
+import it.polimi.ingsw.utils.Pair;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.paint.ImagePattern;
+import javafx.scene.shape.Rectangle;
+
+import javax.xml.crypto.dom.DOMCryptoContext;
+import java.util.HashMap;
+import java.util.Map;
+
+public class CardView extends Pane {
+    // Card dimensions
+<span class="nc" id="L23">    public static double cardWidth = 199;</span>
+<span class="nc" id="L24">    public static double cardHeight = 132;</span>
+<span class="nc" id="L25">    public static double cardBorderW = 44.8;</span>
+<span class="nc" id="L26">    public static double cardBorderH = 52.6;</span>
+
+    /** Pawn dimensions (at center of the initial card) */
+<span class="nc" id="L29">    public static double tokenRadius = 28;</span>
+
+    /** Path to what to show when a card is missing */
+<span class="nc" id="L32">    public static String noCardPath = &quot;/images/no_resource2.png&quot;;</span>
+    // Card corners
+    public Pane topLeftCorner;
+    public Pane topRightCorner;
+    public Pane bottomLeftCorner;
+    public Pane bottomRightCorner;
+
+    private Image image;
+    private Rectangle cardRectangle;
+
+    /**
+     * Initialize an empty CardView
+     */
+    public CardView() {
+<span class="nc" id="L46">        super();</span>
+<span class="nc" id="L47">        String imagePath = noCardPath;</span>
+<span class="nc" id="L48">        this.getProperties().put(&quot;Card&quot;, null);</span>
+<span class="nc" id="L49">        this.getProperties().put(&quot;Side&quot;, null);</span>
+<span class="nc" id="L50">        this.addProperties(imagePath);</span>
+<span class="nc" id="L51">    }</span>
+
+    /**
+     * Initialize a CardView of an Initial Card
+     * @param card initial card
+     * @param side side to show
+     */
+    public CardView(InitialCard card, Side side) {
+<span class="nc" id="L59">        super();</span>
+<span class="nc" id="L60">        String imagePath = GuiUtil.getImagePath(card, side);</span>
+<span class="nc" id="L61">        this.getProperties().put(&quot;Card&quot;, card);</span>
+<span class="nc" id="L62">        this.getProperties().put(&quot;Side&quot;, side);</span>
+<span class="nc" id="L63">        this.addProperties(imagePath);</span>
+<span class="nc" id="L64">    }</span>
+
+    /**
+     * Initialize a CardView of a Playable Card
+     * @param card playable card
+     * @param side side to show
+     */
+    public CardView(PlayableCard card, Side side) {
+<span class="nc" id="L72">        super();</span>
+<span class="nc" id="L73">        String imagePath = GuiUtil.getImagePath(card, side);</span>
+<span class="nc" id="L74">        this.getProperties().put(&quot;Card&quot;, card);</span>
+<span class="nc" id="L75">        this.getProperties().put(&quot;Side&quot;, side);</span>
+<span class="nc" id="L76">        this.addProperties(imagePath);</span>
+<span class="nc" id="L77">    }</span>
+
+    /**
+     * Initialize a CardView of an Objective Card
+     * @param card objective
+     * @param side side to show
+     */
+    public CardView(Objective card, Side side) {
+<span class="nc" id="L85">        super();</span>
+<span class="nc" id="L86">        String imagePath = GuiUtil.getImagePath(card, side);</span>
+<span class="nc" id="L87">        this.getProperties().put(&quot;Card&quot;, card);</span>
+<span class="nc" id="L88">        this.getProperties().put(&quot;Side&quot;, side);</span>
+<span class="nc" id="L89">        this.addProperties(imagePath);</span>
+<span class="nc" id="L90">    }</span>
+
+    /**
+     * Change the displayed card
+     * @param card card to display
+     * @param side side of the card to display
+     */
+    public void setCard(InitialCard card, Side side) {
+<span class="nc" id="L98">        String imagePath = GuiUtil.getImagePath(card, side);</span>
+<span class="nc" id="L99">        this.getProperties().put(&quot;Card&quot;, card);</span>
+<span class="nc" id="L100">        this.getProperties().put(&quot;Side&quot;, side);</span>
+<span class="nc" id="L101">        this.addProperties(imagePath);</span>
+<span class="nc" id="L102">    }</span>
+
+    /**
+     * Change the displayed card
+     * @param card card to display
+     * @param side side of the card to display
+     */
+    public void setCard(PlayableCard card, Side side) {
+<span class="nc" id="L110">        String imagePath = GuiUtil.getImagePath(card, side);</span>
+<span class="nc" id="L111">        this.getProperties().put(&quot;Card&quot;, card);</span>
+<span class="nc" id="L112">        this.getProperties().put(&quot;Side&quot;, side);</span>
+<span class="nc" id="L113">        this.addProperties(imagePath);</span>
+<span class="nc" id="L114">    }</span>
+
+    /**
+     * Change the displayed card
+     * @param card card to display
+     * @param side side of the card to display
+     */
+    public void setCard(Objective card, Side side) {
+<span class="nc" id="L122">        String imagePath = GuiUtil.getImagePath(card, side);</span>
+<span class="nc" id="L123">        this.getProperties().put(&quot;Card&quot;, card);</span>
+<span class="nc" id="L124">        this.getProperties().put(&quot;Side&quot;, side);</span>
+<span class="nc" id="L125">        this.addProperties(imagePath);</span>
+<span class="nc" id="L126">    }</span>
+
+    /**
+     * Change the displayed card to the back of a resource card
+     * @param reign reign to display
+     */
+    public void setResourcesCardBack(Symbol reign) {
+        String imagePath;
+<span class="nc" id="L134">        this.getProperties().put(&quot;Card&quot;, null);</span>
+<span class="nc" id="L135">        this.getProperties().put(&quot;Side&quot;, Side.BACK);</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">        if (reign != null) {</span>
+<span class="nc" id="L137">            imagePath = GuiUtil.getResourcesBack(reign);</span>
+        } else {
+<span class="nc" id="L139">            imagePath = noCardPath;</span>
+        }
+<span class="nc" id="L141">        addProperties(imagePath);</span>
+<span class="nc" id="L142">    }</span>
+
+    /**
+     * Change the displayed card to the back of a gold card
+     * @param reign reign to display
+     */
+    public void setGoldsCardBack(Symbol reign) {
+        String imagePath;
+<span class="nc" id="L150">        this.getProperties().put(&quot;Card&quot;, null);</span>
+<span class="nc" id="L151">        this.getProperties().put(&quot;Side&quot;, Side.BACK);</span>
+<span class="nc bnc" id="L152" title="All 2 branches missed.">        if (reign != null) {</span>
+<span class="nc" id="L153">            imagePath = GuiUtil.getGoldsBack(reign);</span>
+        } else {
+<span class="nc" id="L155">            imagePath = noCardPath;</span>
+        }
+<span class="nc" id="L157">        addProperties(imagePath);</span>
+<span class="nc" id="L158">    }</span>
+
+    /**
+     * Add the properties to the image
+     * @param imagePath
+     */
+    private void addProperties(String imagePath) {
+<span class="nc" id="L165">        super.setPrefHeight(cardHeight);</span>
+<span class="nc" id="L166">        super.setPrefWidth(cardWidth);</span>
+<span class="nc" id="L167">        super.setMaxHeight(cardHeight);</span>
+<span class="nc" id="L168">        super.setMaxWidth(cardWidth);</span>
+<span class="nc" id="L169">        Rectangle rect = new Rectangle(cardWidth, cardHeight);</span>
+<span class="nc" id="L170">        image = new Image(imagePath);</span>
+<span class="nc" id="L171">        ImagePattern pattern = new ImagePattern(</span>
+                image
+        );
+<span class="nc" id="L174">        rect.setFill(pattern);</span>
+<span class="nc" id="L175">        cardRectangle = rect;</span>
+<span class="nc" id="L176">        setArc(20);</span>
+<span class="nc" id="L177">        super.getChildren().add(rect);</span>
+<span class="nc" id="L178">        super.getStyleClass().add(&quot;game-card&quot;);</span>
+<span class="nc" id="L179">        addCorners();</span>
+<span class="nc" id="L180">    }</span>
+
+    /**
+     * Set arcHeight and arcWidth of the card
+     * @param arc arc width and height
+     */
+    public void setArc(double arc) {
+<span class="nc" id="L187">        cardRectangle.setArcHeight(arc);</span>
+<span class="nc" id="L188">        cardRectangle.setArcWidth(arc);</span>
+<span class="nc" id="L189">    }</span>
+
+
+    /**
+     * Add corners to the card
+     */
+    private void addCorners() {
+<span class="nc" id="L196">        topLeftCorner = new Pane();</span>
+<span class="nc" id="L197">        topRightCorner = new Pane();</span>
+<span class="nc" id="L198">        bottomLeftCorner= new Pane();</span>
+<span class="nc" id="L199">        bottomRightCorner = new Pane();</span>
+
+<span class="nc" id="L201">        setCornerProperties(topLeftCorner, 0, 0);</span>
+<span class="nc" id="L202">        setCornerProperties(topRightCorner, cardWidth-cardBorderW,0);</span>
+<span class="nc" id="L203">        setCornerProperties(bottomRightCorner, cardWidth-cardBorderW,cardHeight-cardBorderH);</span>
+<span class="nc" id="L204">        setCornerProperties(bottomLeftCorner, 0,cardHeight-cardBorderH);</span>
+<span class="nc" id="L205">    }</span>
+
+    /**
+     * Add position and dimensions to a corner ad add them in the card
+     * @param corner The corner to add the properties to
+     * @param x position
+     * @param y position
+     */
+    private void setCornerProperties(Pane corner, double x, double y) {
+<span class="nc" id="L214">        corner.setPrefWidth(cardBorderW);</span>
+<span class="nc" id="L215">        corner.setPrefHeight(cardBorderH);</span>
+<span class="nc" id="L216">        corner.setLayoutX(x);</span>
+<span class="nc" id="L217">        corner.setLayoutY(y);</span>
+<span class="nc" id="L218">        super.getChildren().add(corner);</span>
+<span class="nc" id="L219">    }</span>
+
+    /**
+     * Display token of a color on the initial card
+     * @param color color of the token
+     */
+    public void setToken(Color color) {
+<span class="nc" id="L226">        double tokenY = 64;</span>
+<span class="nc" id="L227">        Map&lt;Side, Pair&lt;Double, Double&gt;&gt; coords = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L228">        coords.put(Side.FRONT, new Pair&lt;&gt;(78.0, 121.0));</span>
+<span class="nc" id="L229">        coords.put(Side.BACK, new Pair&lt;&gt;(62.0, 137.0));</span>
+
+<span class="nc" id="L231">        Side side = (Side)super.getProperties().get(&quot;Side&quot;);</span>
+
+<span class="nc" id="L233">        ImageView token = new ImageView(new Image(GuiUtil.getPawnImagePath(color)));</span>
+<span class="nc" id="L234">        token.setFitWidth(tokenRadius);</span>
+<span class="nc" id="L235">        token.setFitHeight(tokenRadius);</span>
+
+<span class="nc" id="L237">        token.setLayoutX(coords.get(side).first() - tokenRadius/2);</span>
+<span class="nc" id="L238">        token.setLayoutY(tokenY - tokenRadius / 2);</span>
+
+<span class="nc bnc" id="L240" title="All 2 branches missed.">        if (color.equals(Color.RED)) {</span>
+<span class="nc" id="L241">            ImageView blackToken = new ImageView(GuiUtil.getBlackPawnImagePath());</span>
+<span class="nc" id="L242">            blackToken.setFitWidth(tokenRadius);</span>
+<span class="nc" id="L243">            blackToken.setFitHeight(tokenRadius);</span>
+<span class="nc" id="L244">            blackToken.setLayoutX(coords.get(side).second() - tokenRadius/2);</span>
+<span class="nc" id="L245">            blackToken.setLayoutY(tokenY - tokenRadius/2);</span>
+<span class="nc" id="L246">            super.getChildren().add(blackToken);</span>
+        }
+<span class="nc" id="L248">        super.getChildren().add(token);</span>
+<span class="nc" id="L249">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

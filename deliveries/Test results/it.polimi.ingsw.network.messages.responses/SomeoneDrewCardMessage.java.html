@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SomeoneDrewCardMessage.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.network.messages.responses</a> &gt; <span class="el_source">SomeoneDrewCardMessage.java</span></div><h1>SomeoneDrewCardMessage.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.network.messages.responses;
+
+import it.polimi.ingsw.gamemodel.DrawSource;
+import it.polimi.ingsw.gamemodel.Symbol;
+import it.polimi.ingsw.utils.Pair;
+
+import javax.swing.plaf.synth.SynthButtonUI;
+
+/**
+ * This response is sent to each user in the match when a user draws a card.
+ */
+public final class SomeoneDrewCardMessage extends ResponseMessage {
+    private final DrawSource drawSource;
+    private final Integer cardID;
+    private final Integer replacementCardID;
+    private final Pair&lt;Symbol, Symbol&gt; deckTopReigns;
+
+    /**
+     * @return Source from which the card is drawn.
+     */
+    public DrawSource getDrawSource() {
+<span class="nc" id="L22">        return drawSource;</span>
+    }
+
+    /**
+     * @return ID of the card drawn by the player
+     */
+    public Integer getCardID() {
+<span class="nc" id="L29">        return cardID;</span>
+    }
+
+    /**
+     * @return ID of the card that replaced the drawn card. Not available if the source is GOLDS_DECK or RESOURCES_DECK
+     */
+    public Integer getReplacementCardID() {
+<span class="nc" id="L36">        return replacementCardID;</span>
+    }
+
+    /**
+     * @return Reign of the replaced card
+     */
+    public Pair&lt;Symbol, Symbol&gt; getDeckTopReigns() {
+<span class="nc" id="L43">        return deckTopReigns;</span>
+    }
+
+    public SomeoneDrewCardMessage(String username, DrawSource source, Integer cardID, Integer replacementCardID, Pair&lt;Symbol, Symbol&gt; deckTopReigns) {
+<span class="nc" id="L47">        super(username);</span>
+<span class="nc" id="L48">        this.drawSource = source;</span>
+<span class="nc" id="L49">        this.cardID = cardID;</span>
+<span class="nc" id="L50">        this.deckTopReigns = deckTopReigns;</span>
+<span class="nc bnc" id="L51" title="All 4 branches missed.">        if (!source.equals(DrawSource.GOLDS_DECK) &amp;&amp; !source.equals(DrawSource.RESOURCES_DECK)) {</span>
+<span class="nc" id="L52">            this.replacementCardID = replacementCardID;</span>
+        } else {
+<span class="nc" id="L54">            this.replacementCardID = null;</span>
+        }
+<span class="nc" id="L56">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

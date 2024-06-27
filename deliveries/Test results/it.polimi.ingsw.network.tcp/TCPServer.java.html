@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TCPServer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.network.tcp</a> &gt; <span class="el_source">TCPServer.java</span></div><h1>TCPServer.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.network.tcp;
+
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import it.polimi.ingsw.gamemodel.Match;
+import it.polimi.ingsw.server.Server;
+
+/**
+ * Class containing the {@link ServerSocket}. This will just accept sockets and
+ * start the {@link ClientListener} with it
+ */
+public class TCPServer {
+    private ServerSocket serverSocketTCP;
+    private Server server;
+
+    /**
+     * Class constructor. It will open a {@link ServerSocket} on the specified port
+     *
+     * @param port   the port on which the server should be started
+     * @param server the {@link Server} object that contains all the {@link Match}
+     *               objects
+     */
+<span class="fc" id="L24">    public TCPServer(Integer port, Server server) {</span>
+        try {
+<span class="fc" id="L26">            this.serverSocketTCP = new ServerSocket(port);</span>
+<span class="fc" id="L27">            this.server = server;</span>
+<span class="nc" id="L28">        } catch (Exception e) {</span>
+<span class="nc" id="L29">            e.printStackTrace();</span>
+<span class="fc" id="L30">        }</span>
+<span class="fc" id="L31">    }</span>
+
+    /**
+     * Main loop. Until the {@link ServerSocket} is not closed, it will listen for
+     * any {@link Socket} that tries to connect and accept them. Finally, it will
+     * start a new {@link ClientListener} with it
+     */
+    public void listen() {
+<span class="pc bpc" id="L39" title="1 of 2 branches missed.">        while (!this.serverSocketTCP.isClosed()) {</span>
+            try {
+<span class="fc" id="L41">                Socket socket = this.serverSocketTCP.accept();</span>
+<span class="fc" id="L42">                new ClientListener(socket, server).start();</span>
+<span class="nc" id="L43">            } catch (IOException e) {</span>
+<span class="nc" id="L44">                System.out.println(&quot;Failed to accept socket&quot;);</span>
+<span class="nc" id="L45">                e.printStackTrace();</span>
+<span class="pc" id="L46">            }</span>
+        }
+<span class="nc" id="L48">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

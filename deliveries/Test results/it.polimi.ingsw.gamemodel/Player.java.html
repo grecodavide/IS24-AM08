@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Player.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.gamemodel</a> &gt; <span class="el_source">Player.java</span></div><h1>Player.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.gamemodel;
+
+import it.polimi.ingsw.exceptions.HandException;
+import it.polimi.ingsw.exceptions.WrongChoiceException;
+import it.polimi.ingsw.exceptions.WrongStateException;
+import it.polimi.ingsw.exceptions.WrongTurnException;
+import it.polimi.ingsw.utils.Pair;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.Objects;
+
+/**
+ * Represents each in-game user, so acts also as a gateway receiving input by the Controller.
+ * It's also responsible for the board's logic, which is a slice of the game logic.
+ */
+public class Player implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    private final String username;
+    private final Match match;
+    private int points;
+    private final Board board;
+    private Color pawnColor;
+    private Objective secretObjective;
+    /**
+     * If the player is connected
+     */
+    private boolean connected;
+
+    /**
+     * Initializes the main player's attributes.
+     *
+     * @param username the player's username
+     * @param match    the match the player belongs to
+     */
+<span class="fc" id="L38">    public Player(String username, Match match) {</span>
+<span class="fc" id="L39">        this.username = username;</span>
+<span class="fc" id="L40">        this.match = match;</span>
+
+<span class="fc" id="L42">        this.connected = true;</span>
+        //Initialize values
+<span class="fc" id="L44">        board = new Board();</span>
+<span class="fc" id="L45">        points = 0;</span>
+<span class="fc" id="L46">    }</span>
+
+    /**
+     * Initializes the current instance from a copy reference
+     *
+     * @param player The player to make a copy of
+     */
+<span class="fc" id="L53">    public Player(Player player) {</span>
+<span class="fc" id="L54">        this.username = player.username;</span>
+<span class="fc" id="L55">        this.match = player.match;</span>
+<span class="fc" id="L56">        this.board = player.board;</span>
+<span class="fc" id="L57">        this.points = player.points;</span>
+<span class="fc" id="L58">        this.pawnColor = player.pawnColor;</span>
+<span class="fc" id="L59">        this.secretObjective = player.secretObjective;</span>
+<span class="fc" id="L60">    }</span>
+
+    @Override
+    public boolean equals(Object o) {
+<span class="fc bfc" id="L64" title="All 2 branches covered.">        if (this == o) return true;</span>
+<span class="pc bpc" id="L65" title="1 of 2 branches missed.">        if (!(o instanceof Player player)) return false;</span>
+
+<span class="fc bfc" id="L67" title="All 2 branches covered.">        return username.equals(player.username) &amp;&amp;</span>
+<span class="pc bpc" id="L68" title="1 of 2 branches missed.">                match.equals(player.match);</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L73">        return Objects.hash(username, match, points, board, pawnColor, secretObjective);</span>
+    }
+
+    /**
+     * Places a card on the player's board, on the give side and in the given position, assuming it's valid.
+     *
+     * @param coords x and y position in which the card is played (where 0, 0 is the initial card)
+     * @param card   the card to be placed
+     * @param side   whether the card should be placed on the front or on the back
+     * @throws WrongChoiceException If the chosen card cannot be player (placement not allowed, or not enough resources,
+     *                              or card not in the player's hand)
+     * @throws WrongStateException  If a card cannot be played in this match state
+     * @throws WrongTurnException   If it's the turn of this player.
+     */
+    public void playCard(Pair&lt;Integer, Integer&gt; coords, PlayableCard card, Side side) throws WrongTurnException, WrongStateException, WrongChoiceException {
+<span class="fc" id="L88">        synchronized (match) {</span>
+<span class="pc bpc" id="L89" title="1 of 2 branches missed.">            if (match.getCurrentPlayer().equals(this))</span>
+<span class="fc" id="L90">                match.makeMove(coords, card, side);</span>
+            else
+<span class="nc" id="L92">                throw new WrongTurnException(&quot;Only the current player can play cards&quot;);</span>
+<span class="fc" id="L93">        }</span>
+<span class="fc" id="L94">    }</span>
+
+    /**
+     * Gets two objectives from the match objectives deck considered to be secret.
+     *
+     * @return a pair of objectives
+     * @throws WrongStateException if called during the wrong match state
+     * @throws WrongTurnException  if called by the player when it's not its turn
+     */
+    public Pair&lt;Objective, Objective&gt; drawSecretObjectives() throws WrongStateException, WrongTurnException {
+<span class="fc" id="L104">        synchronized (match) {</span>
+<span class="pc bpc" id="L105" title="1 of 2 branches missed.">            if (match.getCurrentPlayer().equals(this)) {</span>
+<span class="fc" id="L106">                return match.proposeSecretObjectives();</span>
+            } else {
+<span class="nc" id="L108">                throw new WrongTurnException(&quot;Only the current player can draw secret objectives&quot;);</span>
+            }
+        }
+    }
+
+    /**
+     * Gets an initial card from the match.
+     *
+     * @return an initial card
+     * @throws WrongTurnException  if called by the player when it's not its turn
+     * @throws WrongStateException if called during the wrong match state
+     */
+    public InitialCard drawInitialCard() throws WrongTurnException, WrongStateException {
+<span class="fc" id="L121">        synchronized (match) {</span>
+<span class="pc bpc" id="L122" title="1 of 2 branches missed.">            if (match.getCurrentPlayer().equals(this))</span>
+<span class="fc" id="L123">                return match.drawInitialCard();</span>
+            else
+<span class="nc" id="L125">                throw new WrongTurnException(&quot;Only the current player can draw the initial card&quot;);</span>
+        }
+    }
+
+    /**
+     * Chooses the initial card side.
+     *
+     * @param side the side of the initial card
+     * @throws WrongTurnException  if called by the player when it's not its turn
+     * @throws WrongStateException if called during the wrong match state
+     */
+    public void chooseInitialCardSide(Side side) throws WrongTurnException, WrongStateException {
+<span class="fc" id="L137">        synchronized (match) {</span>
+<span class="pc bpc" id="L138" title="1 of 2 branches missed.">            if (match.getCurrentPlayer().equals(this))</span>
+<span class="fc" id="L139">                match.setInitialSide(side, board.getAvailableResources());</span>
+            else
+<span class="nc" id="L141">                throw new WrongTurnException(&quot;Only the current player can choose the initial card side&quot;);</span>
+<span class="fc" id="L142">        }</span>
+<span class="fc" id="L143">    }</span>
+
+    /**
+     * Adds a card to the player's hand, popping it from the required source
+     *
+     * @param source represents the source of the draw, which can be either one of the two decks or one of the four cards on the table
+     * @throws WrongTurnException   if called by the player when it's not its turn
+     * @throws WrongChoiceException if called on a drawing source which is empty (e.g. empty deck)
+     * @throws WrongStateException  if called during the wrong match state
+     * @throws HandException if the player already has three cards in their hand
+     */
+    public void drawCard(DrawSource source) throws HandException, WrongStateException, WrongChoiceException, WrongTurnException {
+<span class="fc" id="L155">        synchronized (match) {</span>
+<span class="pc bpc" id="L156" title="1 of 2 branches missed.">            if (match.getCurrentPlayer().equals(this)) {</span>
+<span class="fc" id="L157">                PlayableCard card = match.drawCard(source);</span>
+<span class="fc" id="L158">                board.addHandCard(card);</span>
+<span class="fc" id="L159">            } else {</span>
+<span class="nc" id="L160">                throw new WrongTurnException(&quot;Only the current player can draw cards&quot;);</span>
+            }
+<span class="fc" id="L162">        }</span>
+<span class="fc" id="L163">    }</span>
+
+    /**
+     * Sets the player private objective (only at the start of the game).
+     *
+     * @param objective the chosen objective between the two proposed
+     * @throws WrongTurnException   if called by the player when it's not its turn
+     * @throws WrongStateException  if called during the wrong match state
+     * @throws WrongChoiceException if called on an objective which is not one of the proposed ones
+     */
+    public void chooseSecretObjective(Objective objective) throws WrongTurnException, WrongStateException, WrongChoiceException {
+<span class="fc" id="L174">        synchronized (match) {</span>
+<span class="pc bpc" id="L175" title="1 of 2 branches missed.">            if (match.getCurrentPlayer().equals(this)) {</span>
+<span class="fc" id="L176">                match.setSecretObjective(objective);</span>
+<span class="fc" id="L177">                secretObjective = objective;</span>
+            } else {
+<span class="nc" id="L179">                throw new WrongTurnException(&quot;Only the current player can choose an objective&quot;);</span>
+            }
+<span class="fc" id="L181">        }</span>
+<span class="fc" id="L182">    }</span>
+
+    /**
+     * Sends a message in public chat
+     *
+     * @param text content of the message
+     */
+    public void sendBroadcastText(String text) {
+<span class="fc" id="L190">        this.match.sendBroadcastText(this, text);</span>
+<span class="fc" id="L191">    }</span>
+
+    /**
+     * Sends a private message to the specified recipient
+     *
+     * @param recipient recipient of the message
+     * @param text      content of the message
+     */
+    public void sendPrivateText(Player recipient, String text) {
+<span class="fc" id="L200">        this.match.sendPrivateText(this, recipient, text);</span>
+<span class="fc" id="L201">    }</span>
+
+    /**
+     * Getter for the player's board.
+     */
+    public Board getBoard() {
+<span class="fc" id="L207">        return board;</span>
+    }
+
+    /**
+     * Getter for the player's points.
+     */
+    public int getPoints() {
+<span class="fc" id="L214">        return points;</span>
+    }
+
+    /**
+     * Getter for the player's pawn color.
+     */
+    public Color getPawnColor() {
+<span class="fc" id="L221">        return pawnColor;</span>
+    }
+
+    /**
+     * Setter for the player's color.
+     */
+    protected void setColor(Color color) {
+<span class="fc" id="L228">        this.pawnColor = color;</span>
+<span class="fc" id="L229">    }</span>
+
+    /**
+     * Getter for the player's secret objective.
+     *
+     * @see #chooseSecretObjective(Objective)
+     */
+    public Objective getSecretObjective() {
+<span class="fc" id="L237">        return secretObjective;</span>
+    }
+
+    /**
+     * Adds points to the player.
+     *
+     * @param points number of points to add to the player
+     */
+    protected void addPoints(int points) {
+<span class="fc" id="L246">        this.points += points;</span>
+<span class="fc" id="L247">    }</span>
+
+    /**
+     * Getter for the player's username.
+     */
+    public String getUsername() {
+<span class="fc" id="L253">        return username;</span>
+    }
+
+    public boolean isConnected() {
+<span class="fc" id="L257">        synchronized (match) {</span>
+<span class="fc" id="L258">            return connected;</span>
+        }
+    }
+
+    public void setConnected(boolean connected) {
+<span class="nc" id="L263">        synchronized (match) {</span>
+<span class="nc" id="L264">            this.connected = connected;</span>
+<span class="nc" id="L265">        }</span>
+<span class="nc" id="L266">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

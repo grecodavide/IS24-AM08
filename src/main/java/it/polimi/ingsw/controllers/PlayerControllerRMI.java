@@ -36,6 +36,52 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
     }
 
     /**
+     * Notifies the view that match has resumed after a server crash.
+     */
+    @Override
+    public void matchResumed() {
+        if (view == null) {
+            onUnregisteredView();
+        } else {
+            // Get visible objectives, visible playable cards and visible decks top reigns
+            Pair<Objective, Objective> visibleObjectives = match.getVisibleObjectives();
+            Map<DrawSource, PlayableCard> visiblePlayableCards = match.getVisiblePlayableCards();
+            Pair<Symbol, Symbol> decksTopReigns = match.getDecksTopReigns();
+
+            // Create a map that matches each pawn colour to the corresponding player's username
+            Map<String, Color> playersUsernamesAndPawns = new HashMap<>();
+
+            // Create a map that matches each player's username to the corresponding list of cards in the hand
+            Map<String, List<PlayableCard>> playersHands = new HashMap<>();
+
+            // Create a map that matches each player's username to the corresponding available resources
+            Map<String, Map<Symbol, Integer>> availableResources = new HashMap<>();
+
+            // Create a map that matches each player's username to the corresponding points
+            Map<String, Integer> playerPoints = new HashMap<>();
+
+            // Create a map that matches each player's username to the corresponding board
+            Map<String, Map<Pair<Integer, Integer>, PlacedCard>> playerBoards = new HashMap<>();
+
+            // Fill the maps with proper values
+            for (Player p : match.getPlayers()) {
+                playersUsernamesAndPawns.put(p.getUsername(), p.getPawnColor());
+                playersHands.put(p.getUsername(), p.getBoard().getCurrentHand());
+                availableResources.put(p.getUsername(), p.getBoard().getAvailableResources());
+                playerPoints.put(p.getUsername(), p.getPoints());
+                playerBoards.put(p.getUsername(), p.getBoard().getPlacedCards());
+            }
+
+            try {
+                view.matchResumed(playersUsernamesAndPawns, playersHands, visibleObjectives, visiblePlayableCards, decksTopReigns,
+                        player.getSecretObjective(), availableResources, playerBoards, playerPoints, match.getCurrentPlayer().getUsername(), match.getCurrentState().getClass().equals(AfterMoveState.class));
+            } catch (RemoteException e) {
+                onConnectionError();
+            }
+        }
+    }
+
+    /**
      * Sets the internal View attribute to the given argument; if it has already been called, it won't
      * do anything, since it's call is allowed once per PlayerController object.
      * It's used by a remote View having this class object to send itself over RMI to the PlayerControllerRMI
@@ -45,7 +91,7 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
      * @param view The View to save in the PlayerController internal state
      */
     @Override
-    public void registerView(RemoteViewInterface view) throws RemoteException, ChosenMatchException, WrongStateException, AlreadyUsedUsernameException {
+    public void registerView(RemoteViewInterface view) throws RemoteException, ChosenMatchException, WrongStateException, AlreadyUsedUsernameException, WrongNameException {
         if (this.view == null) {
             this.view = view;
 
@@ -387,14 +433,10 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
         } else {
             try {
                 PlayableCard rep = null;
-                Symbol repReign = null;
-                if (replacementCard != null) {
-                    repReign = replacementCard.getReign();
-                }
                 if (!source.equals(DrawSource.GOLDS_DECK) && !source.equals(DrawSource.RESOURCES_DECK)) {
                     rep = replacementCard;
                 }
-                view.someoneDrewCard(someone.getUsername(), source, card, rep, repReign);
+                view.someoneDrewCard(someone.getUsername(), source, card, rep, match.getDecksTopReigns());
             } catch (RemoteException e) {
                 onConnectionError();
             }
@@ -444,8 +486,15 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
         }
     }
 
-    private LeaderboardEntry createLeaderboardEntry(Player p, Boolean b) {
-        return new LeaderboardEntry(p.getUsername(), p.getPoints(), b);
+    /**
+     * Creates a {@link LeaderboardEntry} instance from the given parameters.
+     *
+     * @param player The player of the {@link LeaderboardEntry}
+     * @param winner True if the player is the winner
+     * @return The new {@link LeaderboardEntry} instance
+     */
+    private LeaderboardEntry createLeaderboardEntry(Player player, Boolean winner) {
+        return new LeaderboardEntry(player.getUsername(), player.getPoints(), winner);
     }
 
     /**
@@ -466,6 +515,11 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
         }
     }
 
+    /**
+     * Getter for the view associated to this instance.
+     *
+     * @return The {@link RemoteViewInterface} of this instance
+     */
     public RemoteViewInterface getView() {
         return view;
     }
@@ -476,9 +530,11 @@ public final class PlayerControllerRMI extends PlayerController implements Playe
     private void onConnectionError() {
         match.unsubscribeObserver(this);
         match.removePlayer(player);
-        System.err.println("There has been a connection error with player: " + player.getUsername());
     }
 
+    /**
+     * Prints an error in stderr when this instance is being used without a view attached to it.
+     */
     private void onUnregisteredView() {
         System.err.println("The PlayerControllerRMI of player " + player.getUsername() + " hasn't got a corresponding view");
     }

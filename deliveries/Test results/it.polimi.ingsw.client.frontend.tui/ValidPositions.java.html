@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ValidPositions.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.client.frontend.tui</a> &gt; <span class="el_source">ValidPositions.java</span></div><h1>ValidPositions.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.client.frontend.tui;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import it.polimi.ingsw.client.frontend.ShownCard;
+import it.polimi.ingsw.exceptions.CardException;
+import it.polimi.ingsw.gamemodel.CardFace;
+import it.polimi.ingsw.gamemodel.Corner;
+import it.polimi.ingsw.gamemodel.Symbol;
+import it.polimi.ingsw.utils.Pair;
+
+/**
+ * Valid positions of a board, ie all the points a new card can be linked to
+ */
+public class ValidPositions {
+    private final Map&lt;Pair&lt;Integer, Integer&gt;, BoardPosition&gt; coordinates;
+<span class="fc" id="L18">    private static final Map&lt;Corner, Pair&lt;Integer, Integer&gt;&gt; offsets =</span>
+<span class="fc" id="L19">            Map.of(Corner.TOP_LEFT, new Pair&lt;Integer, Integer&gt;(-1, 1), Corner.TOP_RIGHT, new Pair&lt;Integer, Integer&gt;(1, 1),</span>
+<span class="fc" id="L20">                    Corner.BOTTOM_LEFT, new Pair&lt;Integer, Integer&gt;(-1, -1), Corner.BOTTOM_RIGHT, new Pair&lt;Integer, Integer&gt;(1, -1));</span>
+
+    
+    /**
+     * Class constructor.
+     */
+<span class="fc" id="L26">    public ValidPositions() {</span>
+<span class="fc" id="L27">        this.coordinates = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L28">    }</span>
+    
+    /**
+     * Sums two coordinates.
+     * 
+     * @param coord First coordinate
+     * @param offset Second coordinate
+     * 
+     * @return The sum of the two coordinates
+     */
+    private Pair&lt;Integer, Integer&gt; offsetCoord(Pair&lt;Integer, Integer&gt; coord, Pair&lt;Integer, Integer&gt; offset) {
+<span class="fc" id="L39">        return new Pair&lt;Integer, Integer&gt;(coord.first() + offset.first(), coord.second() + offset.second());</span>
+    }
+
+    
+    /**
+     * Checks if a coordinate is a valid link point.
+     * 
+     * @param coord The coordinate to check
+     * 
+     * @return whether the coordinate is a valid link point or not
+     */
+    public boolean isValid(Pair&lt;Integer, Integer&gt; coord) {
+<span class="pc bpc" id="L51" title="1 of 2 branches missed.">        if (this.coordinates.get(coord) == null) {</span>
+<span class="nc" id="L52">            return false;</span>
+        }
+
+<span class="fc" id="L55">        return this.coordinates.get(coord).isValid();</span>
+    }
+
+    /**
+     * Gets all the valid linking points.
+     * 
+     * @return A map from coordinate to anchor's corner and linking point's index
+     */
+    public Map&lt;Pair&lt;Integer, Integer&gt;, Pair&lt;Integer, Corner&gt;&gt; getValidPlaces() {
+<span class="nc" id="L64">        Map&lt;Pair&lt;Integer, Integer&gt;, Pair&lt;Integer, Corner&gt;&gt; valids = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L65">        int pos = 1;</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">        for (Pair&lt;Integer, Integer&gt; coord : this.coordinates.keySet()) {</span>
+<span class="nc bnc" id="L67" title="All 2 branches missed.">            if (this.coordinates.get(coord).isValid()) {</span>
+<span class="nc" id="L68">                valids.put(coord, new Pair&lt;Integer,Corner&gt;(pos, this.coordinates.get(coord).link().get()));</span>
+<span class="nc" id="L69">                pos++;</span>
+            }
+<span class="nc" id="L71">        }</span>
+
+<span class="nc" id="L73">        return valids;</span>
+    }
+    
+    /**
+     * Adds a card, updating all the valid linking points.
+     * 
+     * @param card The added card
+     */
+    public void addCard(ShownCard card) {
+<span class="fc" id="L82">        CardFace cardFace = card.card().getSide(card.side());</span>
+<span class="fc" id="L83">        Pair&lt;Integer, Integer&gt; coord = card.coords();</span>
+<span class="fc" id="L84">        this.coordinates.put(coord, new BoardPosition(false, Optional.empty()));</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">        for (Corner corner : offsets.keySet()) {</span>
+            try {
+<span class="fc bfc" id="L87" title="All 2 branches covered.">                if (!cardFace.getCorner(corner).equals(Symbol.EMPTY_CORNER)) {</span>
+<span class="fc" id="L88">                    this.coordinates.putIfAbsent(this.offsetCoord(coord, offsets.get(corner)), new BoardPosition(true, Optional.of(corner)));</span>
+                } else {
+<span class="fc" id="L90">                    this.coordinates.put(this.offsetCoord(coord, offsets.get(corner)), new BoardPosition(false, Optional.empty()));</span>
+                }
+<span class="nc" id="L92">            } catch (CardException e) {</span>
+<span class="fc" id="L93">            }</span>
+<span class="fc" id="L94">        }</span>
+<span class="fc" id="L95">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

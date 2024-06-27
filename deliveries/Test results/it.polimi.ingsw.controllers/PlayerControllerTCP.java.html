@@ -1,0 +1,427 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PlayerControllerTCP.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.controllers</a> &gt; <span class="el_source">PlayerControllerTCP.java</span></div><h1>PlayerControllerTCP.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.controllers;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import it.polimi.ingsw.exceptions.HandException;
+import it.polimi.ingsw.exceptions.WrongChoiceException;
+import it.polimi.ingsw.exceptions.WrongStateException;
+import it.polimi.ingsw.exceptions.WrongTurnException;
+import it.polimi.ingsw.gamemodel.*;
+import it.polimi.ingsw.network.messages.Message;
+import it.polimi.ingsw.network.messages.errors.ErrorMessage;
+import it.polimi.ingsw.network.messages.responses.*;
+import it.polimi.ingsw.network.tcp.IOHandler;
+import it.polimi.ingsw.utils.Pair;
+import it.polimi.ingsw.utils.PlacedCardRecord;
+
+/**
+ * Subclass of {@link PlayerController} that implements its abstract methods through TCP
+ * interactions.
+ */
+public final class PlayerControllerTCP extends PlayerController {
+    private final IOHandler io;
+
+    /**
+     * Instantiates the internal Player with the given username and sets the internal Match
+     * reference to the given one, add the new Player instance to the match and subscribe this class
+     * instance to the match observers.
+     *
+     * @param username The username of the new player of the Match
+     * @param match The match to which this PlayerClass must pertain
+     * @param io The I/O handler to be attached to this instance
+     */
+    public PlayerControllerTCP(String username, Match match, IOHandler io) {
+<span class="fc" id="L36">        super(username, match);</span>
+<span class="fc" id="L37">        this.io = io;</span>
+<span class="fc" id="L38">    }</span>
+
+    /**
+     * Utility method to send a message object over the network.
+     *
+     * @param msg The message object to be sent
+     */
+    private void sendMessage(Message msg) {
+        try {
+<span class="fc" id="L47">            this.io.writeMsg(msg);</span>
+<span class="fc" id="L48">        } catch (Exception e) {</span>
+<span class="fc" id="L49">            this.connectionError();</span>
+<span class="fc" id="L50">        }</span>
+<span class="fc" id="L51">    }</span>
+
+    /**
+     * Utility method called when there's a connection error, it removes the player from the match.
+     */
+    private void connectionError() {
+<span class="fc" id="L57">        match.removePlayer(player);</span>
+<span class="fc" id="L58">        match.unsubscribeObserver(this);</span>
+<span class="fc" id="L59">    }</span>
+
+    /**
+     * Utility method to create an {@link ErrorMessage} object from an exception.
+     *
+     * @param exception The exception
+     * @return The nex ErrorMessage instance
+     */
+    private ErrorMessage createErrorMessage(Exception exception) {
+<span class="nc" id="L68">        return new ErrorMessage(exception.getMessage(), exception.getClass().getName());</span>
+    }
+
+    /**
+     * Notifies that the match has just started. Note that is supposed to be called by the match.
+     */
+    @Override
+    public void matchStarted() {
+<span class="nc" id="L76">        this.sendMessage(new MatchStartedMessage(match.getVisibleObjectives(),</span>
+<span class="nc" id="L77">                match.getVisiblePlayableCards(), match.getDecksTopReigns(), match.getPlayers()));</span>
+<span class="nc" id="L78">    }</span>
+
+    /**
+     * Notifies that someone has joined the match. Note that this method is supposed to be called by
+     * a match, moreover the match calls this method on all the MatchObservers instance subscribed
+     * to itself, then even the MatchObserver causing this event gets notified. If and only if the
+     * PlayerController receiving this method call is the one linked to given `someone`, it notifies
+     * the view about the current lobby information.
+     *
+     * @param someone The Player instance that has joined
+     */
+    @Override
+    public void someoneJoined(Player someone) {
+<span class="fc" id="L91">        this.sendMessage(new SomeoneJoinedMessage(someone.getUsername(), match.getPlayers(),</span>
+<span class="fc" id="L92">                match.getMaxPlayers()));</span>
+<span class="fc" id="L93">    }</span>
+
+    /**
+     * Notifies that someone has quit from the match. Note that Match calls this method on all
+     * MatchObservers instance subscribed to itself, then even the MatchObserver causing this event
+     * gets notified.
+     *
+     * @param someone The Player instance that has quit
+     */
+    @Override
+    public void someoneQuit(Player someone) {
+<span class="fc" id="L104">        this.sendMessage(new SomeoneQuitMessage(someone.getUsername(), match.getPlayers().size(),</span>
+<span class="fc" id="L105">                match.isFinished()));</span>
+<span class="fc" id="L106">    }</span>
+
+    /**
+     * Notifies that someone has drawn its initial card. Note that this method is supposed to be
+     * called by a match, moreover the match calls this method on all the MatchObservers instance
+     * subscribed to itself, then even the MatchObserver causing this event gets notified. If and
+     * only if the PlayerController receiving this method call is the one linked to given `someone`,
+     * it notifies the view that it received an initial card.
+     *
+     * @param someone The player instance that has drawn the card
+     * @param card The initial card that has been drawn
+     */
+    @Override
+    public void someoneDrewInitialCard(Player someone, InitialCard card) {
+<span class="nc" id="L120">        this.sendMessage(new SomeoneDrewInitialCardMessage(someone.getUsername(), card.getId()));</span>
+<span class="nc" id="L121">    }</span>
+
+    /**
+     * Notifies that someone has chosen its initial card side. Note that this method is supposed to
+     * be called by a match, moreover the match calls this method on all the MatchObservers instance
+     * subscribed to itself, then even the MatchObserver causing this event gets notified.
+     *
+     * @param someone The player instance that has chosen the side
+     * @param side The chosen initial card side
+     */
+    @Override
+    public void someoneSetInitialSide(Player someone, Side side,
+            Map&lt;Symbol, Integer&gt; availableResources) {
+<span class="nc" id="L134">        this.sendMessage(</span>
+<span class="nc" id="L135">                new SomeoneSetInitialSideMessage(someone.getUsername(), side, availableResources));</span>
+<span class="nc" id="L136">    }</span>
+
+    /**
+     * Notifies that someone has drawn two secret objectives. Note that this method is supposed to
+     * be called by a match, moreover the match calls this method on all the MatchObservers instance
+     * subscribed to itself, then even the MatchObserver causing this event gets notified. If and
+     * only if the PlayerController receiving this method call is the one linked to given `someone`,
+     * it notifies the view about the proposed objectives, the other views will just receive a
+     * notification about the player's username.
+     *
+     * @param someone The player instance that has drawn the objectives
+     * @param objectives The two proposed objectives
+     */
+    @Override
+    public void someoneDrewSecretObjective(Player someone, Pair&lt;Objective, Objective&gt; objectives) {
+<span class="nc" id="L151">        Pair&lt;Integer, Integer&gt; IDs =</span>
+<span class="nc" id="L152">                new Pair&lt;&gt;(objectives.first().getID(), objectives.second().getID());</span>
+<span class="nc" id="L153">        this.sendMessage(new SomeoneDrewSecretObjectivesMessage(someone.getUsername(), IDs));</span>
+<span class="nc" id="L154">    }</span>
+
+    /**
+     * Notifies that someone has chosen the secret objective. Note that this method is supposed to
+     * be called by a match, moreover the match calls this method on all the MatchObservers instance
+     * subscribed to itself, then even the MatchObserver causing this event gets notified. The view
+     * will just receive `someone` username, no the objective.
+     *
+     * @param someone The player instance that has chosen the secret objective
+     * @param objective The chosen secret objective
+     */
+    @Override
+    public void someoneChoseSecretObjective(Player someone, Objective objective) {
+<span class="nc" id="L167">        Integer objectiveID = null;</span>
+<span class="nc bnc" id="L168" title="All 2 branches missed.">        if (someone.equals(player))</span>
+<span class="nc" id="L169">            objectiveID = objective.getID();</span>
+<span class="nc" id="L170">        this.sendMessage(</span>
+<span class="nc" id="L171">                new SomeoneChoseSecretObjectiveMessage(someone.getUsername(), objectiveID));</span>
+<span class="nc" id="L172">    }</span>
+
+    /**
+     * Notifies that someone has played a card. Note that this method is supposed to be called by a
+     * match, moreover the match calls this method on all the MatchObservers instance subscribed to
+     * itself, then even the MatchObserver causing this event gets notified.
+     *
+     * @param someone The Player instance that has played a card
+     * @param coords The coordinates on which the card has been placed
+     * @param card The PlayableCard that has been played
+     * @param side The side on which the card has been placed
+     */
+    @Override
+    public void someonePlayedCard(Player someone, Pair&lt;Integer, Integer&gt; coords, PlayableCard card,
+            Side side) {
+<span class="nc" id="L187">        this.sendMessage(new SomeonePlayedCardMessage(someone.getUsername(), coords, card.getId(),</span>
+<span class="nc" id="L188">                side, someone.getPoints(), someone.getBoard().getAvailableResources()));</span>
+<span class="nc" id="L189">    }</span>
+
+    /**
+     * Notifies that someone has drawn a card. The replacement card is the one that has taken the
+     * place of the drawn one, it's needed since observers have to know the reign of the new card on
+     * top of the decks. Note that this method is supposed to be called by a match, moreover the
+     * match calls this method on all the MatchObservers instance subscribed to itself, then even
+     * the MatchObserver causing this event gets notified.
+     *
+     * @param someone The Player instance that has drawn a card
+     * @param source The drawing source from which the card has been drawn
+     * @param card The card that has been drawn
+     * @param replacementCard The card that has replaced the drawn card, null if the draw source is
+     *        a deck
+     */
+    @Override
+    public void someoneDrewCard(Player someone, DrawSource source, PlayableCard card,
+            PlayableCard replacementCard) {
+<span class="nc" id="L207">        Integer repId = null;</span>
+<span class="nc bnc" id="L208" title="All 2 branches missed.">        if (replacementCard != null) {</span>
+<span class="nc" id="L209">            repId = replacementCard.getId();</span>
+        }
+<span class="nc" id="L211">        this.sendMessage(new SomeoneDrewCardMessage(someone.getUsername(), source, card.getId(),</span>
+<span class="nc" id="L212">                repId, match.getDecksTopReigns()));</span>
+<span class="nc" id="L213">    }</span>
+
+    /**
+     * Notifies that someone sent a message in the public chat.
+     *
+     * @param someone The player that send the message
+     * @param text Content of the message
+     */
+    @Override
+    public void someoneSentBroadcastText(Player someone, String text) {
+<span class="fc" id="L223">        Message msg = new SomeoneSentBroadcastTextMessage(someone.getUsername(), text);</span>
+<span class="fc" id="L224">        this.sendMessage(msg);</span>
+<span class="fc" id="L225">    }</span>
+
+    /**
+     * Notifies that someone sent a private message to another user. If the recipient is the current
+     * player, then the view is notified, otherwise the message is ignored.
+     *
+     * @param someone The player that sent the message
+     * @param recipient The recipient of the message
+     * @param text Content of the message
+     */
+    @Override
+    public void someoneSentPrivateText(Player someone, Player recipient, String text) {
+<span class="fc bfc" id="L237" title="All 2 branches covered.">        if (recipient.getUsername().equals(this.player.getUsername())</span>
+<span class="fc bfc" id="L238" title="All 2 branches covered.">                || someone.getUsername().equals(this.player.getUsername())) {</span>
+<span class="fc" id="L239">            Message msg = new SomeoneSentPrivateTextMessage(someone.getUsername(),</span>
+<span class="fc" id="L240">                    recipient.getUsername(), text);</span>
+<span class="fc" id="L241">            this.sendMessage(msg);</span>
+        }
+<span class="fc" id="L243">    }</span>
+
+    /**
+     * Notifies that the match has just finished.
+     */
+    @Override
+    public void matchFinished() {
+<span class="nc" id="L250">        this.sendMessage(new MatchFinishedMessage(match.getPlayersFinalRanking()));</span>
+<span class="nc" id="L251">    }</span>
+
+
+    /**
+     * Tries to get the player initial card, unless there was a {@link WrongTurnException} or a
+     * {@link WrongStateException}, in which case a new {@link ErrorMessage} is sent with the
+     * exception content
+     */
+    public void drawInitialCard() {
+        try {
+<span class="nc" id="L261">            this.player.drawInitialCard();</span>
+<span class="nc" id="L262">        } catch (WrongTurnException | WrongStateException e) {</span>
+<span class="nc" id="L263">            this.sendMessage(this.createErrorMessage(e));</span>
+<span class="nc" id="L264">        }</span>
+<span class="nc" id="L265">    }</span>
+
+
+    /**
+     * Tries to set the player's initial card's side, unless there was a {@link WrongTurnException}
+     * or a {@link WrongStateException}, in which case a new {@link ErrorMessage} is sent with the
+     * exception content
+     *
+     * @param side The chosen card
+     */
+    public void chooseInitialCardSide(Side side) {
+        try {
+<span class="nc" id="L277">            this.player.chooseInitialCardSide(side);</span>
+<span class="nc" id="L278">        } catch (WrongTurnException | WrongStateException e) {</span>
+<span class="nc" id="L279">            this.sendMessage(this.createErrorMessage(e));</span>
+<span class="nc" id="L280">        }</span>
+<span class="nc" id="L281">    }</span>
+
+    /**
+     * Tries to get the player's secret objectives pair (from which he will have to choose one),
+     * unless there was a {@link WrongTurnException} or a {@link WrongStateException}, in which case
+     * a new {@link ErrorMessage} is sent with the exception content
+     */
+    public void drawSecretObjectives() {
+        try {
+<span class="nc" id="L290">            this.player.drawSecretObjectives();</span>
+<span class="nc" id="L291">        } catch (WrongTurnException | WrongStateException e) {</span>
+<span class="nc" id="L292">            this.sendMessage(this.createErrorMessage(e));</span>
+<span class="nc" id="L293">        }</span>
+<span class="nc" id="L294">    }</span>
+
+    /**
+     * Tries to set the player's secret objective, unless there was a {@link WrongTurnException} or
+     * a {@link WrongStateException}, in which case a new {@link ErrorMessage} is sent with the
+     * exception content
+     *
+     * @param objective The chosen objective
+     */
+    public void chooseSecretObjective(Objective objective) {
+        try {
+<span class="nc" id="L305">            this.player.chooseSecretObjective(objective);</span>
+<span class="nc" id="L306">        } catch (WrongChoiceException | WrongStateException | WrongTurnException e) {</span>
+<span class="nc" id="L307">            this.sendMessage(this.createErrorMessage(e));</span>
+<span class="nc" id="L308">        }</span>
+<span class="nc" id="L309">    }</span>
+
+    /**
+     * Tries to place a card on the player's board, unless there was a {@link WrongStateException},
+     * in which case a new {@link ErrorMessage} is sent with the exception content
+     *
+     * @param coords The chosen coordinates
+     * @param card The chosen card
+     * @param side The chosen side
+     */
+    public void playCard(Pair&lt;Integer, Integer&gt; coords, PlayableCard card, Side side) {
+        try {
+<span class="nc" id="L321">            this.player.playCard(coords, card, side);</span>
+<span class="nc" id="L322">        } catch (WrongChoiceException | WrongStateException | WrongTurnException e) {</span>
+<span class="nc" id="L323">            this.sendMessage(this.createErrorMessage(e));</span>
+<span class="nc" id="L324">        }</span>
+<span class="nc" id="L325">    }</span>
+
+    /**
+     * Tries to draw a card, unless there was a {@link WrongStateException}, in which case a new
+     * {@link ErrorMessage} is sent with the exception content
+     *
+     * @param source The chosen source
+     */
+    public void drawCard(DrawSource source) {
+        try {
+<span class="nc" id="L335">            this.player.drawCard(source);</span>
+<span class="nc" id="L336">        } catch (HandException | WrongTurnException | WrongStateException</span>
+                | WrongChoiceException e) {
+<span class="nc" id="L338">            this.sendMessage(this.createErrorMessage(e));</span>
+<span class="nc" id="L339">        }</span>
+<span class="nc" id="L340">    }</span>
+
+    /**
+     * Sends a broadcast in the chat.
+     *
+     * @param text Text of the message
+     */
+    public void sendBroadcastText(String text) {
+<span class="fc" id="L348">        this.player.sendBroadcastText(text);</span>
+<span class="fc" id="L349">    }</span>
+
+    /**
+     * Sends a private message in the chat.
+     *
+     * @param recipientUsername username of the recipient
+     * @param text text of the message
+     */
+    public void sendPrivateText(String recipientUsername, String text) {
+<span class="fc" id="L358">        Player recipient = null;</span>
+<span class="pc bpc" id="L359" title="1 of 2 branches missed.">        for (Player player : this.match.getPlayers()) {</span>
+<span class="fc bfc" id="L360" title="All 2 branches covered.">            if (player.getUsername().equals(recipientUsername)) {</span>
+<span class="fc" id="L361">                recipient = player;</span>
+<span class="fc" id="L362">                break;</span>
+            }
+<span class="fc" id="L364">        }</span>
+
+        // if you want to send error if recipient does not exist, change here
+<span class="pc bpc" id="L367" title="1 of 2 branches missed.">        if (recipient != null) {</span>
+<span class="fc" id="L368">            this.player.sendPrivateText(recipient, text);</span>
+        }
+<span class="fc" id="L370">    }</span>
+
+    /**
+     * Notifies the view that match has resumed after a server crash.
+     */
+    @Override
+    public void matchResumed() {
+<span class="nc" id="L377">        Map&lt;String, Color&gt; playersUsernamesAndPawns = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L378">        Map&lt;String, List&lt;Integer&gt;&gt; playersHands = new HashMap&lt;&gt;();</span>
+        Pair&lt;Integer, Integer&gt; visibleObjectives;
+<span class="nc" id="L380">        Map&lt;DrawSource, Integer&gt; visiblePlayableCards = new HashMap&lt;&gt;();</span>
+        Pair&lt;Symbol, Symbol&gt; decksTopReigns;
+        Integer secretObjective;
+<span class="nc" id="L383">        Map&lt;String, Map&lt;Symbol, Integer&gt;&gt; availableResources = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L384">        Map&lt;String, Map&lt;Integer, PlacedCardRecord&gt;&gt; placedCards = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L385">        Map&lt;String, Integer&gt; playerPoints = new HashMap&lt;&gt;();</span>
+        String currentPlayer;
+        boolean drawPhase;
+
+<span class="nc" id="L389">        this.match.getPlayers().forEach(player -&gt; {</span>
+<span class="nc" id="L390">            String username = player.getUsername();</span>
+<span class="nc" id="L391">            Board board = player.getBoard();</span>
+<span class="nc" id="L392">            playersUsernamesAndPawns.put(username, player.getPawnColor());</span>
+<span class="nc" id="L393">            playersHands.put(username,</span>
+<span class="nc" id="L394">                    board.getCurrentHand().stream().map(Card::getId).collect(Collectors.toList()));</span>
+<span class="nc" id="L395">            availableResources.put(username, board.getAvailableResources());</span>
+
+<span class="nc" id="L397">            Map&lt;Integer, PlacedCardRecord&gt; placed = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L398">            board.getPlacedCards()</span>
+<span class="nc" id="L399">                    .forEach((coords, placedCard) -&gt; placed.put(placedCard.getTurn(),</span>
+<span class="nc" id="L400">                            new PlacedCardRecord(placedCard.getCard().getId(), coords.first(),</span>
+<span class="nc" id="L401">                                    coords.second(), placedCard.getPlayedSide())));</span>
+
+<span class="nc" id="L403">            placedCards.put(username, placed);</span>
+<span class="nc" id="L404">            playerPoints.put(username, player.getPoints());</span>
+<span class="nc" id="L405">        });</span>
+
+<span class="nc" id="L407">        Pair&lt;Objective, Objective&gt; visibleObjectivesValue = this.match.getVisibleObjectives();</span>
+        // Get a Set of Entry, which contains key and value, and create a new Hashmap with key and
+        // value.ID
+<span class="nc" id="L410">        visibleObjectives = new Pair&lt;&gt;(visibleObjectivesValue.first().getID(),</span>
+<span class="nc" id="L411">                visibleObjectivesValue.second().getID());</span>
+<span class="nc" id="L412">        visiblePlayableCards = this.match.getVisiblePlayableCards().entrySet().stream()</span>
+<span class="nc" id="L413">                .collect(Collectors.toMap(Map.Entry::getKey, entry -&gt; entry.getValue().getId()));</span>
+<span class="nc" id="L414">        decksTopReigns = this.match.getDecksTopReigns();</span>
+<span class="nc" id="L415">        secretObjective = this.player.getSecretObjective().getID();</span>
+<span class="nc" id="L416">        currentPlayer = this.match.getCurrentPlayer().getUsername();</span>
+<span class="nc" id="L417">        drawPhase = this.match.getCurrentState().getClass().equals(AfterMoveState.class);</span>
+
+
+<span class="nc" id="L420">        Message msg = new MatchResumedMessage(playersUsernamesAndPawns, playersHands,</span>
+                visibleObjectives, visiblePlayableCards, decksTopReigns, secretObjective,
+                availableResources, placedCards, playerPoints, currentPlayer, drawPhase);
+
+<span class="nc" id="L424">        this.sendMessage(msg);</span>
+<span class="nc" id="L425">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

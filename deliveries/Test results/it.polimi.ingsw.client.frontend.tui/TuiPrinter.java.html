@@ -1,0 +1,1225 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TuiPrinter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.client.frontend.tui</a> &gt; <span class="el_source">TuiPrinter.java</span></div><h1>TuiPrinter.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.client.frontend.tui;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import org.jline.terminal.Terminal;
+import it.polimi.ingsw.client.frontend.ClientBoard;
+import it.polimi.ingsw.client.frontend.ShownCard;
+import it.polimi.ingsw.exceptions.CardException;
+import it.polimi.ingsw.gamemodel.*;
+import it.polimi.ingsw.utils.AvailableMatch;
+import it.polimi.ingsw.utils.LeaderboardEntry;
+import it.polimi.ingsw.utils.Pair;
+import it.polimi.ingsw.utils.TUICardParser;
+
+/**
+ * Class that handles the actual printing to the terminal.
+ */
+public class TuiPrinter {
+    private final Terminal terminal;
+    private final TUICardParser parser;
+    private final Integer infoLineOffset;
+<span class="nc" id="L24">    private static final Integer cardRows = 6, cardCols = 18, cornerRows = 3, cornerCols = 5;</span>
+
+    /**
+     * Class constructor, it creates auxiliary objects to communicate with the terminal and the card
+     * parser.
+     * 
+     * @throws IOException
+     */
+<span class="nc" id="L32">    public TuiPrinter() throws IOException {</span>
+<span class="nc" id="L33">        this.terminal = org.jline.terminal.TerminalBuilder.terminal();</span>
+<span class="nc" id="L34">        this.parser = new TUICardParser();</span>
+<span class="nc" id="L35">        this.infoLineOffset = 2;</span>
+
+<span class="nc" id="L37">    }</span>
+
+    // ! PRIVATE METHODS //
+    /**
+     * Sums two coordinates.
+     * 
+     * @param op1 The first coordinate
+     * @param op2 The second coordinate
+     * 
+     * @return A new coordinate containing the sum of the two
+     */
+    private Pair&lt;Integer, Integer&gt; sumCoords(Pair&lt;Integer, Integer&gt; op1,
+            Pair&lt;Integer, Integer&gt; op2) {
+<span class="nc" id="L50">        return new Pair&lt;&gt;(op1.first() + op2.first(), op1.second() + op2.second());</span>
+    }
+
+    /**
+     * @return The terminal's height (rows).
+     */
+    private Integer getHeight() {
+<span class="nc" id="L57">        return this.terminal.getHeight();</span>
+    }
+
+    /**
+     * @return The terminal's width (columns).
+     */
+    private Integer getWidth() {
+<span class="nc" id="L64">        return this.terminal.getWidth();</span>
+    }
+
+
+    /**
+     * Sets the string's position on the terminal. This is done via an escape sequence, that anchors
+     * the text in the specified row and column.
+     * 
+     * @param x The x coordinate (column)
+     * @param y The y coordinate (row)
+     * 
+     * @return The escape sequence to be inserted in the string, in order for it to be anchored in
+     *         the right spot
+     */
+    private String setPosition(Integer x, Integer y) {
+<span class="nc" id="L79">        return &quot;\033[&quot; + y + &quot;;&quot; + x + &quot;H&quot;;</span>
+    }
+
+    private Pair&lt;Integer, Integer&gt; getAbsoluteCoords(Pair&lt;Integer, Integer&gt; coords) {
+<span class="nc" id="L83">        int termRows = this.getHeight(), termCols = this.getWidth();</span>
+
+<span class="nc" id="L85">        Pair&lt;Integer, Integer&gt; coordOffset =</span>
+<span class="nc" id="L86">                new Pair&lt;Integer, Integer&gt;((termCols - cardCols) / 2, (termRows - cardRows) / 2);</span>
+<span class="nc" id="L87">        Pair&lt;Integer, Integer&gt; coordUpdated =</span>
+<span class="nc" id="L88">                new Pair&lt;Integer, Integer&gt;(coords.first() * (cardCols - cornerCols),</span>
+<span class="nc" id="L89">                        -coords.second() * (cardRows - cornerRows));</span>
+
+<span class="nc" id="L91">        return this.sumCoords(coordOffset, coordUpdated);</span>
+    }
+
+    /**
+     * Prints the colored username of a player.
+     * 
+     * @param username The player's username
+     * @param color The color associated to the player
+     * 
+     * @return A string with the necessary escape sequences to show a colored username
+     */
+    private String parseUsername(String username, Color color) {
+<span class="nc bnc" id="L103" title="All 5 branches missed.">        String c = switch (color) {</span>
+<span class="nc" id="L104">            case Color.RED -&gt; &quot;\033[031m&quot;;</span>
+<span class="nc" id="L105">            case Color.YELLOW -&gt; &quot;\033[032m&quot;;</span>
+<span class="nc" id="L106">            case Color.GREEN -&gt; &quot;\033[033m&quot;;</span>
+<span class="nc" id="L107">            case Color.BLUE -&gt; &quot;\033[034m&quot;;</span>
+<span class="nc" id="L108">            default -&gt; &quot;&quot;;</span>
+        };
+
+<span class="nc" id="L111">        return c + username + &quot;\033[0m&quot;;</span>
+    }
+
+    /**
+     * Shows a card on the terminal
+     * 
+     * @param card Record containing the card and its coordinates
+     */
+    public void printCard(ShownCard card) {
+        try {
+<span class="nc bnc" id="L121" title="All 2 branches missed.">            if (card.coords().equals(new Pair&lt;&gt;(0, 0)))</span>
+<span class="nc" id="L122">                System.out.println(parser.parseCard(card.card(), getAbsoluteCoords(card.coords()),</span>
+<span class="nc bnc" id="L123" title="All 2 branches missed.">                        null, card.side() == Side.FRONT));</span>
+            else
+<span class="nc" id="L125">                System.out.println(parser.parseCard(card.card(), getAbsoluteCoords(card.coords()),</span>
+<span class="nc bnc" id="L126" title="All 2 branches missed.">                        card.coords(), card.side() == Side.FRONT));</span>
+<span class="nc" id="L127">            System.out.println(&quot;\033[0m&quot;);</span>
+<span class="nc" id="L128">        } catch (CardException e) {</span>
+<span class="nc" id="L129">        }</span>
+<span class="nc" id="L130">    }</span>
+
+    /**
+     * Prints the user points and username.
+     * 
+     * @param username The player's username
+     * @param color The player's associated color
+     * @param points The player's point
+     */
+    private void printPoints(String username, Color color, Integer points) {
+<span class="nc" id="L140">        int oldOffset = this.getHeight() - infoLineOffset;</span>
+<span class="nc" id="L141">        int termCols = this.getWidth();</span>
+        // int newOffset = 1;
+<span class="nc" id="L143">        String out = this.parseUsername(username, color) + &quot;'s points: &quot; + points;</span>
+<span class="nc" id="L144">        System.out.println(this.setPosition((termCols - out.length()) / 4, oldOffset) + out);</span>
+<span class="nc" id="L145">    }</span>
+
+    private int getDimStart(int max, int dim) {
+<span class="nc bnc" id="L148" title="All 2 branches missed.">        if (dim &gt;= max)</span>
+<span class="nc" id="L149">            return 1;</span>
+
+<span class="nc" id="L151">        int left = max - dim; // available space</span>
+<span class="nc bnc" id="L152" title="All 2 branches missed.">        if (left % 2 == 1)</span>
+<span class="nc" id="L153">            left--;</span>
+<span class="nc" id="L154">        return left / 2; // starting coord</span>
+    }
+
+
+    /**
+     * Prints the &quot;welcome&quot; string.
+     * 
+     * @param x The starting x coordinate
+     * @param y The starting y coordinate
+     */
+    private void printWelcome(int x, int y) {
+<span class="nc" id="L165">        List&lt;String&gt; welcomeString = new ArrayList&lt;&gt;();</span>
+
+<span class="nc" id="L167">        String prefix = setPosition(x, y);</span>
+<span class="nc" id="L168">        welcomeString.add(prefix</span>
+                + &quot;  _       __           __                                               __          &quot;);
+<span class="nc" id="L170">        prefix = setPosition(x, ++y);</span>
+<span class="nc" id="L171">        welcomeString.add(prefix</span>
+                + &quot; | |     / /  ___     / /  _____   ____     ____ ___     ___           / /_   ____  &quot;);
+<span class="nc" id="L173">        prefix = setPosition(x, ++y);</span>
+<span class="nc" id="L174">        welcomeString.add(prefix</span>
+                + &quot; | | /| / /  / _ \\   / /  / ___/  / __ \\   / __  __ \\   / _ \\         / __/  / __ \\ &quot;);
+<span class="nc" id="L176">        prefix = setPosition(x, ++y);</span>
+<span class="nc" id="L177">        welcomeString.add(prefix</span>
+                + &quot; | |/ |/ /  /  __/  / /  / /__   / /_/ /  / / / / / /  /  __/        / /_   / /_/ / &quot;);
+<span class="nc" id="L179">        prefix = setPosition(x, ++y);</span>
+<span class="nc" id="L180">        welcomeString.add(prefix</span>
+                + &quot; |__/|__/   \\___/  /_/   \\___/   \\____/  /_/ /_/ /_/   \\___/         \\__/   \\____/  &quot;);
+
+<span class="nc bnc" id="L183" title="All 2 branches missed.">        for (int i = 0; i &lt; welcomeString.size(); i++)</span>
+<span class="nc" id="L184">            System.out.println(welcomeString.get(i));</span>
+<span class="nc" id="L185">    }</span>
+
+    /**
+     * Prints either the small or big title.
+     * 
+     * @param x The starting x coordinate
+     * @param y The starting y coordinate
+     * @param isLittle Whether the title should be small or big
+     */
+    private void printTitle(int x, int y, boolean isLittle) {
+<span class="nc bnc" id="L195" title="All 2 branches missed.">        if (isLittle)</span>
+<span class="nc" id="L196">            printLittleTitle(x, y);</span>
+        else
+<span class="nc" id="L198">            printBigTitle(x, y);</span>
+<span class="nc" id="L199">    }</span>
+
+    /**
+     * Prints the big title.
+     * 
+     * @param x The starting x coordinate
+     * @param y The starting y coordinate
+     */
+    private void printBigTitle(int x, int y) {
+<span class="nc" id="L208">        String white = &quot;\033[0m&quot;, yellow = parser.getRightColor(Symbol.INKWELL), bold = &quot;\033[1m&quot;;</span>
+<span class="nc" id="L209">        List&lt;String&gt; titleString = new ArrayList&lt;&gt;();</span>
+
+<span class="nc" id="L211">        String prefix = setPosition(x, y);</span>
+<span class="nc" id="L212">        titleString.add(prefix</span>
+                + &quot;  _____                                                                                                                                                                                                     _____  &quot;);
+<span class="nc" id="L214">        prefix = setPosition(x, ++y);</span>
+<span class="nc" id="L215">        titleString.add(prefix</span>
+                + &quot; ( ___ )---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------( ___ ) &quot;);
+<span class="nc" id="L217">        prefix = setPosition(x, ++y);</span>
+<span class="nc" id="L218">        titleString.add(prefix</span>
+                + &quot;  |   |                                                                                                                                                                                                     |   |  &quot;);
+<span class="nc" id="L220">        prefix = setPosition(x, ++y);</span>
+<span class="nc" id="L221">        titleString.add(prefix</span>
+                + &quot;  |   |                                                                                                                                                                                                     |   |  &quot;);
+<span class="nc" id="L223">        prefix = setPosition(x, ++y);</span>
+<span class="nc" id="L224">        titleString.add(prefix</span>
+                + &quot;  |   |                                                                                                                                                                                                     |   |  &quot;);
+<span class="nc" id="L226">        prefix = setPosition(x, ++y);</span>
+<span class="nc" id="L227">        titleString.add(prefix</span>
+                + &quot;  |   |           ...                         ..                                             ...     ...                      s                                                  ..    .       .x+=:.       |   |  &quot;);
+<span class="nc" id="L229">        prefix = setPosition(x, ++y);</span>
+<span class="nc" id="L230">        titleString.add(prefix</span>
+                + &quot;  |   |        xH88''~ .x8X                 dF                                            .=*8888n..'%888:                   :8                                            x .d88'    @88&gt;    z'    ^%      |   |  &quot;);
+<span class="nc" id="L232">        prefix = setPosition(x, ++y);</span>
+<span class="nc" id="L233">        titleString.add(prefix</span>
+                + &quot;  |   |      :8888   .f'8888Hf        u.   '88bu.                    uL   ..             X    |8888f '8888                  .88       x.    .        .u    .                5888R     %8P        .   &lt;k     |   |  &quot;);
+<span class="nc" id="L235">        prefix = setPosition(x, ++y);</span>
+<span class="nc" id="L236">        titleString.add(prefix</span>
+                + &quot;  |   |     :8888&gt;  X8L  ^'''   ...ue888b  '*88888bu        .u     .@88b  @88R           88x. '8888X  8888&gt;        u       :888ooo  .@88k  z88u    .d88B :@8c        u      '888R      .       .@8Ned8'     |   |  &quot;);
+<span class="nc" id="L238">        prefix = setPosition(x, ++y);</span>
+<span class="nc" id="L239">        titleString.add(prefix</span>
+                + &quot;  |   |     X8888  X888h        888R Y888r   ^'*8888N    ud8888.  ''Y888k/'*P           '8888k 8888X  ''*8h.    us888u.  -*8888888 ~'8888 ^8888   ='8888f8888r    us888u.    888R    .@88u   .@^%8888'      |   |  &quot;);
+<span class="nc" id="L241">        prefix = setPosition(x, ++y);</span>
+<span class="nc" id="L242">        titleString.add(prefix</span>
+                + &quot;  |   |     88888  |88888.      888R I888&gt;  beWE '888L :888'8888.    Y888L               '8888 X888X .xH8    .@88 '8888'   8888      8888  888R     4888&gt;'88'  .@88 '8888'   888R   ''888E' x88:  ')8b.     |   |  &quot;);
+<span class="nc" id="L244">        prefix = setPosition(x, ++y);</span>
+<span class="nc" id="L245">        titleString.add(prefix</span>
+                + &quot;  |   |     88888   %88888      888R I888&gt;  888E  888E d888 '88%'     8888                 '8' X888|:888X    9888  9888    8888      8888  888R     4888&gt; '    9888  9888    888R     888E  8888N=*8888     |   |  &quot;);
+<span class="nc" id="L247">        prefix = setPosition(x, ++y);</span>
+<span class="nc" id="L248">        titleString.add(prefix</span>
+                + &quot;  |   |     88888 '&gt; '8888&gt;     888R I888&gt;  888E  888E 8888.+'        '888N               =~'  X888 X888X    9888  9888    8888      8888  888R     4888&gt;      9888  9888    888R     888E   %8'    R88     |   |  &quot;);
+<span class="nc" id="L250">        prefix = setPosition(x, ++y);</span>
+<span class="nc" id="L251">        titleString.add(prefix</span>
+                + &quot;  |   |     '8888L %  |888   | u8888cJ888   888E  888F 8888L       .u./'888&amp;               :h. X8*' |888X    9888  9888   .8888Lu=   8888 ,888B .  .d888L .+   9888  9888    888R     888E    @8Wou 9%      |   |  &quot;);
+<span class="nc" id="L253">        prefix = setPosition(x, ++y);</span>
+<span class="nc" id="L254">        titleString.add(prefix</span>
+                + &quot;  |   |      '8888  '-*''   /   '*888*P'   .888N..888  '8888c. .+ d888' Y888*'            X888xX'   '8888..: 9888  9888   ^%888*    '8888Y 8888'   ^'8888*'    9888  9888   .888B .   888&amp;  .888888P'       |   |  &quot;);
+<span class="nc" id="L256">        prefix = setPosition(x, ++y);</span>
+<span class="nc" id="L257">        titleString.add(prefix</span>
+                + &quot;  |   |        '888.      :'      'Y'       ''888*''    '88888%   ' 'Y   Y'             :~'888f     '*888*'  '888*''888'    'Y'      'Y'   'YP        'Y'      '888*''888'  ^*888%    R888' '   ^'F         |   |  &quot;);
+<span class="nc" id="L259">        prefix = setPosition(x, ++y);</span>
+<span class="nc" id="L260">        titleString.add(prefix</span>
+                + &quot;  |   |          '''***~''                     ''         'YP'                              ''        '''     ^Y'   ^Y'                                         ^Y'   ^Y'     '%       ''                   |   |  &quot;);
+<span class="nc" id="L262">        prefix = setPosition(x, ++y);</span>
+<span class="nc" id="L263">        titleString.add(prefix</span>
+                + &quot;  |   |                                                                                                                                                                                                     |   |  &quot;);
+<span class="nc" id="L265">        prefix = setPosition(x, ++y);</span>
+<span class="nc" id="L266">        titleString.add(prefix</span>
+                + &quot;  |   |                                                                                                                                                                                                     |   |  &quot;);
+<span class="nc" id="L268">        prefix = setPosition(x, ++y);</span>
+<span class="nc" id="L269">        titleString.add(prefix</span>
+                + &quot;  |___|                                                                                                                                                                                                     |___|  &quot;);
+<span class="nc" id="L271">        prefix = setPosition(x, ++y);</span>
+<span class="nc" id="L272">        titleString.add(prefix</span>
+                + &quot; (_____)---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------(_____) &quot;);
+
+<span class="nc" id="L275">        System.out.println(bold + yellow);</span>
+<span class="nc bnc" id="L276" title="All 2 branches missed.">        for (int i = 0; i &lt; titleString.size(); i++)</span>
+<span class="nc" id="L277">            System.out.println(titleString.get(i));</span>
+<span class="nc" id="L278">        System.out.println(white);</span>
+<span class="nc" id="L279">    }</span>
+
+    /**
+     * Prints the small title.
+     * 
+     * @param x The starting x coordinate
+     * @param y The starting y coordinate
+     */
+    private void printLittleTitle(int x, int y) {
+<span class="nc" id="L288">        String white = &quot;\033[0m&quot;, yellow = parser.getRightColor(Symbol.INKWELL), bold = &quot;\033[1m&quot;;</span>
+<span class="nc" id="L289">        List&lt;String&gt; titleString = new ArrayList&lt;&gt;();</span>
+
+<span class="nc" id="L291">        String prefix = setPosition(x, y);</span>
+<span class="nc" id="L292">        titleString.add(prefix</span>
+                + &quot;    ______                __                         _   __            __                               __   _         &quot;);
+<span class="nc" id="L294">        prefix = setPosition(x, ++y);</span>
+<span class="nc" id="L295">        titleString.add(prefix</span>
+                + &quot;   / ____/  ____     ____/ /  ___     _  __         / | / /  ____ _   / /_   __  __   _____   ____ _   / /  (_)  _____ &quot;);
+<span class="nc" id="L297">        prefix = setPosition(x, ++y);</span>
+<span class="nc" id="L298">        titleString.add(prefix</span>
+                + &quot;  / /      / __ \\   / __  /  / _ \\   | |/_/        /  |/ /  / __  /  / __/  / / / /  / ___/  / __  /  / /  / /  / ___/ &quot;);
+<span class="nc" id="L300">        prefix = setPosition(x, ++y);</span>
+<span class="nc" id="L301">        titleString.add(prefix</span>
+                + &quot; / /___   / /_/ /  / /_/ /  /  __/  _&gt;  &lt;         / /|  /  / /_/ /  / /_   / /_/ /  / /     / /_/ /  / /  / /  (__  )  &quot;);
+<span class="nc" id="L303">        prefix = setPosition(x, ++y);</span>
+<span class="nc" id="L304">        titleString.add(prefix</span>
+                + &quot; \\____/   \\____/   \\__,_/   \\___/  /_/|_|        /_/ |_/   \\__,_/   \\__/   \\__,_/  /_/      \\__,_/  /_/  /_/  /____/   &quot;);
+
+<span class="nc" id="L307">        System.out.println(bold + yellow);</span>
+<span class="nc bnc" id="L308" title="All 2 branches missed.">        for (int i = 0; i &lt; titleString.size(); i++)</span>
+<span class="nc" id="L309">            System.out.println(titleString.get(i));</span>
+<span class="nc" id="L310">        System.out.println(white);</span>
+<span class="nc" id="L311">    }</span>
+
+
+    /**
+     * Shows a deck and its &quot;shadow&quot;, used to clearify what draw sources are decks.
+     * 
+     * @param coord The coordinates where the deck should be printed
+     * @param reign The deck's top card's reign
+     * @param deckType Whether the deck is resource or gold
+     */
+    private void printDeck(Pair&lt;Integer, Integer&gt; coord, Symbol reign, DrawSource deckType) {
+<span class="nc bnc" id="L322" title="All 2 branches missed.">        if (reign == null)</span>
+<span class="nc" id="L323">            return;</span>
+<span class="nc" id="L324">        String bianco = &quot;\033[0m&quot;;</span>
+<span class="nc" id="L325">        int xx = 8, yy = 7 + 1;</span>
+
+<span class="nc" id="L327">        List&lt;String&gt; underCover = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L328">        int x = coord.first(), y = coord.second();</span>
+
+<span class="nc" id="L330">        String prefix = setPosition(x, y);</span>
+<span class="nc" id="L331">        underCover.add(prefix + &quot;┌────────────────┐&quot;);</span>
+<span class="nc" id="L332">        prefix = setPosition(x, ++y);</span>
+<span class="nc" id="L333">        underCover.add(prefix + &quot;│                │&quot;);</span>
+<span class="nc" id="L334">        prefix = setPosition(x, ++y);</span>
+<span class="nc" id="L335">        underCover.add(prefix + &quot;│                │&quot;);</span>
+<span class="nc" id="L336">        prefix = setPosition(x, ++y);</span>
+<span class="nc" id="L337">        underCover.add(prefix + &quot;│                │&quot;);</span>
+<span class="nc" id="L338">        prefix = setPosition(x, ++y);</span>
+<span class="nc" id="L339">        underCover.add(prefix + &quot;│                │&quot;);</span>
+<span class="nc" id="L340">        prefix = setPosition(x, ++y);</span>
+<span class="nc" id="L341">        underCover.add(prefix + &quot;└────────────────┘&quot;);</span>
+
+<span class="nc" id="L343">        System.out.println(bianco);</span>
+<span class="nc bnc" id="L344" title="All 2 branches missed.">        for (String s : underCover)</span>
+<span class="nc" id="L345">            System.out.println(s);</span>
+
+<span class="nc" id="L347">        x = coord.first() + 2;</span>
+<span class="nc" id="L348">        y = coord.second() - 1;</span>
+<span class="nc" id="L349">        String topDeckCar = this.parser.getGenericBack(reign, new Pair&lt;&gt;(x, y));</span>
+<span class="nc" id="L350">        System.out.println(topDeckCar);</span>
+
+<span class="nc bnc" id="L352" title="All 2 branches missed.">        if (deckType == DrawSource.GOLDS_DECK)</span>
+<span class="nc" id="L353">            System.out.println(setPosition(x + xx, y - 1 - 1) + getCardIndex(deckType));</span>
+<span class="nc bnc" id="L354" title="All 2 branches missed.">        if (deckType == DrawSource.RESOURCES_DECK)</span>
+<span class="nc" id="L355">            System.out.println(setPosition(x + xx, y + yy + 1) + getCardIndex(deckType));</span>
+
+<span class="nc" id="L357">    }</span>
+
+    /**
+     * Prints the visible cards from which it's possible to draw.
+     * 
+     * @param coord The coordinates from where the printing should be started
+     * @param visiblePlayableCards The drawable cards
+     */
+    private void printVisibleCards(Pair&lt;Integer, Integer&gt; coord,
+            Map&lt;DrawSource, PlayableCard&gt; visiblePlayableCards) {
+<span class="nc" id="L367">        String white = &quot;\033[0m&quot;;</span>
+
+        // obtain card obj
+<span class="nc" id="L370">        PlayableCard firstG = visiblePlayableCards.get(DrawSource.FIRST_VISIBLE),</span>
+<span class="nc" id="L371">                secondG = visiblePlayableCards.get(DrawSource.SECOND_VISIBLE),</span>
+<span class="nc" id="L372">                thirdR = visiblePlayableCards.get(DrawSource.THIRD_VISIBLE),</span>
+<span class="nc" id="L373">                fourthR = visiblePlayableCards.get(DrawSource.FOURTH_VISIBLE);</span>
+
+        // obtain card coord
+<span class="nc" id="L376">        int x = coord.first(), y = coord.second();</span>
+<span class="nc" id="L377">        int xOffset = 18 + 2, yOffset = 6 + 2;</span>
+<span class="nc" id="L378">        Pair&lt;Integer, Integer&gt; firstCoord = new Pair&lt;&gt;(x, y),</span>
+<span class="nc" id="L379">                secondCoord = new Pair&lt;&gt;(x + xOffset, y), thirdCoord = new Pair&lt;&gt;(x, y + yOffset),</span>
+<span class="nc" id="L380">                fourthCoord = new Pair&lt;&gt;(x + xOffset, y + yOffset);</span>
+
+        // obtain card as string (if it exists)
+        try {
+            String firstToPrint;
+            String secondToPrint;
+            String thirdToPrint;
+            String fourthToPrint;
+<span class="nc" id="L388">            int xx = 8, yy = 6;</span>
+
+<span class="nc bnc" id="L390" title="All 2 branches missed.">            if (firstG != null) {</span>
+<span class="nc" id="L391">                firstToPrint = this.parser.parseCard(firstG, firstCoord, null, true);</span>
+<span class="nc" id="L392">                System.out.println(firstToPrint);</span>
+<span class="nc" id="L393">                System.out.println(setPosition(firstCoord.first() + xx, firstCoord.second() - 1 - 2)</span>
+<span class="nc" id="L394">                        + getCardIndex(DrawSource.FIRST_VISIBLE));</span>
+<span class="nc" id="L395">                System.out.println(white);</span>
+            }
+<span class="nc bnc" id="L397" title="All 2 branches missed.">            if (secondG != null) {</span>
+<span class="nc" id="L398">                secondToPrint = this.parser.parseCard(secondG, secondCoord, null, true);</span>
+<span class="nc" id="L399">                System.out.println(secondToPrint);</span>
+<span class="nc" id="L400">                System.out</span>
+<span class="nc" id="L401">                        .println(setPosition(secondCoord.first() + xx, secondCoord.second() - 1 - 2)</span>
+<span class="nc" id="L402">                                + getCardIndex(DrawSource.SECOND_VISIBLE));</span>
+<span class="nc" id="L403">                System.out.println(white);</span>
+            }
+<span class="nc bnc" id="L405" title="All 2 branches missed.">            if (thirdR != null) {</span>
+<span class="nc" id="L406">                thirdToPrint = this.parser.parseCard(thirdR, thirdCoord, null, true);</span>
+<span class="nc" id="L407">                System.out.println(thirdToPrint);</span>
+<span class="nc" id="L408">                System.out.println(</span>
+<span class="nc" id="L409">                        setPosition(thirdCoord.first() + xx, thirdCoord.second() + yy + 1 + 1)</span>
+<span class="nc" id="L410">                                + getCardIndex(DrawSource.THIRD_VISIBLE));</span>
+<span class="nc" id="L411">                System.out.println(white);</span>
+            }
+<span class="nc bnc" id="L413" title="All 2 branches missed.">            if (fourthR != null) {</span>
+<span class="nc" id="L414">                fourthToPrint = this.parser.parseCard(fourthR, fourthCoord, null, true);</span>
+<span class="nc" id="L415">                System.out.println(fourthToPrint);</span>
+<span class="nc" id="L416">                System.out.println(</span>
+<span class="nc" id="L417">                        setPosition(fourthCoord.first() + xx, fourthCoord.second() + yy + 1 + 1)</span>
+<span class="nc" id="L418">                                + getCardIndex(DrawSource.FOURTH_VISIBLE));</span>
+<span class="nc" id="L419">                System.out.println(white);</span>
+            }
+
+<span class="nc" id="L422">        } catch (CardException e) {</span>
+<span class="nc" id="L423">            throw new RuntimeException(e);</span>
+<span class="nc" id="L424">        }</span>
+
+<span class="nc" id="L426">    }</span>
+
+    /**
+     * Returns the index representing a draw source, in order to make easier for the user to choose
+     * the draw source.
+     * 
+     * @param drawSource The draw source
+     * 
+     * @return The corresponding index
+     */
+    private char getCardIndex(DrawSource drawSource) {
+<span class="nc bnc" id="L437" title="All 7 branches missed.">        return switch (drawSource) {</span>
+<span class="nc" id="L438">            case FIRST_VISIBLE -&gt; '1';</span>
+<span class="nc" id="L439">            case SECOND_VISIBLE -&gt; '2';</span>
+<span class="nc" id="L440">            case THIRD_VISIBLE -&gt; '3';</span>
+<span class="nc" id="L441">            case FOURTH_VISIBLE -&gt; '4';</span>
+<span class="nc" id="L442">            case GOLDS_DECK -&gt; 'G';</span>
+<span class="nc" id="L443">            case RESOURCES_DECK -&gt; 'R';</span>
+<span class="nc" id="L444">            default -&gt; '0';</span>
+        };
+    }
+
+    /**
+     * Prints a character a given amount of times.
+     * 
+     * @param c The char
+     * @param times The times the char should be repeated
+     * 
+     * @return String obtained concatenating the char
+     */
+    private String repeatChar(char c, int times) {
+
+<span class="nc" id="L458">        StringBuilder s = new StringBuilder();</span>
+<span class="nc bnc" id="L459" title="All 2 branches missed.">        for (int i = 0; i &lt; times; i++)</span>
+<span class="nc" id="L460">            s.append(c);</span>
+<span class="nc" id="L461">        return s.toString();</span>
+    }
+
+    /**
+     * Creates a box, used for centered messages
+     * 
+     * @param totalWidth The width (column) of the content
+     * @param upperBorder The upper border
+     * @param middleBorder The vertical border
+     * @param lowerBorder The lower border
+     */
+    private void boxBuilder(int totalWidth, StringBuffer upperBorder, StringBuffer middleBorder,
+            StringBuffer lowerBorder) {
+<span class="nc" id="L474">        int lineWidth = totalWidth - 2;</span>
+
+        // define the border template
+<span class="nc" id="L477">        upperBorder.append(&quot;╔&quot;);</span>
+<span class="nc" id="L478">        upperBorder.append(repeatChar('═', lineWidth));</span>
+<span class="nc" id="L479">        upperBorder.append(&quot;╗&quot;);</span>
+
+<span class="nc" id="L481">        middleBorder.append(&quot;╠&quot;);</span>
+<span class="nc" id="L482">        middleBorder.append(repeatChar('═', lineWidth));</span>
+<span class="nc" id="L483">        middleBorder.append(&quot;╣&quot;);</span>
+
+<span class="nc" id="L485">        lowerBorder.append(&quot;╚&quot;);</span>
+<span class="nc" id="L486">        lowerBorder.append(repeatChar('═', lineWidth));</span>
+<span class="nc" id="L487">        lowerBorder.append(&quot;╝&quot;);</span>
+<span class="nc" id="L488">    }</span>
+
+    private int getMaxElemLen(List&lt;String&gt; stringList) {
+<span class="nc" id="L491">        int max = 0;</span>
+<span class="nc bnc" id="L492" title="All 2 branches missed.">        for (String s : stringList) {</span>
+<span class="nc bnc" id="L493" title="All 2 branches missed.">            if (s.length() &gt; max)</span>
+<span class="nc" id="L494">                max = s.length();</span>
+<span class="nc" id="L495">        }</span>
+<span class="nc" id="L496">        return max;</span>
+    }
+
+
+    /**
+     * Parses a certain coordinate to another, representing where a link number should be printed.
+     * 
+     * @param coord The anchor card's coordinate
+     * @param corner The anchor card's corner
+     * 
+     * @return The number's coordinates
+     */
+    private Pair&lt;Integer, Integer&gt; getNumberCoords(Pair&lt;Integer, Integer&gt; coord, Corner corner) {
+<span class="nc bnc" id="L509" title="All 5 branches missed.">        return switch (corner) {</span>
+<span class="nc" id="L510">            case Corner.TOP_LEFT -&gt; new Pair&lt;&gt;(coord.first() - 2, coord.second() - 1);</span>
+<span class="nc" id="L511">            case Corner.TOP_RIGHT -&gt; new Pair&lt;&gt;(coord.first() + cardCols + 1, coord.second() - 1);</span>
+<span class="nc" id="L512">            case Corner.BOTTOM_LEFT -&gt; new Pair&lt;&gt;(coord.first() - 2, coord.second() + cardRows);</span>
+<span class="nc" id="L513">            case Corner.BOTTOM_RIGHT -&gt; new Pair&lt;&gt;(coord.first() + cardCols + 1,</span>
+<span class="nc" id="L514">                    coord.second() + cardRows);</span>
+<span class="nc" id="L515">            default -&gt; null;</span>
+        };
+    }
+
+
+    /**
+     * Parses a certain coordinate to another, representing the coordinates of a hypotetical card
+     * that could be linked to the anchor's card.
+     * 
+     * @param coord The anchor card's coordinates
+     * @param corner The anchor card's corner
+     * 
+     * @return The hypotetical linked card
+     */
+    private Pair&lt;Integer, Integer&gt; getLinkedCoords(Pair&lt;Integer, Integer&gt; coord, Corner corner) {
+<span class="nc bnc" id="L530" title="All 5 branches missed.">        return switch (corner) {</span>
+<span class="nc" id="L531">            case Corner.TOP_LEFT -&gt; new Pair&lt;&gt;(coord.first() + 1, coord.second() - 1);</span>
+<span class="nc" id="L532">            case Corner.TOP_RIGHT -&gt; new Pair&lt;&gt;(coord.first() - 1, coord.second() - 1);</span>
+<span class="nc" id="L533">            case Corner.BOTTOM_LEFT -&gt; new Pair&lt;&gt;(coord.first() + 1, coord.second() + 1);</span>
+<span class="nc" id="L534">            case Corner.BOTTOM_RIGHT -&gt; new Pair&lt;&gt;(coord.first() - 1, coord.second() + 1);</span>
+<span class="nc" id="L535">            default -&gt; null;</span>
+        };
+    }
+
+    // ! PUBLIC METHODS //
+
+    /**
+     * Clears the terminal.
+     */
+    public void clearTerminal() {
+<span class="nc" id="L545">        System.out.println(&quot;\033[2J&quot;);</span>
+<span class="nc" id="L546">    }</span>
+
+    /**
+     * Prints the command prompt.
+     */
+    public void printPrompt(String customMessage) {
+<span class="nc" id="L552">        int termRows = this.getHeight();</span>
+<span class="nc bnc" id="L553" title="All 2 branches missed.">        if (customMessage == &quot;&quot;) {</span>
+<span class="nc" id="L554">            System.out.print(this.setPosition(1, termRows - infoLineOffset + 1));</span>
+        } else {
+<span class="nc" id="L556">            System.out.print(</span>
+<span class="nc" id="L557">                    this.setPosition(1, termRows - infoLineOffset + 1) + customMessage + &quot; &quot;);</span>
+        }
+<span class="nc" id="L559">        System.out.flush();</span>
+<span class="nc" id="L560">    }</span>
+
+
+    /**
+     * Prints a list of Strings to the terminal, first element of first line, last element on last
+     * line.
+     * 
+     * @param messages List of messages to display
+     */
+    public void printMessages(List&lt;String&gt; messages) {
+<span class="nc" id="L570">        int termRows = this.getHeight();</span>
+<span class="nc" id="L571">        Integer offset = 0;</span>
+<span class="nc bnc" id="L572" title="All 2 branches missed.">        for (String string : messages) {</span>
+<span class="nc" id="L573">            System.out.println(this.setPosition(1, termRows - infoLineOffset - offset) + string);</span>
+<span class="nc" id="L574">            offset++;</span>
+<span class="nc" id="L575">        }</span>
+<span class="nc" id="L576">    }</span>
+
+
+    /**
+     * Prints a list of Strings to the terminal, first element on last line, last element of first
+     * line.
+     * 
+     * @param message List of messages to display
+     */
+    public void printListReverse(List&lt;String&gt; message) {
+<span class="nc" id="L586">        int termRows = this.getHeight();</span>
+<span class="nc" id="L587">        Integer offset = 0;</span>
+<span class="nc" id="L588">        int size = message.size();</span>
+<span class="nc bnc" id="L589" title="All 2 branches missed.">        for (String string : message) {</span>
+<span class="nc" id="L590">            System.out.println(</span>
+<span class="nc" id="L591">                    this.setPosition(1, termRows - infoLineOffset - size + offset + 1) + string);</span>
+<span class="nc" id="L592">            offset++;</span>
+<span class="nc" id="L593">        }</span>
+<span class="nc" id="L594">    }</span>
+
+    /**
+     * Prints a message in the line above the prompt.
+     *
+     * @param string The message to print
+     */
+    public void printMessage(String string) {
+<span class="nc" id="L602">        int termRows = this.getHeight();</span>
+<span class="nc" id="L603">        System.out.println(this.setPosition(1, termRows - infoLineOffset) + string);</span>
+<span class="nc" id="L604">    }</span>
+
+    /**
+     * Prints all the players' available resources (from the board).
+     *
+     * @param availableResources map from the type of resource (Symbol) to its quantity (Integer)
+     * @param verticalOffset offset lines from the top (default is 1)
+     */
+    public void printAvailableResources(Map&lt;Symbol, Integer&gt; availableResources,
+            Integer verticalOffset) {
+<span class="nc" id="L614">        int vertCoord = this.getHeight() - this.infoLineOffset;</span>
+<span class="nc" id="L615">        int termCols = this.getWidth();</span>
+<span class="nc" id="L616">        String out = &quot;&quot;;</span>
+<span class="nc" id="L617">        String spaces = &quot;    &quot;;</span>
+<span class="nc" id="L618">        Integer len = availableResources.keySet().size() * (5 + spaces.length()); // icon, space, :,</span>
+                                                                                  // space, number
+<span class="nc" id="L620">        List&lt;Symbol&gt; toPrint = List.of(Symbol.PLANT, Symbol.INSECT, Symbol.FUNGUS, Symbol.ANIMAL,</span>
+                Symbol.PARCHMENT, Symbol.FEATHER, Symbol.INKWELL);
+
+<span class="nc bnc" id="L623" title="All 2 branches missed.">        for (Symbol resource : toPrint) {</span>
+<span class="nc" id="L624">            out += parser.getRightColor(resource) + parser.getRightIcon(resource) + &quot;: &quot;</span>
+<span class="nc" id="L625">                    + availableResources.get(resource) + spaces;</span>
+<span class="nc" id="L626">        }</span>
+
+<span class="nc" id="L628">        System.out.println(this.setPosition((termCols - len) / 2, vertCoord) + out + &quot;\033[0m&quot;);</span>
+<span class="nc" id="L629">    }</span>
+
+    /**
+     * Prints the whole board, including username, points and resources.
+     *
+     * @param username The username to print
+     * @param board the board to be printed
+     */
+    public void printPlayerBoard(String username, ClientBoard board) {
+<span class="nc bnc" id="L638" title="All 2 branches missed.">        if (board == null) {</span>
+<span class="nc" id="L639">            this.printMessage(&quot;No such player exists!&quot;);</span>
+<span class="nc" id="L640">            return;</span>
+        }
+<span class="nc" id="L642">        Map&lt;Integer, ShownCard&gt; placed = board.getPlaced();</span>
+<span class="nc bnc" id="L643" title="All 2 branches missed.">        for (Integer turn : placed.keySet()) {</span>
+<span class="nc" id="L644">            this.printCard(placed.get(turn));</span>
+<span class="nc" id="L645">        }</span>
+<span class="nc" id="L646">        this.printAvailableResources(board.getAvailableResources(),</span>
+<span class="nc" id="L647">                this.getHeight() - infoLineOffset);</span>
+<span class="nc" id="L648">        this.printPoints(username, board.getColor(), board.getPoints());</span>
+<span class="nc" id="L649">    }</span>
+
+    /**
+     * Prints the hand of the player, which includes the 3 available-to-play cards.
+     *
+     * @param username username of the player
+     * @param color color of the player's token
+     * @param hand list of cards (as IDs)
+     */
+    public void printHand(String username, Color color, List&lt;PlayableCard&gt; hand) {
+<span class="nc" id="L659">        int termCols = this.getWidth();</span>
+<span class="nc" id="L660">        Integer handSize = hand.size();</span>
+<span class="nc" id="L661">        Integer spaces = 4;</span>
+
+<span class="nc" id="L663">        Integer last = (termCols - (handSize) * (cardCols)) / 2 - spaces * (handSize - 1) / 2;</span>
+<span class="nc bnc" id="L664" title="All 2 branches missed.">        for (PlayableCard card : hand) {</span>
+            try {
+<span class="nc" id="L666">                System.out.println(</span>
+<span class="nc" id="L667">                        parser.parseCard(card, new Pair&lt;Integer, Integer&gt;(last, 2), null, true)</span>
+                                + &quot;\033[0m&quot;);
+<span class="nc" id="L669">                last += cardCols + spaces;</span>
+<span class="nc" id="L670">            } catch (Exception e) {</span>
+<span class="nc" id="L671">                e.printStackTrace();</span>
+<span class="nc" id="L672">            }</span>
+<span class="nc" id="L673">        }</span>
+<span class="nc" id="L674">    }</span>
+
+    /**
+     * Prints the objectives, both common and secret, of a given player.
+     *
+     * @param username username of the player
+     * @param color color of the player's token
+     * @param secret secret objective (as ID)
+     * @param visibles array of common objectives (as IDs)
+     */
+    public void printObjectives(String username, Color color, Objective secret,
+            Pair&lt;Objective, Objective&gt; visibles) {
+<span class="nc" id="L686">        int termCols = this.getWidth();</span>
+        Integer strlen;
+
+<span class="nc" id="L689">        strlen = (&quot;Your secret objective&quot;).length();</span>
+<span class="nc" id="L690">        username = this.parseUsername(&quot;Your&quot;, color) + &quot; secret objective:&quot;;</span>
+<span class="nc" id="L691">        Integer last = (termCols - strlen) / 2;</span>
+<span class="nc" id="L692">        System.out.println(this.setPosition(last, 1) + username);</span>
+
+<span class="nc" id="L694">        last = (termCols - cardCols) / 2;</span>
+<span class="nc" id="L695">        System.out.println(</span>
+<span class="nc" id="L696">                parser.parseObjective(secret, new Pair&lt;Integer, Integer&gt;(last, 2)) + &quot;\033[0m&quot;);</span>
+
+<span class="nc" id="L698">        int verticalSpaceAlreadyUsedForSecretObjective = (7) + 1 + 1;</span>
+<span class="nc" id="L699">        printObjectivePair(&quot;Common objectives:&quot;, visibles,</span>
+                verticalSpaceAlreadyUsedForSecretObjective);
+
+<span class="nc" id="L702">    }</span>
+
+    /**
+     * Prints a pair of objectives, with a brief description above them.
+     * 
+     * @param pairObjectives pair of objectives
+     * @param heightOffset offset lines from the top (default is 1)
+     */
+    public void printObjectivePair(String message, Pair&lt;Objective, Objective&gt; pairObjectives,
+            int heightOffset) {
+<span class="nc bnc" id="L712" title="All 2 branches missed.">        int yOffset = (heightOffset &lt;= 0) ? 1 : heightOffset;</span>
+
+        // common objectives STRING
+<span class="nc" id="L715">        int xCoord = getDimStart(this.terminal.getWidth(), message.length());</span>
+<span class="nc" id="L716">        message = setPosition(xCoord, yOffset++) + message;</span>
+<span class="nc" id="L717">        System.out.println(message);</span>
+
+        // common objectives CARDS
+<span class="nc" id="L720">        int cardWidth = 18, spaceBetweenSides = 4;</span>
+<span class="nc" id="L721">        xCoord = getDimStart(this.getWidth(), (2 * cardWidth) + spaceBetweenSides);</span>
+
+<span class="nc" id="L723">        Pair&lt;Integer, Integer&gt; obj1Coord = new Pair&lt;&gt;(xCoord, yOffset);</span>
+<span class="nc" id="L724">        Pair&lt;Integer, Integer&gt; obj2Coord =</span>
+<span class="nc" id="L725">                new Pair&lt;&gt;(xCoord + cardWidth + spaceBetweenSides, yOffset);</span>
+<span class="nc" id="L726">        String obj1 = this.parser.parseObjective(pairObjectives.first(), obj1Coord);</span>
+<span class="nc" id="L727">        String obj2 = this.parser.parseObjective(pairObjectives.second(), obj2Coord);</span>
+
+<span class="nc" id="L729">        System.out.println(obj1 + obj2);</span>
+<span class="nc" id="L730">    }</span>
+
+    /**
+     * Prints the message history of the most recent messages.
+     *
+     * @param chat chat object, as a list of strings
+     */
+    public void printChat(List&lt;String&gt; chat) {
+<span class="nc" id="L738">        printSimpleList(chat, false, false);</span>
+<span class="nc" id="L739">    }</span>
+
+    /**
+     * Prints the welcome screen in the middle of the tui view.
+     */
+    public void printWelcomeScreen() {
+
+        // get title and welcome sizes
+<span class="nc" id="L747">        int welcomeHeight = 5, welcomeWidth = 88 + 2; // width must be even (pari)</span>
+<span class="nc" id="L748">        int spaceBetween = 3;</span>
+<span class="nc" id="L749">        int titleHeight = 21, titleWidth = 210 + 2; // width must be even (pari)</span>
+<span class="nc" id="L750">        int verticalOffset = -10;</span>
+
+<span class="nc bnc" id="L752" title="All 2 branches missed.">        boolean isLittle = (this.terminal.getWidth() &lt; titleWidth</span>
+<span class="nc bnc" id="L753" title="All 2 branches missed.">                || this.terminal.getHeight() &lt; welcomeHeight - verticalOffset + titleHeight) ? true</span>
+<span class="nc" id="L754">                        : false;</span>
+<span class="nc bnc" id="L755" title="All 2 branches missed.">        if (isLittle) {</span>
+<span class="nc" id="L756">            titleHeight = 5;</span>
+<span class="nc" id="L757">            titleWidth = 118 + 2;</span>
+<span class="nc" id="L758">            verticalOffset = -1;</span>
+        }
+
+        // get coordinates
+<span class="nc" id="L762">        int welcomeStartY =</span>
+<span class="nc" id="L763">                getDimStart(this.getHeight(), welcomeHeight + spaceBetween + titleHeight);</span>
+<span class="nc" id="L764">        int titleStartY = welcomeStartY + welcomeHeight + spaceBetween;</span>
+
+<span class="nc" id="L766">        int welcomeStartX = getDimStart(this.getWidth(), welcomeWidth);</span>
+<span class="nc" id="L767">        int titleStartX = getDimStart(this.getWidth(), titleWidth);</span>
+
+        // print welcome and title
+<span class="nc" id="L770">        printWelcome(welcomeStartX, welcomeStartY + verticalOffset);</span>
+<span class="nc" id="L771">        printTitle(titleStartX, titleStartY + verticalOffset, isLittle);</span>
+<span class="nc" id="L772">    }</span>
+
+    /**
+     * Prints the game's ranking.
+     * 
+     * @param ranking The Leaderboard
+     * @param username The player's username, used to highlight your rank
+     */
+    public synchronized void printEndScreen(List&lt;LeaderboardEntry&gt; ranking, String username) {
+<span class="nc" id="L781">        int maxWidth = this.getWidth() - 2;</span>
+
+<span class="nc" id="L783">        this.clearTerminal();</span>
+<span class="nc" id="L784">        List&lt;String&gt; winning = new ArrayList&lt;String&gt;();</span>
+<span class="nc" id="L785">        List&lt;String&gt; losing = new ArrayList&lt;String&gt;();</span>
+<span class="nc bnc" id="L786" title="All 2 branches missed.">        for (LeaderboardEntry leaderboardEntry : ranking) {</span>
+<span class="nc" id="L787">            String user = leaderboardEntry.username();</span>
+<span class="nc bnc" id="L788" title="All 2 branches missed.">            if (user.equals(username)) {</span>
+                String color;
+<span class="nc bnc" id="L790" title="All 2 branches missed.">                if (leaderboardEntry.winner()) {</span>
+<span class="nc" id="L791">                    color = &quot;\033[31m&quot;;</span>
+                } else {
+<span class="nc" id="L793">                    color = &quot;\033[33m&quot;;</span>
+                }
+
+<span class="nc" id="L796">                user = color + &quot;YOU&quot; + &quot;\033[0m&quot;;</span>
+            }
+<span class="nc" id="L798">            String entry = user + &quot; (&quot; + leaderboardEntry.points() + &quot;)&quot;;</span>
+<span class="nc bnc" id="L799" title="All 2 branches missed.">            if (leaderboardEntry.winner()) {</span>
+<span class="nc" id="L800">                winning.add(entry);</span>
+            } else {
+<span class="nc" id="L802">                losing.add(entry);</span>
+            }
+<span class="nc" id="L804">        }</span>
+
+<span class="nc bnc" id="L806" title="All 2 branches missed.">        String winningTitle = winning.size() == 1 ? &quot;Winner: &quot; : &quot;Draw:&quot;;</span>
+<span class="nc" id="L807">        String losingTitle = &quot;Losers:&quot;;</span>
+
+<span class="nc" id="L809">        final int startPos = (maxWidth - winningTitle.length()) / 2;</span>
+<span class="nc" id="L810">        System.out.println(this.setPosition(startPos, 2) + winningTitle);</span>
+<span class="nc" id="L811">        int i = 0;</span>
+<span class="nc" id="L812">        final int base = 3;</span>
+<span class="nc bnc" id="L813" title="All 2 branches missed.">        for (String winner : winning) {</span>
+<span class="nc" id="L814">            System.out.println(this.setPosition(startPos, base + i) + winner);</span>
+<span class="nc" id="L815">            i++;</span>
+<span class="nc" id="L816">        }</span>
+
+<span class="nc bnc" id="L818" title="All 2 branches missed.">        if (losing.size() &gt; 0) {</span>
+<span class="nc" id="L819">            i++;</span>
+<span class="nc" id="L820">            System.out.println(this.setPosition(startPos, base + i) + losingTitle);</span>
+<span class="nc" id="L821">            i++;</span>
+<span class="nc bnc" id="L822" title="All 2 branches missed.">            for (String loser : losing) {</span>
+<span class="nc" id="L823">                System.out.println(this.setPosition(startPos, base + i) + loser);</span>
+<span class="nc" id="L824">                i++;</span>
+<span class="nc" id="L825">            }</span>
+        }
+
+<span class="nc" id="L828">        System.out.println(this.setPosition(0, this.getHeight()) + &quot; &quot;);</span>
+<span class="nc" id="L829">        System.exit(0);</span>
+<span class="nc" id="L830">    }</span>
+
+    /**
+     * Prints the specified initial card front and back in the middle of the screen.
+     * 
+     * @param initialCard initial card to print
+     * @param heightOffset offset lines from the top (default is 1)
+     */
+    public void printInitialSideBySide(InitialCard initialCard, int heightOffset) {
+
+<span class="nc bnc" id="L840" title="All 2 branches missed.">        int offset = (heightOffset &lt;= 0) ? 1 : heightOffset;</span>
+        String faceup, facedown;
+<span class="nc" id="L842">        int cardWidth = 18, spaceBetweenSides = 4;</span>
+<span class="nc" id="L843">        int width = getDimStart(this.getWidth(), (2 * cardWidth) + spaceBetweenSides);</span>
+
+<span class="nc" id="L845">        Pair&lt;Integer, Integer&gt; faceupCoord = new Pair&lt;&gt;(width, offset);</span>
+<span class="nc" id="L846">        Pair&lt;Integer, Integer&gt; facedownCoord =</span>
+<span class="nc" id="L847">                new Pair&lt;&gt;(width + cardWidth + spaceBetweenSides, offset);</span>
+
+        try {
+<span class="nc" id="L850">            faceup = this.parser.parseCard(initialCard, faceupCoord, null, true);</span>
+<span class="nc" id="L851">            facedown = this.parser.parseCard(initialCard, facedownCoord, null, false);</span>
+<span class="nc" id="L852">            System.out.println(faceup + facedown);</span>
+<span class="nc" id="L853">        } catch (CardException e) {</span>
+<span class="nc" id="L854">        }</span>
+<span class="nc" id="L855">    }</span>
+
+    /**
+     * Prints the specified initial card front and back in the middle of the screen.
+     * 
+     * @param playableCard gold/resource card to print
+     * @param heightOffset offset lines from the top. For default (y-centered) must be 0
+     */
+    public void printPlayableFrontAndBack(PlayableCard playableCard, int heightOffset) {
+<span class="nc bnc" id="L864" title="All 2 branches missed.">        int yCoord = (heightOffset &gt; 0) ? heightOffset : getDimStart(getHeight() - 1, 6);</span>
+<span class="nc" id="L865">        int cardWidth = 18, spaceBetweenSides = 4;</span>
+<span class="nc" id="L866">        int xCoord = getDimStart(getWidth(), cardWidth + spaceBetweenSides + cardWidth);</span>
+
+<span class="nc" id="L868">        String faceUp, faceDown, bianco = &quot;\033[0m&quot;;</span>
+<span class="nc" id="L869">        Pair&lt;Integer, Integer&gt; faceupCoord = new Pair&lt;&gt;(xCoord, yCoord);</span>
+<span class="nc" id="L870">        Pair&lt;Integer, Integer&gt; facedownCoord =</span>
+<span class="nc" id="L871">                new Pair&lt;&gt;(xCoord + cardWidth + spaceBetweenSides, yCoord);</span>
+
+        try {
+<span class="nc" id="L874">            faceUp = this.parser.parseCard(playableCard, faceupCoord, null, true);</span>
+<span class="nc" id="L875">            faceDown = this.parser.parseCard(playableCard, facedownCoord, null, false);</span>
+<span class="nc" id="L876">            System.out.println(faceUp + faceDown + bianco);</span>
+<span class="nc" id="L877">        } catch (CardException e) {</span>
+<span class="nc" id="L878">        }</span>
+<span class="nc" id="L879">    }</span>
+
+    /**
+     * Prints a one-line message in the center of the screen.
+     *
+     * @param message message to display
+     * @param heightOffset offset lines from the top. For default (y-centered) must be 0
+     */
+    public void printCenteredMessage(String message, int heightOffset) {
+<span class="nc" id="L888">        int maxWidth = message.length();</span>
+<span class="nc bnc" id="L889" title="All 2 branches missed.">        if (maxWidth &gt; getWidth() - 4)</span>
+<span class="nc" id="L890">            return;</span>
+
+<span class="nc" id="L892">        String resetStyle = &quot;\033[0m&quot;, style = &quot;\033[1m&quot;;</span>
+
+        // int yCoord = getDimStart(this.terminal.getHeight(), 3);
+<span class="nc bnc" id="L895" title="All 2 branches missed.">        int yCoord = (heightOffset &gt; 0) ? heightOffset : getDimStart(this.terminal.getHeight(), 3);</span>
+<span class="nc" id="L896">        int xCoord = getDimStart(this.terminal.getWidth(), maxWidth + 4);</span>
+<span class="nc" id="L897">        String prefix = setPosition(xCoord, yCoord);</span>
+
+        // define the border template
+<span class="nc" id="L900">        StringBuffer upperBorder = new StringBuffer(&quot;╔&quot;);</span>
+<span class="nc" id="L901">        upperBorder.append(repeatChar('═', maxWidth + 2));</span>
+<span class="nc" id="L902">        upperBorder.append(&quot;╗&quot;);</span>
+<span class="nc" id="L903">        StringBuffer center = new StringBuffer(&quot;║ &quot;);</span>
+<span class="nc" id="L904">        center.append(style + message + resetStyle);</span>
+<span class="nc" id="L905">        center.append(&quot; ║&quot;);</span>
+<span class="nc" id="L906">        StringBuffer lowerBorder = new StringBuffer(&quot;╚&quot;);</span>
+<span class="nc" id="L907">        lowerBorder.append(repeatChar('═', maxWidth + 2));</span>
+<span class="nc" id="L908">        lowerBorder.append(&quot;╝&quot;);</span>
+
+        // print
+<span class="nc" id="L911">        System.out.println(prefix + upperBorder.toString());</span>
+<span class="nc" id="L912">        prefix = setPosition(xCoord, ++yCoord);</span>
+<span class="nc" id="L913">        System.out.println(prefix + center.toString());</span>
+<span class="nc" id="L914">        prefix = setPosition(xCoord, ++yCoord);</span>
+<span class="nc" id="L915">        System.out.println(prefix + lowerBorder.toString());</span>
+
+<span class="nc" id="L917">    }</span>
+
+    /**
+     * Prints the drawing screen, containing the 2 decks and the 4 visible cards. Unavailable
+     * resources are not displayed.
+     *
+     * @param decksTopReign pair of the 2 top-deck cards
+     * @param visiblePlayableCards map of visible cards
+     */
+    public void printDrawingScreen(Pair&lt;Symbol, Symbol&gt; decksTopReign,
+            Map&lt;DrawSource, PlayableCard&gt; visiblePlayableCards) {
+        // int maxHeight = this.getHeight() - this.infoLineOffset;
+<span class="nc" id="L929">        int deckHeight = 6 + 2, deckWidth = 18 + 1; // width must be even (pari)</span>
+<span class="nc" id="L930">        int xSpaceBetween = 12, ySpaceBetween = 0;</span>
+<span class="nc" id="L931">        int cardsHeight = 6 + 2, cardsWidth = 18 + 2 + 18; // width must be even (pari)</span>
+
+<span class="nc" id="L933">        int deckStartX = getDimStart(this.getWidth(), deckWidth + xSpaceBetween + cardsWidth);</span>
+<span class="nc" id="L934">        int deckStartY = getDimStart(this.getHeight(), deckHeight + ySpaceBetween + cardsHeight);</span>
+<span class="nc" id="L935">        int cardsStartX = deckStartX + deckWidth + xSpaceBetween;</span>
+<span class="nc" id="L936">        int cardsStartY = deckStartY;</span>
+
+<span class="nc" id="L938">        printDeck(new Pair&lt;&gt;(deckStartX, deckStartY), decksTopReign.first(), DrawSource.GOLDS_DECK);</span>
+<span class="nc" id="L939">        printDeck(new Pair&lt;&gt;(deckStartX, deckStartY + deckHeight + ySpaceBetween),</span>
+<span class="nc" id="L940">                decksTopReign.second(), DrawSource.RESOURCES_DECK);</span>
+<span class="nc" id="L941">        printVisibleCards(new Pair&lt;&gt;(cardsStartX, cardsStartY), visiblePlayableCards);</span>
+<span class="nc" id="L942">    }</span>
+
+    /**
+     * Prints the list of matches (joinable or not) in the center of the screen. It can print a
+     * maximum of 99 matches.
+     *
+     * @param joinableMatches list of available matches
+     * @param unavailableMatches list of not joinable matches
+     * @param heightOffset offset lines from the top (default is 1)
+     */
+    public void printMatchesLobby(List&lt;AvailableMatch&gt; joinableMatches,
+            List&lt;AvailableMatch&gt; unavailableMatches, int heightOffset) {
+<span class="nc bnc" id="L954" title="All 2 branches missed.">        int yCoord = (heightOffset &gt; 0) ? heightOffset : 1;</span>
+<span class="nc" id="L955">        int maxWidth = 45;</span>
+<span class="nc" id="L956">        int xCoord = getDimStart(getWidth(), maxWidth);</span>
+<span class="nc" id="L957">        String prefix = setPosition(xCoord, yCoord);</span>
+
+        // define the border template
+<span class="nc" id="L960">        StringBuffer upperBorder = new StringBuffer();</span>
+<span class="nc" id="L961">        StringBuffer middleBorder = new StringBuffer();</span>
+<span class="nc" id="L962">        StringBuffer lowerBorder = new StringBuffer();</span>
+<span class="nc" id="L963">        boxBuilder(maxWidth, upperBorder, middleBorder, lowerBorder);</span>
+
+        // print upper and middle border
+<span class="nc" id="L966">        System.out.println(prefix + upperBorder.toString());</span>
+<span class="nc" id="L967">        prefix = setPosition(xCoord, ++yCoord);</span>
+<span class="nc" id="L968">        System.out.println(prefix + &quot;║      \033[1mMatches                        Slots\033[0m ║&quot;); // manually</span>
+                                                                                                    // adjust
+                                                                                                    // according
+                                                                                                    // to
+                                                                                                    // maxWidth
+<span class="nc" id="L973">        prefix = setPosition(xCoord, ++yCoord);</span>
+<span class="nc" id="L974">        System.out.println(prefix + middleBorder.toString());</span>
+<span class="nc" id="L975">        prefix = setPosition(xCoord, ++yCoord);</span>
+
+
+        // print list of joinable matches
+<span class="nc" id="L979">        String white = &quot;\033[0m&quot;, green = &quot;\033[32m&quot;, yellow = &quot;\033[33m&quot;;</span>
+<span class="nc" id="L980">        int matchIndex = 1;</span>
+<span class="nc bnc" id="L981" title="All 2 branches missed.">        for (AvailableMatch m1 : joinableMatches) {</span>
+
+<span class="nc bnc" id="L983" title="All 2 branches missed.">            if (joinableMatches.get(matchIndex - 1).isRejoinable()) {</span>
+<span class="nc" id="L984">                System.out.printf(&quot;%s║ %s[%02d] %-31s    %s  ║&quot;, prefix, yellow, matchIndex,</span>
+<span class="nc" id="L985">                        m1.name().toString(), white); // manually adjust according to maxWidth</span>
+            } else {
+<span class="nc" id="L987">                System.out.printf(&quot;%s║ %s[%02d] %-31s %s/%s%s  ║&quot;, prefix, green, matchIndex,</span>
+<span class="nc" id="L988">                        m1.name().toString(), m1.currentPlayers().toString(),</span>
+<span class="nc" id="L989">                        m1.maxPlayers().toString(), white); // manually adjust according to maxWidth</span>
+            }
+
+<span class="nc" id="L992">            prefix = setPosition(xCoord, ++yCoord);</span>
+<span class="nc" id="L993">            matchIndex++;</span>
+<span class="nc" id="L994">        }</span>
+
+        // print list of unavailable matches
+<span class="nc" id="L997">        String red = &quot;\033[31m&quot;;</span>
+<span class="nc bnc" id="L998" title="All 2 branches missed.">        for (AvailableMatch m2 : unavailableMatches) {</span>
+
+<span class="nc" id="L1000">            System.out.printf(&quot;%s║ [--] %s%-31s %s/%s%s  ║&quot;, prefix, red, m2.name().toString(),</span>
+<span class="nc" id="L1001">                    m2.currentPlayers().toString(), m2.maxPlayers().toString(), white); // manually</span>
+                                                                                        // adjust
+                                                                                        // according
+                                                                                        // to
+                                                                                        // maxWidth
+<span class="nc" id="L1006">            prefix = setPosition(xCoord, ++yCoord);</span>
+<span class="nc" id="L1007">        }</span>
+
+        // print lower border
+<span class="nc" id="L1010">        System.out.print(prefix + lowerBorder.toString());</span>
+<span class="nc" id="L1011">    }</span>
+
+    /**
+     * Prints the scoreboard at the end of the match.
+     *
+     * @param playerToPoints map from player name as string, to total points as integer
+     * @param heightOffset offset lines from the top (default is 1)
+     */
+    public void printScoreboard(Map&lt;String, Integer&gt; playerToPoints, int heightOffset) {
+<span class="nc bnc" id="L1020" title="All 2 branches missed.">        int yCoord = (heightOffset &gt; 0) ? heightOffset : 1;</span>
+<span class="nc" id="L1021">        int maxWidth = 38 + 2;</span>
+<span class="nc" id="L1022">        int xCoord = getDimStart(getWidth(), maxWidth);</span>
+<span class="nc" id="L1023">        String prefix = setPosition(xCoord, yCoord);</span>
+
+        // define the border template
+<span class="nc" id="L1026">        StringBuffer upperBorder = new StringBuffer(&quot;╔&quot;);</span>
+<span class="nc" id="L1027">        upperBorder.append(repeatChar('═', maxWidth - 2));</span>
+<span class="nc" id="L1028">        upperBorder.append(&quot;╗&quot;);</span>
+<span class="nc" id="L1029">        StringBuffer middleBorder = new StringBuffer(&quot;╠&quot;);</span>
+<span class="nc" id="L1030">        middleBorder.append(repeatChar('═', maxWidth - 2));</span>
+<span class="nc" id="L1031">        middleBorder.append(&quot;╣&quot;);</span>
+<span class="nc" id="L1032">        StringBuffer lowerBorder = new StringBuffer(&quot;╚&quot;);</span>
+<span class="nc" id="L1033">        lowerBorder.append(repeatChar('═', maxWidth - 2));</span>
+<span class="nc" id="L1034">        lowerBorder.append(&quot;╝&quot;);</span>
+
+        // print upper and middle border
+<span class="nc" id="L1037">        System.out.println(prefix + upperBorder.toString());</span>
+<span class="nc" id="L1038">        prefix = setPosition(xCoord, ++yCoord);</span>
+<span class="nc" id="L1039">        System.out.println(prefix + &quot;║ \033[1mPlayer                         Score\033[0m ║&quot;); // manually</span>
+                                                                                               // adjust
+                                                                                               // according
+                                                                                               // to
+                                                                                               // maxWidth
+<span class="nc" id="L1044">        prefix = setPosition(xCoord, ++yCoord);</span>
+<span class="nc" id="L1045">        System.out.println(prefix + middleBorder.toString());</span>
+<span class="nc" id="L1046">        prefix = setPosition(xCoord, ++yCoord);</span>
+
+        // print list of players
+<span class="nc bnc" id="L1049" title="All 2 branches missed.">        for (String s : playerToPoints.keySet()) {</span>
+<span class="nc" id="L1050">            System.out.printf(&quot;%s║ %-31s%4s  ║&quot;, prefix, s, playerToPoints.get(s).toString()); // manually</span>
+                                                                                               // adjust
+                                                                                               // according
+                                                                                               // to
+                                                                                               // maxWidth
+<span class="nc" id="L1055">            prefix = setPosition(xCoord, ++yCoord);</span>
+<span class="nc" id="L1056">        }</span>
+
+        // print lower border
+<span class="nc" id="L1059">        System.out.print(prefix + lowerBorder.toString());</span>
+<span class="nc" id="L1060">    }</span>
+
+    /**
+     * Prints the hand of the player at the bottom of the screen.
+     *
+     * @param hand list of the 3 playable cards (hand)
+     */
+    public void printHandAtBottom(List&lt;PlayableCard&gt; hand) {
+<span class="nc" id="L1068">        int termCols = this.getWidth();</span>
+<span class="nc" id="L1069">        Integer handSize = hand.size();</span>
+<span class="nc" id="L1070">        Integer spaces = 4;</span>
+
+<span class="nc" id="L1072">        Integer last = (termCols - (handSize) * (cardCols)) / 2 - spaces * (handSize - 1) / 2;</span>
+<span class="nc" id="L1073">        Integer row = this.getHeight() - TuiPrinter.cardRows - 3;</span>
+
+<span class="nc bnc" id="L1075" title="All 2 branches missed.">        for (PlayableCard card : hand) {</span>
+            try {
+<span class="nc" id="L1077">                System.out.println(</span>
+<span class="nc" id="L1078">                        parser.parseCard(card, new Pair&lt;Integer, Integer&gt;(last, row), null, true)</span>
+                                + &quot;\033[0m&quot;);
+<span class="nc" id="L1080">                last += cardCols + spaces;</span>
+<span class="nc" id="L1081">            } catch (Exception e) {</span>
+<span class="nc" id="L1082">                e.printStackTrace();</span>
+<span class="nc" id="L1083">            }</span>
+<span class="nc" id="L1084">        }</span>
+<span class="nc" id="L1085">    }</span>
+
+    /**
+     * Prints a list of strings with a box around them.
+     *
+     * @param stringList list of strings
+     * @param msg message to display
+     * @param textColor color of the players' name (red or green)
+     * @param isCentered if the list has to be centered in the tui or not
+     */
+    public void printStringsBoxed(List&lt;String&gt; stringList, String msg, Color textColor,
+            Boolean isCentered) {
+<span class="nc" id="L1097">        int maxWidth = 40; // leave it even</span>
+<span class="nc" id="L1098">        int xCoord = getDimStart(getWidth(), maxWidth);</span>
+<span class="nc bnc" id="L1099" title="All 2 branches missed.">        int yCoord = (isCentered) ? getDimStart(terminal.getHeight(), stringList.size() + 4) : 1;</span>
+<span class="nc" id="L1100">        String bold = &quot;\033[1m&quot;, reset = &quot;\033[0m&quot;, color;</span>
+<span class="nc bnc" id="L1101" title="All 3 branches missed.">        switch (textColor) {</span>
+            case RED:
+<span class="nc" id="L1103">                color = &quot;\033[31m&quot;;</span>
+<span class="nc" id="L1104">                break;</span>
+            case GREEN:
+<span class="nc" id="L1106">                color = &quot;\033[32m&quot;;</span>
+<span class="nc" id="L1107">                break;</span>
+            default:
+<span class="nc" id="L1109">                color = reset;</span>
+                break;
+        }
+
+        // define the border template
+<span class="nc" id="L1114">        StringBuffer upperBorder = new StringBuffer();</span>
+<span class="nc" id="L1115">        StringBuffer middleBorder = new StringBuffer();</span>
+<span class="nc" id="L1116">        StringBuffer lowerBorder = new StringBuffer();</span>
+<span class="nc" id="L1117">        boxBuilder(maxWidth, upperBorder, middleBorder, lowerBorder);</span>
+
+        // define title of the table
+        // String msg = &quot;Connected Players&quot;;
+<span class="nc" id="L1121">        StringBuffer title = new StringBuffer();</span>
+<span class="nc" id="L1122">        title.append(&quot;║&quot;).append(bold);</span>
+<span class="nc bnc" id="L1123" title="All 2 branches missed.">        if (msg.length() % 2 != 0) {</span>
+<span class="nc" id="L1124">            title.append(repeatChar(' ', (maxWidth - msg.length() - 2) / 2));</span>
+<span class="nc" id="L1125">            title.append(msg);</span>
+<span class="nc" id="L1126">            title.append(repeatChar(' ', ((maxWidth - msg.length() - 2) / 2) + 1));</span>
+
+        } else {
+<span class="nc" id="L1129">            title.append(repeatChar(' ', (maxWidth - msg.length() - 2) / 2));</span>
+<span class="nc" id="L1130">            title.append(msg);</span>
+<span class="nc" id="L1131">            title.append(repeatChar(' ', (maxWidth - msg.length() - 2) / 2));</span>
+        }
+<span class="nc" id="L1133">        title.append(&quot;║&quot;).append(reset);</span>
+
+        // define players' lines
+<span class="nc" id="L1136">        List&lt;String&gt; playerList = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L1137" title="All 2 branches missed.">        for (String s : stringList) {</span>
+
+<span class="nc" id="L1139">            StringBuffer player = new StringBuffer();</span>
+<span class="nc" id="L1140">            player.append(&quot;║&quot;).append(color);</span>
+<span class="nc bnc" id="L1141" title="All 2 branches missed.">            if (s.length() % 2 != 0) {</span>
+<span class="nc" id="L1142">                player.append(repeatChar(' ', (maxWidth - s.length() - 2) / 2));</span>
+<span class="nc" id="L1143">                player.append(s);</span>
+<span class="nc" id="L1144">                player.append(repeatChar(' ', ((maxWidth - s.length() - 2) / 2) + 1));</span>
+
+            } else {
+<span class="nc" id="L1147">                player.append(repeatChar(' ', (maxWidth - s.length() - 2) / 2));</span>
+<span class="nc" id="L1148">                player.append(s);</span>
+<span class="nc" id="L1149">                player.append(repeatChar(' ', (maxWidth - s.length() - 2) / 2));</span>
+            }
+<span class="nc" id="L1151">            player.append(reset).append(&quot;║&quot;);</span>
+
+<span class="nc" id="L1153">            playerList.add(player.toString());</span>
+<span class="nc" id="L1154">        }</span>
+
+        // print it all
+<span class="nc" id="L1157">        String prefix = setPosition(xCoord, yCoord);</span>
+<span class="nc" id="L1158">        System.out.println(prefix + upperBorder.toString());</span>
+<span class="nc" id="L1159">        prefix = setPosition(xCoord, ++yCoord);</span>
+<span class="nc" id="L1160">        System.out.println(prefix + title.toString());</span>
+<span class="nc" id="L1161">        prefix = setPosition(xCoord, ++yCoord);</span>
+<span class="nc" id="L1162">        System.out.println(prefix + middleBorder.toString());</span>
+<span class="nc" id="L1163">        prefix = setPosition(xCoord, ++yCoord);</span>
+<span class="nc bnc" id="L1164" title="All 2 branches missed.">        for (String s : playerList) {</span>
+<span class="nc" id="L1165">            System.out.println(prefix + s);</span>
+<span class="nc" id="L1166">            prefix = setPosition(xCoord, ++yCoord);</span>
+<span class="nc" id="L1167">        }</span>
+<span class="nc" id="L1168">        System.out.println(prefix + lowerBorder);</span>
+
+<span class="nc" id="L1170">    }</span>
+
+    /**
+     * Prints a list, simple or numbered, either in the center or in the bottom left of the tui.
+     *
+     * @param stringList list of strings
+     * @param isCentered if you want it centered or not
+     * @param isNumbered if you want it numbered or not
+     */
+    public void printSimpleList(List&lt;String&gt; stringList, Boolean isCentered, Boolean isNumbered) {
+        // coords with case
+<span class="nc bnc" id="L1181" title="All 2 branches missed.">        int xCoord = (isCentered) ? getDimStart(getWidth(), getMaxElemLen(stringList)) : 1;</span>
+<span class="nc bnc" id="L1182" title="All 2 branches missed.">        int yCoord = (isCentered) ? (terminal.getHeight() - stringList.size())</span>
+<span class="nc" id="L1183">                : (this.getHeight() - infoLineOffset + 1 - stringList.size());</span>
+<span class="nc" id="L1184">        int index = 0;</span>
+<span class="nc bnc" id="L1185" title="All 2 branches missed.">        if (yCoord &lt;= 0) {</span>
+<span class="nc" id="L1186">            index = -yCoord + 2;</span>
+<span class="nc" id="L1187">            yCoord = 1;</span>
+        }
+
+        // printing phase
+<span class="nc" id="L1191">        int i = 1;</span>
+<span class="nc" id="L1192">        String prefix = setPosition(xCoord, yCoord);</span>
+<span class="nc bnc" id="L1193" title="All 2 branches missed.">        for (; index &lt; stringList.size(); index++) {</span>
+<span class="nc bnc" id="L1194" title="All 2 branches missed.">            if (isNumbered)</span>
+<span class="nc" id="L1195">                System.out.println(prefix + String.valueOf(i++) + &quot;) &quot; + stringList.get(index));</span>
+            else
+<span class="nc" id="L1197">                System.out.println(prefix + stringList.get(index));</span>
+
+<span class="nc" id="L1199">            prefix = setPosition(xCoord, ++yCoord);</span>
+        }
+<span class="nc" id="L1201">    }</span>
+
+    /**
+     * Prints indexes for available spots, during the placing card phase.
+     *
+     * @param validPlaces map FROM board's coordinates where the hypotetic card would be TO a pair,
+     *        consisting of a number (the index) and the corner where future card would be linked
+     */
+    public void printValidPlaces(Map&lt;Pair&lt;Integer, Integer&gt;, Pair&lt;Integer, Corner&gt;&gt; validPlaces) {
+        Corner link;
+        Pair&lt;Integer, Integer&gt; abs;
+        Pair&lt;Integer, Integer&gt; linkedCard;
+<span class="nc bnc" id="L1213" title="All 2 branches missed.">        for (Pair&lt;Integer, Integer&gt; coord : validPlaces.keySet()) {</span>
+<span class="nc" id="L1214">            link = validPlaces.get(coord).second();</span>
+<span class="nc" id="L1215">            linkedCard = this.getLinkedCoords(coord, link);</span>
+<span class="nc" id="L1216">            abs = this.getNumberCoords(this.getAbsoluteCoords(linkedCard), link);</span>
+
+<span class="nc" id="L1218">            System.out.print(</span>
+<span class="nc" id="L1219">                    this.setPosition(abs.first(), abs.second()) + validPlaces.get(coord).first());</span>
+<span class="nc" id="L1220">            System.out.flush();</span>
+<span class="nc" id="L1221">        }</span>
+<span class="nc" id="L1222">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

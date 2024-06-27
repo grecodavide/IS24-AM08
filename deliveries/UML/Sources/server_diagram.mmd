@@ -1,0 +1,160 @@
+classDiagram
+    MatchObserver <|-- PlayerController
+    PlayerController <|-- PlayerControllerTCP
+    PlayerController <|-- PlayerControllerRMI
+    Server --> PlayerControllerRMI
+    PlayerControllerTCP --> IOHandler
+    PlayerControllerRMI --> ViewInterface
+    Server --|> ServerRMIInterface
+    MatchStatusObserver --|> MatchObserver
+    class MatchObserver{
+        <<Interface>>
+        + someoneSetInitialSide(Player someone, Side side, Map~Symbol, Integer~ availableResources) void
+        + someoneJoined(Player someone) void
+        + someoneQuit(Player someone) void
+        + someoneChoseSecretObjective(Player someone, Objective objective) void
+        + matchFinished() void
+        + someoneDrewSecretObjective(Player someone, Pair~Objective, Objective~ objectives) void
+        + someoneSentBroadcastText(Player someone, String content) void
+        + someoneDrewCard(Player someone, DrawSource drawSource, PlayableCard card, PlayableCard replacementCard) void
+        + someoneSentPrivateText(Player someone, Player receiver, String content) void
+        + someoneDrewInitialCard(Player someone, InitialCard card) void
+        + someonePlayedCard(Player someone, Pair~Integer, Integer~ coords, PlayableCard card, Side side) void
+        + matchStarted() void
+    } 
+
+  
+    class PlayerController{
+      - Player player
+      - Match match
+      + PlayerController()
+      + getPlayer() Player
+      + matchResumed() void
+      + sendJoined() void  
+    }
+    
+    class PlayerControllerTCP{
+      - IOHandler io
+      +PlayerControllerTCP(String nickname, Match match, IOHandler io)
+      +someoneJoined(Player someone)
+      +someoneQuit(Player someone) 
+      +matchStarted() void
+      +someoneDrewInitialCard(Player someone, InitialCard card) void
+      +someoneSetInitialSide(Player someone, Side side) void
+      +someoneDrewSecretObjectives(Player someone, Pair~Objective, Objective~ objectives) void
+      +someoneChoseSecretObjective(Player someone, Objective objective) void
+      +someonePlayedCard(Player someone, Pair~Integer, Integer~ coords, PlayableCard card, Side side) void
+      +someoneDrewCard(Player someone, DrawSource source, PlayableCard card, PlayebleCard replacementCard) void
+      +matchFinished() void
+      +drawInitialCard() void
+      +chooseInitialCardSide(Side side) void
+      +drawSecretObjectives() void
+      +playCard(Pair~Integer, Integer~ coords, PlayableCard card, Side side, int points) void
+      +drawCard(DrawSource source)
+      +chooseSecretObjective(Objective objective) void 
+      +drawSecretObjectives() void
+      +sendBroadcastText(String text) void
+      +sendPrivateText(Player receiver, String text) void
+      +someoneSentBroadcastText(Player someone, String text) void
+      +someoneSentPrivateText(Player someone, Player receiver, String text) void
+
+      - sendMessage(Message msg) void
+      - connectionError() void
+      - createErrorMessage(Exception e) ErrorMessage
+    }
+    
+    class PlayerControllerRMI {
+      - ViewInterface view
+      +PlayerControllerRMI(String nickname, Match match)
+      + registerView(RemoteViewInterface view)
+      +someoneJoined(Player someone) void
+      +someoneQuit(Player someone) void
+      +matchStarted() void
+      +someoneDrewInitialCard(Player someone, InitialCard card) void
+      +someoneSetInitialSide(Player someone, Side side) void
+      +someoneDrewSecretObjectives(Player someone, Pair~Objective, Objective~ objectives) void
+      +someoneChoseSecretObjective(Player someone, Objective objective) void
+      +someonePlayedCard(Player someone, Pair~Integer, Integer~ coords, PlayableCard card, Side side) void
+      +someoneDrewCard(Player someone, DrawSource source, PlayableCard card, PlayebleCard replacementCard) void
+      +matchFinished() void
+      +drawInitialCard() void
+      +chooseInitialCardSide(Side side) void
+      +drawSecretObjectives() void
+      +playCard(Pair~Integer, Integer~ coords, PlayableCard card, Side side, int points) void
+      +drawCard(DrawSource source)
+      +chooseSecretObjective(Objective objective) void 
+      +drawSecretObjectives() void
+      +sendBroadcastText(String text) void
+      +sendPrivateText(Player receiver, String text) void
+      +someoneSentBroadcastText(Player someone, String text) void
+      +someoneSentPrivateText(Player someone, Player receiver, String text) void
+      -onConnectionError() void
+    }
+
+    class ServerRMIInterface {
+      <<Interface>>
+      + createMatch(String name, int maxPlayers) void
+      + getJoinableMatches() List~AvailableMatch~
+      + joinMatch(String matchName, String username) PlayerControllerRMIInterface
+      + ping() boolean
+    }
+    
+    class Server {
+        - Map~String, Match~ matches
+        - Map~Integer, Objective~  objectives
+        - Map~Integer, PlayableCard~ playableCards
+        - Map~Integer, InitialCard~ initialCards
+        - int portRMI
+        - int portTCP
+        + Server(int portRMI, int portTCP)
+        + main() void
+        + loadCrashedMatches() void
+        + joinMatch(String matchName, String nickname) PlayerControllerRMIInterface
+        + createMatch(String matchName, int maxPlayers) void
+        + getNewMatch(int maxPlayers) Match
+        + getJoinableMatches() List~AvailableMatch~
+        + getJoinableMatchesMap() Map~String, List&ltMatch&gt~
+        + startRMIServer() void
+        + startTCPServer() void
+        + ping() boolean
+    }
+    
+    class IOHandler {
+        - ObjectInputStream inputStream 
+        - ObjectOutputStream outputStream
+        - MessageJsonParser parser
+        + IOHandler(Socket socker)
+        + readMsg() String
+        + writeMsg(Message msg) void
+    }
+    
+    class ViewInterface {
+      <<Interface>>
+      + giveSecretObjectives(Pair~Objective, Objective~ secretObjectives) void
+      + matchStarted(Map~Color, String~ playersNicknamesAndPawns, Map &lt String, List &lt PlayableCard &gt &gt playerHands, Pair~Objective, Objective~ visibleObjectives, Map~DrawSource, PlayableCard~ visiblePlayableCards, Pair~Symbol, Symbol~ decksCardsBacks) void
+      + someoneDrewInitialCard(Player someone, InitialCard card) void
+      + someoneSetInitialSide(Player someone, Side side) void
+      + someoneDrewSecretObjective(Player someone, Pair~Objective, Objective~ objectives) void
+      + someoneChoseSecretObjective(Player someone, Objective objective)
+      + someonePlayedCard(Player someone, Pair~Integer, Integer~ coords, PlayableCard card, Side side) void
+      + someoneDrewCard(Player someone, DrawSource source, Card card) void
+      + matchFinished() void
+    }
+
+class MatchStatusObserver {
+  + MatchStatusObserver(String, Map~String, Match~) 
+  + someoneJoined(Player) void
+  + someonePlayedCard(Player, Pair~Integer, Integer~, PlayableCard, Side) void
+  + someoneSentBroadcastText(Player, String) void
+  + someoneChoseSecretObjective(Player, Objective) void
+  + matchStarted() void
+  + someoneDrewCard(Player, DrawSource, PlayableCard, PlayableCard) void
+  + someoneQuit(Player) void
+  - removeSerializedMatch() void
+  + someoneSetInitialSide(Player, Side, Map~Symbol, Integer~) void
+  + someoneDrewInitialCard(Player, InitialCard) void
+  + matchFinished() void
+  - serializeMatch() void
+  + someoneSentPrivateText(Player, Player, String) void
+  + someoneDrewSecretObjective(Player, Pair~Objective, Objective~) void
+}

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SomeoneSetInitialSideMessage.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.network.messages.responses</a> &gt; <span class="el_source">SomeoneSetInitialSideMessage.java</span></div><h1>SomeoneSetInitialSideMessage.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.network.messages.responses;
+
+import java.util.Map;
+import it.polimi.ingsw.gamemodel.Side;
+import it.polimi.ingsw.gamemodel.Symbol;
+
+/**
+ * This response is sent to each user in the match when a user chosees the initial side of a card.
+ */
+public final class SomeoneSetInitialSideMessage extends ResponseMessage {
+    private final Side side;
+    private final Map&lt;Symbol, Integer&gt; availableResources;
+
+    /**
+     * @return Available resources of player after setting the initial card
+     */
+    public Map&lt;Symbol, Integer&gt; getAvailableResources() {
+<span class="nc" id="L18">        return availableResources;</span>
+    }
+
+    /**
+     * @return Side of the initial card.
+     */
+    public Side getSide() {
+<span class="nc" id="L25">        return side;</span>
+    }
+
+    public SomeoneSetInitialSideMessage(String username, Side side, Map&lt;Symbol, Integer&gt; availableResources) {
+<span class="nc" id="L29">        super(username);</span>
+<span class="nc" id="L30">        this.side = side;</span>
+<span class="nc" id="L31">        this.availableResources = availableResources;</span>
+<span class="nc" id="L32">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

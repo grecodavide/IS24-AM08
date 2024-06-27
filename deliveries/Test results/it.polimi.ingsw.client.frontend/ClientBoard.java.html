@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ClientBoard.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.client.frontend</a> &gt; <span class="el_source">ClientBoard.java</span></div><h1>ClientBoard.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.client.frontend;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import it.polimi.ingsw.gamemodel.*;
+import it.polimi.ingsw.utils.Pair;
+
+/**
+ * This class contains just elements needed to show the player's board, points, resources, hand and objectives
+ */
+public class ClientBoard {
+    private final Map&lt;Integer, ShownCard&gt; placed;
+    private Integer placementNumber;
+    private List&lt;PlayableCard&gt; hand;
+    private Integer points;
+    private Map&lt;Symbol, Integer&gt; availableResources;
+    private final Color color;
+    private Objective objective;
+    private InitialCard initialCard;
+
+    
+    /**
+     * Class constructor.
+     * 
+     * @param color The player pawn's color
+     * @param hand The player's hand
+     */
+<span class="nc" id="L30">    public ClientBoard(Color color, List&lt;PlayableCard&gt; hand) {</span>
+<span class="nc" id="L31">        this.placementNumber = 0;</span>
+<span class="nc" id="L32">        this.placed = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L33">        this.color = color;</span>
+
+<span class="nc" id="L35">        this.hand = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L36">        this.hand = hand;</span>
+
+<span class="nc" id="L38">        this.points = 0;</span>
+
+<span class="nc" id="L40">        this.availableResources = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L41">        Symbol.getBasicResources().forEach((reign -&gt; this.availableResources.put(reign, 0)));</span>
+<span class="nc" id="L42">    }</span>
+    
+    /**
+     * Sets the secret objective.
+     * 
+     * @param objective The chosen secret objective
+     */
+    public void setSecretObjective(Objective objective) {
+<span class="nc" id="L50">        this.objective = objective;</span>
+<span class="nc" id="L51">    }</span>
+    
+    /**
+     * Adds a card to the player's board.
+     * 
+     * @param coords The card's coordinates
+     * @param card The chosen card
+     * @param side The chosen side
+     * @param points The player's point (total)
+     * @param resources The player's resources (total)
+     */
+    public void placeCard(Pair&lt;Integer, Integer&gt; coords, PlayableCard card, Side side, Integer points, Map&lt;Symbol, Integer&gt; resources) {
+<span class="nc" id="L63">        this.hand.remove(card);</span>
+<span class="nc" id="L64">        this.placed.put(placementNumber, new ShownCard(card, side, coords));</span>
+<span class="nc" id="L65">        this.points = points;</span>
+<span class="nc" id="L66">        this.availableResources = resources;</span>
+<span class="nc" id="L67">        this.placementNumber++;</span>
+<span class="nc" id="L68">    }</span>
+    
+    /**
+     * Adds a card to the player's hand.
+     * 
+     * @param card The drawn card
+     */
+    public void drawCard(PlayableCard card) {
+<span class="nc" id="L76">        this.hand.add(card);</span>
+<span class="nc" id="L77">    }</span>
+
+    
+    /**
+     * Sets the initial card. This still does not put it in the board, as the side is still not chosen.
+     * 
+     * @param card The chosen card
+     *
+     * @see ClientBoard#placeInitial(Side, Map)
+     */
+    public void setInitial(InitialCard card) {
+<span class="nc" id="L88">        this.initialCard = card;</span>
+<span class="nc" id="L89">    }</span>
+    
+    /**
+     * Places initial card on the board. At this point, the initial card's side has been chosen
+     * 
+     * @param side The chosen side
+     * @param availableResources The player's resources (total)
+     */
+    public void placeInitial(Side side, Map&lt;Symbol, Integer&gt; availableResources) {
+<span class="nc" id="L98">        this.placed.put(placementNumber, new ShownCard(this.initialCard, side, new Pair&lt;&gt;(0, 0)));</span>
+<span class="nc" id="L99">        this.availableResources = availableResources;</span>
+<span class="nc" id="L100">        this.placementNumber++;</span>
+<span class="nc" id="L101">    }</span>
+
+    /**
+     * @return The initial card.
+     */
+<span class="nc" id="L106">    public InitialCard getInitialCard() {return this.initialCard;}</span>
+
+    /**
+     * @return The card's index (ie, the first card played would have a placementNumber of 1).
+     */
+    public Integer getPlacementNumber() {
+<span class="nc" id="L112">        return placementNumber;</span>
+    }
+
+    /**
+     * @return The player's hand.
+     */
+    public List&lt;PlayableCard&gt; getHand() {
+<span class="nc" id="L119">        return hand;</span>
+    }
+
+    /**
+     * @return The player's points.
+     */
+    public Integer getPoints() {
+<span class="nc" id="L126">        return points;</span>
+    }
+
+    /**
+     * @return The player's board.
+     */
+    public Map&lt;Integer, ShownCard&gt; getPlaced() {
+<span class="nc" id="L133">        return placed;</span>
+    }
+
+    /**
+     * @return The player's resources.
+     */
+    public Map&lt;Symbol, Integer&gt; getAvailableResources() {
+<span class="nc" id="L140">        return availableResources;</span>
+    }
+
+    /**
+     * @return The player pawn's color.
+     */
+    public Color getColor() {
+<span class="nc" id="L147">        return color;</span>
+    }
+
+    /**
+     * @return The player's secret objective.
+     */
+    public Objective getObjective() {
+<span class="nc" id="L154">        return objective;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

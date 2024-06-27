@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ConnectionSceneController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.client.frontend.gui.controllers</a> &gt; <span class="el_source">ConnectionSceneController.java</span></div><h1>ConnectionSceneController.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.client.frontend.gui.controllers;
+
+import java.io.IOException;
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.List;
+import it.polimi.ingsw.client.frontend.gui.GraphicalApplication;
+import it.polimi.ingsw.client.frontend.gui.nodes.CardView;
+import it.polimi.ingsw.client.network.NetworkHandler;
+import it.polimi.ingsw.client.network.NetworkHandlerRMI;
+import it.polimi.ingsw.client.network.NetworkHandlerTCP;
+import it.polimi.ingsw.gamemodel.Color;
+import it.polimi.ingsw.utils.AvailableMatch;
+import it.polimi.ingsw.utils.GuiUtil;
+import it.polimi.ingsw.utils.LeaderboardEntry;
+import javafx.fxml.FXML;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleGroup;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+
+/**
+ * Controller for the connection scene
+ */
+<span class="nc" id="L28">public class ConnectionSceneController extends SceneController {</span>
+    public TextField serverAddress;
+    public TextField serverPort;
+    @FXML
+    private RadioButton RMIButton;
+    @FXML
+    private RadioButton TCPButton;
+    @FXML
+    private Button connectButton;
+    private ToggleGroup connectionGroup;
+
+    public void initialize() {
+        // Set the toggle group
+<span class="nc" id="L41">        connectionGroup = new ToggleGroup();</span>
+<span class="nc" id="L42">        RMIButton.setToggleGroup(connectionGroup);</span>
+<span class="nc" id="L43">        TCPButton.setToggleGroup(connectionGroup);</span>
+<span class="nc" id="L44">        TCPButton.setSelected(true);</span>
+        // Add callback for the button
+<span class="nc" id="L46">        connectButton.setOnAction(event -&gt; {</span>
+<span class="nc" id="L47">            connect();</span>
+<span class="nc" id="L48">        });</span>
+
+<span class="nc" id="L50">    }</span>
+
+    /**
+     * Connect to the specified NetworkView
+     */
+    private void connect() {
+<span class="nc bnc" id="L56" title="All 2 branches missed.">        if (debuggingKeys()) {</span>
+<span class="nc" id="L57">            return;</span>
+        }
+<span class="nc" id="L59">        NetworkHandler networkHandler = null;</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">        if (TCPButton.isSelected()) {</span>
+            try {
+<span class="nc" id="L62">                networkHandler = new NetworkHandlerTCP(view, serverAddress.getText(), Integer.valueOf(serverPort.getText()));</span>
+<span class="nc" id="L63">                view.setNetworkHandler(networkHandler);</span>
+<span class="nc" id="L64">                showLobby();</span>
+<span class="nc" id="L65">            } catch (Exception e) {</span>
+<span class="nc" id="L66">                view.notifyError(new RemoteException(&quot;Cannot connect to the server!&quot;));</span>
+<span class="nc" id="L67">            }</span>
+        } else {
+            try {
+<span class="nc" id="L70">                networkHandler = new NetworkHandlerRMI(view, serverAddress.getText(), Integer.parseInt(serverPort.getText()));</span>
+<span class="nc" id="L71">                view.setNetworkHandler(networkHandler);</span>
+<span class="nc" id="L72">                showLobby();</span>
+<span class="nc" id="L73">            } catch (Exception e) {</span>
+<span class="nc" id="L74">                view.notifyError(e);</span>
+<span class="nc" id="L75">            }</span>
+        }
+<span class="nc" id="L77">    }</span>
+
+    private void showLobby() throws IOException {
+<span class="nc" id="L80">        StackPane root = this.loadScene(&quot;/fxml/lobby.fxml&quot;);</span>
+<span class="nc" id="L81">        GuiUtil.applyCSS(root, &quot;/css/style.css&quot;);</span>
+<span class="nc" id="L82">        Scene lobbyScene = new Scene(root, GraphicalApplication.screenWidth, GraphicalApplication.screenHeight);</span>
+<span class="nc" id="L83">        LobbySceneController controller = (LobbySceneController) root.getProperties().get(&quot;Controller&quot;);</span>
+<span class="nc" id="L84">        view.setLobbySceneController(controller);</span>
+<span class="nc" id="L85">        stage.setScene(lobbyScene);</span>
+<span class="nc" id="L86">    }</span>
+
+    private boolean debuggingKeys() {
+<span class="nc" id="L89">        boolean res = false;</span>
+<span class="nc" id="L90">        String command = serverAddress.getText();</span>
+<span class="nc bnc" id="L91" title="All 2 branches missed.">        if (command.equals(&quot;ranking&quot;)) {</span>
+            try {
+<span class="nc" id="L93">                StackPane root = this.loadScene(&quot;/fxml/ranking.fxml&quot;);</span>
+<span class="nc" id="L94">                GuiUtil.applyCSS(root, &quot;/css/style.css&quot;);</span>
+<span class="nc" id="L95">                RankingSceneController controller = (RankingSceneController) root.getProperties().get(&quot;Controller&quot;);</span>
+<span class="nc" id="L96">                Scene lobbyScene = new Scene(root, GraphicalApplication.screenWidth, GraphicalApplication.screenHeight);</span>
+<span class="nc" id="L97">                stage.setScene(lobbyScene);</span>
+<span class="nc" id="L98">                controller.setVictory(true);</span>
+<span class="nc" id="L99">                controller.addRanking(new LeaderboardEntry(&quot;Oingo&quot;, 20, true));</span>
+<span class="nc" id="L100">                controller.addRanking(new LeaderboardEntry(&quot;Boingo&quot;, 12, false));</span>
+<span class="nc" id="L101">                controller.addRanking(new LeaderboardEntry(&quot;Hol Horse&quot;, 10, false));</span>
+<span class="nc" id="L102">            } catch (Exception e) {</span>
+<span class="nc" id="L103">                throw new RuntimeException(e);</span>
+<span class="nc" id="L104">            }</span>
+<span class="nc" id="L105">            return true;</span>
+<span class="nc bnc" id="L106" title="All 2 branches missed.">        } else if (command.equals(&quot;waiting&quot;)) {</span>
+            try {
+<span class="nc" id="L108">                StackPane root = this.loadScene(&quot;/fxml/waiting.fxml&quot;);</span>
+<span class="nc" id="L109">                GuiUtil.applyCSS(root, &quot;/css/style.css&quot;);</span>
+<span class="nc" id="L110">                WaitingSceneController controller = (WaitingSceneController) root.getProperties().get(&quot;Controller&quot;);</span>
+<span class="nc" id="L111">                Scene lobbyScene = new Scene(root, GraphicalApplication.screenWidth, GraphicalApplication.screenHeight);</span>
+<span class="nc" id="L112">                stage.setScene(lobbyScene);</span>
+<span class="nc" id="L113">                controller.setCurrentPlayers(3);</span>
+<span class="nc" id="L114">                controller.setMaxPlayers(4);</span>
+<span class="nc" id="L115">                controller.setMatchName(&quot;Marioh&quot;);</span>
+<span class="nc" id="L116">                controller.addPlayer(&quot;Oingo&quot;);</span>
+<span class="nc" id="L117">                controller.addPlayer(&quot;Boingo&quot;);</span>
+<span class="nc" id="L118">                controller.addPlayer(&quot;Hol Horse&quot;);</span>
+<span class="nc" id="L119">            } catch (Exception e) {</span>
+<span class="nc" id="L120">                throw new RuntimeException(e);</span>
+<span class="nc" id="L121">            }</span>
+<span class="nc" id="L122">            return true;</span>
+<span class="nc bnc" id="L123" title="All 2 branches missed.">        } else if (command.equals(&quot;match&quot;)) {</span>
+            try {
+<span class="nc" id="L125">                VBox root = this.loadScene(&quot;/fxml/match.fxml&quot;);</span>
+<span class="nc" id="L126">                GuiUtil.applyCSS(root, &quot;/css/match.css&quot;);</span>
+<span class="nc" id="L127">                MatchSceneController controller = (MatchSceneController) root.getProperties().get(&quot;Controller&quot;);</span>
+<span class="nc" id="L128">                Scene lobbyScene = new Scene(root, GraphicalApplication.screenWidth, GraphicalApplication.screenHeight);</span>
+<span class="nc" id="L129">                stage.setScene(lobbyScene);</span>
+<span class="nc" id="L130">                controller.addPlayerTab(&quot;Oingo&quot;, Color.RED);</span>
+<span class="nc" id="L131">                PlayerTabController controller1 = controller.addPlayerTab(&quot;Boingo&quot;, Color.BLUE);</span>
+<span class="nc" id="L132">                controller1.setCurrentPlayer(true);</span>
+<span class="nc" id="L133">                CardView cardView = new CardView();</span>
+<span class="nc" id="L134">                ChatPaneController chatPaneController = controller.getChatPane();</span>
+<span class="nc" id="L135">                chatPaneController.addPlayer(&quot;Oingo&quot;);</span>
+<span class="nc" id="L136">                controller.setPlateauPoints(&quot;Boingo&quot;, 3);</span>
+<span class="nc" id="L137">                controller.setPlateauPoints(&quot;Oingo&quot;, 3);</span>
+
+<span class="nc" id="L139">            } catch (Exception e) {</span>
+<span class="nc" id="L140">                throw new RuntimeException(e);</span>
+<span class="nc" id="L141">            }</span>
+<span class="nc" id="L142">            return true;</span>
+<span class="nc bnc" id="L143" title="All 2 branches missed.">        } else if (command.startsWith(&quot;error&quot;)) {</span>
+<span class="nc" id="L144">            String errorMessage = command.replace(&quot;error &quot;, &quot;&quot;);</span>
+<span class="nc" id="L145">            view.notifyError(new Exception(errorMessage));</span>
+<span class="nc bnc" id="L146" title="All 2 branches missed.">        } else if (command.equals(&quot;lobby&quot;)) {</span>
+            try {
+<span class="nc" id="L148">                StackPane root = this.loadScene(&quot;/fxml/lobby.fxml&quot;);</span>
+<span class="nc" id="L149">                GuiUtil.applyCSS(root, &quot;/css/style.css&quot;);</span>
+<span class="nc" id="L150">                LobbySceneController controller = (LobbySceneController) root.getProperties().get(&quot;Controller&quot;);</span>
+<span class="nc" id="L151">                List&lt;AvailableMatch&gt; matches = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L152">                matches.add(new AvailableMatch(&quot;New&quot;, 3, 2, true));</span>
+<span class="nc" id="L153">                matches.add(new AvailableMatch(&quot;New2&quot;, 3, 3, false));</span>
+<span class="nc" id="L154">                matches.add(new AvailableMatch(&quot;New3&quot;, 0, 3, false));</span>
+<span class="nc" id="L155">                controller.updateMatches(matches);</span>
+<span class="nc" id="L156">                Scene lobbyScene = new Scene(root, GraphicalApplication.screenWidth, GraphicalApplication.screenHeight);</span>
+<span class="nc" id="L157">                stage.setScene(lobbyScene);</span>
+
+<span class="nc" id="L159">            } catch (IOException e) {</span>
+<span class="nc" id="L160">                throw new RuntimeException(e);</span>
+<span class="nc" id="L161">            }</span>
+<span class="nc" id="L162">            return true;</span>
+        }
+<span class="nc" id="L164">        return res;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

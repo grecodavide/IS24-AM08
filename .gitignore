@@ -1,3 +1,6 @@
+# Match files
+*.match
+
 # Compiled class file
 *.class
 
@@ -34,3 +37,4 @@ target/
 
 .project
 src/main/resources/graphics/
+bin/

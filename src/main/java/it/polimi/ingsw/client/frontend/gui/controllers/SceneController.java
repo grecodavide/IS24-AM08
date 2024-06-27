@@ -8,6 +8,9 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
+/**
+ * JavaFX controller of a scene
+ */
 public abstract class SceneController {
     protected GraphicalViewGUI view;
     protected Stage stage;
@@ -19,12 +22,24 @@ public abstract class SceneController {
     public void initializePostController() throws IOException{
     }
 
+    /**
+     * This method is run when the controller is initialized
+     * @throws IOException if there is a file error
+     */
     public abstract void initialize() throws IOException;
 
+    /**
+     * Set the graphical view for the controller
+     * @param view graphical view
+     */
     public void setGraphicalView(GraphicalViewGUI view) {
         this.view = view;
     }
 
+    /**
+     * Set the main stage the controller is in
+     * @param stage JavaFX stage
+     */
     public void setStage(Stage stage) {
         this.stage = stage;
     }

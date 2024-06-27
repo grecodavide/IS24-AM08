@@ -1,0 +1,948 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GraphicalViewTUI.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.client.frontend.tui</a> &gt; <span class="el_source">GraphicalViewTUI.java</span></div><h1>GraphicalViewTUI.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.client.frontend.tui;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import it.polimi.ingsw.client.frontend.ClientBoard;
+import it.polimi.ingsw.client.frontend.GraphicalView;
+import it.polimi.ingsw.client.frontend.ShownCard;
+import it.polimi.ingsw.client.network.NetworkHandlerRMI;
+import it.polimi.ingsw.client.network.NetworkHandlerTCP;
+import it.polimi.ingsw.exceptions.WrongInputFormatException;
+import it.polimi.ingsw.gamemodel.*;
+import it.polimi.ingsw.utils.AvailableMatch;
+import it.polimi.ingsw.utils.LeaderboardEntry;
+import it.polimi.ingsw.utils.Pair;
+import it.polimi.ingsw.utils.RequestStatus;
+
+/**
+ * Class that handles client game loop from TUI.
+ */
+public class GraphicalViewTUI extends GraphicalView {
+    private final TuiPrinter printer;
+    private String lastError;
+    private boolean ongoing;
+    private List&lt;String&gt; playersWithObjective;
+    private final PlayerControls playerControls;
+    private final InputHandler inputHandler;
+    private final ValidPositions validPositions;
+<span class="nc" id="L30">    private final static List&lt;String&gt; helpMessage = List.of(</span>
+            &quot;players,     p -&gt; show list of players&quot;,
+            &quot;write,       w -&gt; write message (add :username to send private text)&quot;,
+            &quot;chat,        c -&gt; show chat&quot;,
+            &quot;board,       b -&gt; show your board (or specify a number to show corresponding player's board)&quot;,
+            &quot;objectives,  o -&gt; show secret and common objectives&quot;,
+            &quot;hand,        h -&gt; show your hand&quot;);
+
+    private List&lt;String&gt; chat;
+    private List&lt;String&gt; messages;
+    private final static String playerControlPrompt =
+            &quot;Type command, or 'help' for a list of available commands.&quot;;
+
+
+    /**
+     * Class constructor. Starts the interface and creates all auxiliary objects.
+     */
+    public GraphicalViewTUI() {
+<span class="nc" id="L48">        super();</span>
+<span class="nc" id="L49">        this.ongoing = true;</span>
+<span class="nc" id="L50">        this.playersWithObjective = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L51">        this.playerControls = new PlayerControls(); // starts disabled</span>
+<span class="nc" id="L52">        this.validPositions = new ValidPositions();</span>
+
+<span class="nc" id="L54">        this.chat = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L55">        this.messages = new ArrayList&lt;&gt;();</span>
+        try {
+<span class="nc" id="L57">            this.printer = new TuiPrinter();</span>
+<span class="nc" id="L58">        } catch (Exception e) {</span>
+<span class="nc" id="L59">            throw new RuntimeException(&quot;Could not access terminal. Quitting now&quot;);</span>
+<span class="nc" id="L60">        }</span>
+
+<span class="nc" id="L62">        this.inputHandler = new InputHandler(this.printer);</span>
+
+<span class="nc" id="L64">    }</span>
+
+    /**
+     * Actually starts the interface, then handles the pre-match.
+     */
+    private void startInterface() {
+<span class="nc" id="L70">        this.printer.clearTerminal();</span>
+<span class="nc" id="L71">        this.setNetworkHandler();</span>
+<span class="nc" id="L72">        this.printer.clearTerminal();</span>
+<span class="nc" id="L73">        this.setMatch();</span>
+<span class="nc" id="L74">        new Thread(this::startPlayerControls).start();</span>
+<span class="nc" id="L75">    }</span>
+
+    ///////////////////////
+    // AUXILIARY METHODS //
+    ///////////////////////
+    /**
+     * Sets the last request's status, eventually notifying all threads of the server's response.
+     * 
+     * @param status The last request's status
+     */
+    @Override
+    public void setLastRequestStatus(RequestStatus status) {
+<span class="nc" id="L87">        synchronized (this.lastRequest) {</span>
+<span class="nc" id="L88">            super.setLastRequestStatus(status);</span>
+<span class="nc bnc" id="L89" title="All 2 branches missed.">            if (!status.equals(RequestStatus.PENDING)) {</span>
+<span class="nc" id="L90">                this.lastRequest.notifyAll();</span>
+            }
+<span class="nc" id="L92">        }</span>
+<span class="nc" id="L93">    }</span>
+
+
+    /**
+     * Waits for the server response after any action was performed. Until the server does not send
+     * a response (or an error), the thread is stopped.
+     * 
+     * @return Whether the last action was successful or not
+     */
+    private boolean getServerResponse() {
+<span class="nc" id="L103">        this.printer.printCenteredMessage(&quot;Waiting for server...&quot;, 1);</span>
+        try {
+<span class="nc" id="L105">            synchronized (this.lastRequest) {</span>
+<span class="nc bnc" id="L106" title="All 2 branches missed.">                while (this.lastRequest.getStatus().equals(RequestStatus.PENDING)) {</span>
+<span class="nc" id="L107">                    this.lastRequest.wait();</span>
+                }
+<span class="nc" id="L109">            }</span>
+<span class="nc" id="L110">            return this.lastRequest.getStatus().equals(RequestStatus.SUCCESSFUL);</span>
+<span class="nc" id="L111">        } catch (InterruptedException e) {</span>
+<span class="nc" id="L112">            throw new RuntimeException();</span>
+        }
+
+    }
+
+
+    /**
+     * Shows the player's board and hand.
+     * 
+     * @param board the player's board
+     */
+    private synchronized void showHand(ClientBoard board) {
+<span class="nc" id="L124">        this.printer.printPlayerBoard(this.username, board);</span>
+<span class="nc" id="L125">        this.printer.printHandAtBottom(board.getHand());</span>
+<span class="nc" id="L126">    }</span>
+
+    /**
+     * Asks the user which card he wants to play.
+     * 
+     * @param board The player's board
+     * 
+     * @return The chosen card
+     */
+    private PlayableCard chooseCardFromHand(ClientBoard board) {
+<span class="nc" id="L136">        List&lt;PlayableCard&gt; hand = board.getHand();</span>
+
+<span class="nc" id="L138">        this.inputHandler.setPrompt(&quot;Choose card to play (1, 2, 3):&quot;);</span>
+<span class="nc" id="L139">        this.showHand(board);</span>
+<span class="nc" id="L140">        String userIn = this.inputHandler.askUser();</span>
+
+<span class="nc" id="L142">        PlayableCard card = null;</span>
+<span class="nc" id="L143">        Integer maxValue = hand.size();</span>
+<span class="nc bnc" id="L144" title="All 2 branches missed.">        while (card == null) {</span>
+            try {
+<span class="nc" id="L146">                Integer index = Integer.parseInt(userIn) - 1;</span>
+<span class="nc bnc" id="L147" title="All 4 branches missed.">                if (index &gt;= 0 &amp;&amp; index &lt; maxValue) {</span>
+<span class="nc" id="L148">                    card = hand.get(index);</span>
+                } else {
+<span class="nc" id="L150">                    throw new NumberFormatException(&quot;Number not in range!&quot;);</span>
+                }
+<span class="nc" id="L152">            } catch (NumberFormatException e) {</span>
+<span class="nc" id="L153">                this.inputHandler.setPrompt(&quot;Not a valid number! try again&quot;);</span>
+<span class="nc" id="L154">                this.showHand(board);</span>
+<span class="nc" id="L155">                userIn = this.inputHandler.askUser();</span>
+<span class="nc" id="L156">            }</span>
+        }
+
+<span class="nc" id="L159">        return card;</span>
+    }
+
+
+    /**
+     * Asks the user which side he wants to play the chosen card.
+     * 
+     * @param card The card to be placed on the board
+     * 
+     * @return The chosen side
+     */
+    private Side chooseCardSide(PlayableCard card) {
+<span class="nc" id="L171">        this.printer.clearTerminal();</span>
+<span class="nc" id="L172">        this.printer.printPlayableFrontAndBack(card, 0);</span>
+
+<span class="nc" id="L174">        this.inputHandler</span>
+<span class="nc" id="L175">                .setPrompt(&quot;What side do you want to play the card on? (defaults to front)&quot;);</span>
+<span class="nc" id="L176">        String userIn = this.inputHandler.askUser();</span>
+<span class="nc bnc" id="L177" title="All 2 branches missed.">        return switch (userIn) {</span>
+<span class="nc" id="L178">            case &quot;b&quot;, &quot;back&quot; -&gt; Side.BACK;</span>
+<span class="nc" id="L179">            default -&gt; Side.FRONT;</span>
+        };
+    }
+
+
+    /**
+     * Asks the user where he wants to play the chosen card.
+     * 
+     * @param board The current player's board
+     * 
+     * @return The chosen coordinates
+     */
+    private Pair&lt;Integer, Integer&gt; chooseCoords(ClientBoard board) {
+<span class="nc" id="L192">        Map&lt;Pair&lt;Integer, Integer&gt;, Pair&lt;Integer, Corner&gt;&gt; valids =</span>
+<span class="nc" id="L193">                this.validPositions.getValidPlaces();</span>
+
+<span class="nc" id="L195">        Pair&lt;Integer, Integer&gt; coord = null;</span>
+
+<span class="nc" id="L197">        this.inputHandler.setPrompt(&quot;Choose where to place card:&quot;);</span>
+<span class="nc bnc" id="L198" title="All 2 branches missed.">        while (coord == null) {</span>
+<span class="nc" id="L199">            this.printer.printValidPlaces(valids);</span>
+<span class="nc" id="L200">            this.printer.printPlayerBoard(this.username, board);</span>
+
+<span class="nc" id="L202">            Integer position = -1;</span>
+            try {
+<span class="nc" id="L204">                position = Integer.valueOf(this.inputHandler.askUser());</span>
+<span class="nc" id="L205">            } catch (NumberFormatException e) {</span>
+<span class="nc" id="L206">                this.inputHandler.setPrompt(&quot;Not a number! Try again&quot;);</span>
+<span class="nc" id="L207">            }</span>
+<span class="nc bnc" id="L208" title="All 2 branches missed.">            if (position != -1) {</span>
+<span class="nc bnc" id="L209" title="All 2 branches missed.">                for (Pair&lt;Integer, Integer&gt; cmp : valids.keySet()) {</span>
+<span class="nc bnc" id="L210" title="All 2 branches missed.">                    if (valids.get(cmp).first().equals(position)) {</span>
+<span class="nc" id="L211">                        coord = cmp;</span>
+                    }
+<span class="nc" id="L213">                }</span>
+<span class="nc" id="L214">                this.inputHandler.setPrompt(&quot;Not a valid number! try again&quot;);</span>
+            }
+<span class="nc" id="L216">        }</span>
+<span class="nc" id="L217">        return coord;</span>
+    }
+
+
+    /**
+     * Gets the player's input while it's not his turn, and then performs the corresponding action.
+     */
+    private void parsePlayerControl() {
+<span class="nc" id="L225">        ClientBoard board = this.clientBoards.get(this.username);</span>
+        String userIn, command, argument, player;
+
+<span class="nc" id="L228">        userIn = this.inputHandler.getNextLine();</span>
+<span class="nc" id="L229">        this.printer.clearTerminal();</span>
+
+<span class="nc" id="L231">        int splitIndex = userIn.indexOf(&quot; &quot;);</span>
+<span class="nc bnc" id="L232" title="All 2 branches missed.">        if (splitIndex == -1) {</span>
+<span class="nc" id="L233">            command = userIn;</span>
+<span class="nc" id="L234">            argument = &quot;&quot;;</span>
+        } else {
+<span class="nc" id="L236">            command = userIn.substring(0, splitIndex);</span>
+<span class="nc" id="L237">            argument = userIn.substring(splitIndex + 1);</span>
+        }
+
+<span class="nc bnc" id="L240" title="All 8 branches missed.">        switch (command) {</span>
+            case &quot;o&quot;, &quot;objectives&quot;:
+<span class="nc" id="L242">                this.printer.printObjectives(username, board.getColor(), board.getObjective(),</span>
+                        this.visibleObjectives);
+<span class="nc" id="L244">                break;</span>
+            case &quot;h&quot;, &quot;hand&quot;:
+<span class="nc" id="L246">                this.printer.printHand(this.username, board.getColor(), board.getHand());</span>
+<span class="nc" id="L247">                break;</span>
+            case &quot;b&quot;, &quot;board&quot;:
+<span class="nc bnc" id="L249" title="All 5 branches missed.">                switch (argument) {</span>
+                    case &quot;1&quot;:
+<span class="nc" id="L251">                        player = this.players.get(0);</span>
+<span class="nc" id="L252">                        this.printer.printPlayerBoard(player, this.clientBoards.get(player));</span>
+<span class="nc" id="L253">                        break;</span>
+                    case &quot;2&quot;:
+<span class="nc" id="L255">                        player = this.players.get(1);</span>
+<span class="nc" id="L256">                        this.printer.printPlayerBoard(player, this.clientBoards.get(player));</span>
+<span class="nc" id="L257">                        break;</span>
+                    case &quot;3&quot;:
+<span class="nc bnc" id="L259" title="All 2 branches missed.">                        if (this.players.size() &gt; 2) {</span>
+<span class="nc" id="L260">                            player = this.players.get(2);</span>
+<span class="nc" id="L261">                            this.printer.printPlayerBoard(player, this.clientBoards.get(player));</span>
+                        }
+                        break;
+                    case &quot;4&quot;:
+<span class="nc bnc" id="L265" title="All 2 branches missed.">                        if (this.players.size() &gt; 3) {</span>
+<span class="nc" id="L266">                            player = this.players.get(3);</span>
+<span class="nc" id="L267">                            this.printer.printPlayerBoard(player, this.clientBoards.get(player));</span>
+                        }
+                        break;
+
+                    default:
+<span class="nc" id="L272">                        this.printer.printPlayerBoard(this.username,</span>
+<span class="nc" id="L273">                                this.clientBoards.get(this.username));</span>
+                        break;
+                }
+<span class="nc" id="L276">                break;</span>
+            case &quot;c&quot;, &quot;chat&quot;:
+<span class="nc" id="L278">                this.printer.printChat(this.chat);</span>
+<span class="nc" id="L279">                break;</span>
+            case &quot;w&quot;, &quot;write&quot;:
+<span class="nc bnc" id="L281" title="All 2 branches missed.">                if (!argument.equals(&quot;&quot;)) {</span>
+<span class="nc bnc" id="L282" title="All 2 branches missed.">                    if (argument.charAt(0) == ':') {</span>
+<span class="nc" id="L283">                        splitIndex = argument.indexOf(&quot; &quot;);</span>
+<span class="nc bnc" id="L284" title="All 2 branches missed.">                        if (splitIndex != -1) {</span>
+<span class="nc" id="L285">                            String text = argument.substring(splitIndex + 1);</span>
+<span class="nc" id="L286">                            String recipient = argument.substring(1, splitIndex);</span>
+<span class="nc bnc" id="L287" title="All 2 branches missed.">                            if (!argument.equals(&quot;&quot;)) {</span>
+<span class="nc" id="L288">                                this.sendPrivateText(recipient, text);</span>
+                            }
+<span class="nc bnc" id="L290" title="All 2 branches missed.">                            if (!this.getServerResponse()) {</span>
+<span class="nc" id="L291">                                this.messages.add(this.lastError);</span>
+                            } else {
+<span class="nc" id="L293">                                this.chat.add(&quot;(to: &quot; + recipient + &quot;): &quot; + text);</span>
+                            }
+<span class="nc" id="L295">                        }</span>
+                    } else {
+<span class="nc" id="L297">                        this.sendBroadcastText(argument);</span>
+<span class="nc bnc" id="L298" title="All 2 branches missed.">                        if (!this.getServerResponse()) {</span>
+<span class="nc" id="L299">                            this.messages.add(this.lastError);</span>
+                        } else {
+<span class="nc" id="L301">                            this.chat.add(&quot;(you): &quot; + argument);</span>
+                        }
+                    }
+
+<span class="nc" id="L305">                    this.printer.clearTerminal();</span>
+                }
+                break;
+            case &quot;p&quot;, &quot;players&quot;:
+<span class="nc" id="L309">                this.printer.printSimpleList(this.players, false, true);</span>
+<span class="nc" id="L310">                break;</span>
+
+            case &quot;help&quot;:
+<span class="nc" id="L313">                this.printer.printSimpleList(helpMessage, false, false);</span>
+<span class="nc" id="L314">                break;</span>
+
+            default:
+<span class="nc" id="L317">                this.printer.printCenteredMessage(&quot;Not a known command: '&quot; + command</span>
+                        + &quot;'. Type 'help' to show a help message&quot;, 0);
+                break;
+        }
+
+<span class="nc" id="L322">        this.inputHandler.setPrompt(playerControlPrompt);</span>
+<span class="nc" id="L323">        this.inputHandler.showPrompt();</span>
+<span class="nc" id="L324">    }</span>
+
+
+    /**
+     * Enables the player to use custom commands while it's not his turn.
+     */
+    private void enablePlayerControls() {
+<span class="nc" id="L331">        this.inputHandler.setPrompt(playerControlPrompt);</span>
+<span class="nc" id="L332">        this.inputHandler.showPrompt();</span>
+<span class="nc" id="L333">        this.playerControls.enable();</span>
+<span class="nc" id="L334">    }</span>
+
+
+    /**
+     * Starts the handling of player controls. If enables, polls for user input and as soon as there
+     * is something calls {@link GraphicalViewTUI#parsePlayerControl()}. If disabled, stops the
+     * thread
+     */
+    private void startPlayerControls() {
+<span class="nc bnc" id="L343" title="All 2 branches missed.">        while (this.ongoing) {</span>
+<span class="nc" id="L344">            synchronized (this.playerControls) {</span>
+<span class="nc bnc" id="L345" title="All 2 branches missed.">                if (this.playerControls.isEnabled()) {</span>
+                    try {
+<span class="nc bnc" id="L347" title="All 2 branches missed.">                        if (System.in.available() &gt; 0) {</span>
+<span class="nc" id="L348">                            this.parsePlayerControl();</span>
+                        } else {
+<span class="nc" id="L350">                            Thread.sleep(200);</span>
+                        }
+<span class="nc" id="L352">                    } catch (InterruptedException e) {</span>
+<span class="nc" id="L353">                    } catch (IOException e) {</span>
+<span class="nc" id="L354">                        System.err.println(&quot;Could not connect! Quitting now...&quot;);</span>
+<span class="nc" id="L355">                        System.exit(1);</span>
+<span class="nc" id="L356">                    }</span>
+                } else {
+                    try {
+<span class="nc" id="L359">                        this.playerControls.wait();</span>
+<span class="nc" id="L360">                    } catch (InterruptedException e) {</span>
+<span class="nc" id="L361">                    }</span>
+                }
+
+<span class="nc" id="L364">            }</span>
+        }
+<span class="nc" id="L366">    }</span>
+
+    ////////////////////////
+    // PRE MATCH METHODS //
+    ///////////////////////
+    /**
+     * Sets the network view, asking the player how he wants to connect (host, port, RMI vs TCP).
+     */
+    private void setNetworkHandler() {
+        String userIn, IPAddr;
+<span class="nc" id="L376">        Integer port = null;</span>
+
+<span class="nc" id="L378">        this.inputHandler.setPrompt(&quot;Choose IP address:&quot;);</span>
+<span class="nc" id="L379">        IPAddr = this.inputHandler.askUser();</span>
+<span class="nc" id="L380">        this.inputHandler.setPrompt(&quot;Choose port:&quot;);</span>
+<span class="nc" id="L381">        userIn = this.inputHandler.askUser();</span>
+<span class="nc bnc" id="L382" title="All 2 branches missed.">        while (port == null) {</span>
+            try {
+<span class="nc" id="L384">                port = Integer.valueOf(userIn);</span>
+<span class="nc" id="L385">            } catch (NumberFormatException e) {</span>
+<span class="nc" id="L386">                userIn = this.inputHandler.askUser();</span>
+<span class="nc" id="L387">            }</span>
+        }
+
+<span class="nc" id="L390">        this.inputHandler.setPrompt(&quot;Choose connection type (1 for TCP, 2 for RMI)&quot;);</span>
+<span class="nc" id="L391">        this.networkHandler = null;</span>
+<span class="nc bnc" id="L392" title="All 2 branches missed.">        while (this.networkHandler == null) {</span>
+<span class="nc" id="L393">            userIn = this.inputHandler.askUser();</span>
+            try {
+<span class="nc bnc" id="L395" title="All 3 branches missed.">                switch (userIn) {</span>
+                    case &quot;1&quot;, &quot;tcp&quot;, &quot;TCP&quot;:
+<span class="nc" id="L397">                        this.setNetworkHandler(new NetworkHandlerTCP(this, IPAddr, port));</span>
+<span class="nc" id="L398">                        break;</span>
+                    case &quot;2&quot;, &quot;rmi&quot;, &quot;RMI&quot;:
+<span class="nc" id="L400">                        this.setNetworkHandler(new NetworkHandlerRMI(this, IPAddr, port));</span>
+<span class="nc" id="L401">                        break;</span>
+                    default:
+<span class="nc" id="L403">                        this.inputHandler.setPrompt(</span>
+                                &quot;Not a valid connection type! Choose connection type (1 for TCP, 2 for RMI)&quot;);
+                        break;
+                }
+<span class="nc" id="L407">            } catch (Exception e) {</span>
+<span class="nc" id="L408">                this.printer.clearTerminal();</span>
+<span class="nc" id="L409">                this.printer.printMessage(&quot;Could not connect! Try again&quot;);</span>
+<span class="nc" id="L410">                this.setNetworkHandler();</span>
+<span class="nc" id="L411">                return;</span>
+<span class="nc" id="L412">            }</span>
+        }
+<span class="nc" id="L414">    }</span>
+
+
+    /**
+     * Asks the player to choose a username.
+     */
+    private void chooseUsername() {
+<span class="nc" id="L421">        String userIn = &quot;&quot;;</span>
+<span class="nc" id="L422">        this.inputHandler.setPrompt(&quot;Choose username:&quot;);</span>
+<span class="nc bnc" id="L423" title="All 2 branches missed.">        while (userIn.equals(&quot;&quot;)) {</span>
+<span class="nc" id="L424">            userIn = this.inputHandler.askUser();</span>
+<span class="nc" id="L425">            this.inputHandler.setPrompt(&quot;Not a valid username! Choose username:&quot;);</span>
+        }
+<span class="nc" id="L427">        super.setUsername(userIn);</span>
+<span class="nc" id="L428">    }</span>
+
+
+    /**
+     * Asks the server for a list of available matches and waits for it.
+     */
+    private void getAvailableMatches() {
+<span class="nc" id="L435">        this.lastRequest.setStatus(RequestStatus.PENDING);</span>
+<span class="nc" id="L436">        this.networkHandler.getAvailableMatches();</span>
+
+<span class="nc bnc" id="L438" title="All 2 branches missed.">        if (!this.getServerResponse()) {</span>
+<span class="nc" id="L439">            this.printer.clearTerminal();</span>
+<span class="nc" id="L440">            this.printer.printCenteredMessage(&quot;Could not receive availbale matches, try again!&quot;, 1);</span>
+<span class="nc" id="L441">            this.getAvailableMatches();</span>
+<span class="nc" id="L442">            return;</span>
+        }
+<span class="nc" id="L444">    }</span>
+
+
+    /**
+     * Tries to create a new match, asking the player for match name and max players.
+     * 
+     * @throws WrongInputFormatException if the max number of players was not specified
+     */
+    private void createMatch() throws WrongInputFormatException {
+<span class="nc" id="L453">        String userIn = this.inputHandler.askUser();</span>
+<span class="nc" id="L454">        Integer splitIndex = userIn.indexOf(&quot; &quot;);</span>
+<span class="nc bnc" id="L455" title="All 2 branches missed.">        if (splitIndex == -1) {</span>
+<span class="nc" id="L456">            throw new WrongInputFormatException(&quot;The max players number was not specified!&quot;);</span>
+        }
+
+<span class="nc" id="L459">        String matchName = userIn.substring(0, splitIndex);</span>
+        Integer maxPlayers;
+        try {
+<span class="nc" id="L462">            maxPlayers = Integer.valueOf(userIn.substring(splitIndex + 1));</span>
+<span class="nc" id="L463">        } catch (Exception e) {</span>
+<span class="nc" id="L464">            throw new WrongInputFormatException(&quot;Bad format for max players number!&quot;);</span>
+<span class="nc" id="L465">        }</span>
+
+<span class="nc" id="L467">        super.createMatch(matchName, maxPlayers);</span>
+<span class="nc" id="L468">    }</span>
+
+
+    /**
+     * Tries to join a match, showing the player a list of matches and their relative index, and
+     * asking him which he wants to join.
+     * 
+     * @param joinables List of matches the player can join
+     * 
+     * @throws WrongInputFormatException if the player did not specify a valid index
+     */
+    private void joinMatch(List&lt;AvailableMatch&gt; joinables) throws WrongInputFormatException {
+<span class="nc" id="L480">        String userIn = this.inputHandler.askUser();</span>
+        Integer matchIndex;
+        try {
+<span class="nc" id="L483">            matchIndex = Integer.valueOf(userIn) - 1;</span>
+<span class="nc" id="L484">        } catch (NumberFormatException e) {</span>
+<span class="nc" id="L485">            throw new WrongInputFormatException(&quot;You must specify a number!&quot;);</span>
+<span class="nc" id="L486">        }</span>
+
+<span class="nc bnc" id="L488" title="All 4 branches missed.">        if (matchIndex &lt; 0 || matchIndex &gt;= joinables.size()) {</span>
+<span class="nc" id="L489">            throw new WrongInputFormatException(&quot;Invalid index!&quot;);</span>
+        }
+
+<span class="nc" id="L492">        super.joinMatch(joinables.get(matchIndex).name());</span>
+<span class="nc" id="L493">    }</span>
+
+
+    /**
+     * Tries to set the match, either creating it or joining an already existing one.
+     * 
+     * @see GraphicalViewTUI#joinMatch(List)
+     * @see GraphicalViewTUI#createMatch()
+     */
+    private void setMatch() {
+<span class="nc" id="L503">        List&lt;AvailableMatch&gt; joinables = new ArrayList&lt;&gt;(), notJoinables = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L504">        this.chooseUsername();</span>
+
+<span class="nc" id="L506">        this.getAvailableMatches();</span>
+
+<span class="nc" id="L508">        String createMatchPrompt = &quot;Type the match name and max players (e.g. MatchTest 2).&quot;;</span>
+<span class="nc" id="L509">        String joinMatchPrompt = &quot;Type the number corresponding to the match you want to join.&quot;;</span>
+
+<span class="nc" id="L511">        this.availableMatches.forEach(match -&gt; {</span>
+<span class="nc bnc" id="L512" title="All 4 branches missed.">            if (match.currentPlayers() &lt; match.maxPlayers() || match.isRejoinable()) {</span>
+<span class="nc" id="L513">                joinables.add(match);</span>
+            } else {
+<span class="nc" id="L515">                notJoinables.add(match);</span>
+            }
+<span class="nc" id="L517">        });</span>
+<span class="nc" id="L518">        this.printer.clearTerminal();</span>
+
+<span class="nc" id="L520">        boolean matchSet = false;</span>
+
+<span class="nc bnc" id="L522" title="All 2 branches missed.">        while (!matchSet) {</span>
+            try {
+<span class="nc bnc" id="L524" title="All 2 branches missed.">                if (this.availableMatches.isEmpty()) {</span>
+<span class="nc" id="L525">                    this.inputHandler.setPrompt(&quot;No matches available. &quot; + createMatchPrompt);</span>
+<span class="nc" id="L526">                    this.createMatch();</span>
+<span class="nc" id="L527">                    matchSet = true;</span>
+                } else {
+<span class="nc bnc" id="L529" title="All 2 branches missed.">                    if (joinables.isEmpty())</span>
+<span class="nc" id="L530">                        joinMatchPrompt = &quot;No matches available. &quot; + joinMatchPrompt;</span>
+
+<span class="nc" id="L532">                    this.inputHandler.setPrompt(</span>
+                            &quot;Do you want to join a match or (c)reate one? (defaults to join)&quot;);
+<span class="nc" id="L534">                    String userIn = this.inputHandler.askUser();</span>
+<span class="nc" id="L535">                    this.printer.printMatchesLobby(joinables, notJoinables, 0);</span>
+<span class="nc bnc" id="L536" title="All 2 branches missed.">                    switch (userIn) {</span>
+                        case &quot;c&quot;, &quot;C&quot;, &quot;create&quot;, &quot;Create&quot;:
+<span class="nc" id="L538">                            this.inputHandler.setPrompt(createMatchPrompt);</span>
+<span class="nc" id="L539">                            this.createMatch();</span>
+<span class="nc" id="L540">                            matchSet = true;</span>
+<span class="nc" id="L541">                            break;</span>
+
+                        default:
+<span class="nc" id="L544">                            this.inputHandler.setPrompt(joinMatchPrompt);</span>
+<span class="nc" id="L545">                            this.joinMatch(joinables);</span>
+<span class="nc" id="L546">                            matchSet = true;</span>
+                            break;
+                    }
+                }
+<span class="nc" id="L550">            } catch (WrongInputFormatException e) {</span>
+<span class="nc" id="L551">                this.inputHandler.setPrompt(e.getMessage() + &quot;! Try again.&quot;);</span>
+<span class="nc" id="L552">            }</span>
+        }
+
+<span class="nc bnc" id="L555" title="All 2 branches missed.">        if (!this.getServerResponse()) {</span>
+<span class="nc" id="L556">            this.printer.clearTerminal();</span>
+<span class="nc" id="L557">            this.printer.printCenteredMessage(this.lastError + &quot;! Try again.&quot;, 0);</span>
+<span class="nc" id="L558">            this.setMatch();</span>
+<span class="nc" id="L559">            return;</span>
+        }
+
+<span class="nc" id="L562">    }</span>
+
+
+    /**
+     * Show the list of players in the match.
+     * 
+     * @param someoneUsername Last player who joined the match
+     * @param joinedPlayers List of all the other players
+     */
+    @Override
+    public void someoneJoined(String someoneUsername, List&lt;String&gt; joinedPlayers) {
+<span class="nc" id="L573">        super.someoneJoined(someoneUsername, joinedPlayers);</span>
+<span class="nc" id="L574">        this.printer.clearTerminal();</span>
+<span class="nc" id="L575">        this.printer.printWelcomeScreen();</span>
+<span class="nc" id="L576">        this.messages.add(&quot;Joined players:&quot;);</span>
+<span class="nc" id="L577">        this.messages.addAll(joinedPlayers);</span>
+<span class="nc" id="L578">        this.printer.printListReverse(this.messages);</span>
+<span class="nc" id="L579">        this.printer.printPrompt(&quot;&quot;);</span>
+<span class="nc" id="L580">        this.messages.clear();</span>
+<span class="nc" id="L581">    }</span>
+
+    ///////////////////
+    // MATCH METHODS //
+    ///////////////////
+    /**
+     * Asks the user which side he wants to play the initial card.
+     * 
+     * @param initialCard The initial card he drew
+     */
+    @Override
+    public void giveInitialCard(InitialCard initialCard) {
+<span class="nc" id="L593">        super.giveInitialCard(initialCard);</span>
+<span class="nc" id="L594">        this.printer.clearTerminal();</span>
+<span class="nc" id="L595">        this.printer.printInitialSideBySide(initialCard, 1);</span>
+
+<span class="nc" id="L597">        this.inputHandler.setPrompt(&quot;Choose initial card side (defaults to front)&quot;);</span>
+<span class="nc" id="L598">        String userIn = this.inputHandler.askUser();</span>
+        Side side;
+<span class="nc bnc" id="L600" title="All 2 branches missed.">        switch (userIn) {</span>
+            case &quot;b&quot;, &quot;back&quot;:
+<span class="nc" id="L602">                side = Side.BACK;</span>
+<span class="nc" id="L603">                break;</span>
+            default:
+<span class="nc" id="L605">                side = Side.FRONT;</span>
+                break;
+        }
+
+<span class="nc" id="L609">        super.chooseInitialCardSide(side);</span>
+<span class="nc bnc" id="L610" title="All 2 branches missed.">        if (!this.getServerResponse()) {</span>
+<span class="nc" id="L611">            this.giveInitialCard(initialCard);</span>
+        } else {
+<span class="nc" id="L613">            this.printer.clearTerminal();</span>
+<span class="nc" id="L614">            this.validPositions</span>
+<span class="nc" id="L615">                    .addCard(new ShownCard(initialCard, side, new Pair&lt;Integer, Integer&gt;(0, 0)));</span>
+        }
+<span class="nc" id="L617">    }</span>
+
+
+    /**
+     * Asks the user which secret objective he wants to keep between the random two given to him.
+     * 
+     * @param secretObjectives the pair of objectives the player has to choose from
+     */
+    @Override
+    public void giveSecretObjectives(Pair&lt;Objective, Objective&gt; secretObjectives) {
+<span class="nc" id="L627">        super.giveSecretObjectives(secretObjectives);</span>
+<span class="nc" id="L628">        this.printer.clearTerminal();</span>
+<span class="nc" id="L629">        this.printer.printObjectivePair(&quot;Your choices:&quot;, secretObjectives, 1);</span>
+
+<span class="nc" id="L631">        this.inputHandler.setPrompt(&quot;Choose secret objective (defaults to first):&quot;);</span>
+<span class="nc" id="L632">        String userIn = this.inputHandler.askUser();</span>
+        Objective objective;
+<span class="nc bnc" id="L634" title="All 2 branches missed.">        switch (userIn) {</span>
+            case &quot;2&quot;, &quot;second&quot;:
+<span class="nc" id="L636">                objective = secretObjectives.second();</span>
+<span class="nc" id="L637">                break;</span>
+            default:
+<span class="nc" id="L639">                objective = secretObjectives.first();</span>
+                break;
+        }
+
+<span class="nc" id="L643">        super.chooseSecretObjective(objective);</span>
+<span class="nc bnc" id="L644" title="All 2 branches missed.">        if (!this.getServerResponse()) {</span>
+<span class="nc" id="L645">            this.giveSecretObjectives(secretObjectives);</span>
+        }
+<span class="nc" id="L647">    }</span>
+
+
+    /**
+     * Adds to the list of player with objectives the last player who chose his secret objective.
+     * This is used to determine whether the player currently playing has already chosen secret
+     * objective (and so should play a regular turn) or not.
+     * 
+     * @param someoneUsername the username of the last player who chose secret objective
+     */
+    @Override
+    public void someoneChoseSecretObjective(String someoneUsername) {
+<span class="nc" id="L659">        super.someoneChoseSecretObjective(someoneUsername);</span>
+<span class="nc" id="L660">        this.playersWithObjective.add(someoneUsername);</span>
+<span class="nc" id="L661">    }</span>
+
+
+    /**
+     * Notifies all players (but the current one) that someone is playing their turn.
+     */
+    @Override
+    public void changePlayer() {
+<span class="nc" id="L669">        this.printer.clearTerminal();</span>
+<span class="nc" id="L670">        ClientBoard board = this.clientBoards.get(this.currentPlayer);</span>
+
+<span class="nc" id="L672">        new Thread(() -&gt; {</span>
+<span class="nc bnc" id="L673" title="All 2 branches missed.">            if (board.getPlaced().isEmpty()) { // choosing initial side</span>
+<span class="nc" id="L674">                this.printer.printCenteredMessage(this.currentPlayer + &quot; is choosing initial side!&quot;,</span>
+                        0);
+<span class="nc" id="L676">                this.printer.printPrompt(&quot;&quot;);</span>
+<span class="nc bnc" id="L677" title="All 2 branches missed.">            } else if (!this.playersWithObjective.contains(this.currentPlayer)) { // choosing</span>
+                                                                                  // objective
+<span class="nc" id="L679">                this.printer.printCenteredMessage(</span>
+                        this.currentPlayer + &quot; is choosing secret objective!&quot;, 0);
+<span class="nc" id="L681">                this.printer.printPrompt(&quot;&quot;);</span>
+            } else {
+<span class="nc" id="L683">                this.enablePlayerControls();</span>
+            }
+<span class="nc" id="L685">        }).start();</span>
+<span class="nc" id="L686">    }</span>
+
+
+    /**
+     * Ask a player to choose a card to play, the side on which the card should be played, and the
+     * coordinates in which the card should be played; finally trying to actually play the card.
+     */
+    @Override
+    public void makeMove() {
+<span class="nc" id="L695">        this.playerControls.disable();</span>
+<span class="nc" id="L696">        this.printer.clearTerminal();</span>
+
+<span class="nc bnc" id="L698" title="All 2 branches missed.">        if (this.lastRequest.getStatus().equals(RequestStatus.FAILED)) {</span>
+<span class="nc" id="L699">            this.messages.add(lastError + &quot; Try again.&quot;);</span>
+        }
+<span class="nc bnc" id="L701" title="All 2 branches missed.">        if (this.lastTurn) {</span>
+<span class="nc" id="L702">            this.messages.add(&quot;This is the last turn! Play carefully&quot;);</span>
+        }
+<span class="nc bnc" id="L704" title="All 2 branches missed.">        if (!this.messages.isEmpty()) {</span>
+<span class="nc" id="L705">            this.printer.printMessages(messages);</span>
+        }
+
+<span class="nc" id="L708">        ClientBoard board = this.clientBoards.get(this.username);</span>
+<span class="nc" id="L709">        PlayableCard card = this.chooseCardFromHand(board);</span>
+<span class="nc" id="L710">        Side side = this.chooseCardSide(card);</span>
+<span class="nc" id="L711">        Pair&lt;Integer, Integer&gt; coords = this.chooseCoords(board);</span>
+<span class="nc" id="L712">        ShownCard shownCard = new ShownCard(card, side, coords);</span>
+
+<span class="nc" id="L714">        this.printer.clearTerminal();</span>
+<span class="nc" id="L715">        this.printer.printPlayerBoard(this.username, board);</span>
+<span class="nc" id="L716">        this.printer.printCard(shownCard);</span>
+
+<span class="nc" id="L718">        this.inputHandler.setPrompt(&quot;Are you sure? (n to cancel)&quot;);</span>
+<span class="nc" id="L719">        String userIn = this.inputHandler.askUser();</span>
+<span class="nc bnc" id="L720" title="All 2 branches missed.">        if (userIn.equals(&quot;n&quot;)) {</span>
+<span class="nc" id="L721">            this.makeMove();</span>
+<span class="nc" id="L722">            return;</span>
+        }
+
+<span class="nc" id="L725">        super.playCard(coords, card, side);</span>
+<span class="nc bnc" id="L726" title="All 2 branches missed.">        if (!this.getServerResponse()) {</span>
+<span class="nc" id="L727">            this.printer.clearTerminal();</span>
+<span class="nc" id="L728">            this.printer.clearTerminal();</span>
+<span class="nc" id="L729">            this.makeMove();</span>
+<span class="nc" id="L730">            return;</span>
+        } else {
+<span class="nc" id="L732">            this.messages.clear();</span>
+<span class="nc" id="L733">            this.validPositions.addCard(shownCard);</span>
+        }
+<span class="nc" id="L735">    }</span>
+
+
+    /**
+     * Asks the player from where he wants to draw.
+     * 
+     * @param availableResources All the possible draw sources
+     */
+    private void makeUserDraw(Map&lt;Symbol, Integer&gt; availableResources) {
+<span class="nc" id="L744">        this.printer.clearTerminal();</span>
+<span class="nc" id="L745">        DrawSource source = null;</span>
+<span class="nc" id="L746">        this.printer.printAvailableResources(availableResources, 0);</span>
+        String userIn;
+<span class="nc" id="L748">        this.inputHandler.setPrompt(&quot;Choose a draw source: &quot;);</span>
+<span class="nc bnc" id="L749" title="All 2 branches missed.">        while (source == null) {</span>
+<span class="nc" id="L750">            this.printer.printDrawingScreen(decksTopReign, visiblePlayableCards);</span>
+
+<span class="nc" id="L752">            this.inputHandler.setPrompt(&quot;Choose draw source:&quot;);</span>
+<span class="nc" id="L753">            userIn = this.inputHandler.askUser();</span>
+<span class="nc bnc" id="L754" title="All 7 branches missed.">            switch (userIn) {</span>
+                case &quot;G&quot;, &quot;g&quot;:
+<span class="nc" id="L756">                    source = DrawSource.GOLDS_DECK;</span>
+<span class="nc" id="L757">                    break;</span>
+                case &quot;R&quot;, &quot;r&quot;:
+<span class="nc" id="L759">                    source = DrawSource.RESOURCES_DECK;</span>
+<span class="nc" id="L760">                    break;</span>
+                case &quot;1&quot;:
+<span class="nc" id="L762">                    source = DrawSource.FIRST_VISIBLE;</span>
+<span class="nc" id="L763">                    break;</span>
+                case &quot;2&quot;:
+<span class="nc" id="L765">                    source = DrawSource.SECOND_VISIBLE;</span>
+<span class="nc" id="L766">                    break;</span>
+                case &quot;3&quot;:
+<span class="nc" id="L768">                    source = DrawSource.THIRD_VISIBLE;</span>
+<span class="nc" id="L769">                    break;</span>
+                case &quot;4&quot;:
+<span class="nc" id="L771">                    source = DrawSource.FOURTH_VISIBLE;</span>
+<span class="nc" id="L772">                    break;</span>
+                default:
+<span class="nc" id="L774">                    this.inputHandler.setPrompt(&quot;Not a valid source! Try again.&quot;);</span>
+                    break;
+<span class="nc" id="L776">            }</span>
+        }
+<span class="nc" id="L778">        super.drawCard(source);</span>
+<span class="nc bnc" id="L779" title="All 2 branches missed.">        if (!getServerResponse()) {</span>
+<span class="nc" id="L780">            this.makeUserDraw(availableResources);</span>
+<span class="nc" id="L781">            return;</span>
+        }
+<span class="nc" id="L783">    }</span>
+
+
+    /**
+     * Notifies all players that someone played a card, and updates the relative player's board.
+     * 
+     * @param someoneUsername The player that played the card
+     * @param coords The chosen coordinates
+     * @param card The chosen played card
+     * @param side The chosen side
+     * @param points The points of that player
+     * @param availableResources The resources of that player
+     */
+    @Override
+    public void someonePlayedCard(String someoneUsername, Pair&lt;Integer, Integer&gt; coords,
+            PlayableCard card, Side side, int points, Map&lt;Symbol, Integer&gt; availableResources) {
+<span class="nc" id="L799">        super.someonePlayedCard(someoneUsername, coords, card, side, points, availableResources);</span>
+
+<span class="nc bnc" id="L801" title="All 2 branches missed.">        if (this.username.equals(someoneUsername)) {</span>
+<span class="nc" id="L802">            this.makeUserDraw(availableResources);</span>
+        }
+<span class="nc" id="L804">    }</span>
+
+
+    /**
+     * Notifies everyone else that a player left.
+     * 
+     * @param someoneUsername Player's username
+     */
+    @Override
+    public void someoneQuit(String someoneUsername) {
+<span class="nc" id="L814">        this.printer.printCenteredMessage(someoneUsername + &quot; quit!&quot;, 0);</span>
+<span class="nc" id="L815">    }</span>
+
+
+    /**
+     * Shows whether the current player won or lost.
+     * 
+     * @param ranking Match ranking
+     */
+    @Override
+    public void matchFinished(List&lt;LeaderboardEntry&gt; ranking) {
+<span class="nc" id="L825">        this.printer.clearTerminal();</span>
+<span class="nc" id="L826">        this.ongoing = false;</span>
+<span class="nc" id="L827">        this.printer.printEndScreen(ranking, this.username);</span>
+<span class="nc" id="L828">    }</span>
+
+
+    /**
+     * Sets the last error message to what the server responded.
+     * 
+     * @param exception The thrown exception
+     */
+    @Override
+    public void notifyError(Exception exception) {
+<span class="nc" id="L838">        super.notifyError(exception);</span>
+<span class="nc" id="L839">        this.lastError = exception.getMessage();</span>
+<span class="nc bnc" id="L840" title="All 2 branches missed.">        if (this.lastError == null) {</span>
+<span class="nc" id="L841">            this.lastError = exception.getClass().getName();</span>
+        }
+<span class="nc" id="L843">    }</span>
+
+
+    /**
+     * Notifies that the match has started.
+     */
+    @Override
+<span class="nc" id="L850">    protected void notifyMatchStarted() {}</span>
+
+
+    /**
+     * Notifies that the player correctly rejoined a match, and makes him play his turn.
+     * 
+     * @param drawPhase whether the player should draw or play
+     */
+    @Override
+    protected void notifyMatchResumed(boolean drawPhase) {
+<span class="nc" id="L860">        new Thread(() -&gt; {</span>
+
+<span class="nc" id="L862">            this.clientBoards.get(this.username).getPlaced()</span>
+<span class="nc" id="L863">                    .forEach((turn, shownCard) -&gt; this.validPositions.addCard(</span>
+<span class="nc" id="L864">                            new ShownCard(shownCard.card(), shownCard.side(), shownCard.coords())));</span>
+
+            // we resume match only if the game was in progress, so all players chose secret
+            // objectives
+<span class="nc" id="L868">            this.players.forEach(this.playersWithObjective::add);</span>
+
+<span class="nc" id="L870">            this.printer.clearTerminal();</span>
+<span class="nc bnc" id="L871" title="All 2 branches missed.">            if (this.username.equals(this.currentPlayer)) {</span>
+<span class="nc bnc" id="L872" title="All 2 branches missed.">                if (drawPhase) {</span>
+<span class="nc" id="L873">                    this.makeUserDraw(this.clientBoards.get(this.username).getAvailableResources());</span>
+                    // new Thread(() -&gt;
+                    // this.makeUserDraw(this.clientBoards.get(this.username).getAvailableResources())).start();;
+                } else {
+                    // new Thread(this::makeMove).start();
+<span class="nc" id="L878">                    this.makeMove();</span>
+                }
+            } else {
+<span class="nc" id="L881">                this.enablePlayerControls();</span>
+            }
+
+<span class="nc" id="L884">        }).start();</span>
+<span class="nc" id="L885">    }</span>
+
+
+    /**
+     * Adds to the chat a broadcast text.
+     * 
+     * @param someoneUsername The player who sent the broadcast
+     * @param text The sent text
+     */
+    @Override
+    public void someoneSentPrivateText(String someoneUsername, String text) {
+<span class="nc" id="L896">        super.someoneSentPrivateText(someoneUsername, text);</span>
+
+<span class="nc bnc" id="L898" title="All 2 branches missed.">        if (!this.username.equals(someoneUsername)) {</span>
+<span class="nc" id="L899">            this.chat.add(&quot;(&quot; + someoneUsername + &quot;): &quot; + text);</span>
+<span class="nc" id="L900">            this.messages.add(someoneUsername + &quot; sent a private text!&quot;);</span>
+<span class="nc" id="L901">            this.printer.printMessages(this.messages);</span>
+<span class="nc" id="L902">            this.inputHandler.showPrompt();</span>
+        }
+<span class="nc" id="L904">    }</span>
+
+
+    /**
+     * Adds to the chat a private text.
+     * 
+     * @param someoneUsername The player who sent the private text
+     * @param text The sent text
+     */
+    @Override
+    public void someoneSentBroadcastText(String someoneUsername, String text) {
+<span class="nc" id="L915">        super.someoneSentBroadcastText(someoneUsername, text);</span>
+
+<span class="nc bnc" id="L917" title="All 2 branches missed.">        if (!this.username.equals(someoneUsername)) {</span>
+<span class="nc" id="L918">            this.chat.add(&quot;[&quot; + someoneUsername + &quot;]: &quot; + text);</span>
+<span class="nc" id="L919">            this.messages.add(someoneUsername + &quot; sent a text!&quot;);</span>
+<span class="nc" id="L920">            this.printer.printMessages(this.messages);</span>
+<span class="nc" id="L921">            this.inputHandler.showPrompt();</span>
+        }
+<span class="nc" id="L923">    }</span>
+
+    /**
+     * Notifies that there has been a connection error. We only care about server crashes, but it
+     * could be anything
+     */
+    @Override
+    public void notifyConnectionLost() {
+<span class="nc" id="L931">        this.printer.clearTerminal();</span>
+<span class="nc" id="L932">        this.printer.printCenteredMessage(&quot;Connection Lost!&quot;, 0);</span>
+<span class="nc" id="L933">        System.exit(1);</span>
+<span class="nc" id="L934">    }</span>
+
+
+    /**
+     * Launch the TUI client
+     * @param args command line arguments
+     */
+    public static void main(String[] args) {
+<span class="nc" id="L942">        GraphicalViewTUI tui = new GraphicalViewTUI();</span>
+<span class="nc" id="L943">        tui.startInterface();</span>
+<span class="nc bnc" id="L944" title="All 2 branches missed.">        while (tui.ongoing) {</span>
+        }
+<span class="nc" id="L946">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

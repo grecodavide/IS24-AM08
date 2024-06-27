@@ -1,0 +1,16 @@
+it.polimi.ingsw.client.frontend
+it.polimi.ingsw.client.frontend.gui
+it.polimi.ingsw.client.frontend.gui.controllers
+it.polimi.ingsw.client.frontend.gui.nodes
+it.polimi.ingsw.client.frontend.tui
+it.polimi.ingsw.client.network
+it.polimi.ingsw.controllers
+it.polimi.ingsw.exceptions
+it.polimi.ingsw.gamemodel
+it.polimi.ingsw.network.messages
+it.polimi.ingsw.network.messages.actions
+it.polimi.ingsw.network.messages.errors
+it.polimi.ingsw.network.messages.responses
+it.polimi.ingsw.network.tcp
+it.polimi.ingsw.server
+it.polimi.ingsw.utils

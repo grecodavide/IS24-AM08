@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ActionMessage.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.network.messages.actions</a> &gt; <span class="el_source">ActionMessage.java</span></div><h1>ActionMessage.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.network.messages.actions;
+
+import it.polimi.ingsw.network.messages.Message;
+
+/**
+ * Messages sent by clients to the server to express a user intention to do an
+ * action
+ */
+public sealed abstract class ActionMessage extends Message permits ChooseInitialCardSideMessage, ChooseSecretObjectiveMessage,
+        CreateMatchMessage, DrawCardMessage, DrawInitialCardMessage, DrawSecretObjectivesMessage, GetAvailableMatchesMessage,
+        JoinMatchMessage, PlayCardMessage, SendBroadcastTextMessage, SendPrivateTextMessage {
+    private String action;
+    private String username;
+
+    
+    /**
+     * Class constructor.
+     * 
+     * @param username The player who wants to perform the action
+     */
+    public ActionMessage(String username) {
+<span class="fc" id="L22">        super();</span>
+<span class="fc" id="L23">        this.action = this.getClass().getSimpleName().replace(&quot;Message&quot;, &quot;&quot;);</span>
+<span class="fc" id="L24">        this.username = username;</span>
+<span class="fc" id="L25">    }</span>
+
+    /**
+     * @return name of the action
+     */
+    public String getAction() {
+<span class="nc" id="L31">        return action;</span>
+    }
+
+    /**
+     * @return username of the player
+     */
+    public String getUsername() {
+<span class="fc" id="L38">        return username;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

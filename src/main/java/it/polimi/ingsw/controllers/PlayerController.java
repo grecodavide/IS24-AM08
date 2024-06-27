@@ -2,10 +2,14 @@ package it.polimi.ingsw.controllers;
 
 import it.polimi.ingsw.exceptions.AlreadyUsedUsernameException;
 import it.polimi.ingsw.exceptions.ChosenMatchException;
+import it.polimi.ingsw.exceptions.WrongNameException;
 import it.polimi.ingsw.exceptions.WrongStateException;
 import it.polimi.ingsw.gamemodel.Match;
 import it.polimi.ingsw.gamemodel.MatchObserver;
 import it.polimi.ingsw.gamemodel.Player;
+import it.polimi.ingsw.utils.GuiUtil;
+
+import java.util.Optional;
 
 /**
  * Controller for a match player, the only agent needing a view and so a controller in this
@@ -19,7 +23,7 @@ import it.polimi.ingsw.gamemodel.Player;
  */
 public abstract sealed class PlayerController implements MatchObserver permits PlayerControllerRMI, PlayerControllerTCP {
     protected Player player;
-    protected Match match;
+    protected final Match match;
 
     /**
      * Instantiates the internal Player with the given username and sets the internal Match reference to
@@ -45,22 +49,52 @@ public abstract sealed class PlayerController implements MatchObserver permits P
 
     /**
      * Tries to effectively join a match, adding himself to the list of observers and the corresponding
-     * player to the match, if the username is valid
+     * player to the match, if the username is valid.
      *
-     * @throws AlreadyUsedUsernameException if the username is already taken
-     * @throws WrongStateException          if the match currently does not accept new players
+     * @throws AlreadyUsedUsernameException If the username is already taken
+     * @throws WrongStateException          If the match currently does not accept new players
+     * @throws ChosenMatchException         If the chosen match is not valid
+     * @throws WrongNameException           If the chosen username is not acceptable due to alphabetical restrictions
+     * @throws IllegalArgumentException     If the player is already in the match or too many players would be in the match
      */
-    public void sendJoined() throws IllegalArgumentException, AlreadyUsedUsernameException, WrongStateException, ChosenMatchException {
+    public void sendJoined() throws IllegalArgumentException, AlreadyUsedUsernameException, WrongStateException, ChosenMatchException, WrongNameException {
+        if (!GuiUtil.isValidName(this.player.getUsername())) {
+            throw new WrongNameException("The match name must be alphanumeric with maximum 32 characters");
+        }
         if (match == null) {
             throw new ChosenMatchException("The specified match does not exist");
         }
 
         try {
-            match.subscribeObserver(this);
-            this.match.addPlayer(this.player);
+            synchronized (match) {
+                if (!match.isRejoinable()) {
+                    match.subscribeObserver(this);
+                    match.addPlayer(this.player);
+                } else {
+                    // Rejoin a match
+                    // Get the player with the same username and not already connected
+                    Optional<Player> playerOptional = match.getPlayers().stream()
+                            .filter((p) -> p.getUsername().equals(player.getUsername()))
+                            .filter((p) -> !p.isConnected())
+                            .findFirst();
+                    if (playerOptional.isPresent()) {
+                        player = playerOptional.get();
+                        player.setConnected(true);
+                        match.subscribeObserver(this);
+                        this.matchResumed();
+                    } else {
+                        throw new WrongStateException("There is no disconnected player with this username");
+                    }
+                }
+            }
         } catch (AlreadyUsedUsernameException | IllegalArgumentException e) {
             match.unsubscribeObserver(this);
             throw e;
         }
     }
+
+    /**
+     * Notifies the view that match has resumed after a server crash.
+     */
+    public abstract void matchResumed();
 }

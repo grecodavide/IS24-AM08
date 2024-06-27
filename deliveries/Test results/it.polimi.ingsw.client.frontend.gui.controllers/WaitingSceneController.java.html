@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>WaitingSceneController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.client.frontend.gui.controllers</a> &gt; <span class="el_source">WaitingSceneController.java</span></div><h1>WaitingSceneController.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.client.frontend.gui.controllers;
+
+import it.polimi.ingsw.client.frontend.gui.GraphicalApplication;
+import it.polimi.ingsw.utils.GuiUtil;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.Label;
+import javafx.scene.layout.VBox;
+
+import java.io.IOException;
+import java.util.HashMap;
+
+/**
+ * JavaFX controller for the waiting scene. It shows all the current players
+ * waiting for the match to start
+ */
+<span class="nc" id="L17">public class WaitingSceneController extends SceneController {</span>
+
+    public Label matchName;
+    public VBox playersContainer;
+    private String name;
+<span class="nc" id="L22">    private int maxPlayers = 0;</span>
+<span class="nc" id="L23">    private int players = 0;</span>
+<span class="nc" id="L24">    private HashMap&lt;String, Label&gt; labels = new HashMap&lt;&gt;();</span>
+
+    @Override
+    public void initialize() throws IOException {
+
+<span class="nc" id="L29">    }</span>
+
+    /**
+     * Add a player to the list
+     * @param username username of the player to add
+     */
+    public void addPlayer(String username) {
+<span class="nc" id="L36">        Label playerLabel = new Label();</span>
+<span class="nc" id="L37">        playerLabel.setAlignment(Pos.CENTER);</span>
+<span class="nc" id="L38">        playerLabel.setText(username);</span>
+<span class="nc" id="L39">        playerLabel.getStyleClass().add(&quot;form-label&quot;);</span>
+<span class="nc" id="L40">        playersContainer.getChildren().add(playerLabel);</span>
+<span class="nc" id="L41">        labels.put(username, playerLabel);</span>
+<span class="nc" id="L42">    }</span>
+
+    /**
+     * Set the name of the match to display
+     * @param name name of the match
+     */
+    public void setMatchName(String name) {
+<span class="nc" id="L49">        this.name = name;</span>
+<span class="nc" id="L50">        updateLabel();</span>
+<span class="nc" id="L51">    }</span>
+
+    /**
+     * Set the maximum amount of players in the current match
+     * @param players maximum number of players
+     */
+    public void setMaxPlayers(int players) {
+<span class="nc" id="L58">        maxPlayers = players;</span>
+<span class="nc" id="L59">        updateLabel();</span>
+
+<span class="nc" id="L61">    }</span>
+
+    /**
+     * Set the current amount of players in the current match
+     * @param players current number of players
+     */
+    public void setCurrentPlayers(int players) {
+<span class="nc" id="L68">        this.players = players;</span>
+<span class="nc" id="L69">        updateLabel();</span>
+<span class="nc" id="L70">    }</span>
+
+    /**
+     * Get the amount of current players
+     * @return the amount of current players in the match
+     */
+    public int getCurrentPlayers() {
+<span class="nc" id="L77">        return players;</span>
+    }
+
+    /**
+     * Update the players count, match name and max players
+     */
+    public void updateLabel() {
+<span class="nc" id="L84">        matchName.setText(name + &quot; &quot; + players + &quot;/&quot; + maxPlayers);</span>
+<span class="nc" id="L85">    }</span>
+
+    /**
+     * Remove a player from the list
+     * @param username username of the player to remove
+     */
+    public void removePlayer(String username) {
+<span class="nc bnc" id="L92" title="All 2 branches missed.">        if (this.labels.containsKey(username)) {</span>
+<span class="nc" id="L93">            playersContainer.getChildren().remove(labels.get(username));</span>
+        }
+<span class="nc" id="L95">    }</span>
+
+    /**
+     * Show the match scene when the match is started
+     * @return the match scene controller
+     * @throws IOException if there was a file error
+     */
+    public MatchSceneController showMatch() throws IOException {
+<span class="nc" id="L103">        VBox root = loadScene(&quot;/fxml/match.fxml&quot;);</span>
+<span class="nc" id="L104">        GuiUtil.applyCSS(root, &quot;/css/match.css&quot;);</span>
+<span class="nc" id="L105">        Scene matchScene = new Scene(root, GraphicalApplication.screenWidth, GraphicalApplication.screenHeight);</span>
+<span class="nc" id="L106">        stage.setScene(matchScene);</span>
+<span class="nc" id="L107">        return (MatchSceneController) root.getProperties().get(&quot;Controller&quot;);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

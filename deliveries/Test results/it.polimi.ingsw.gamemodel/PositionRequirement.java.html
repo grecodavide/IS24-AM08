@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PositionRequirement.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.gamemodel</a> &gt; <span class="el_source">PositionRequirement.java</span></div><h1>PositionRequirement.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.gamemodel;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
+import it.polimi.ingsw.exceptions.InvalidResourceException;
+import it.polimi.ingsw.utils.Pair;
+
+/**
+ * This class handles requirements involving relative positioning of cards, e.g. three red cards placed in the top right corner of each other
+ */
+public class PositionRequirement extends Requirement implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    private Map&lt;Pair&lt;Integer, Integer&gt;, Symbol&gt; reqs;
+
+    /**
+     * Note that, since this requirement only cares about relative positioning, there must always be
+     * an element whose key is (0, 0)
+     *
+     * @param reqs The relative positioning of the cards (of which we only care about the faction).
+     */
+<span class="fc" id="L27">    public PositionRequirement(Map&lt;Pair&lt;Integer, Integer&gt;, Symbol&gt; reqs) throws InvalidResourceException {</span>
+<span class="fc" id="L28">        EnumSet&lt;Symbol&gt; validResources = Symbol.getReigns();</span>
+<span class="fc bfc" id="L29" title="All 2 branches covered.">        for (Symbol s : reqs.values()) {</span>
+<span class="pc bpc" id="L30" title="1 of 2 branches missed.">            if (!validResources.contains(s)) {</span>
+<span class="nc" id="L31">                throw new InvalidResourceException(&quot;Resource &quot; + s.toString() + &quot; is not valid for a &quot; + this.getClass().toString());</span>
+            }
+<span class="fc" id="L33">        }</span>
+
+<span class="fc" id="L35">        this.reqs = reqs;</span>
+<span class="fc" id="L36">    }</span>
+
+    /**
+     * The requirement will be satisfied if the board has cards of the specified faction in the correct relative positions
+     *
+     * @param board the {@link Board} on which the requirement must be checked
+     * @return whether the board actually meets the requirement or not
+     */
+    @Override
+    public int timesMet(Board board) {
+<span class="fc" id="L46">        Map&lt;Pair&lt;Integer, Integer&gt;, PlacedCard&gt; placedCards = board.getPlacedCards();</span>
+<span class="fc" id="L47">        List&lt;Pair&lt;Integer, Integer&gt;&gt; alreadyUsed = new ArrayList&lt;&gt;();</span>
+
+        PlacedCard cmpPlaced;
+        Card cmp;
+
+        boolean requirementMatched;
+<span class="fc" id="L53">        int timesMet = 0;</span>
+
+        Pair&lt;Integer, Integer&gt; tmp;
+
+<span class="fc bfc" id="L57" title="All 2 branches covered.">        for (Pair&lt;Integer, Integer&gt; coord : placedCards.keySet()) {</span>
+<span class="fc" id="L58">            requirementMatched = true;</span>
+            // for each card in the board
+<span class="fc bfc" id="L60" title="All 2 branches covered.">            for (Pair&lt;Integer, Integer&gt; offset : this.reqs.keySet()) {</span>
+<span class="fc" id="L61">                tmp = new Pair&lt;&gt;(coord.first() + offset.first(), coord.second() + offset.second());</span>
+<span class="fc" id="L62">                cmpPlaced = placedCards.get(tmp);</span>
+<span class="fc bfc" id="L63" title="All 2 branches covered.">                if (cmpPlaced != null) { // card in required position does not exist so go next</span>
+<span class="fc" id="L64">                    cmp = cmpPlaced.getCard();</span>
+                    // if the card is not a playable it is the initial (so go next), and if the reign is not matched go next
+<span class="fc bfc" id="L66" title="All 6 branches covered.">                    if ((!(cmp instanceof PlayableCard)) || ((PlayableCard) cmp).getReign() != this.reqs.get(offset) || alreadyUsed.indexOf(tmp) != -1) {</span>
+<span class="fc" id="L67">                        requirementMatched = false;</span>
+                    }
+                } else {
+<span class="fc" id="L70">                    requirementMatched = false;</span>
+                }
+<span class="fc" id="L72">            }</span>
+<span class="fc bfc" id="L73" title="All 2 branches covered.">            if (requirementMatched) {</span>
+<span class="fc bfc" id="L74" title="All 2 branches covered.">                for (Pair&lt;Integer, Integer&gt; offset : reqs.keySet()) {</span>
+<span class="fc" id="L75">                    alreadyUsed.add(new Pair&lt;&gt;(coord.first() + offset.first(), coord.second() + offset.second()));</span>
+<span class="fc" id="L76">                }</span>
+<span class="fc" id="L77">                timesMet++;</span>
+            }
+<span class="fc" id="L79">        }</span>
+<span class="fc" id="L80">        return timesMet;</span>
+    }
+
+    /**
+     * Getter for the PositionRequirement class
+     * @return the positioning requirement for the objective card to be activated
+     *
+     */
+    public Map&lt;Pair&lt;Integer, Integer&gt;, Symbol&gt; getReqs(){
+<span class="nc" id="L89">        return this.reqs;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

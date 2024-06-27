@@ -14,10 +14,18 @@ public class ErrorMessage extends Message {
         this.error = error;
     }
 
+    /**
+     * Getter for the error code of the message
+     * @return error code of the message
+     */
     public String getError() {
         return error;
     }
 
+    /**
+     * Getter for the message in human language
+     * @return the mesage
+     */
     public String getMessage() {
         return message;
     }

@@ -2,6 +2,7 @@ package it.polimi.ingsw.client.frontend.gui.controllers;
 
 import it.polimi.ingsw.client.frontend.gui.GraphicalApplication;
 import it.polimi.ingsw.exceptions.WrongInputFormatException;
+import it.polimi.ingsw.gamemodel.Color;
 import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.GuiUtil;
 import javafx.fxml.FXML;
@@ -9,6 +10,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import javafx.scene.shape.Circle;
 
 import java.io.IOException;
 import java.util.List;
@@ -65,6 +67,11 @@ public class LobbySceneController extends SceneController {
         matchNumberContainer.getChildren().forEach((button) -> {((RadioButton) button).setToggleGroup(matchNumberToggle);});
     }
 
+    /**
+     * Show the wait scene
+     * @return the wait scene controller
+     * @throws IOException in case of file error
+     */
     public WaitingSceneController showWaitScene() throws IOException {
         StackPane root = loadScene("/fxml/waiting.fxml");
         GuiUtil.applyCSS(root, "/css/match.css");
@@ -92,7 +99,7 @@ public class LobbySceneController extends SceneController {
             matchContainer.getChildren().add(emptyLabel);
         }
         for (AvailableMatch m : matchList) {
-            addMatchCard(m.name(), m.currentPlayers(), m.maxPlayers());
+            addMatchCard(m.name(), m.currentPlayers(), m.maxPlayers(), m.isRejoinable());
         }
     }
 
@@ -101,15 +108,26 @@ public class LobbySceneController extends SceneController {
      * @param name name of the match
      * @param players current amount of players
      * @param maxPlayers maximum number of players allowed in the match
+     * @param isRejoinable if the match is rejoinable
      */
-    public void addMatchCard(String name, int players, int maxPlayers) {
+    public void addMatchCard(String name, int players, int maxPlayers, boolean isRejoinable) {
+        Color c;
+        if (isRejoinable) {
+            c = Color.YELLOW;
+        } else if (maxPlayers == players) {
+            c = Color.RED;
+        } else {
+            c = Color.GREEN;
+        }
+
+
         HBox matchCard = new HBox();
         matchCard.getStyleClass().add("lobby-card");
         matchCard.getStyleClass().add("lobby-card-" + matchContainer.getChildren().size()%2);
         matchCard.setAlignment(Pos.CENTER);
 
         RadioButton button = new RadioButton();
-        button.setDisable(players == maxPlayers);
+        button.setDisable(players == maxPlayers && !isRejoinable);
         button.setAlignment(Pos.CENTER);
         button.getStyleClass().add("radio");
         button.getStyleClass().add("lobby-radio");
@@ -127,10 +145,20 @@ public class LobbySceneController extends SceneController {
         HBox.setHgrow(spacer, Priority.ALWAYS);
         matchCard.getChildren().add(spacer);
 
+
+        // Match status indicator
+        Circle status = new Circle();
+        spacer = new Pane();
+        spacer.setPrefWidth(3);
+        status.setFill(javafx.scene.paint.Color.web(GuiUtil.getHexFromColor(c)));
+        status.setRadius(16);
+        // Players label
         Label playerLabel = new Label(players + "/" + maxPlayers);
         playerLabel.setAlignment(Pos.CENTER);
         playerLabel.getStyleClass().add("lobby-title");
         matchCard.getChildren().add(playerLabel);
+        matchCard.getChildren().add(spacer);
+        matchCard.getChildren().add(status);
 
         Pane spacer2 = new Pane();
         spacer2.setPrefWidth(5);

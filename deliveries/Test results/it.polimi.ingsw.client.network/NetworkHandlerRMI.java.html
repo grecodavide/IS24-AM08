@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NetworkHandlerRMI.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.client.network</a> &gt; <span class="el_source">NetworkHandlerRMI.java</span></div><h1>NetworkHandlerRMI.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.client.network;
+
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
+import java.util.List;
+import it.polimi.ingsw.client.frontend.GraphicalView;
+import it.polimi.ingsw.controllers.PlayerController;
+import it.polimi.ingsw.controllers.PlayerControllerRMI;
+import it.polimi.ingsw.controllers.PlayerControllerRMIInterface;
+import it.polimi.ingsw.gamemodel.DrawSource;
+import it.polimi.ingsw.gamemodel.Objective;
+import it.polimi.ingsw.gamemodel.PlayableCard;
+import it.polimi.ingsw.gamemodel.Side;
+import it.polimi.ingsw.server.Server;
+import it.polimi.ingsw.server.ServerRMIInterface;
+import it.polimi.ingsw.utils.AvailableMatch;
+import it.polimi.ingsw.utils.Pair;
+
+/**
+ * Class used by a generic client to receive from and transmit to a remote {@link Server} instance and a
+ * remote {@link PlayerControllerRMI} instance using the RMI protocol.
+ */
+public class NetworkHandlerRMI extends NetworkHandler {
+    private final ServerRMIInterface server;
+    private PlayerControllerRMIInterface controller;
+<span class="nc" id="L29">    private boolean exported = false;</span>
+
+    /**
+     * Initialize the instance all its internal attributes.
+     *
+     * @param graphicalView The GraphicalView to be subscribed to this NetworkHandler instance
+     * @param ipAddress     The server IP address
+     * @param port          The server port
+     * @throws RemoteException If the remote server is considered not reachable any more and cannot return as usual
+     */
+    public NetworkHandlerRMI(GraphicalView graphicalView, String ipAddress, int port) throws RemoteException {
+<span class="nc" id="L40">        super(graphicalView, ipAddress, port);</span>
+
+        // Try to get a remote Server instance from the network
+<span class="nc" id="L43">        Registry registry = LocateRegistry.getRegistry(ipAddress, port);</span>
+        try {
+<span class="nc" id="L45">            this.server = (ServerRMIInterface) registry.lookup(&quot;CodexNaturalisRMIServer&quot;);</span>
+<span class="nc" id="L46">            connected = true;</span>
+<span class="nc" id="L47">            this.startConnectionCheck();</span>
+<span class="nc" id="L48">        } catch (NotBoundException e) {</span>
+            // If the registry exists but the lookup string isn't found, exit the application since it's
+            // a programmatic error (it regards the code, not the app life cycle)
+<span class="nc" id="L51">            throw new RuntimeException(e);</span>
+<span class="nc" id="L52">        }</span>
+<span class="nc" id="L53">    }</span>
+
+    /**
+     * Asks the server to send a list of {@link AvailableMatch}.
+     */
+    @Override
+    public void getAvailableMatches() {
+        try {
+<span class="nc" id="L61">            List&lt;AvailableMatch&gt; matches = server.getJoinableMatches();</span>
+<span class="nc" id="L62">            this.receiveAvailableMatches(matches);</span>
+<span class="nc" id="L63">        } catch (Exception e) {</span>
+<span class="nc" id="L64">            this.graphicalView.notifyError(e);</span>
+<span class="nc" id="L65">        }</span>
+<span class="nc" id="L66">    }</span>
+
+    /**
+     * Asks to join a match.
+     *
+     * @param matchName the match's name
+     */
+    @Override
+    public void joinMatch(String matchName) {
+        try {
+<span class="nc" id="L76">            controller = server.joinMatch(matchName, this.username);</span>
+
+            // Export the object only if it was not previously exported
+<span class="nc bnc" id="L79" title="All 2 branches missed.">            if (!exported) {</span>
+<span class="nc" id="L80">                UnicastRemoteObject.exportObject(this, 0);</span>
+<span class="nc" id="L81">                exported = true;</span>
+            }
+<span class="nc" id="L83">            controller.registerView(this);</span>
+<span class="nc" id="L84">        } catch (Exception e) {</span>
+<span class="nc" id="L85">            this.graphicalView.notifyError(e);</span>
+<span class="nc" id="L86">        }</span>
+<span class="nc" id="L87">    }</span>
+
+    /**
+     * Asks to create a match.
+     *
+     * @param matchName  The match name
+     * @param maxPlayers The match maximum number of players
+     */
+    @Override
+    public void createMatch(String matchName, Integer maxPlayers) {
+        try {
+<span class="nc" id="L98">            server.createMatch(matchName, maxPlayers);</span>
+<span class="nc" id="L99">            this.joinMatch(matchName);</span>
+<span class="nc" id="L100">        } catch (Exception e) {</span>
+<span class="nc" id="L101">            this.graphicalView.notifyError(e);</span>
+<span class="nc" id="L102">        }</span>
+<span class="nc" id="L103">    }</span>
+
+    /**
+     * Draws an initial card for the player.
+     */
+    @Override
+    public void drawInitialCard() {
+        try {
+<span class="nc" id="L111">            controller.drawInitialCard();</span>
+<span class="nc" id="L112">        } catch (Exception e) {</span>
+<span class="nc" id="L113">            this.graphicalView.notifyError(e);</span>
+<span class="nc" id="L114">        }</span>
+<span class="nc" id="L115">    }</span>
+
+    /**
+     * Communicates the chosen initial card side.
+     *
+     * @param side The side on which play the initial card drawn using {@link #drawInitialCard()}
+     */
+    @Override
+    public void chooseInitialCardSide(Side side) {
+        try {
+<span class="nc" id="L125">            controller.chooseInitialCardSide(side);</span>
+<span class="nc" id="L126">        } catch (Exception e) {</span>
+<span class="nc" id="L127">            this.graphicalView.notifyError(e);</span>
+<span class="nc" id="L128">        }</span>
+<span class="nc" id="L129">    }</span>
+
+    /**
+     * Draws two secret objectives.
+     */
+    @Override
+    public void drawSecretObjectives() {
+        try {
+<span class="nc" id="L137">            controller.drawSecretObjectives();</span>
+<span class="nc" id="L138">        } catch (Exception e) {</span>
+<span class="nc" id="L139">            this.graphicalView.notifyError(e);</span>
+<span class="nc" id="L140">        }</span>
+<span class="nc" id="L141">    }</span>
+
+    /**
+     * Communicates the chosen secret objective.
+     *
+     * @param objective The chosen objective
+     */
+    @Override
+    public void chooseSecretObjective(Objective objective) {
+        try {
+<span class="nc" id="L151">            controller.chooseSecretObjective(objective);</span>
+<span class="nc" id="L152">        } catch (Exception e) {</span>
+<span class="nc" id="L153">            this.graphicalView.notifyError(e);</span>
+<span class="nc" id="L154">        }</span>
+<span class="nc" id="L155">    }</span>
+
+    /**
+     * Plays a card.
+     *
+     * @param coords The coordinates on which to place the card
+     * @param card   The PlayableCard to play
+     * @param side   The side on which to play the chosen card
+     */
+    @Override
+    public void playCard(Pair&lt;Integer, Integer&gt; coords, PlayableCard card, Side side) {
+        try {
+<span class="nc" id="L167">            controller.playCard(coords, card, side);</span>
+<span class="nc" id="L168">        } catch (Exception e) {</span>
+<span class="nc" id="L169">            this.graphicalView.notifyError(e);</span>
+<span class="nc" id="L170">        }</span>
+<span class="nc" id="L171">    }</span>
+
+    /**
+     * Draws a card.
+     *
+     * @param source The drawing source to draw the card from
+     */
+    @Override
+    public void drawCard(DrawSource source) {
+        try {
+<span class="nc" id="L181">            controller.drawCard(source);</span>
+<span class="nc" id="L182">        } catch (Exception e) {</span>
+<span class="nc" id="L183">            this.graphicalView.notifyError(e);</span>
+<span class="nc" id="L184">        }</span>
+<span class="nc" id="L185">    }</span>
+
+    /**
+     * Sends a message to all the match players
+     *
+     * @param text The content of the message
+     */
+    @Override
+    public void sendBroadcastText(String text) {
+        try {
+<span class="nc" id="L195">            controller.sendBroadcastText(text);</span>
+<span class="nc" id="L196">        } catch (Exception e) {</span>
+<span class="nc" id="L197">            this.graphicalView.notifyError(e);</span>
+<span class="nc" id="L198">        }</span>
+<span class="nc" id="L199">    }</span>
+
+    /**
+     * Sends a private message to a match player
+     *
+     * @param recipient The recipient username
+     * @param text The content of the message
+     */
+    @Override
+    public void sendPrivateText(String recipient, String text) {
+        try {
+<span class="nc" id="L210">            controller.sendPrivateText(recipient, text);</span>
+<span class="nc" id="L211">        } catch (Exception e) {</span>
+<span class="nc" id="L212">            this.graphicalView.notifyError(e);</span>
+<span class="nc" id="L213">        }</span>
+<span class="nc" id="L214">    }</span>
+
+    /**
+     * Disconnects from the server.
+     */
+    @Override
+    public void disconnect() {
+<span class="nc" id="L221">        connected = false;</span>
+<span class="nc" id="L222">    }</span>
+
+    /**
+     * Checks for connectivity.
+     *
+     * @return The status of the connection, true if active, false otherwise
+     */
+    @Override
+    public boolean ping() {
+        try {
+<span class="nc" id="L232">            return server.ping();</span>
+<span class="nc" id="L233">        } catch (RemoteException e) {</span>
+<span class="nc" id="L234">            return false;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

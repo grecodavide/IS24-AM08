@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CardJsonParser.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.utils</a> &gt; <span class="el_source">CardJsonParser.java</span></div><h1>CardJsonParser.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.utils;
+
+import com.google.gson.*;
+import it.polimi.ingsw.exceptions.InvalidResourceException;
+import it.polimi.ingsw.gamemodel.PositionRequirement;
+import it.polimi.ingsw.gamemodel.QuantityRequirement;
+import it.polimi.ingsw.gamemodel.Requirement;
+import it.polimi.ingsw.gamemodel.Symbol;
+
+import java.lang.reflect.Type;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Parser of Cards, implements a custom parser for Requirement
+ */
+<span class="fc" id="L18">public class CardJsonParser {</span>
+<span class="fc" id="L19">    Gson cardBuilder = new GsonBuilder().registerTypeAdapter(Requirement.class, (new CardTypeAdapter())).setPrettyPrinting().create();</span>
+
+    /**
+     * Returns a Gson builder with pretty print and custom Requirement deserializer
+     *
+     * @return
+     */
+    public Gson getCardBuilder() {
+<span class="fc" id="L27">        return cardBuilder;</span>
+    }
+
+<span class="fc" id="L30">    private class CardTypeAdapter implements JsonDeserializer&lt;Requirement&gt; {</span>
+        @Override
+        public Requirement deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+<span class="fc" id="L33">            JsonObject requirementObject = json.getAsJsonObject();</span>
+<span class="fc" id="L34">            EnumSet&lt;Symbol&gt; symbols = Symbol.getBasicResources();</span>
+            // Check the reqs property
+<span class="pc bpc" id="L36" title="1 of 2 branches missed.">            if (requirementObject.has(&quot;reqs&quot;)) {</span>
+<span class="fc" id="L37">                JsonObject reqObject = requirementObject.get(&quot;reqs&quot;).getAsJsonObject();</span>
+                // If reqs has pairs inside, then it's a PositionRequirement
+<span class="fc bfc" id="L39" title="All 2 branches covered.">                if (reqObject.has(&quot;Pair[first=0, second=0]&quot;)) {</span>
+                    try {
+                        // Manually create a Positional Requirement
+<span class="fc" id="L42">                        Map&lt;Pair&lt;Integer, Integer&gt;, Symbol&gt; reqmap = decodeMap(reqObject);</span>
+<span class="fc" id="L43">                        return new PositionRequirement(reqmap);</span>
+<span class="nc" id="L44">                    } catch (InvalidResourceException e) {</span>
+<span class="nc" id="L45">                        throw new RuntimeException(e);</span>
+                    }
+                    // If reqs has symbols inside, then it's a QuantityRequirement
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">                } else if (symbols.stream().anyMatch(s -&gt; reqObject.has(s.toString()))) {</span>
+<span class="fc" id="L49">                    return context.deserialize(requirementObject, QuantityRequirement.class);</span>
+                } else {
+<span class="nc" id="L51">                    throw new JsonParseException(json.toString());</span>
+                }
+            } else {
+<span class="nc" id="L54">                throw new JsonParseException(json.toString());</span>
+            }
+        }
+
+        /**
+         * Deserializes pair object
+         *
+         * @param pair string of the encoded pair
+         * @return The decoded Pair object
+         */
+        private Pair&lt;Integer, Integer&gt; decodePair(String pair) {
+<span class="fc" id="L65">            String values = pair.replace(&quot;Pair[first=&quot;, &quot;&quot;).replace(&quot; second=&quot;, &quot;&quot;).replace(&quot;]&quot;, &quot;&quot;);</span>
+<span class="fc" id="L66">            String[] a = values.split(&quot;,&quot;);</span>
+<span class="fc" id="L67">            return new Pair&lt;&gt;(Integer.parseInt(a[0]), Integer.parseInt(a[1]));</span>
+        }
+
+        /**
+         * Deserializes the map containing the positional requirement
+         *
+         * @param j
+         * @return
+         */
+        private Map&lt;Pair&lt;Integer, Integer&gt;, Symbol&gt; decodeMap(JsonObject j) {
+<span class="fc" id="L77">            Map&lt;Pair&lt;Integer, Integer&gt;, Symbol&gt; map = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L78">            Map&lt;String, JsonElement&gt; jsonmap = j.asMap();</span>
+<span class="fc bfc" id="L79" title="All 2 branches covered.">            for (String pairstring : jsonmap.keySet()) {</span>
+<span class="fc" id="L80">                map.put(decodePair(pairstring), Symbol.valueOf(jsonmap.get(pairstring).getAsString()));</span>
+<span class="fc" id="L81">            }</span>
+<span class="fc" id="L82">            return map;</span>
+        }
+
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

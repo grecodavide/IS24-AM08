@@ -30,5 +30,7 @@
                 <Insets bottom="50.0" left="40.0" right="40.0" top="50.0"/>
             </padding>
         </VBox>
+        <Pane prefHeight="100" />
+        <Button fx:id="playAgainButton" text="Play Again" styleClass="button"/>
     </VBox>
 </StackPane>

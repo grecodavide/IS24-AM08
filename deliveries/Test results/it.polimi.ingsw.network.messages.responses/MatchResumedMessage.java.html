@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MatchResumedMessage.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.network.messages.responses</a> &gt; <span class="el_source">MatchResumedMessage.java</span></div><h1>MatchResumedMessage.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.network.messages.responses;
+
+import java.util.List;
+import java.util.Map;
+import it.polimi.ingsw.gamemodel.Color;
+import it.polimi.ingsw.gamemodel.DrawSource;
+import it.polimi.ingsw.gamemodel.Symbol;
+import it.polimi.ingsw.utils.Pair;
+import it.polimi.ingsw.utils.PlacedCardRecord;
+
+/**
+ * This response is sent to the user who just rejoined a match. All the parameters refer to the
+ * status of the match before the server crashed
+ */
+public final class MatchResumedMessage extends ResponseMessage {
+    private final Map&lt;String, Color&gt; playersUsernamesAndPawns;
+    private final Map&lt;String, List&lt;Integer&gt;&gt; playersHands;
+    private final Pair&lt;Integer, Integer&gt; visibleObjectives;
+    private final Map&lt;DrawSource, Integer&gt; visiblePlayableCards;
+    private final Pair&lt;Symbol, Symbol&gt; decksTopReigns;
+    private final Integer secretObjective;
+    private final Map&lt;String, Map&lt;Symbol, Integer&gt;&gt; availableResources;
+    private final Map&lt;String, Map&lt;Integer, PlacedCardRecord&gt;&gt; placedCards;
+    private final Map&lt;String, Integer&gt; playerPoints;
+    private final String currentPlayer;
+    private final boolean drawPhase;
+
+    public MatchResumedMessage(Map&lt;String, Color&gt; playersUsernamesAndPawns,
+            Map&lt;String, List&lt;Integer&gt;&gt; playersHands, Pair&lt;Integer, Integer&gt; visibleObjectives,
+            Map&lt;DrawSource, Integer&gt; visiblePlayableCards, Pair&lt;Symbol, Symbol&gt; decksTopReigns,
+            Integer secretObjective, Map&lt;String, Map&lt;Symbol, Integer&gt;&gt; availableResources,
+            Map&lt;String, Map&lt;Integer, PlacedCardRecord&gt;&gt; placedCards,
+            Map&lt;String, Integer&gt; playerPoints, String currentPlayer, boolean drawPhase) {
+<span class="nc" id="L34">        super(null);</span>
+<span class="nc" id="L35">        this.playersUsernamesAndPawns = playersUsernamesAndPawns;</span>
+<span class="nc" id="L36">        this.playersHands = playersHands;</span>
+<span class="nc" id="L37">        this.visibleObjectives = visibleObjectives;</span>
+<span class="nc" id="L38">        this.visiblePlayableCards = visiblePlayableCards;</span>
+<span class="nc" id="L39">        this.decksTopReigns = decksTopReigns;</span>
+<span class="nc" id="L40">        this.secretObjective = secretObjective;</span>
+<span class="nc" id="L41">        this.availableResources = availableResources;</span>
+<span class="nc" id="L42">        this.placedCards = placedCards;</span>
+<span class="nc" id="L43">        this.playerPoints = playerPoints;</span>
+<span class="nc" id="L44">        this.currentPlayer = currentPlayer;</span>
+<span class="nc" id="L45">        this.drawPhase = drawPhase;</span>
+<span class="nc" id="L46">    }</span>
+
+
+    /**
+     * @return A map from players' username to pawn color
+     */
+    public Map&lt;String, Color&gt; getPlayersUsernamesAndPawns() {
+<span class="nc" id="L53">        return playersUsernamesAndPawns;</span>
+    }
+
+    /**
+     * @return A map from players' username to their hand
+     */
+    public Map&lt;String, List&lt;Integer&gt;&gt; getPlayersHands() {
+<span class="nc" id="L60">        return playersHands;</span>
+    }
+
+    /**
+     * @return The two visible objectives common to every player
+     */
+    public Pair&lt;Integer, Integer&gt; getVisibleObjectives() {
+<span class="nc" id="L67">        return visibleObjectives;</span>
+    }
+
+    /**
+     * @return The four drawable cards visible to everyone
+     */
+    public Map&lt;DrawSource, Integer&gt; getVisiblePlayableCards() {
+<span class="nc" id="L74">        return visiblePlayableCards;</span>
+    }
+
+    /**
+     * @return The reign of the two decks (resource and gold)
+     */
+    public Pair&lt;Symbol, Symbol&gt; getDecksTopReigns() {
+<span class="nc" id="L81">        return decksTopReigns;</span>
+    }
+
+    /**
+     * @return The secret objective ID of the player
+     */
+    public Integer getSecretObjective() {
+<span class="nc" id="L88">        return secretObjective;</span>
+    }
+
+    /**
+     * @return A map from players' username to their available resources
+     */
+    public Map&lt;String, Map&lt;Symbol, Integer&gt;&gt; getAvailableResources() {
+<span class="nc" id="L95">        return availableResources;</span>
+    }
+
+    /**
+     * @return A map from players' username to their board
+     */
+    public Map&lt;String, Map&lt;Integer, PlacedCardRecord&gt;&gt; getPlacedCards() {
+<span class="nc" id="L102">        return placedCards;</span>
+    }
+
+    /**
+     * @return A map from players' username to their points
+     */
+    public Map&lt;String, Integer&gt; getPlayerPoints() {
+<span class="nc" id="L109">        return playerPoints;</span>
+    }
+
+    /**
+     * @return Username of the player currently playing his turn
+     */
+    public String getCurrentPlayer() {
+<span class="nc" id="L116">        return currentPlayer;</span>
+    }
+
+    /**
+     * @return Whether the current player should play or draw a card
+     */
+    public boolean isDrawPhase() {
+<span class="nc" id="L123">        return drawPhase;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,542 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PlayerControllerRMI.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.controllers</a> &gt; <span class="el_source">PlayerControllerRMI.java</span></div><h1>PlayerControllerRMI.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.controllers;
+
+import it.polimi.ingsw.client.network.RemoteViewInterface;
+import it.polimi.ingsw.exceptions.*;
+import it.polimi.ingsw.gamemodel.*;
+import it.polimi.ingsw.server.Server;
+import it.polimi.ingsw.utils.LeaderboardEntry;
+import it.polimi.ingsw.utils.Pair;
+
+import java.rmi.RemoteException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Subclass of {@link PlayerController} that implements its abstract methods through RMI interactions.
+ * Each instance of this class is supposed to be sent through {@link Server#joinMatch(String, String)})
+ * to an RMI View, this latter will then send its View instance to the PlayerController object, calling
+ * {@link #registerView(RemoteViewInterface)} on it.
+ */
+public final class PlayerControllerRMI extends PlayerController implements PlayerControllerRMIInterface {
+    // The remote View instance
+    private RemoteViewInterface view;
+
+    /**
+     * Instantiates the internal Player with the given username and sets the internal Match reference to the given one,
+     * add the new Player instance to the match and subscribe this class instance to the match observers.
+     *
+     * @param username The username of the new player of the Match
+     * @param match    The match to which this PlayerClass must pertain
+     * @throws AlreadyUsedUsernameException If the username is already taken by another player of the same match
+     * @throws WrongStateException          If a new player cannot be added on the current state of the Match
+     */
+    public PlayerControllerRMI(String username, Match match) throws AlreadyUsedUsernameException, WrongStateException {
+<span class="fc" id="L35">        super(username, match);</span>
+<span class="fc" id="L36">    }</span>
+
+    /**
+     * Notifies the view that match has resumed after a server crash.
+     */
+    @Override
+    public void matchResumed() {
+<span class="pc bpc" id="L43" title="1 of 2 branches missed.">        if (view == null) {</span>
+<span class="nc" id="L44">            onUnregisteredView();</span>
+        } else {
+            // Get visible objectives, visible playable cards and visible decks top reigns
+<span class="fc" id="L47">            Pair&lt;Objective, Objective&gt; visibleObjectives = match.getVisibleObjectives();</span>
+<span class="fc" id="L48">            Map&lt;DrawSource, PlayableCard&gt; visiblePlayableCards = match.getVisiblePlayableCards();</span>
+<span class="fc" id="L49">            Pair&lt;Symbol, Symbol&gt; decksTopReigns = match.getDecksTopReigns();</span>
+
+            // Create a map that matches each pawn colour to the corresponding player's username
+<span class="fc" id="L52">            Map&lt;String, Color&gt; playersUsernamesAndPawns = new HashMap&lt;&gt;();</span>
+
+            // Create a map that matches each player's username to the corresponding list of cards in the hand
+<span class="fc" id="L55">            Map&lt;String, List&lt;PlayableCard&gt;&gt; playersHands = new HashMap&lt;&gt;();</span>
+
+            // Create a map that matches each player's username to the corresponding available resources
+<span class="fc" id="L58">            Map&lt;String, Map&lt;Symbol, Integer&gt;&gt; availableResources = new HashMap&lt;&gt;();</span>
+
+            // Create a map that matches each player's username to the corresponding points
+<span class="fc" id="L61">            Map&lt;String, Integer&gt; playerPoints = new HashMap&lt;&gt;();</span>
+
+            // Create a map that matches each player's username to the corresponding board
+<span class="fc" id="L64">            Map&lt;String, Map&lt;Pair&lt;Integer, Integer&gt;, PlacedCard&gt;&gt; playerBoards = new HashMap&lt;&gt;();</span>
+
+            // Fill the maps with proper values
+<span class="fc bfc" id="L67" title="All 2 branches covered.">            for (Player p : match.getPlayers()) {</span>
+<span class="fc" id="L68">                playersUsernamesAndPawns.put(p.getUsername(), p.getPawnColor());</span>
+<span class="fc" id="L69">                playersHands.put(p.getUsername(), p.getBoard().getCurrentHand());</span>
+<span class="fc" id="L70">                availableResources.put(p.getUsername(), p.getBoard().getAvailableResources());</span>
+<span class="fc" id="L71">                playerPoints.put(p.getUsername(), p.getPoints());</span>
+<span class="fc" id="L72">                playerBoards.put(p.getUsername(), p.getBoard().getPlacedCards());</span>
+<span class="fc" id="L73">            }</span>
+
+            try {
+<span class="fc" id="L76">                view.matchResumed(playersUsernamesAndPawns, playersHands, visibleObjectives, visiblePlayableCards, decksTopReigns,</span>
+<span class="fc" id="L77">                        player.getSecretObjective(), availableResources, playerBoards, playerPoints, match.getCurrentPlayer().getUsername(), match.getCurrentState().getClass().equals(AfterMoveState.class));</span>
+<span class="nc" id="L78">            } catch (RemoteException e) {</span>
+<span class="nc" id="L79">                onConnectionError();</span>
+<span class="fc" id="L80">            }</span>
+        }
+<span class="fc" id="L82">    }</span>
+
+    /**
+     * Sets the internal View attribute to the given argument; if it has already been called, it won't
+     * do anything, since it's call is allowed once per PlayerController object.
+     * It's used by a remote View having this class object to send itself over RMI to the PlayerControllerRMI
+     * instance.
+     * Note that this method is supposed to be called by a view.
+     *
+     * @param view The View to save in the PlayerController internal state
+     */
+    @Override
+    public void registerView(RemoteViewInterface view) throws RemoteException, ChosenMatchException, WrongStateException, AlreadyUsedUsernameException, WrongNameException {
+<span class="pc bpc" id="L95" title="1 of 2 branches missed.">        if (this.view == null) {</span>
+<span class="fc" id="L96">            this.view = view;</span>
+
+<span class="fc" id="L98">            this.sendJoined();</span>
+        }
+<span class="fc" id="L100">    }</span>
+
+    /**
+     * Draws an initial card for the player. Since this is done through RMI, it just involves a call to
+     * {@link Player#drawInitialCard()}.
+     * Note that this method is supposed to be called by a view.
+     *
+     * @throws WrongStateException If the current match state doesn't allow drawing an initial card
+     * @throws WrongTurnException  If the current turn it's not the one of this player
+     */
+    @Override
+    public void drawInitialCard() throws WrongStateException, WrongTurnException, RemoteException {
+<span class="fc" id="L112">        player.drawInitialCard();</span>
+<span class="fc" id="L113">    }</span>
+
+    /**
+     * Communicates the chosen initial card side. Since this is done through RMI, it just involves a call to
+     * {@link Player#chooseInitialCardSide(Side)}.
+     * Note that this method is supposed to be called by a view.
+     *
+     * @param side The side on which play the initial card drawn using {@link #drawInitialCard()}
+     * @throws WrongStateException If the current match state doesn't allow setting the initial card side
+     * @throws WrongTurnException  If the current turn it's not the one of this player
+     */
+    @Override
+    public void chooseInitialCardSide(Side side) throws WrongStateException, WrongTurnException, RemoteException {
+<span class="fc" id="L126">        player.chooseInitialCardSide(side);</span>
+<span class="fc" id="L127">    }</span>
+
+    /**
+     * Draws two secret objectives. Since this is done through RMI, it just involves a call to
+     * {@link Player#drawSecretObjectives()}.
+     * Note that this method is supposed to be called by a view.
+     *
+     * @throws WrongStateException If the current match state doesn't allow drawing secret objectives
+     * @throws WrongTurnException  If the current turn it's not the one of this player
+     */
+    @Override
+    public void drawSecretObjectives() throws WrongStateException, WrongTurnException, RemoteException {
+<span class="fc" id="L139">        player.drawSecretObjectives();</span>
+<span class="fc" id="L140">    }</span>
+
+    /**
+     * Communicates the chosen secret objective. Since this is done through RMI, it just involves a call to
+     * {@link Player#chooseSecretObjective(Objective)}.
+     * Note that this method is supposed to be called by a view.
+     *
+     * @param objective The chosen objective
+     * @throws WrongStateException  If the current match state doesn't allow choosing a secret objective
+     * @throws WrongTurnException   If the current turn it's not the one of this player
+     * @throws WrongChoiceException If the chosen objective is not one of the two drawn ones using {@link #drawSecretObjectives()}
+     */
+    @Override
+    public void chooseSecretObjective(Objective objective) throws WrongStateException, WrongTurnException, WrongChoiceException, RemoteException {
+<span class="fc" id="L154">        player.chooseSecretObjective(objective);</span>
+<span class="fc" id="L155">    }</span>
+
+    /**
+     * Plays a card. Since this is done through RMI, it just involves a call to
+     * {@link Player#playCard(Pair, PlayableCard, Side)}.
+     * Note that this method is supposed to be called by a view.
+     *
+     * @param coords The coordinates on which to place the card
+     * @param card   The PlayableCard to play
+     * @param side   The side on which to play the chosen card
+     * @throws WrongStateException  If the current match state doesn't allow playing cards
+     * @throws WrongTurnException   If the current turn it's not the one of this player
+     * @throws WrongChoiceException If the chosen card is not one of those in the player's current hand
+     */
+    @Override
+    public void playCard(Pair&lt;Integer, Integer&gt; coords, PlayableCard card, Side side) throws WrongStateException, WrongTurnException, WrongChoiceException, RemoteException {
+<span class="fc" id="L171">        player.playCard(coords, card, side);</span>
+<span class="fc" id="L172">    }</span>
+
+    /**
+     * Draws a card. Since this is done through RMI, it just involves a call to
+     * {@link Player#drawCard(DrawSource)}.
+     * Note that this method is supposed to be called by a view.
+     *
+     * @param source The drawing source to draw the card from
+     * @throws HandException        If the player already has a full hand of cards (three cards)
+     * @throws WrongStateException  If the current match state doesn't allow drawing cards
+     * @throws WrongTurnException   If the current turn it's not the one of this player
+     * @throws WrongChoiceException If the chosen DrawSource doesn't have any card left (i.e. it's empty)
+     */
+    @Override
+    public void drawCard(DrawSource source) throws HandException, WrongStateException, WrongTurnException, WrongChoiceException, RemoteException {
+<span class="fc" id="L187">        player.drawCard(source);</span>
+<span class="fc" id="L188">    }</span>
+
+    /**
+     * Sends a broadcast in the chat. Since this is done through RMI, it just involves a call to
+     * {@link Player#sendBroadcastText(String)}.
+     * Note that this method is supposed to be called by a view.
+     *
+     * @param text Text of the message
+     */
+    @Override
+    public void sendBroadcastText(String text) throws RemoteException {
+<span class="fc" id="L199">        player.sendBroadcastText(text);</span>
+<span class="fc" id="L200">    }</span>
+
+    /**
+     * Sends a private message in the chat. Since this is done through RMI, it just involves a call to
+     * {@link Player#sendPrivateText(Player, String)} )}.
+     * Note that this method is supposed to be called by a view.
+     *
+     * @param recipient username of the recipient
+     * @param text      text of the message
+     */
+    @Override
+    public void sendPrivateText(String recipient, String text) throws RemoteException {
+<span class="pc bpc" id="L212" title="1 of 2 branches missed.">        if (match.getPlayers().stream().anyMatch(p -&gt; p.getUsername().equals(recipient))) {</span>
+<span class="fc" id="L213">            Player p = match.getPlayers().stream()</span>
+<span class="fc" id="L214">                    .filter(pl -&gt; pl.getUsername().equals(recipient))</span>
+<span class="fc" id="L215">                    .toList().getFirst();</span>
+<span class="fc" id="L216">            player.sendPrivateText(p, text);</span>
+        }
+<span class="fc" id="L218">    }</span>
+
+    /**
+     * Notifies that the match has just started.
+     * Note that is supposed to be called by the match.
+     */
+    @Override
+    public void matchStarted() {
+<span class="pc bpc" id="L226" title="1 of 2 branches missed.">        if (view == null) {</span>
+<span class="nc" id="L227">            onUnregisteredView();</span>
+        } else {
+            // Get visible objectives, visible playable cards and visible decks top reigns
+<span class="fc" id="L230">            Pair&lt;Objective, Objective&gt; visibleObjectives = match.getVisibleObjectives();</span>
+<span class="fc" id="L231">            Map&lt;DrawSource, PlayableCard&gt; visiblePlayableCards = match.getVisiblePlayableCards();</span>
+<span class="fc" id="L232">            Pair&lt;Symbol, Symbol&gt; decksTopReigns = match.getDecksTopReigns();</span>
+
+            // Create a map that matches each pawn colour to the corresponding player's username
+<span class="fc" id="L235">            Map&lt;String, Color&gt; playersUsernamesAndPawns = new HashMap&lt;&gt;();</span>
+
+            // Create a map that matches each player's username to the corresponding list of cards in the hand
+<span class="fc" id="L238">            Map&lt;String, List&lt;PlayableCard&gt;&gt; playersHands = new HashMap&lt;&gt;();</span>
+
+            // Fill the maps with proper values
+<span class="fc bfc" id="L241" title="All 2 branches covered.">            for (Player p : match.getPlayers()) {</span>
+<span class="fc" id="L242">                playersUsernamesAndPawns.put(p.getUsername(), p.getPawnColor());</span>
+<span class="fc" id="L243">                playersHands.put(p.getUsername(), p.getBoard().getCurrentHand());</span>
+<span class="fc" id="L244">            }</span>
+
+            try {
+<span class="fc" id="L247">                view.matchStarted(playersUsernamesAndPawns, playersHands, visibleObjectives, visiblePlayableCards, decksTopReigns);</span>
+<span class="nc" id="L248">            } catch (RemoteException e) {</span>
+<span class="nc" id="L249">                onConnectionError();</span>
+<span class="fc" id="L250">            }</span>
+        }
+<span class="fc" id="L252">    }</span>
+
+    /**
+     * Notifies that someone has joined the match.
+     * Note that this method is supposed to be called by a match, moreover the match calls this method on all the
+     * MatchObservers instance subscribed to itself, then even the MatchObserver causing this event gets notified.
+     * If and only if the PlayerController receiving this method call is the one linked to given `someone`, it notifies
+     * the view about the current lobby information.
+     *
+     * @param someone The Player instance that has joined
+     */
+    @Override
+    public void someoneJoined(Player someone) {
+<span class="pc bpc" id="L265" title="1 of 2 branches missed.">        if (view == null) {</span>
+<span class="nc" id="L266">            onUnregisteredView();</span>
+        } else {
+            try {
+<span class="fc" id="L269">                List&lt;String&gt; playersUsernames = match.getPlayers().stream().map(Player::getUsername).toList();</span>
+<span class="fc" id="L270">                view.someoneJoined(someone.getUsername(), playersUsernames);</span>
+<span class="nc" id="L271">            } catch (RemoteException e) {</span>
+<span class="nc" id="L272">                onConnectionError();</span>
+<span class="fc" id="L273">            }</span>
+        }
+<span class="fc" id="L275">    }</span>
+
+    /**
+     * Notifies that someone has quit from the match.
+     * Note that Match calls this method on all MatchObservers instance subscribed to itself, then
+     * even the MatchObserver causing this event gets notified.
+     *
+     * @param someone The Player instance that has quit
+     */
+    @Override
+    public void someoneQuit(Player someone) {
+<span class="pc bpc" id="L286" title="1 of 2 branches missed.">        if (view == null) {</span>
+<span class="nc" id="L287">            onUnregisteredView();</span>
+        } else {
+            try {
+<span class="fc" id="L290">                view.someoneQuit(someone.getUsername());</span>
+<span class="nc" id="L291">            } catch (RemoteException e) {</span>
+<span class="nc" id="L292">                onConnectionError();</span>
+<span class="fc" id="L293">            }</span>
+        }
+<span class="fc" id="L295">    }</span>
+
+    /**
+     * Notifies that someone has drawn its initial card.
+     * Note that this method is supposed to be called by a match, moreover the match calls this method on all the
+     * MatchObservers instance subscribed to itself, then even the MatchObserver causing this event gets notified.
+     * If and only if the PlayerController receiving this method call is the one linked to given `someone`, it notifies
+     * the view that it received an initial card.
+     *
+     * @param someone The player instance that has drawn the card
+     * @param card    The initial card that has been drawn
+     */
+    @Override
+    public void someoneDrewInitialCard(Player someone, InitialCard card) {
+<span class="pc bpc" id="L309" title="1 of 2 branches missed.">        if (view == null) {</span>
+<span class="nc" id="L310">            onUnregisteredView();</span>
+        } else {
+            try {
+<span class="fc bfc" id="L313" title="All 2 branches covered.">                if (player.equals(someone)) {</span>
+<span class="fc" id="L314">                    view.giveInitialCard(card);</span>
+                } else {
+<span class="fc" id="L316">                    view.someoneDrewInitialCard(someone.getUsername(), card);</span>
+                }
+<span class="nc" id="L318">            } catch (RemoteException e) {</span>
+<span class="nc" id="L319">                onConnectionError();</span>
+<span class="fc" id="L320">            }</span>
+        }
+<span class="fc" id="L322">    }</span>
+
+    /**
+     * Notifies that someone has chosen its initial card side.
+     * Note that this method is supposed to be called by a match, moreover the match calls this method on all the
+     * MatchObservers instance subscribed to itself, then even the MatchObserver causing this event gets notified.
+     *
+     * @param someone The player instance that has chosen the side
+     * @param side    The chosen initial card side
+     */
+    @Override
+    public void someoneSetInitialSide(Player someone, Side side, Map&lt;Symbol, Integer&gt; availableResources) {
+<span class="pc bpc" id="L334" title="1 of 2 branches missed.">        if (view == null) {</span>
+<span class="nc" id="L335">            onUnregisteredView();</span>
+        } else {
+            try {
+<span class="fc" id="L338">                view.someoneSetInitialSide(someone.getUsername(), side, availableResources);</span>
+<span class="nc" id="L339">            } catch (RemoteException e) {</span>
+<span class="nc" id="L340">                onConnectionError();</span>
+<span class="fc" id="L341">            }</span>
+        }
+<span class="fc" id="L343">    }</span>
+
+    /**
+     * Notifies that someone has drawn two secret objectives.
+     * Note that this method is supposed to be called by a match, moreover the match calls this method on all the
+     * MatchObservers instance subscribed to itself, then even the MatchObserver causing this event gets notified.
+     * If and only if the PlayerController receiving this method call is the one linked to given `someone`, it notifies
+     * the view about the proposed objectives, the other views will just receive a notification about the player's username.
+     *
+     * @param someone    The player instance that has drawn the objectives
+     * @param objectives The two proposed objectives
+     */
+    @Override
+    public void someoneDrewSecretObjective(Player someone, Pair&lt;Objective, Objective&gt; objectives) {
+<span class="pc bpc" id="L357" title="1 of 2 branches missed.">        if (view == null) {</span>
+<span class="nc" id="L358">            onUnregisteredView();</span>
+        } else {
+            try {
+<span class="fc bfc" id="L361" title="All 2 branches covered.">                if (player.equals(someone)) {</span>
+<span class="fc" id="L362">                    view.giveSecretObjectives(objectives);</span>
+                } else {
+<span class="fc" id="L364">                    view.someoneDrewSecretObjective(someone.getUsername());</span>
+                }
+<span class="nc" id="L366">            } catch (RemoteException e) {</span>
+<span class="nc" id="L367">                onConnectionError();</span>
+<span class="fc" id="L368">            }</span>
+        }
+<span class="fc" id="L370">    }</span>
+
+    /**
+     * Notifies that someone has chosen the secret objective.
+     * Note that this method is supposed to be called by a match, moreover the match calls this method on all the
+     * MatchObservers instance subscribed to itself, then even the MatchObserver causing this event gets notified.
+     * The view will just receive `someone` username, no the objective.
+     *
+     * @param someone   The player instance that has chosen the secret objective
+     * @param objective The chosen secret objective
+     */
+    @Override
+    public void someoneChoseSecretObjective(Player someone, Objective objective) {
+<span class="pc bpc" id="L383" title="1 of 2 branches missed.">        if (view == null) {</span>
+<span class="nc" id="L384">            onUnregisteredView();</span>
+        } else {
+            try {
+<span class="fc" id="L387">                view.someoneChoseSecretObjective(someone.getUsername());</span>
+<span class="nc" id="L388">            } catch (RemoteException e) {</span>
+<span class="nc" id="L389">                onConnectionError();</span>
+<span class="fc" id="L390">            }</span>
+        }
+<span class="fc" id="L392">    }</span>
+
+    /**
+     * Notifies that someone has played a card.
+     * Note that this method is supposed to be called by a match, moreover the match calls this method on all the
+     * MatchObservers instance subscribed to itself, then even the MatchObserver causing this event gets notified.
+     *
+     * @param someone The Player instance that has played a card
+     * @param coords  The coordinates on which the card has been placed
+     * @param card    The PlayableCard that has been played
+     * @param side    The side on which the card has been placed
+     */
+    @Override
+    public void someonePlayedCard(Player someone, Pair&lt;Integer, Integer&gt; coords, PlayableCard card, Side side) {
+<span class="pc bpc" id="L406" title="1 of 2 branches missed.">        if (view == null) {</span>
+<span class="nc" id="L407">            onUnregisteredView();</span>
+        } else {
+            try {
+<span class="fc" id="L410">                view.someonePlayedCard(someone.getUsername(), coords, card, side, someone.getPoints(), someone.getBoard().getAvailableResources());</span>
+<span class="nc" id="L411">            } catch (RemoteException e) {</span>
+<span class="nc" id="L412">                onConnectionError();</span>
+<span class="fc" id="L413">            }</span>
+        }
+<span class="fc" id="L415">    }</span>
+
+    /**
+     * Notifies that someone has drawn a card.
+     * The replacement card is the one that has taken the place of the drawn one, it's needed since observers have to
+     * know the reign of the new card on top of the decks.
+     * Note that this method is supposed to be called by a match, moreover the match calls this method on all the
+     * MatchObservers instance subscribed to itself, then even the MatchObserver causing this event gets notified.
+     *
+     * @param someone         The Player instance that has drawn a card
+     * @param source          The drawing source from which the card has been drawn
+     * @param card            The card that has been drawn
+     * @param replacementCard The card that has replaced the drawn card, null if the draw source is a deck
+     */
+    @Override
+    public void someoneDrewCard(Player someone, DrawSource source, PlayableCard card, PlayableCard replacementCard) {
+<span class="pc bpc" id="L431" title="1 of 2 branches missed.">        if (view == null) {</span>
+<span class="nc" id="L432">            onUnregisteredView();</span>
+        } else {
+            try {
+<span class="fc" id="L435">                PlayableCard rep = null;</span>
+<span class="fc bfc" id="L436" title="All 4 branches covered.">                if (!source.equals(DrawSource.GOLDS_DECK) &amp;&amp; !source.equals(DrawSource.RESOURCES_DECK)) {</span>
+<span class="fc" id="L437">                    rep = replacementCard;</span>
+                }
+<span class="fc" id="L439">                view.someoneDrewCard(someone.getUsername(), source, card, rep, match.getDecksTopReigns());</span>
+<span class="nc" id="L440">            } catch (RemoteException e) {</span>
+<span class="nc" id="L441">                onConnectionError();</span>
+<span class="fc" id="L442">            }</span>
+        }
+<span class="fc" id="L444">    }</span>
+
+    /**
+     * Notifies that someone sent a message in the public chat.
+     *
+     * @param someone The player that send the message
+     * @param text    Content of the message
+     */
+    @Override
+    public void someoneSentBroadcastText(Player someone, String text) {
+<span class="pc bpc" id="L454" title="1 of 2 branches missed.">        if (view == null) {</span>
+<span class="nc" id="L455">            onUnregisteredView();</span>
+        } else {
+            try {
+<span class="fc" id="L458">                view.someoneSentBroadcastText(someone.getUsername(), text);</span>
+<span class="nc" id="L459">            } catch (RemoteException e) {</span>
+<span class="nc" id="L460">                onConnectionError();</span>
+<span class="fc" id="L461">            }</span>
+        }
+<span class="fc" id="L463">    }</span>
+
+    /**
+     * Notifies that someone sent a private message to another user.
+     * If the recipient is the current player, then the view is notified,
+     * otherwise the message is ignored.
+     *
+     * @param someone   The player that sent the message
+     * @param recipient The recipient of the message
+     * @param text      Content of the message
+     */
+    @Override
+    public void someoneSentPrivateText(Player someone, Player recipient, String text) {
+<span class="pc bpc" id="L476" title="1 of 2 branches missed.">        if (view == null) {</span>
+<span class="nc" id="L477">            onUnregisteredView();</span>
+        } else {
+<span class="pc bpc" id="L479" title="1 of 4 branches missed.">            if (recipient.equals(this.player) || someone.equals(this.player)) {</span>
+                try {
+<span class="fc" id="L481">                    view.someoneSentPrivateText(someone.getUsername(), text);</span>
+<span class="nc" id="L482">                } catch (RemoteException e) {</span>
+<span class="nc" id="L483">                    onConnectionError();</span>
+<span class="fc" id="L484">                }</span>
+            }
+        }
+<span class="fc" id="L487">    }</span>
+
+    /**
+     * Creates a {@link LeaderboardEntry} instance from the given parameters.
+     *
+     * @param player The player of the {@link LeaderboardEntry}
+     * @param winner True if the player is the winner
+     * @return The new {@link LeaderboardEntry} instance
+     */
+    private LeaderboardEntry createLeaderboardEntry(Player player, Boolean winner) {
+<span class="fc" id="L497">        return new LeaderboardEntry(player.getUsername(), player.getPoints(), winner);</span>
+    }
+
+    /**
+     * Notifies that the match has just finished.
+     */
+    @Override
+    public void matchFinished() {
+<span class="pc bpc" id="L505" title="1 of 2 branches missed.">        if (view == null) {</span>
+<span class="nc" id="L506">            onUnregisteredView();</span>
+        } else {
+            try {
+<span class="fc" id="L509">                List&lt;LeaderboardEntry&gt; ranking = match.getPlayersFinalRanking().stream()</span>
+<span class="fc" id="L510">                        .map(p -&gt; createLeaderboardEntry(p.first(), p.second())).toList();</span>
+<span class="fc" id="L511">                view.matchFinished(ranking);</span>
+<span class="nc" id="L512">            } catch (RemoteException e) {</span>
+<span class="nc" id="L513">                onConnectionError();</span>
+<span class="fc" id="L514">            }</span>
+        }
+<span class="fc" id="L516">    }</span>
+
+    /**
+     * Getter for the view associated to this instance.
+     *
+     * @return The {@link RemoteViewInterface} of this instance
+     */
+    public RemoteViewInterface getView() {
+<span class="fc" id="L524">        return view;</span>
+    }
+
+    /**
+     * Removes the player linked to this PlayerControllerRMI instance when there's a connection error.
+     */
+    private void onConnectionError() {
+<span class="nc" id="L531">        match.unsubscribeObserver(this);</span>
+<span class="nc" id="L532">        match.removePlayer(player);</span>
+<span class="nc" id="L533">    }</span>
+
+    /**
+     * Prints an error in stderr when this instance is being used without a view attached to it.
+     */
+    private void onUnregisteredView() {
+<span class="nc" id="L539">        System.err.println(&quot;The PlayerControllerRMI of player &quot; + player.getUsername() + &quot; hasn't got a corresponding view&quot;);</span>
+<span class="nc" id="L540">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

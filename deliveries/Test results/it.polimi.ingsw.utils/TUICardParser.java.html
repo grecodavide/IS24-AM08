@@ -1,0 +1,574 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TUICardParser.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.utils</a> &gt; <span class="el_source">TUICardParser.java</span></div><h1>TUICardParser.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.utils;
+
+import java.util.*;
+import it.polimi.ingsw.exceptions.CardException;
+import it.polimi.ingsw.exceptions.InvalidResourceException;
+import it.polimi.ingsw.gamemodel.*;
+
+
+<span class="nc" id="L9">public class TUICardParser {</span>
+
+    public String getGenericBack(Symbol reign, Pair&lt;Integer, Integer&gt; coord) {
+        try {
+<span class="nc" id="L13">            PlayableCard card = new ResourceCard(null, reign, 0);</span>
+<span class="nc" id="L14">            return parseCard(card, coord, null, false);</span>
+<span class="nc" id="L15">        } catch (InvalidResourceException | CardException e) {</span>
+<span class="nc" id="L16">            return &quot;&quot;;</span>
+        }
+    }
+
+
+
+
+    // PARSERS
+    
+    /**
+     * Generates a printable string representing a {@link Card} of any type
+     * 
+     * @param card the card to be parsed
+     * @param coord where to place the card (relative to the terminal, not {@link Board})
+     * @param displayCoord coordinates to display on the card (null if none should be displayed)
+     * @param isFacingUp wheter the card is facing up or down
+     * 
+     * @return The parsed card
+     * 
+     * @throws CardException 
+     */
+    public String parseCard(Card card, Pair&lt;Integer, Integer&gt; coord, Pair&lt;Integer, Integer&gt; displayCoord, Boolean isFacingUp)
+            throws CardException {
+
+        // acquire information
+<span class="nc" id="L41">        Map&lt;Corner, Symbol&gt; cornersToProcess = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L42">        acquireCornerSymbols(cornersToProcess, card, isFacingUp);</span>
+
+<span class="nc" id="L44">        Set&lt;Symbol&gt; centerToProcess = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L45">        acquireCenterSymbols(centerToProcess, card, isFacingUp);</span>
+
+        String cardColor;
+<span class="nc bnc" id="L48" title="All 4 branches missed.">        switch (card) {</span>
+<span class="nc" id="L49">            case InitialCard initialCard -&gt; cardColor = &quot;\033[0m&quot;;</span>
+<span class="nc" id="L50">            case GoldCard goldCard -&gt; cardColor = getRightColor(goldCard.getReign());</span>
+<span class="nc" id="L51">            case ResourceCard resourceCard -&gt; cardColor = getRightColor(resourceCard.getReign());</span>
+<span class="nc" id="L52">            default -&gt; throw new CardException(&quot;Invalid card type: &quot; + card.getClass() + &quot;!&quot;);</span>
+        }
+
+
+        // process information
+<span class="nc" id="L57">        Map&lt;Corner, List&lt;String&gt;&gt; cornersAsString = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L58">        processCorners(cornersAsString, cornersToProcess, coord, cardColor);</span>
+
+<span class="nc" id="L60">        Map&lt;Integer, String&gt; centerAsString = new HashMap&lt;&gt;();</span>
+<span class="nc bnc" id="L61" title="All 4 branches missed.">        switch (card) {</span>
+<span class="nc" id="L62">            case InitialCard initialCard -&gt; processCenter(centerAsString, centerToProcess, initialCard);</span>
+<span class="nc" id="L63">            case GoldCard goldCard -&gt; processCenter(centerAsString, displayCoord, centerToProcess, goldCard);</span>
+<span class="nc" id="L64">            case ResourceCard resourceCard -&gt; processCenter(centerAsString, displayCoord, centerToProcess, resourceCard);</span>
+<span class="nc" id="L65">            default -&gt; throw new CardException(&quot;Invalid card type: &quot; + card.getClass() + &quot;!&quot;);</span>
+        }
+
+        // assemble the string
+<span class="nc" id="L69">        String newLine = &quot;\n&quot;;</span>
+<span class="nc" id="L70">        StringBuilder printableCard = new StringBuilder(cardColor).append(newLine);</span>
+<span class="nc" id="L71">        assembleCard(printableCard, cornersAsString, centerAsString); // if it doesn't work, use the safe version assembleCardSafe</span>
+<span class="nc" id="L72">        printableCard.append(newLine);</span>
+
+        // card assembled
+<span class="nc" id="L75">        return printableCard.toString();</span>
+    }
+
+    public String parseObjective(Objective card, Pair&lt;Integer, Integer&gt; coord) {
+
+        // process information
+<span class="nc" id="L81">        Map&lt;Corner, List&lt;String&gt;&gt; cornersAsString = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L82">        processObjectiveCorners(cornersAsString, coord);</span>
+
+<span class="nc" id="L84">        Map&lt;Integer, String&gt; centerAsString = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L85">        processObjectiveCenter(centerAsString, card);</span>
+
+        // assemble the string
+<span class="nc" id="L88">        String newLine = &quot;\n&quot;, cardColor = &quot;\033[0m&quot;;</span>
+<span class="nc" id="L89">        StringBuilder printableCard = new StringBuilder(cardColor).append(newLine);</span>
+<span class="nc" id="L90">        assembleCard(printableCard, cornersAsString, centerAsString); // if it doesn't work, use the safe version assembleCardSafe</span>
+<span class="nc" id="L91">        printableCard.append(newLine);</span>
+
+        // card assembled
+<span class="nc" id="L94">        return printableCard.toString();</span>
+    }
+
+
+    // NO JAVADOC
+    // ASSEMBLERERS
+    private void assembleCard(StringBuilder printableCard, Map&lt;Corner, List&lt;String&gt;&gt; cornersAsString, Map&lt;Integer, String&gt; centerAsString) {
+
+<span class="nc" id="L102">        List&lt;Corner&gt; left = new ArrayList&lt;&gt;(), right = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L103">        left.add(Corner.TOP_LEFT);</span>
+<span class="nc" id="L104">        left.add(Corner.BOTTOM_LEFT);</span>
+<span class="nc" id="L105">        right.add(Corner.TOP_RIGHT);</span>
+<span class="nc" id="L106">        right.add(Corner.BOTTOM_RIGHT);</span>
+
+        int i, j, k;
+<span class="nc bnc" id="L109" title="All 2 branches missed.">        for (i = 0; i &lt; 6; i++) {</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">            j = (i &lt;= 2) ? 0 : 1;</span>
+<span class="nc" id="L111">            k = i % 3;</span>
+
+<span class="nc" id="L113">            printableCard.append(cornersAsString.get(left.get(j)).get(k));</span>
+<span class="nc" id="L114">            printableCard.append(centerAsString.get(i));</span>
+<span class="nc" id="L115">            printableCard.append(cornersAsString.get(right.get(j)).get(k));</span>
+        }
+
+<span class="nc" id="L118">    }</span>
+
+
+    // ACQUIRES
+
+    private void acquireCornerSymbols(Map&lt;Corner, Symbol&gt; cornersToProcess, Card card, Boolean isFacingUp) {
+        try {
+<span class="nc bnc" id="L125" title="All 2 branches missed.">            Side side = (isFacingUp) ? Side.FRONT : Side.BACK;</span>
+<span class="nc" id="L126">            Symbol topLeft = card.getSide(side).getCorner(Corner.TOP_LEFT);</span>
+<span class="nc" id="L127">            Symbol topRight = card.getSide(side).getCorner(Corner.TOP_RIGHT);</span>
+<span class="nc" id="L128">            Symbol bottomLeft = card.getSide(side).getCorner(Corner.BOTTOM_LEFT);</span>
+<span class="nc" id="L129">            Symbol bottomRight = card.getSide(side).getCorner(Corner.BOTTOM_RIGHT);</span>
+
+<span class="nc" id="L131">            cornersToProcess.put(Corner.TOP_LEFT, topLeft);</span>
+<span class="nc" id="L132">            cornersToProcess.put(Corner.TOP_RIGHT, topRight);</span>
+<span class="nc" id="L133">            cornersToProcess.put(Corner.BOTTOM_LEFT, bottomLeft);</span>
+<span class="nc" id="L134">            cornersToProcess.put(Corner.BOTTOM_RIGHT, bottomRight);</span>
+<span class="nc" id="L135">        } catch (CardException e) {</span>
+<span class="nc" id="L136">            throw new RuntimeException(e);</span>
+<span class="nc" id="L137">        }</span>
+<span class="nc" id="L138">    }</span>
+
+    private void acquireCenterSymbols(Set&lt;Symbol&gt; centerToProcess, Card card, Boolean isFacingUp) {
+<span class="nc bnc" id="L141" title="All 2 branches missed.">        Side side = (isFacingUp) ? Side.FRONT : Side.BACK;</span>
+<span class="nc" id="L142">        centerToProcess.addAll(card.getSide(side).getCenter());</span>
+<span class="nc" id="L143">    }</span>
+
+
+    // PROCESSERS
+
+    private void processCorners(Map&lt;Corner, List&lt;String&gt;&gt; cornersAsString, Map&lt;Corner, Symbol&gt; cornersToProcess,
+            Pair&lt;Integer, Integer&gt; coord, String borderColor) {
+
+        List&lt;String&gt; singleCorner;
+        String suffix;
+
+<span class="nc bnc" id="L154" title="All 2 branches missed.">        for (Corner corner : cornersToProcess.keySet()) {</span>
+<span class="nc" id="L155">            singleCorner = new ArrayList&lt;&gt;();</span>
+
+<span class="nc bnc" id="L157" title="All 5 branches missed.">            switch (corner) {</span>
+                case Corner.TOP_LEFT:
+<span class="nc" id="L159">                    suffix = &quot;&quot;;</span>
+<span class="nc" id="L160">                    singleCorner.addAll(getTopLeftCorner(coord, cornersToProcess.get(corner), suffix, borderColor));</span>
+<span class="nc" id="L161">                    break;</span>
+
+                case Corner.TOP_RIGHT:
+<span class="nc" id="L164">                    suffix = &quot;\n&quot;;</span>
+<span class="nc" id="L165">                    singleCorner.addAll(getTopRightCorner(coord, cornersToProcess.get(corner), suffix, borderColor));</span>
+<span class="nc" id="L166">                    break;</span>
+
+                case Corner.BOTTOM_LEFT:
+<span class="nc" id="L169">                    suffix = &quot;&quot;;</span>
+<span class="nc" id="L170">                    singleCorner.addAll(getBottomLeftCorner(coord, cornersToProcess.get(corner), suffix, borderColor));</span>
+<span class="nc" id="L171">                    break;</span>
+
+                case Corner.BOTTOM_RIGHT:
+<span class="nc" id="L174">                    suffix = &quot;\n&quot;;</span>
+<span class="nc" id="L175">                    singleCorner.addAll(getBottomRightCorner(coord, cornersToProcess.get(corner), suffix, borderColor));</span>
+<span class="nc" id="L176">                    break;</span>
+
+                default:
+                    break;
+
+            }
+<span class="nc" id="L182">            cornersAsString.put(corner, singleCorner);</span>
+<span class="nc" id="L183">        }</span>
+<span class="nc" id="L184">    }</span>
+
+    private String getPlayableCoord(Integer x, Integer y) {
+<span class="nc" id="L187">        String coords = &quot;(&quot; + x.toString() + &quot;,&quot; + y.toString() + &quot;)&quot;;</span>
+<span class="nc" id="L188">        Integer preSpacesNumber = (8 - coords.length()) / 2; // center is 8 chars</span>
+<span class="nc" id="L189">        String preSpaces = &quot; &quot;.repeat(preSpacesNumber);</span>
+<span class="nc" id="L190">        String postSpaces = &quot; &quot;.repeat(8 - preSpacesNumber - coords.length());</span>
+
+<span class="nc" id="L192">        return preSpaces + coords + postSpaces;</span>
+    }
+
+    // only considers cases of goldcards with 1 or 2 different symbols as placement requirement
+    private void processCenter(Map&lt;Integer, String&gt; centerAsString, Pair&lt;Integer, Integer&gt; displayCoord, Set&lt;Symbol&gt; centerToProcess,
+            GoldCard card) {
+<span class="nc" id="L198">        centerAsString.put(0, &quot;────────&quot;);</span>
+<span class="nc bnc" id="L199" title="All 2 branches missed.">        if (displayCoord != null) {</span>
+<span class="nc" id="L200">            centerAsString.put(2, getPlayableCoord(displayCoord.first(), displayCoord.second()));</span>
+        } else {
+<span class="nc" id="L202">            centerAsString.put(2, &quot;        &quot;);</span>
+        }
+<span class="nc" id="L204">        centerAsString.put(5, &quot;────────&quot;);</span>
+
+<span class="nc" id="L206">        String colorReset = getRightColor(card.getReign());</span>
+
+<span class="nc bnc" id="L208" title="All 2 branches missed.">        if (centerToProcess.isEmpty()) {</span>
+<span class="nc" id="L209">            centerAsString.put(3, &quot;        &quot;);</span>
+<span class="nc" id="L210">            centerAsString.put(1, &quot;   &quot; + getRightColor(card.getMultiplier()) + String.valueOf(card.getPoints())</span>
+<span class="nc" id="L211">                    + getRightIcon(card.getMultiplier()) + colorReset + &quot;  &quot;);</span>
+
+            String prefixSpace, postfixSpace;
+<span class="nc bnc" id="L214" title="All 4 branches missed.">            switch (card.getRequirement().getReqs().size()) {</span>
+                case 1:
+<span class="nc" id="L216">                    prefixSpace = &quot;   &quot;;</span>
+<span class="nc" id="L217">                    postfixSpace = &quot;  &quot;;</span>
+<span class="nc" id="L218">                    break;</span>
+                case 2:
+<span class="nc" id="L220">                    prefixSpace = postfixSpace = &quot; &quot;;</span>
+<span class="nc" id="L221">                    break;</span>
+                case 3:
+<span class="nc" id="L223">                    prefixSpace = postfixSpace = &quot;&quot;;</span>
+<span class="nc" id="L224">                    break;</span>
+                default:
+<span class="nc" id="L226">                    prefixSpace = postfixSpace = &quot;&quot;;</span>
+                    break;
+            };
+<span class="nc" id="L229">            centerAsString.put(4, prefixSpace + getQuantityString(card.getRequirement().getReqs(), colorReset) + postfixSpace);</span>
+
+<span class="nc" id="L231">            return;</span>
+        }
+
+<span class="nc" id="L234">        centerAsString.put(1, &quot;        &quot;);</span>
+<span class="nc" id="L235">        centerAsString.put(3, &quot;   &quot; + getRightColor(card.getReign()) + &quot;1&quot; + getRightIcon(card.getReign()) + &quot;  &quot;); // back</span>
+<span class="nc" id="L236">        centerAsString.put(4, &quot;        &quot;);</span>
+<span class="nc" id="L237">    }</span>
+
+    private void processCenter(Map&lt;Integer, String&gt; centerAsString, Pair&lt;Integer, Integer&gt; displayCoord, Set&lt;Symbol&gt; centerToProcess,
+            ResourceCard card) {
+<span class="nc" id="L241">        centerAsString.put(0, &quot;────────&quot;);</span>
+<span class="nc bnc" id="L242" title="All 2 branches missed.">        if (displayCoord != null) {</span>
+<span class="nc" id="L243">            centerAsString.put(2, getPlayableCoord(displayCoord.first(), displayCoord.second()));</span>
+        } else {
+<span class="nc" id="L245">            centerAsString.put(2, &quot;        &quot;);</span>
+        }
+<span class="nc" id="L247">        centerAsString.put(4, &quot;        &quot;);</span>
+<span class="nc" id="L248">        centerAsString.put(5, &quot;────────&quot;);</span>
+
+<span class="nc bnc" id="L250" title="All 2 branches missed.">        if (centerToProcess.isEmpty()) {</span>
+<span class="nc bnc" id="L251" title="All 2 branches missed.">            if (card.getPoints() == 0) {</span>
+<span class="nc" id="L252">                centerAsString.put(1, &quot;        &quot;);</span>
+            } else {
+<span class="nc" id="L254">                centerAsString.put(1, &quot;   &quot; + String.valueOf(card.getPoints()) + &quot;    &quot;);</span>
+            }
+
+<span class="nc" id="L257">            centerAsString.put(3, &quot;        &quot;);</span>
+<span class="nc" id="L258">            return;</span>
+        }
+
+<span class="nc" id="L261">        centerAsString.put(1, &quot;        &quot;);</span>
+<span class="nc" id="L262">        centerAsString.put(3, &quot;   &quot; + getRightColor(card.getReign()) + &quot;1&quot; + getRightIcon(card.getReign()) + &quot;  &quot;); // back</span>
+<span class="nc" id="L263">    }</span>
+
+    private void processCenter(Map&lt;Integer, String&gt; centerAsString, Set&lt;Symbol&gt; centerToProcess, InitialCard card) {
+<span class="nc" id="L266">        String colorReset = &quot;\033[0m&quot;;</span>
+
+<span class="nc" id="L268">        centerAsString.put(0, colorReset + &quot;────────&quot;);</span>
+<span class="nc" id="L269">        centerAsString.put(1, colorReset + &quot;        &quot;);</span>
+<span class="nc" id="L270">        centerAsString.put(4, colorReset + &quot;        &quot;);</span>
+<span class="nc" id="L271">        centerAsString.put(5, colorReset + &quot;────────&quot;);</span>
+
+<span class="nc bnc" id="L273" title="All 2 branches missed.">        if (centerToProcess.isEmpty()) {</span>
+<span class="nc" id="L274">            centerAsString.put(2, colorReset + &quot;   ╔╗   &quot;);</span>
+<span class="nc" id="L275">            centerAsString.put(3, colorReset + &quot;   ╚╝   &quot;);</span>
+<span class="nc" id="L276">            return;</span>
+        }
+
+<span class="nc" id="L279">        Symbol[] symbols = centerToProcess.toArray(new Symbol[0]);</span>
+
+<span class="nc" id="L281">        centerAsString.put(2, &quot;   &quot; + getRightColor(symbols[0]) + &quot;1&quot; + getRightIcon(symbols[0]) + colorReset + &quot;  &quot;);</span>
+<span class="nc bnc" id="L282" title="All 4 branches missed.">        switch (centerToProcess.size()) {</span>
+            case 1:
+<span class="nc" id="L284">                centerAsString.put(3, &quot;        &quot;);</span>
+<span class="nc" id="L285">                break;</span>
+            case 2:
+<span class="nc" id="L287">                centerAsString.put(3, &quot;   &quot; + getRightColor(symbols[1]) + &quot;1&quot; + getRightIcon(symbols[1]) + colorReset + &quot;  &quot;);</span>
+<span class="nc" id="L288">                break;</span>
+            case 3:
+<span class="nc" id="L290">                centerAsString.put(3, &quot; &quot; + getRightColor(symbols[1]) + &quot;1&quot; + getRightIcon(symbols[1]) + getRightColor(symbols[2]) + &quot;1&quot;</span>
+<span class="nc" id="L291">                        + getRightIcon(symbols[2]) + colorReset + &quot; &quot;);</span>
+<span class="nc" id="L292">                break;</span>
+            default:
+                break;
+        }
+<span class="nc" id="L296">    }</span>
+
+    private void processObjectiveCorners(Map&lt;Corner, List&lt;String&gt;&gt; cornersAsString, Pair&lt;Integer, Integer&gt; coord) {
+<span class="nc" id="L299">        String leftSuffix = &quot;&quot;, rightSuffix = &quot;\n&quot;;</span>
+<span class="nc" id="L300">        Symbol symbol = Symbol.EMPTY_CORNER;</span>
+
+<span class="nc" id="L302">        cornersAsString.put(Corner.TOP_LEFT, getTopLeftCorner(coord, symbol, leftSuffix, &quot;\033[0m&quot;));</span>
+<span class="nc" id="L303">        cornersAsString.put(Corner.TOP_RIGHT, getTopRightCorner(coord, symbol, rightSuffix, &quot;\033[0m&quot;));</span>
+<span class="nc" id="L304">        cornersAsString.put(Corner.BOTTOM_LEFT, getBottomLeftCorner(coord, symbol, leftSuffix, &quot;\033[0m&quot;));</span>
+<span class="nc" id="L305">        cornersAsString.put(Corner.BOTTOM_RIGHT, getBottomRightCorner(coord, symbol, rightSuffix, &quot;\033[0m&quot;));</span>
+<span class="nc" id="L306">    }</span>
+
+
+
+    private void processObjectiveCenter(Map&lt;Integer, String&gt; centerAsString, Objective objective) {
+
+<span class="nc" id="L312">        centerAsString.put(0, &quot;────────&quot;);</span>
+<span class="nc" id="L313">        centerAsString.put(1, &quot;   &quot; + String.valueOf(objective.getPoints()) + &quot;    &quot;);</span>
+<span class="nc" id="L314">        centerAsString.put(5, &quot;────────&quot;);</span>
+
+<span class="nc bnc" id="L316" title="All 3 branches missed.">        switch (objective.getReq()) {</span>
+<span class="nc" id="L317">            case PositionRequirement positionRequirement:</span>
+<span class="nc" id="L318">                positioningClassifier(centerAsString, positionRequirement.getReqs());</span>
+<span class="nc" id="L319">                break;</span>
+<span class="nc" id="L320">            case QuantityRequirement quantityRequirement:</span>
+<span class="nc" id="L321">                Map&lt;Symbol, Integer&gt; req = quantityRequirement.getReqs();</span>
+<span class="nc" id="L322">                int size = req.size();</span>
+<span class="nc" id="L323">                centerAsString.put(2, &quot;        &quot;);</span>
+<span class="nc" id="L324">                centerAsString.put(4, &quot;        &quot;);</span>
+<span class="nc" id="L325">                int reqSize = req.size();</span>
+<span class="nc bnc" id="L326" title="All 2 branches missed.">                if (reqSize &lt; 3) {</span>
+<span class="nc" id="L327">                    String space = getObjectiveSpace(size);</span>
+<span class="nc bnc" id="L328" title="All 2 branches missed.">                    if (space != null) {</span>
+<span class="nc" id="L329">                        centerAsString.put(3, space + &quot; &quot; + getQuantityString(req, &quot;\033[0m&quot;) + space);</span>
+<span class="nc" id="L330">                        break;</span>
+                    }
+<span class="nc" id="L332">                } else {</span>
+<span class="nc" id="L333">                    int firstHalf = size / 2;</span>
+<span class="nc" id="L334">                    String space = getObjectiveSpace(firstHalf);</span>
+<span class="nc" id="L335">                    Map&lt;Symbol, Integer&gt; first = new HashMap&lt;&gt;(), second = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L336">                    int cycle = 0;</span>
+<span class="nc bnc" id="L337" title="All 2 branches missed.">                    for (Symbol s : req.keySet()) {</span>
+<span class="nc bnc" id="L338" title="All 2 branches missed.">                        if (cycle &lt; firstHalf)</span>
+<span class="nc" id="L339">                            first.put(s, req.get(s));</span>
+                        else
+<span class="nc" id="L341">                            second.put(s, req.get(s));</span>
+<span class="nc" id="L342">                        cycle++;</span>
+<span class="nc" id="L343">                    }</span>
+
+<span class="nc" id="L345">                    centerAsString.put(3, space + &quot; &quot; + getQuantityString(first, &quot;\033[0m&quot;) + space);</span>
+<span class="nc" id="L346">                    space = getObjectiveSpace(size - firstHalf);</span>
+<span class="nc" id="L347">                    centerAsString.put(4, space + getQuantityString(second, &quot;\033[0m&quot;) + space);</span>
+                }
+<span class="nc" id="L349">                break;</span>
+            default:
+<span class="nc" id="L351">                throw new IllegalStateException(&quot;Unexpected value: &quot; + objective.getReq());</span>
+        }
+
+
+<span class="nc" id="L355">    }</span>
+
+    // GETTERS
+
+    private String getQuantityString(Map&lt;Symbol, Integer&gt; reqs, String borderColor) {
+
+<span class="nc" id="L361">        StringBuilder reqString = new StringBuilder();</span>
+
+<span class="nc bnc" id="L363" title="All 2 branches missed.">        for (Symbol symbol : reqs.keySet())</span>
+<span class="nc" id="L364">            reqString.append(getRightColor(symbol)).append(String.valueOf(reqs.get(symbol))).append(getRightIcon(symbol))</span>
+<span class="nc" id="L365">                    .append(borderColor);</span>
+
+<span class="nc" id="L367">        return reqString.toString();</span>
+
+    }
+
+    private String getPrefixCoord(Pair&lt;Integer, Integer&gt; coord, int linePosition) {
+<span class="nc" id="L372">        int x = coord.first(), y = coord.second();</span>
+
+<span class="nc bnc" id="L374" title="All 7 branches missed.">        return switch (linePosition) {</span>
+<span class="nc" id="L375">            case 1 -&gt; &quot;\033[&quot; + String.valueOf(y) + &quot;;&quot; + String.valueOf(x) + &quot;H&quot;;</span>
+<span class="nc" id="L376">            case 2 -&gt; &quot;\033[&quot; + String.valueOf(y + 1) + &quot;;&quot; + String.valueOf(x) + &quot;H&quot;;</span>
+<span class="nc" id="L377">            case 3 -&gt; &quot;\033[&quot; + String.valueOf(y + 2) + &quot;;&quot; + String.valueOf(x) + &quot;H&quot;;</span>
+<span class="nc" id="L378">            case 4 -&gt; &quot;\033[&quot; + String.valueOf(y + 3) + &quot;;&quot; + String.valueOf(x) + &quot;H&quot;;</span>
+<span class="nc" id="L379">            case 5 -&gt; &quot;\033[&quot; + String.valueOf(y + 4) + &quot;;&quot; + String.valueOf(x) + &quot;H&quot;;</span>
+<span class="nc" id="L380">            case 6 -&gt; &quot;\033[&quot; + String.valueOf(y + 5) + &quot;;&quot; + String.valueOf(x) + &quot;H&quot;;</span>
+<span class="nc" id="L381">            default -&gt; &quot;&quot;;</span>
+        };
+
+    }
+
+    private String getColorAndIcon(Symbol symbol) {
+<span class="nc" id="L387">        return getRightColor(symbol) + getRightIcon(symbol);</span>
+    }
+
+    /**
+     * The method is a getter for the TUI-relative color of a specific symbol.
+     * 
+     * @param symbol the specified symbol
+     * @return the color code as String
+     */
+    public String getRightColor(Symbol symbol) {
+<span class="nc bnc" id="L397" title="All 8 branches missed.">        return switch (symbol) {</span>
+<span class="nc" id="L398">            case FUNGUS -&gt; &quot;\033[31m&quot;;</span>
+<span class="nc" id="L399">            case ANIMAL -&gt; &quot;\033[34m&quot;;</span>
+<span class="nc" id="L400">            case PLANT -&gt; &quot;\033[32m&quot;;</span>
+<span class="nc" id="L401">            case INSECT -&gt; &quot;\033[35m&quot;;</span>
+
+<span class="nc" id="L403">            case INKWELL -&gt; &quot;\033[33m&quot;;</span>
+<span class="nc" id="L404">            case PARCHMENT -&gt; &quot;\033[33m&quot;;</span>
+<span class="nc" id="L405">            case FEATHER -&gt; &quot;\033[33m&quot;;</span>
+<span class="nc" id="L406">            default -&gt; &quot;&quot;;</span>
+        };
+    }
+
+    /**
+     * The method is a getter for the TUI-relative icon of a specific symbol.
+     * 
+     * @param symbol the specified symbol
+     * @return the symbol icon as String
+     */
+    public String getRightIcon(Symbol symbol) {
+<span class="nc bnc" id="L417" title="All 10 branches missed.">        return switch (symbol) {</span>
+<span class="nc" id="L418">            case FULL_CORNER, EMPTY_CORNER -&gt; &quot;  &quot;;</span>
+<span class="nc" id="L419">            case FUNGUS -&gt; &quot;󰟟 &quot;;</span>
+<span class="nc" id="L420">            case ANIMAL -&gt; &quot; &quot;;</span>
+<span class="nc" id="L421">            case PLANT -&gt; &quot; &quot;;</span>
+<span class="nc" id="L422">            case INSECT -&gt; &quot;󱖉 &quot;;</span>
+<span class="nc" id="L423">            case INKWELL -&gt; &quot;󱄮 &quot;;</span>
+<span class="nc" id="L424">            case PARCHMENT -&gt; &quot; &quot;;</span>
+<span class="nc" id="L425">            case FEATHER -&gt; &quot; &quot;;</span>
+<span class="nc" id="L426">            case CORNER_OBJ -&gt; &quot;󱨈 &quot;;</span>
+<span class="nc" id="L427">            default -&gt; &quot;  &quot;;</span>
+        };
+    }
+
+    private List&lt;String&gt; getTopLeftCorner(Pair&lt;Integer, Integer&gt; coord, Symbol symbol, String suffix, String borderColor) {
+<span class="nc" id="L432">        List&lt;String&gt; corner = new ArrayList&lt;&gt;();</span>
+
+<span class="nc bnc" id="L434" title="All 2 branches missed.">        switch (symbol) {</span>
+            case Symbol.EMPTY_CORNER:
+<span class="nc" id="L436">                corner.add(getPrefixCoord(coord, 1) + &quot;┌────&quot; + suffix);</span>
+<span class="nc" id="L437">                corner.add(getPrefixCoord(coord, 2) + &quot;│    &quot; + suffix);</span>
+<span class="nc" id="L438">                corner.add(getPrefixCoord(coord, 3) + &quot;│    &quot; + suffix);</span>
+<span class="nc" id="L439">                break;</span>
+
+            default:
+<span class="nc" id="L442">                corner.add(getPrefixCoord(coord, 1) + &quot;┌───┬&quot; + suffix);</span>
+<span class="nc" id="L443">                corner.add(getPrefixCoord(coord, 2) + &quot;│ &quot; + getColorAndIcon(symbol) + borderColor + &quot;│&quot; + suffix);</span>
+<span class="nc" id="L444">                corner.add(getPrefixCoord(coord, 3) + &quot;├───┘&quot; + suffix);</span>
+                break;
+        }
+
+<span class="nc" id="L448">        return corner;</span>
+    }
+
+    private List&lt;String&gt; getTopRightCorner(Pair&lt;Integer, Integer&gt; coord, Symbol symbol, String suffix, String borderColor) {
+
+<span class="nc" id="L453">        List&lt;String&gt; corner = new ArrayList&lt;&gt;();</span>
+
+<span class="nc bnc" id="L455" title="All 2 branches missed.">        switch (symbol) {</span>
+            case Symbol.EMPTY_CORNER:
+<span class="nc" id="L457">                corner.add(&quot;────┐&quot; + suffix);</span>
+<span class="nc" id="L458">                corner.add(&quot;    │&quot; + suffix);</span>
+<span class="nc" id="L459">                corner.add(&quot;    │&quot; + suffix);</span>
+<span class="nc" id="L460">                break;</span>
+
+            default:
+<span class="nc" id="L463">                corner.add(&quot;┬───┐&quot; + suffix);</span>
+<span class="nc" id="L464">                corner.add(&quot;│ &quot; + getColorAndIcon(symbol) + borderColor + &quot;│&quot; + suffix);</span>
+<span class="nc" id="L465">                corner.add(&quot;└───┤&quot; + suffix);</span>
+                break;
+        }
+
+<span class="nc" id="L469">        return corner;</span>
+    }
+
+    private List&lt;String&gt; getBottomLeftCorner(Pair&lt;Integer, Integer&gt; coord, Symbol symbol, String suffix, String borderColor) {
+
+<span class="nc" id="L474">        List&lt;String&gt; corner = new ArrayList&lt;&gt;();</span>
+
+<span class="nc bnc" id="L476" title="All 2 branches missed.">        switch (symbol) {</span>
+            case Symbol.EMPTY_CORNER:
+<span class="nc" id="L478">                corner.add(getPrefixCoord(coord, 4) + &quot;│    &quot; + suffix);</span>
+<span class="nc" id="L479">                corner.add(getPrefixCoord(coord, 5) + &quot;│    &quot; + suffix);</span>
+<span class="nc" id="L480">                corner.add(getPrefixCoord(coord, 6) + &quot;└────&quot; + suffix);</span>
+<span class="nc" id="L481">                break;</span>
+
+            default:
+<span class="nc" id="L484">                corner.add(getPrefixCoord(coord, 4) + &quot;├───┐&quot; + suffix);</span>
+<span class="nc" id="L485">                corner.add(getPrefixCoord(coord, 5) + &quot;│ &quot; + getColorAndIcon(symbol) + borderColor + &quot;│&quot; + suffix);</span>
+<span class="nc" id="L486">                corner.add(getPrefixCoord(coord, 6) + &quot;└───┴&quot; + suffix);</span>
+                break;
+        }
+
+<span class="nc" id="L490">        return corner;</span>
+    }
+
+    private List&lt;String&gt; getBottomRightCorner(Pair&lt;Integer, Integer&gt; coord, Symbol symbol, String suffix, String borderColor) {
+
+<span class="nc" id="L495">        List&lt;String&gt; corner = new ArrayList&lt;&gt;();</span>
+
+<span class="nc bnc" id="L497" title="All 2 branches missed.">        switch (symbol) {</span>
+            case Symbol.EMPTY_CORNER:
+<span class="nc" id="L499">                corner.add(&quot;    │&quot; + suffix);</span>
+<span class="nc" id="L500">                corner.add(&quot;    │&quot; + suffix);</span>
+<span class="nc" id="L501">                corner.add(&quot;────┘&quot; + suffix);</span>
+<span class="nc" id="L502">                break;</span>
+
+            default:
+<span class="nc" id="L505">                corner.add(&quot;┌───┤&quot; + suffix);</span>
+<span class="nc" id="L506">                corner.add(&quot;│ &quot; + getColorAndIcon(symbol) + borderColor + &quot;│&quot; + suffix);</span>
+<span class="nc" id="L507">                corner.add(&quot;┴───┘&quot; + suffix);</span>
+                break;
+        }
+
+<span class="nc" id="L511">        return corner;</span>
+    }
+
+    private String getPosixIcon(Symbol symbol) {
+
+<span class="nc" id="L516">        String icon = &quot;▆▆&quot;, suffix = &quot;\033[0m&quot;;</span>
+
+<span class="nc bnc" id="L518" title="All 5 branches missed.">        return switch (symbol) {</span>
+<span class="nc" id="L519">            case FUNGUS -&gt; &quot;\033[31m&quot; + icon + suffix;</span>
+<span class="nc" id="L520">            case ANIMAL -&gt; &quot;\033[36m&quot; + icon + suffix;</span>
+<span class="nc" id="L521">            case PLANT -&gt; &quot;\033[32m&quot; + icon + suffix;</span>
+<span class="nc" id="L522">            case INSECT -&gt; &quot;\033[35m&quot; + icon + suffix;</span>
+<span class="nc" id="L523">            default -&gt; icon + suffix;</span>
+        };
+
+
+    }
+
+
+    // UTILS
+    private void positioningClassifier(Map&lt;Integer, String&gt; centerAsString, Map&lt;Pair&lt;Integer, Integer&gt;, Symbol&gt; reqs) {
+<span class="nc" id="L532">        Pair&lt;Integer, Integer&gt; bottomMost = null;</span>
+<span class="nc" id="L533">        Pair&lt;Integer, Integer&gt; leftMost = null;</span>
+
+
+<span class="nc bnc" id="L536" title="All 2 branches missed.">        for (Pair&lt;Integer, Integer&gt; coord : reqs.keySet()) {</span>
+<span class="nc bnc" id="L537" title="All 4 branches missed.">            if (bottomMost == null || coord.second() &lt; bottomMost.second()) {</span>
+<span class="nc" id="L538">                bottomMost = coord;</span>
+            }
+<span class="nc bnc" id="L540" title="All 4 branches missed.">            if (leftMost == null || coord.first() &lt; leftMost.first()) {</span>
+<span class="nc" id="L541">                leftMost = coord;</span>
+            }
+<span class="nc" id="L543">        }</span>
+
+        Integer col, row;
+<span class="nc bnc" id="L546" title="All 2 branches missed.">        for (Pair&lt;Integer, Integer&gt; coord : reqs.keySet()) {</span>
+<span class="nc" id="L547">            row = 2 - (coord.second() - bottomMost.second()); // 2 (max) - (curr - offset): we go top to bottom</span>
+<span class="nc" id="L548">            col = coord.first() - leftMost.first(); // simply offset</span>
+
+            // String building (with horizontal spaces)
+<span class="nc" id="L551">            String tmp = &quot;&quot;;</span>
+<span class="nc bnc" id="L552" title="All 2 branches missed.">            for (int i = 0; i &lt; col; i++) {</span>
+<span class="nc" id="L553">                tmp += &quot;  &quot;;</span>
+            }
+<span class="nc" id="L555">            tmp += getPosixIcon(reqs.get(coord));</span>
+<span class="nc bnc" id="L556" title="All 2 branches missed.">            for (int i = col; i &lt; 3; i++) {</span>
+<span class="nc" id="L557">                tmp += &quot;  &quot;;</span>
+            }
+
+<span class="nc" id="L560">            centerAsString.put(row + 2, tmp); // +2: start from second line of card</span>
+<span class="nc" id="L561">        }</span>
+<span class="nc" id="L562">    }</span>
+
+    private String getObjectiveSpace(Integer size) {
+<span class="nc bnc" id="L565" title="All 4 branches missed.">        return switch (size) {</span>
+<span class="nc" id="L566">            case 1 -&gt; &quot;  &quot;;</span>
+<span class="nc" id="L567">            case 2 -&gt; &quot; &quot;;</span>
+<span class="nc" id="L568">            case 3 -&gt; &quot;&quot;;</span>
+<span class="nc" id="L569">            default -&gt; null;</span>
+        };
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

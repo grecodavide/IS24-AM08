@@ -1,0 +1,401 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PlayerTabController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.client.frontend.gui.controllers</a> &gt; <span class="el_source">PlayerTabController.java</span></div><h1>PlayerTabController.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.client.frontend.gui.controllers;
+
+import it.polimi.ingsw.client.frontend.gui.nodes.BoardPane;
+import it.polimi.ingsw.client.frontend.gui.nodes.CardView;
+import it.polimi.ingsw.gamemodel.*;
+import it.polimi.ingsw.utils.CardsManager;
+import it.polimi.ingsw.utils.Pair;
+import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Cursor;
+import javafx.scene.Node;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Tab;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.TransferMode;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Controller of the player tab
+ */
+<span class="nc" id="L34">public class PlayerTabController extends SceneController {</span>
+    public HBox handCards;
+    @FXML
+    private StackPane rootPane;
+    @FXML
+    private Tab playerTab;
+    private String username;
+    @FXML
+    BoardPane playerBoard;
+    @FXML
+    ScrollPane scroll;
+    @FXML
+    HBox resourcesCounter;
+    @FXML
+    Label pointsCounter;
+    @FXML
+    Label stateTitle;
+    HBox actionContainer;
+<span class="nc" id="L52">    private final List&lt;Node&gt; temporaryDragAreas = new ArrayList&lt;&gt;();</span>
+
+    public void initialize() {
+<span class="nc" id="L55">        scroll.getStyleClass().clear();</span>
+
+<span class="nc" id="L57">        HashMap&lt;Symbol, Integer&gt; res = new HashMap&lt;&gt;();</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">        for (Symbol s : Symbol.getBasicResources()) {</span>
+<span class="nc" id="L59">            res.put(s, 0);</span>
+<span class="nc" id="L60">        }</span>
+<span class="nc" id="L61">        setResources(res);</span>
+<span class="nc" id="L62">    }</span>
+
+    /**
+     * Set the displayed resources
+     *
+     * @param resources map to the resources amount
+     */
+    public void setResources(Map&lt;Symbol, Integer&gt; resources) {
+<span class="nc" id="L70">        resourcesCounter.getChildren().clear();</span>
+<span class="nc" id="L71">        Symbol[] order = new Symbol[]{Symbol.FUNGUS, Symbol.PLANT, Symbol.ANIMAL, Symbol.INSECT,</span>
+                Symbol.FEATHER, Symbol.PARCHMENT, Symbol.INKWELL};
+<span class="nc bnc" id="L73" title="All 2 branches missed.">        for (Symbol s : order) {</span>
+<span class="nc" id="L74">            ImageView icon = new ImageView(new Image(&quot;/images/symbols/&quot; + s.toString().toUpperCase() + &quot;.png&quot;));</span>
+<span class="nc" id="L75">            icon.setFitHeight(40);</span>
+<span class="nc" id="L76">            icon.setFitWidth(40);</span>
+<span class="nc" id="L77">            Label count = new Label(String.valueOf(resources.get(s)));</span>
+<span class="nc" id="L78">            count.getStyleClass().add(&quot;resources-count&quot;);</span>
+<span class="nc" id="L79">            resourcesCounter.getChildren().add(icon);</span>
+<span class="nc" id="L80">            resourcesCounter.getChildren().add(count);</span>
+        }
+<span class="nc" id="L82">    }</span>
+
+    /**
+     * Places a card on the board
+     *
+     * @param coords
+     * @param card
+     * @param side
+     */
+    public void placeCard(Pair&lt;Integer, Integer&gt; coords, PlayableCard card, Side side) {
+<span class="nc" id="L92">        playerBoard.addCard(coords, card, side);</span>
+<span class="nc" id="L93">    }</span>
+
+    /**
+     * Set the amount of points that the player has
+     * @param points amount of points
+     */
+    public void setPoints(int points) {
+<span class="nc" id="L100">        pointsCounter.setText(&quot;Points: &quot; + points);</span>
+<span class="nc" id="L101">    }</span>
+
+    // Drag and drop management
+
+    /**
+     * Add attributes to the hand card
+     *
+     * @param card CardView to add attributes
+     */
+    private void initializeHandCard(CardView card) {
+<span class="nc" id="L111">        card.setCursor(Cursor.OPEN_HAND);</span>
+<span class="nc" id="L112">        card.setOnDragDetected(event -&gt; {</span>
+            // Set Dragboard content
+<span class="nc" id="L114">            Dragboard dragboard = card.startDragAndDrop(TransferMode.MOVE);</span>
+<span class="nc" id="L115">            ClipboardContent content = new ClipboardContent();</span>
+<span class="nc" id="L116">            content.putString(&quot;&quot;);</span>
+<span class="nc" id="L117">            dragboard.setContent(content);</span>
+            // Set the card as image of the dragboard
+<span class="nc" id="L119">            card.setArc(0);</span>
+<span class="nc" id="L120">            dragboard.setDragView(card.snapshot(null, null));</span>
+<span class="nc" id="L121">            dragboard.setDragViewOffsetX(CardView.cardWidth / 2);</span>
+<span class="nc" id="L122">            dragboard.setDragViewOffsetY(CardView.cardHeight / 2);</span>
+<span class="nc" id="L123">            this.createDragArea((PlayableCard) card.getProperties().get(&quot;Card&quot;), (Side) card.getProperties().get(&quot;Side&quot;));</span>
+<span class="nc" id="L124">            card.setVisible(false);</span>
+<span class="nc" id="L125">            card.setCursor(Cursor.CLOSED_HAND);</span>
+<span class="nc" id="L126">            event.consume();</span>
+<span class="nc" id="L127">        });</span>
+<span class="nc" id="L128">        card.setOnDragDone(event -&gt; {</span>
+<span class="nc" id="L129">            this.removeDragAreas();</span>
+<span class="nc" id="L130">            card.setArc(20);</span>
+<span class="nc" id="L131">            card.setVisible(true);</span>
+<span class="nc" id="L132">            card.setCursor(Cursor.DEFAULT);</span>
+<span class="nc" id="L133">            event.consume();</span>
+<span class="nc" id="L134">        });</span>
+<span class="nc" id="L135">        card.setOnMouseClicked((clickEvent) -&gt; {</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">            if (clickEvent.getButton() == MouseButton.SECONDARY) {</span>
+<span class="nc" id="L137">                Side side = (Side) card.getProperties().get(&quot;Side&quot;);</span>
+<span class="nc bnc" id="L138" title="All 2 branches missed.">                Side newSide = side.equals(Side.BACK) ? Side.FRONT : Side.BACK;</span>
+<span class="nc" id="L139">                card.setCard((PlayableCard) card.getProperties().get(&quot;Card&quot;), newSide);</span>
+<span class="nc bnc" id="L140" title="All 2 branches missed.">            } else if (clickEvent.getButton() == MouseButton.MIDDLE) {</span>
+                // Compatibility with Hyprland
+<span class="nc bnc" id="L142" title="All 2 branches missed.">                if (this.temporaryDragAreas.size() &gt; 0) {</span>
+<span class="nc" id="L143">                    this.removeDragAreas();</span>
+                } else {
+<span class="nc" id="L145">                    this.createDragArea((PlayableCard) card.getProperties().get(&quot;Card&quot;), (Side) card.getProperties().get(&quot;Side&quot;));</span>
+                }
+            }
+<span class="nc" id="L148">        });</span>
+<span class="nc" id="L149">    }</span>
+
+    /**
+     * Create all possible drag areas on the board
+     *
+     * @param card Card to place
+     * @param side Side on which place the card
+     */
+    private void createDragArea(PlayableCard card, Side side) {
+<span class="nc" id="L158">        List&lt;Pair&lt;Integer, Integer&gt;&gt; placeableCoords = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L159" title="All 2 branches missed.">        for (Pair&lt;Integer, Integer&gt; coords : playerBoard.takenSpots) {</span>
+<span class="nc bnc" id="L160" title="All 2 branches missed.">            for (int i = -1; i &lt; 2; i++) {</span>
+<span class="nc bnc" id="L161" title="All 2 branches missed.">                for (int j = -1; j &lt; 2; j++) {</span>
+<span class="nc bnc" id="L162" title="All 4 branches missed.">                    if (i != 0 &amp;&amp; j != 0) {</span>
+<span class="nc" id="L163">                        Pair&lt;Integer, Integer&gt; c = new Pair&lt;&gt;(coords.first() + i, coords.second() + j);</span>
+<span class="nc bnc" id="L164" title="All 2 branches missed.">                        if (!playerBoard.takenSpots.contains(c)) placeableCoords.add(c);</span>
+                    }
+                }
+            }
+<span class="nc" id="L168">        }</span>
+<span class="nc bnc" id="L169" title="All 2 branches missed.">        for (Pair&lt;Integer, Integer&gt; c : placeableCoords) {</span>
+<span class="nc" id="L170">            showDragArea(c, card, side);</span>
+<span class="nc" id="L171">        }</span>
+<span class="nc" id="L172">    }</span>
+
+    /**
+     * Create a drag area in the specified coordinates, for the specified card on a certain side
+     *
+     * @param pcoords Game coordinates on which to put the area
+     * @param card    Card where to put the area
+     * @param side    Side on which to put the card
+     */
+    private void showDragArea(Pair&lt;Integer, Integer&gt; pcoords, PlayableCard card, Side side) {
+<span class="nc" id="L182">        Pane dragArea = new Pane();</span>
+<span class="nc" id="L183">        dragArea.getStyleClass().add(&quot;place-spot&quot;);</span>
+        // Set area position
+<span class="nc" id="L185">        Pair&lt;Double, Double&gt; gcoords = playerBoard.convertCoordinates(pcoords);</span>
+<span class="nc" id="L186">        dragArea.setLayoutX(gcoords.first());</span>
+<span class="nc" id="L187">        dragArea.setLayoutY(gcoords.second());</span>
+        // Set area size
+<span class="nc" id="L189">        dragArea.setPrefHeight(CardView.cardHeight);</span>
+<span class="nc" id="L190">        dragArea.setPrefWidth(CardView.cardWidth);</span>
+
+        // When you drag over the area accept the drag
+<span class="nc" id="L193">        dragArea.setOnDragOver(event -&gt; {</span>
+<span class="nc bnc" id="L194" title="All 4 branches missed.">            if (event.getGestureSource() != this &amp;&amp; event.getDragboard().hasString()) {</span>
+<span class="nc" id="L195">                event.acceptTransferModes(TransferMode.MOVE);</span>
+            }
+<span class="nc" id="L197">            event.consume();</span>
+<span class="nc" id="L198">        });</span>
+        // When you drop on the area do the needed actions
+<span class="nc" id="L200">        dragArea.setOnDragDropped(event -&gt; {</span>
+<span class="nc" id="L201">            event.setDropCompleted(true);</span>
+<span class="nc" id="L202">            this.removeDragAreas();</span>
+            // Play the card
+<span class="nc" id="L204">            view.playCard(pcoords, card, side);</span>
+<span class="nc" id="L205">            event.consume();</span>
+<span class="nc" id="L206">        });</span>
+<span class="nc" id="L207">        dragArea.setOnMouseClicked(event -&gt; {</span>
+<span class="nc bnc" id="L208" title="All 2 branches missed.">            if (event.getButton().equals(MouseButton.PRIMARY)) {</span>
+<span class="nc" id="L209">                this.removeDragAreas();</span>
+                // Play the card
+<span class="nc" id="L211">                view.playCard(pcoords, card, side);</span>
+<span class="nc" id="L212">                event.consume();</span>
+            }
+<span class="nc" id="L214">        });</span>
+
+        // When you enter the area change style
+<span class="nc" id="L217">        dragArea.setOnDragEntered(event -&gt; {</span>
+<span class="nc" id="L218">            dragArea.getStyleClass().add(&quot;place-spot-hover&quot;);</span>
+<span class="nc" id="L219">            event.consume();</span>
+<span class="nc" id="L220">        });</span>
+        // When you exit the area change style
+<span class="nc" id="L222">        dragArea.setOnDragExited(event -&gt; {</span>
+<span class="nc" id="L223">            dragArea.getStyleClass().remove(&quot;place-spot-hover&quot;);</span>
+<span class="nc" id="L224">            event.consume();</span>
+<span class="nc" id="L225">        });</span>
+<span class="nc" id="L226">        playerBoard.getChildren().add(dragArea);</span>
+<span class="nc" id="L227">        temporaryDragAreas.add(dragArea);</span>
+<span class="nc" id="L228">    }</span>
+
+    /**
+     * Remove all temporary drag areas from player board
+     */
+    private void removeDragAreas() {
+<span class="nc bnc" id="L234" title="All 2 branches missed.">        for (Node n : temporaryDragAreas) {</span>
+<span class="nc" id="L235">            playerBoard.getChildren().remove(n);</span>
+<span class="nc" id="L236">        }</span>
+<span class="nc" id="L237">        temporaryDragAreas.clear();</span>
+<span class="nc" id="L238">    }</span>
+
+    /**
+     * Current player has to choose the secret objective
+     * @param objectives the two objectives to choose
+     */
+    public void giveSecretObjectives(Pair&lt;Objective, Objective&gt; objectives) {
+<span class="nc" id="L245">        stateTitle.setText(&quot;Choose your secret objective&quot;);</span>
+<span class="nc" id="L246">        CardView first = new CardView(objectives.first(), Side.FRONT);</span>
+<span class="nc" id="L247">        CardView second = new CardView(objectives.second(), Side.FRONT);</span>
+<span class="nc" id="L248">        createCardChoiceContainer(first, second);</span>
+<span class="nc" id="L249">        first.setCursor(Cursor.HAND);</span>
+<span class="nc" id="L250">        second.setCursor(Cursor.HAND);</span>
+<span class="nc" id="L251">        first.setOnMouseClicked((mouseEvent) -&gt; view.chooseSecretObjective(objectives.first()));</span>
+<span class="nc" id="L252">        second.setOnMouseClicked((mouseEvent -&gt; view.chooseSecretObjective(objectives.second())));</span>
+<span class="nc" id="L253">    }</span>
+
+    /**
+     * Another player is choosing the secret objective
+     */
+    public void someoneDrewSecretObjective() {
+<span class="nc" id="L259">        stateTitle.setText(username + &quot; is choosing the secret objective&quot;);</span>
+<span class="nc" id="L260">        CardView first = new CardView(CardsManager.getInstance().getObjectives().get(1), Side.BACK);</span>
+<span class="nc" id="L261">        CardView second = new CardView(CardsManager.getInstance().getObjectives().get(1), Side.BACK);</span>
+<span class="nc" id="L262">        createCardChoiceContainer(first, second);</span>
+<span class="nc" id="L263">    }</span>
+
+    /**
+     * The current player is choosing the initial card side
+     * @param card given initial card
+     */
+    public void giveInitialCard(InitialCard card) {
+<span class="nc" id="L270">        stateTitle.setText(&quot;Choose your card&quot;);</span>
+<span class="nc" id="L271">        CardView front = new CardView(card, Side.FRONT);</span>
+<span class="nc" id="L272">        CardView back = new CardView(card, Side.BACK);</span>
+<span class="nc" id="L273">        createCardChoiceContainer(front, back);</span>
+<span class="nc" id="L274">        front.setCursor(Cursor.HAND);</span>
+<span class="nc" id="L275">        front.setOnMouseClicked((e) -&gt; {</span>
+<span class="nc" id="L276">            view.chooseInitialCardSide(Side.FRONT);</span>
+<span class="nc" id="L277">        });</span>
+<span class="nc" id="L278">        back.setCursor(Cursor.HAND);</span>
+<span class="nc" id="L279">        back.setOnMouseClicked((e) -&gt; {</span>
+<span class="nc" id="L280">            view.chooseInitialCardSide(Side.BACK);</span>
+<span class="nc" id="L281">        });</span>
+<span class="nc" id="L282">    }</span>
+
+    /**
+     * Show that someone is choosing the initial card side
+     * @param card initial card
+     */
+    public void someoneDrewInitialCard(InitialCard card) {
+<span class="nc" id="L289">        stateTitle.setText(username + &quot; is choosing the initial card side...&quot;);</span>
+<span class="nc" id="L290">        CardView front = new CardView(card, Side.FRONT);</span>
+<span class="nc" id="L291">        CardView back = new CardView(card, Side.BACK);</span>
+<span class="nc" id="L292">        createCardChoiceContainer(front, back);</span>
+<span class="nc" id="L293">    }</span>
+
+    /**
+     * Remove the container that asks for initials card, objective cards..
+     */
+    public void removePlayerChoiceContainer() {
+<span class="nc" id="L299">        rootPane.getChildren().remove(actionContainer);</span>
+<span class="nc" id="L300">        stateTitle.setText(&quot;&quot;);</span>
+<span class="nc" id="L301">    }</span>
+
+    /**
+     * Creates the container to show the choice of initials card or objectives
+     *
+     * @param front First option to show
+     * @param back  Second option to show
+     */
+    private void createCardChoiceContainer(CardView front, CardView back) {
+<span class="nc" id="L310">        actionContainer = new HBox();</span>
+        // Add CardViews
+<span class="nc" id="L312">        actionContainer.getChildren().add(front);</span>
+<span class="nc" id="L313">        actionContainer.getChildren().add(back);</span>
+        // Set container properties
+<span class="nc" id="L315">        actionContainer.setMaxHeight(Double.NEGATIVE_INFINITY);</span>
+<span class="nc" id="L316">        actionContainer.setMaxWidth(Double.NEGATIVE_INFINITY);</span>
+<span class="nc" id="L317">        actionContainer.setSpacing(30);</span>
+        // Set alignment and add to the rootPane
+<span class="nc" id="L319">        actionContainer.setAlignment(Pos.BASELINE_CENTER);</span>
+<span class="nc" id="L320">        rootPane.getChildren().add(actionContainer);</span>
+<span class="nc" id="L321">        StackPane.setAlignment(actionContainer, Pos.CENTER);</span>
+<span class="nc" id="L322">    }</span>
+
+    /**
+     * Set the player username
+     * @param username username of the player
+     */
+    public void setUsername(String username) {
+<span class="nc" id="L329">        this.username = username;</span>
+<span class="nc" id="L330">        playerTab.getProperties().put(&quot;Username&quot;, username);</span>
+<span class="nc" id="L331">    }</span>
+
+    /**
+     * Get the Board Pane of the player
+     * @return the board pane
+     */
+    public BoardPane getBoard() {
+<span class="nc" id="L338">        return playerBoard;</span>
+    }
+
+    /**
+     * Set the secret objective for the current player
+     * @param objective objective to set
+     */
+    public void setSecretObjective(Objective objective) {
+        CardView secretObjective;
+<span class="nc bnc" id="L347" title="All 2 branches missed.">        if (objective != null) {</span>
+<span class="nc" id="L348">            secretObjective = new CardView(objective, Side.FRONT);</span>
+        } else {
+<span class="nc" id="L350">            secretObjective = new CardView(CardsManager.getInstance().getObjectives().get(2), Side.BACK);</span>
+        }
+<span class="nc" id="L352">        StackPane.setAlignment(secretObjective, Pos.BOTTOM_LEFT);</span>
+<span class="nc" id="L353">        StackPane.setMargin(secretObjective, new Insets(0, 100, 100, 0));</span>
+
+<span class="nc" id="L355">        rootPane.getChildren().add(secretObjective);</span>
+<span class="nc" id="L356">    }</span>
+
+    /**
+     * Set state title, usually used to tell the player what to do
+     * @param title text of the title
+     */
+    public void setStateTitle(String title) {
+<span class="nc" id="L363">        this.stateTitle.setText(title);</span>
+<span class="nc" id="L364">    }</span>
+
+    /**
+     * Set player hand cards
+     * @param cards list of cards currently in the player's hand
+     */
+    public void setHandCards(List&lt;PlayableCard&gt; cards) {
+<span class="nc" id="L371">        handCards.getChildren().clear();</span>
+<span class="nc bnc" id="L372" title="All 2 branches missed.">        for (PlayableCard card : cards) {</span>
+<span class="nc" id="L373">            CardView handCard = new CardView(card, Side.FRONT);</span>
+<span class="nc" id="L374">            initializeHandCard(handCard);</span>
+<span class="nc" id="L375">            handCards.getChildren().add(handCard);</span>
+<span class="nc" id="L376">        }</span>
+<span class="nc" id="L377">    }</span>
+
+    /**
+     * Set if the player is the current one
+     * @param current if the player is current
+     */
+    public void setCurrentPlayer(boolean current) {
+<span class="nc bnc" id="L384" title="All 2 branches missed.">        if (current) {</span>
+<span class="nc" id="L385">            playerTab.getStyleClass().add(&quot;player-tab&quot;);</span>
+        } else {
+<span class="nc" id="L387">            playerTab.getStyleClass().remove(&quot;player-tab&quot;);</span>
+        }
+<span class="nc" id="L389">    }</span>
+
+    /**
+     * Enables/disables mouse interactions with hand cards.
+     *
+     * @param enable True if interactions should be enabled, false otherwise
+     */
+    public void enablePlaceCardInteractions(boolean enable) {
+<span class="nc bnc" id="L397" title="All 2 branches missed.">        handCards.setDisable(!enable);</span>
+<span class="nc" id="L398">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

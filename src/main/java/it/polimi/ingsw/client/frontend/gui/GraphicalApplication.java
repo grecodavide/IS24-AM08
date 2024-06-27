@@ -10,16 +10,31 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import java.io.IOException;
 
+/**
+ * Class from which the FXML application is run, so it's entry point for the user.
+ * Apart from making use of FXML instances and methods, it interacts massively with {@link GraphicalViewGUI}.
+ */
 public class GraphicalApplication extends Application {
     private GraphicalViewGUI view;
     private Stage primaryStage;
+    // Window size
     public static double screenWidth = 1920.0;
     public static double screenHeight = 1020.0;
 
+    /**
+     * Launch the application
+     * @param args args
+     */
     public static void main(String[] args) {
         launch(args);
     }
 
+    /**
+     * Default method to start the FXML application, it can be called only from this class main(...).
+     *
+     * @param primaryStage The stage to be opened
+     * @throws IOException If there has been an I/O error.
+     */
     @Override
     public void start(Stage primaryStage) throws IOException {
         this.primaryStage = primaryStage;
@@ -35,7 +50,7 @@ public class GraphicalApplication extends Application {
         Scene connectionScene = new Scene(root, screenWidth, screenHeight);
         // Show the window
 
-        /*
+        /* Disabled by default
         // Fullscreen
         primaryStage.setFullScreen(true);
         primaryStage.setMaximized(true);
@@ -50,7 +65,6 @@ public class GraphicalApplication extends Application {
                 Platform.exit();
                 System.exit(0);
             });
-
     }
 
 

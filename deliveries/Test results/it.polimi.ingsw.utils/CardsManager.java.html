@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CardsManager.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.utils</a> &gt; <span class="el_source">CardsManager.java</span></div><h1>CardsManager.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.utils;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import it.polimi.ingsw.gamemodel.*;
+
+import java.io.FileReader;
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Singleton that represents a collection of all cards actually existing in the Game, so only those used
+ * in the Match instances.
+ * It's appointed to initialise them with instances to be de-serialized from a file and make them available
+ * through getters.
+ */
+public final class CardsManager {
+<span class="fc" id="L20">    private static final CardsManager singletonInstance = new CardsManager();</span>
+
+    private final Map&lt;Integer, InitialCard&gt; initialCards;
+    private final Map&lt;Integer, GoldCard&gt; goldCards;
+    private final Map&lt;Integer, ResourceCard&gt; resourceCards;
+    private final Map&lt;Integer, Objective&gt; objectives;
+
+    /**
+     * Private constructor since the singleton pattern is being used.
+     * Read from the JSON files, de-serialise the content in Map&lt;Integer, XXX&gt; objects, initialize the private attributes
+     * with these values.
+     */
+<span class="fc" id="L32">    private CardsManager() {</span>
+<span class="fc" id="L33">        CardJsonParser parser = new CardJsonParser();</span>
+<span class="fc" id="L34">        Gson gson = parser.getCardBuilder();</span>
+
+<span class="fc" id="L36">        Type initialCardsType = new TypeToken&lt;Map&lt;Integer, InitialCard&gt;&gt;() { }.getType();</span>
+<span class="fc" id="L37">        Type goldCardsType = new TypeToken&lt;Map&lt;Integer, GoldCard&gt;&gt;() { }.getType();</span>
+<span class="fc" id="L38">        Type resourceCardsType = new TypeToken&lt;Map&lt;Integer, ResourceCard&gt;&gt;() { }.getType();</span>
+<span class="fc" id="L39">        Type objectivesType = new TypeToken&lt;Map&lt;Integer, Objective&gt;&gt;() {}.getType();</span>
+
+        try {
+<span class="fc" id="L42">            initialCards = gson.fromJson(getResource(&quot;/json/initial_card.json&quot;), initialCardsType);</span>
+<span class="fc" id="L43">            goldCards = gson.fromJson(getResource(&quot;/json/gold_card.json&quot;), goldCardsType);</span>
+<span class="fc" id="L44">            resourceCards = gson.fromJson(getResource(&quot;/json/resource_card.json&quot;), resourceCardsType);</span>
+<span class="fc" id="L45">            objectives = gson.fromJson(getResource(&quot;/json/objective_card.json&quot;), objectivesType);</span>
+<span class="nc" id="L46">        } catch (Exception e) {</span>
+<span class="nc" id="L47">            throw new RuntimeException(e);</span>
+<span class="fc" id="L48">        }</span>
+<span class="fc" id="L49">    }</span>
+
+    private String getResource(String path) {
+        try {
+<span class="fc" id="L53">            return new String(this.getClass().getResourceAsStream(path).readAllBytes());</span>
+<span class="nc" id="L54">        } catch (IOException e) {</span>
+<span class="nc" id="L55">            throw new RuntimeException(e);</span>
+        }
+    }
+
+    /**
+     * Getter for the only possible instance available of this class, so used instead of a constructor.
+     *
+     * @return Always the same CardsManager instance
+     */
+    public static CardsManager getInstance() {
+<span class="fc" id="L65">        return singletonInstance;</span>
+    }
+
+    /**
+     * Getter for the initial cards
+     *
+     * @return Map that matches an int ID to the corresponding initial card
+     */
+    public Map&lt;Integer, InitialCard&gt; getInitialCards() {
+<span class="fc" id="L74">        return initialCards;</span>
+    }
+
+    /**
+     * Getter for the gold cards
+     *
+     * @return Map that matches an int ID to the corresponding gold card
+     */
+    public Map&lt;Integer, GoldCard&gt; getGoldCards() {
+<span class="fc" id="L83">        return goldCards;</span>
+    }
+
+    /**
+     * Getter for the resource cards
+     *
+     * @return Map that matches an int ID to the corresponding resource card
+     */
+    public Map&lt;Integer, ResourceCard&gt; getResourceCards() {
+<span class="fc" id="L92">        return resourceCards;</span>
+    }
+
+    /**
+     * Getter for the objectives
+     *
+     * @return Map that matches an int ID to the corresponding objective
+     */
+    public Map&lt;Integer, Objective&gt; getObjectives() {
+<span class="fc" id="L101">        return objectives;</span>
+    }
+
+    /**
+     * Getter for the playable cards
+     *
+     * @return Map that matches an int ID to the corresponding playable card
+     */
+    public Map&lt;Integer, PlayableCard&gt; getPlayableCards() {
+<span class="nc" id="L110">        Map&lt;Integer, PlayableCard&gt; playableCards = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L111">        playableCards.putAll(goldCards);</span>
+<span class="nc" id="L112">        playableCards.putAll(resourceCards);</span>
+
+<span class="nc" id="L114">        return playableCards;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RankingSceneController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.client.frontend.gui.controllers</a> &gt; <span class="el_source">RankingSceneController.java</span></div><h1>RankingSceneController.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.client.frontend.gui.controllers;
+
+import it.polimi.ingsw.client.frontend.gui.GraphicalApplication;
+import it.polimi.ingsw.client.frontend.gui.GraphicalViewGUI;
+import it.polimi.ingsw.utils.GuiUtil;
+import it.polimi.ingsw.utils.LeaderboardEntry;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+
+import java.io.IOException;
+
+/**
+ * JavaFX Controller of the ranking scene, shows the leaderboard after the match is finished
+ */
+<span class="nc" id="L19">public class RankingSceneController extends SceneController {</span>
+
+    public VBox leaderboardContainer;
+<span class="nc" id="L22">    public static double tableSize = 700;</span>
+    public Label victoryLabel;
+    public Button playAgainButton;
+
+    @Override
+    public void initialize() throws IOException {
+
+<span class="nc" id="L29">    }</span>
+
+    @Override
+    public void initializePostController() {
+<span class="nc" id="L33">        playAgainButton.setOnAction(event -&gt; {</span>
+            try {
+<span class="nc" id="L35">                showConnectionScene();</span>
+<span class="nc" id="L36">            } catch (IOException e) {}</span>
+<span class="nc" id="L37">        });</span>
+<span class="nc" id="L38">    }</span>
+
+    /**
+     * Add an entry to the graphical leaderboard
+     * @param entry the entry
+     */
+    public void addRanking(LeaderboardEntry entry) {
+<span class="nc" id="L45">        StackPane row = new StackPane();</span>
+<span class="nc" id="L46">        row.setMaxHeight(Double.NEGATIVE_INFINITY);</span>
+<span class="nc" id="L47">        row.setMinWidth(tableSize);</span>
+
+        // Add player label
+<span class="nc" id="L50">        Label playerLabel = new Label(entry.username());</span>
+<span class="nc" id="L51">        playerLabel.setMaxWidth(tableSize/3);</span>
+<span class="nc" id="L52">        StackPane.setAlignment(playerLabel, Pos.CENTER_LEFT);</span>
+<span class="nc" id="L53">        playerLabel.getStyleClass().add(&quot;leaderboard-player-label&quot;);</span>
+
+        // Add player points
+<span class="nc" id="L56">        Label playerPoints = new Label(String.valueOf(entry.points()) + &quot; points&quot;);</span>
+<span class="nc" id="L57">        StackPane.setAlignment(playerPoints, Pos.CENTER);</span>
+<span class="nc" id="L58">        playerPoints.getStyleClass().add(&quot;leaderboard-points&quot;);</span>
+
+        // Add player result
+<span class="nc bnc" id="L61" title="All 2 branches missed.">        Label playerResult = new Label(entry.winner() ? &quot;Winner&quot; : &quot;Loser&quot;);</span>
+<span class="nc" id="L62">        StackPane.setAlignment(playerResult, Pos.CENTER_RIGHT);</span>
+<span class="nc" id="L63">        playerResult.getStyleClass().add(&quot;leaderboard-result&quot;);</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">        playerResult.getStyleClass().add(entry.winner() ? &quot;leaderboard-winner&quot; : &quot;leaderboard-loser&quot;);</span>
+
+        // Add elements to parents
+<span class="nc" id="L67">        row.getChildren().addAll(playerLabel, playerPoints, playerResult);</span>
+<span class="nc" id="L68">        leaderboardContainer.getChildren().add(row);</span>
+<span class="nc" id="L69">    }</span>
+
+    /**
+     * Set if the player has won the match
+     * @param victory if the current player has won
+     */
+    public void setVictory(boolean victory) {
+<span class="nc bnc" id="L76" title="All 2 branches missed.">        if (victory) {</span>
+<span class="nc" id="L77">            victoryLabel.setText(&quot;Victory&quot;);</span>
+        } else {
+<span class="nc" id="L79">            victoryLabel.setText(&quot;Defeat&quot;);</span>
+        }
+<span class="nc" id="L81">    }</span>
+
+    /**
+     * Show the connection scene
+     * @throws IOException in case of file errors
+     */
+    public void showConnectionScene() throws IOException {
+<span class="nc" id="L88">        view.disconnect();</span>
+<span class="nc" id="L89">        view = new GraphicalViewGUI(stage);</span>
+<span class="nc" id="L90">        StackPane root = this.loadScene(&quot;/fxml/connection.fxml&quot;);</span>
+        // Add stylesheet
+<span class="nc" id="L92">        GuiUtil.applyCSS(root, &quot;/css/style.css&quot;);</span>
+        // Create the connection scene
+<span class="nc" id="L94">        Scene connectionScene = new Scene(root, GraphicalApplication.screenWidth, GraphicalApplication.screenHeight);</span>
+<span class="nc" id="L95">        stage.setScene(connectionScene);</span>
+<span class="nc" id="L96">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

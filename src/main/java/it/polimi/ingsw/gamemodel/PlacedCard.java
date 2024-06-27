@@ -1,9 +1,15 @@
 package it.polimi.ingsw.gamemodel;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 /**
  * This class handles the card already placed on the board, since we need to remember which card covers which
  */
-public class PlacedCard {
+public class PlacedCard implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     private Card card;
     private int turn;
     private Side playedSide;

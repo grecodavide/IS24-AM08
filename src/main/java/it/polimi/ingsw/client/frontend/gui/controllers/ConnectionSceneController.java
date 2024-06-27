@@ -1,9 +1,14 @@
 package it.polimi.ingsw.client.frontend.gui.controllers;
 
+import java.io.IOException;
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.List;
 import it.polimi.ingsw.client.frontend.gui.GraphicalApplication;
-import it.polimi.ingsw.client.network.NetworkView;
-import it.polimi.ingsw.client.network.NetworkViewRMI;
-import it.polimi.ingsw.client.network.NetworkViewTCP;
+import it.polimi.ingsw.client.frontend.gui.nodes.CardView;
+import it.polimi.ingsw.client.network.NetworkHandler;
+import it.polimi.ingsw.client.network.NetworkHandlerRMI;
+import it.polimi.ingsw.client.network.NetworkHandlerTCP;
 import it.polimi.ingsw.gamemodel.Color;
 import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.GuiUtil;
@@ -16,11 +21,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-
-import java.io.IOException;
-import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Controller for the connection scene
@@ -56,19 +56,19 @@ public class ConnectionSceneController extends SceneController {
         if (debuggingKeys()) {
             return;
         }
-        NetworkView networkHandler = null;
+        NetworkHandler networkHandler = null;
         if (TCPButton.isSelected()) {
             try {
-                networkHandler = new NetworkViewTCP(view, serverAddress.getText(), Integer.valueOf(serverPort.getText()));
-                view.setNetworkInterface(networkHandler);
+                networkHandler = new NetworkHandlerTCP(view, serverAddress.getText(), Integer.valueOf(serverPort.getText()));
+                view.setNetworkHandler(networkHandler);
                 showLobby();
             } catch (Exception e) {
                 view.notifyError(new RemoteException("Cannot connect to the server!"));
             }
         } else {
             try {
-                networkHandler = new NetworkViewRMI(view, serverAddress.getText(), Integer.parseInt(serverPort.getText()));
-                view.setNetworkInterface(networkHandler);
+                networkHandler = new NetworkHandlerRMI(view, serverAddress.getText(), Integer.parseInt(serverPort.getText()));
+                view.setNetworkHandler(networkHandler);
                 showLobby();
             } catch (Exception e) {
                 view.notifyError(e);
@@ -130,11 +130,12 @@ public class ConnectionSceneController extends SceneController {
                 controller.addPlayerTab("Oingo", Color.RED);
                 PlayerTabController controller1 = controller.addPlayerTab("Boingo", Color.BLUE);
                 controller1.setCurrentPlayer(true);
+                CardView cardView = new CardView();
                 ChatPaneController chatPaneController = controller.getChatPane();
                 chatPaneController.addPlayer("Oingo");
-                chatPaneController.receiveBroadcastMessage("Oingo", "JOfasdfasdf");
-                chatPaneController.receiveBroadcastMessage("Oingo", "JOdfafasdfasdf");
-                chatPaneController.receiveBroadcastMessage("Oingo", "dfsiooisfd 8fdsd");
+                controller.setPlateauPoints("Boingo", 3);
+                controller.setPlateauPoints("Oingo", 3);
+
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -148,6 +149,10 @@ public class ConnectionSceneController extends SceneController {
                 GuiUtil.applyCSS(root, "/css/style.css");
                 LobbySceneController controller = (LobbySceneController) root.getProperties().get("Controller");
                 List<AvailableMatch> matches = new ArrayList<>();
+                matches.add(new AvailableMatch("New", 3, 2, true));
+                matches.add(new AvailableMatch("New2", 3, 3, false));
+                matches.add(new AvailableMatch("New3", 0, 3, false));
+                controller.updateMatches(matches);
                 Scene lobbyScene = new Scene(root, GraphicalApplication.screenWidth, GraphicalApplication.screenHeight);
                 stage.setScene(lobbyScene);
 

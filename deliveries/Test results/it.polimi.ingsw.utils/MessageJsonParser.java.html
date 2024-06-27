@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MessageJsonParser.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.utils</a> &gt; <span class="el_source">MessageJsonParser.java</span></div><h1>MessageJsonParser.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.utils;
+
+import com.google.gson.*;
+import it.polimi.ingsw.network.messages.Message;
+import it.polimi.ingsw.network.messages.actions.ActionMessage;
+import it.polimi.ingsw.network.messages.errors.ErrorMessage;
+import it.polimi.ingsw.network.messages.responses.ResponseMessage;
+
+import java.lang.reflect.Type;
+import java.util.Arrays;
+import java.util.Optional;
+
+public class MessageJsonParser {
+
+    Gson messageBuilder;
+
+<span class="fc" id="L17">    public MessageJsonParser() {</span>
+<span class="fc" id="L18">        messageBuilder = new GsonBuilder().registerTypeAdapter(Message.class, new MessageTypeAdapter()).create();</span>
+<span class="fc" id="L19">    }</span>
+
+    public Gson getMessageBuilder() {
+<span class="nc" id="L22">        return messageBuilder;</span>
+    }
+
+
+    public Message toMessage(String json) {
+        try {
+<span class="fc" id="L28">            return messageBuilder.fromJson(json, Message.class);</span>
+<span class="fc" id="L29">        } catch (Exception e) {</span>
+<span class="fc" id="L30">            throw new JsonParseException(&quot;Error converting to message&quot;);</span>
+        }
+    }
+
+    public String toJson(Message m) {
+<span class="fc" id="L35">        return messageBuilder.toJson(m);</span>
+    }
+
+<span class="fc" id="L38">    private class MessageTypeAdapter implements JsonDeserializer&lt;Message&gt; {</span>
+
+        @Override
+        public Message deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+<span class="fc" id="L42">            JsonObject messageObject = json.getAsJsonObject();</span>
+
+<span class="fc bfc" id="L44" title="All 2 branches covered.">            if (messageObject.has(&quot;action&quot;)) {</span>
+<span class="fc" id="L45">                return convertClass(ActionMessage.class, messageObject.get(&quot;action&quot;).getAsString(), messageObject, context);</span>
+<span class="pc bpc" id="L46" title="1 of 2 branches missed.">            } else if (messageObject.has(&quot;response&quot;)) {</span>
+<span class="fc" id="L47">                return convertClass(ResponseMessage.class, messageObject.get(&quot;response&quot;).getAsString(), messageObject, context);</span>
+<span class="nc bnc" id="L48" title="All 2 branches missed.">            } else if (messageObject.has(&quot;error&quot;)) {</span>
+<span class="nc" id="L49">                return convertError(messageObject.get(&quot;error&quot;).getAsString(), messageObject, context);</span>
+            } else {
+<span class="nc" id="L51">                throw new JsonParseException(&quot;Wrong message type&quot;);</span>
+            }
+        }
+
+        private Message convertError(String type, JsonObject messageObject, JsonDeserializationContext context) {
+<span class="nc" id="L56">            return context.deserialize(messageObject, ErrorMessage.class);</span>
+        }
+
+        private Message convertClass(Class&lt;?&gt; mainClass, String type, JsonObject messageObject, JsonDeserializationContext context) {
+<span class="fc" id="L60">            Class&lt;?&gt;[] classes = mainClass.getPermittedSubclasses();</span>
+<span class="fc" id="L61">            Optional&lt;Class&lt;?&gt;&gt; resultClass = Arrays.stream(classes)</span>
+<span class="fc" id="L62">                    .filter(a -&gt; type.equals(a.getSimpleName().replace(&quot;Message&quot;, &quot;&quot;)))</span>
+<span class="fc" id="L63">                    .findFirst();</span>
+<span class="fc bfc" id="L64" title="All 2 branches covered.">            if (resultClass.isEmpty()) {</span>
+<span class="fc" id="L65">                throw new JsonParseException(&quot;Value is not found&quot;);</span>
+            } else {
+<span class="fc" id="L67">                return context.deserialize(messageObject, resultClass.get());</span>
+            }
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

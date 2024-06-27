@@ -12,6 +12,12 @@ public sealed abstract class ActionMessage extends Message permits ChooseInitial
     private String action;
     private String username;
 
+    
+    /**
+     * Class constructor.
+     * 
+     * @param username The player who wants to perform the action
+     */
     public ActionMessage(String username) {
         super();
         this.action = this.getClass().getSimpleName().replace("Message", "");

@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ClientListener.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.network.tcp</a> &gt; <span class="el_source">ClientListener.java</span></div><h1>ClientListener.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.network.tcp;
+
+import java.io.IOException;
+import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
+import com.google.gson.JsonParseException;
+import it.polimi.ingsw.controllers.PlayerControllerTCP;
+import it.polimi.ingsw.exceptions.AlreadyUsedUsernameException;
+import it.polimi.ingsw.exceptions.ChosenMatchException;
+import it.polimi.ingsw.exceptions.WrongNameException;
+import it.polimi.ingsw.exceptions.WrongStateException;
+import it.polimi.ingsw.gamemodel.*;
+import it.polimi.ingsw.network.messages.actions.*;
+import it.polimi.ingsw.network.messages.errors.ErrorMessage;
+import it.polimi.ingsw.network.messages.responses.AvailableMatchesMessage;
+import it.polimi.ingsw.network.messages.responses.ResponseMessage;
+import it.polimi.ingsw.server.Server;
+import it.polimi.ingsw.utils.CardsManager;
+import it.polimi.ingsw.utils.MessageJsonParser;
+import it.polimi.ingsw.utils.Pair;
+
+/*
+ * actual connection procedure: - socket accepted - socket asks for available matches, giving its
+ * name to server - when received, it communicates which match it wants to join - only then a
+ * PlayerController will be created, with said match - from there the constructor is done, a player
+ * has joined and it just has to listen
+ */
+
+/**
+ * Every time a socket gets accepted by the TCP server, a new ClientListener will be created with
+ * it, and it will:
+ * &lt;ul&gt;
+ * &lt;li&gt;Acquire the client's username
+ * &lt;li&gt;Make the client (which is still not a {@link Player}) choose/create a {@link Match} to join
+ * &lt;li&gt;Create its {@link PlayerControllerTCP}, which will also make him join such {@link Match}
+ * &lt;li&gt;Listen for any message received and, execute the corresponding action.
+ * &lt;/ul&gt;
+ * 
+ * Note that this will just require the action to be executed, but it's {@link PlayerControllerTCP}
+ * that actually calls the {@link Player} methods
+ */
+public class ClientListener extends Thread {
+    private Socket socket;
+    private PlayerControllerTCP playerController;
+    private MessageJsonParser parser;
+    private IOHandler io;
+    private Server server;
+    private Match match;
+    private Map&lt;Integer, Objective&gt; objectives;
+    private Map&lt;Integer, PlayableCard&gt; playableCards;
+
+    /**
+     * Class constructor. Needs to have a reference to the server instance since it needs to handle
+     * the match assignment
+     *
+     * @param socket the socket that required a connection
+     * @param server the instance of {@link Server} that's running
+     */
+<span class="fc" id="L60">    public ClientListener(Socket socket, Server server) {</span>
+        try {
+<span class="fc" id="L62">            this.socket = socket;</span>
+<span class="fc" id="L63">            this.io = new IOHandler(this.socket);</span>
+<span class="fc" id="L64">            this.server = server;</span>
+<span class="fc" id="L65">            this.parser = new MessageJsonParser();</span>
+
+<span class="fc" id="L67">            this.objectives = CardsManager.getInstance().getObjectives();</span>
+<span class="fc" id="L68">            Map&lt;Integer, ResourceCard&gt; resources = CardsManager.getInstance().getResourceCards();</span>
+<span class="fc" id="L69">            Map&lt;Integer, GoldCard&gt; golds = CardsManager.getInstance().getGoldCards();</span>
+
+<span class="fc" id="L71">            this.playableCards = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L72">            resources.forEach((id, card) -&gt; this.playableCards.put(id, card));</span>
+<span class="fc" id="L73">            golds.forEach((id, card) -&gt; this.playableCards.put(id, card));</span>
+
+<span class="nc" id="L75">        } catch (IOException e) {</span>
+<span class="nc" id="L76">            this.sendError(&quot;Failed to create Listener thread&quot;, e);</span>
+<span class="fc" id="L77">        }</span>
+<span class="fc" id="L78">    }</span>
+
+
+    /**
+     * Sends error message with custom text
+     *
+     * @param prompt the text to be shown
+     * @param exception the exception type
+     */
+    private void sendError(String prompt, Exception exception) {
+        try {
+<span class="nc" id="L89">            this.io.writeMsg(new ErrorMessage(prompt, exception.getClass().getName()));</span>
+<span class="nc" id="L90">        } catch (Exception ignored) {</span>
+<span class="nc" id="L91">        }</span>
+<span class="nc" id="L92">    }</span>
+
+
+    /**
+     * Loops until a player controller is created
+     *
+     * @throws IOException if there was an I/O error
+     */
+    private void setPlayerController() {
+        ActionMessage msg;
+<span class="fc" id="L102">        String username = null;</span>
+<span class="fc" id="L103">        Match match = null;</span>
+        ResponseMessage availableMatches;
+<span class="fc" id="L105">        boolean shouldLoop = true;</span>
+
+<span class="fc bfc" id="L107" title="All 2 branches covered.">        while (shouldLoop) {</span>
+            try {
+<span class="fc" id="L109">                msg = (ActionMessage) this.parser.toMessage(this.io.readMsg());</span>
+<span class="pc bpc" id="L110" title="1 of 2 branches missed.">                if (msg == null) {</span>
+<span class="nc" id="L111">                    shouldLoop = false;</span>
+                } else {
+<span class="pc bpc" id="L113" title="1 of 4 branches missed.">                    switch (msg) {</span>
+<span class="fc" id="L114">                        case GetAvailableMatchesMessage getAvailableMatchesMessage:</span>
+<span class="fc" id="L115">                            username = getAvailableMatchesMessage.getUsername();</span>
+<span class="fc" id="L116">                            availableMatches = new AvailableMatchesMessage(</span>
+<span class="fc" id="L117">                                    this.server.getJoinableMatchesMap());</span>
+<span class="fc" id="L118">                            this.io.writeMsg(availableMatches);</span>
+<span class="fc" id="L119">                            break;</span>
+
+<span class="fc" id="L121">                        case CreateMatchMessage createMatchMessage:</span>
+<span class="fc" id="L122">                            username = createMatchMessage.getUsername();</span>
+<span class="fc" id="L123">                            this.server.createMatch(createMatchMessage.getMatchName(),</span>
+<span class="fc" id="L124">                                    createMatchMessage.getMaxPlayers());</span>
+<span class="fc" id="L125">                            match = this.server.getMatch(createMatchMessage.getMatchName());</span>
+
+<span class="fc" id="L127">                            this.createPlayerController(username, match);</span>
+<span class="fc" id="L128">                            shouldLoop = false;</span>
+<span class="fc" id="L129">                            break;</span>
+
+<span class="fc" id="L131">                        case JoinMatchMessage joinMatchMessage:</span>
+<span class="fc" id="L132">                            username = joinMatchMessage.getUsername();</span>
+<span class="fc" id="L133">                            match = this.server.getMatch(joinMatchMessage.getMatchName());</span>
+
+<span class="fc" id="L135">                            this.createPlayerController(username, match);</span>
+<span class="fc" id="L136">                            shouldLoop = false;</span>
+<span class="fc" id="L137">                            break;</span>
+
+                        default:
+                            break;
+                    }
+                }
+<span class="nc" id="L143">            } catch (JsonParseException | ClassNotFoundException e) {</span>
+                // message is not correctly formatted, ignore
+<span class="nc" id="L145">            } catch (ChosenMatchException | WrongStateException | AlreadyUsedUsernameException</span>
+                    | IllegalArgumentException | WrongNameException e) {
+<span class="nc" id="L147">                this.sendError(e.getMessage(), e);</span>
+<span class="nc" id="L148">            } catch (IOException e) {</span>
+<span class="nc" id="L149">                this.close(match);</span>
+<span class="pc" id="L150">            }</span>
+        }
+<span class="fc" id="L152">        this.match = match;</span>
+<span class="fc" id="L153">    }</span>
+
+
+    /**
+     * Tries to actually create the player controller with the acquired information
+     *
+     * @param username The chosen username
+     * @param match The match to join
+     * @throws AlreadyUsedUsernameException If the match already contains the chosen username
+     * @throws WrongStateException If the match currently does not accept new players
+     * @throws ChosenMatchException If the match does not exist or is not valid
+     */
+    private void createPlayerController(String username, Match match)
+            throws AlreadyUsedUsernameException, IllegalArgumentException, WrongStateException,
+            ChosenMatchException, WrongNameException {
+<span class="fc" id="L168">        this.playerController = new PlayerControllerTCP(username, match, this.io);</span>
+<span class="fc" id="L169">        this.playerController.sendJoined();</span>
+<span class="fc" id="L170">    }</span>
+
+    /**
+     * This parses the message received from socket's input stream and executes the request such
+     * message carried. If the message is not one of the expected types, it will just be ignored
+     *
+     * @param msg The received message (received as a string)
+     *
+     * @see ActionMessage
+     */
+    private void executeRequest(String msg) {
+        try {
+
+<span class="fc" id="L183">            ActionMessage message = (ActionMessage) parser.toMessage(msg);</span>
+<span class="pc bpc" id="L184" title="1 of 2 branches missed.">            if (msg != null) {</span>
+<span class="pc bpc" id="L185" title="7 of 9 branches missed.">                switch (message) {</span>
+<span class="nc" id="L186">                    case ChooseSecretObjectiveMessage actionMsg:</span>
+<span class="nc" id="L187">                        this.playerController.chooseSecretObjective(</span>
+<span class="nc" id="L188">                                this.objectives.get(actionMsg.getObjectiveID()));</span>
+<span class="nc" id="L189">                        break;</span>
+<span class="nc" id="L190">                    case ChooseInitialCardSideMessage actionMsg:</span>
+<span class="nc" id="L191">                        this.playerController.chooseInitialCardSide(actionMsg.getSide());</span>
+<span class="nc" id="L192">                        break;</span>
+<span class="nc" id="L193">                    case DrawCardMessage actionMsg:</span>
+<span class="nc" id="L194">                        this.playerController.drawCard(actionMsg.getSource());</span>
+<span class="nc" id="L195">                        break;</span>
+<span class="nc" id="L196">                    case DrawInitialCardMessage actionMsg:</span>
+<span class="nc" id="L197">                        this.playerController.drawInitialCard();</span>
+<span class="nc" id="L198">                        break;</span>
+<span class="nc" id="L199">                    case DrawSecretObjectivesMessage actionMsg:</span>
+<span class="nc" id="L200">                        this.playerController.drawSecretObjectives();</span>
+<span class="nc" id="L201">                        break;</span>
+<span class="fc" id="L202">                    case SendBroadcastTextMessage actionMsg:</span>
+<span class="fc" id="L203">                        this.playerController.sendBroadcastText(actionMsg.getText());</span>
+<span class="fc" id="L204">                        break;</span>
+<span class="fc" id="L205">                    case SendPrivateTextMessage actionMsg:</span>
+<span class="fc" id="L206">                        this.playerController.sendPrivateText(actionMsg.getRecipient(),</span>
+<span class="fc" id="L207">                                actionMsg.getText());</span>
+<span class="fc" id="L208">                        break;</span>
+<span class="nc" id="L209">                    case PlayCardMessage actionMsg:</span>
+<span class="nc" id="L210">                        Pair&lt;Integer, Integer&gt; coords =</span>
+<span class="nc" id="L211">                                new Pair&lt;&gt;(actionMsg.getX(), actionMsg.getY());</span>
+<span class="nc" id="L212">                        PlayableCard card = this.playableCards.get(actionMsg.getCardID());</span>
+<span class="nc" id="L213">                        this.playerController.playCard(coords, card, actionMsg.getSide());</span>
+<span class="nc" id="L214">                        break;</span>
+                    default:
+                        break;
+                }
+            }
+<span class="nc" id="L219">        } catch (JsonParseException e) {</span>
+            // Nothing to do here: it was either a ping or a wrongly formatted message
+<span class="fc" id="L221">        }</span>
+
+<span class="fc" id="L223">    }</span>
+
+    /**
+     * Main loop. This will just wait for anything to be put on the input stream and then call
+     * {@link ClientListener#executeRequest(String)}
+     */
+    public void listen() {
+        try {
+<span class="pc bpc" id="L231" title="2 of 4 branches missed.">            while (!this.socket.isClosed() &amp;&amp; this.socket.isConnected()) {</span>
+<span class="fc" id="L232">                String msg = this.io.readMsg();</span>
+                // if msg is null, it means the socket was closed client side. Quit all
+<span class="fc bfc" id="L234" title="All 2 branches covered.">                if (msg == null) {</span>
+<span class="fc" id="L235">                    throw new IOException(&quot;Socket closed&quot;);</span>
+                }
+<span class="fc" id="L237">                this.executeRequest(msg);</span>
+<span class="fc" id="L238">            }</span>
+<span class="fc" id="L239">        } catch (IOException | ClassNotFoundException e) {</span>
+<span class="fc" id="L240">            this.close(match);</span>
+<span class="nc" id="L241">        }</span>
+<span class="fc" id="L242">    }</span>
+
+    /**
+     * This will close socket and input/output handlers, if not null
+     */
+    private void close(Match match) {
+        try {
+<span class="fc" id="L249">            match.removePlayer(this.playerController.getPlayer());</span>
+<span class="pc bpc" id="L250" title="2 of 4 branches missed.">            if (this.socket != null &amp;&amp; !this.socket.isClosed()) {</span>
+<span class="fc" id="L251">                this.io.close();</span>
+<span class="fc" id="L252">                this.socket.close();</span>
+            }
+<span class="nc" id="L254">        } catch (IOException | NullPointerException e) {</span>
+<span class="fc" id="L255">        }</span>
+<span class="fc" id="L256">    }</span>
+
+    /**
+     * Since the class extends {@link Thread} it needs to implement {@link Thread#run()}.
+     * Specifically, this will just run {@link ClientListener#listen()}
+     */
+    @Override
+    public void run() {
+<span class="fc" id="L264">        this.setPlayerController();</span>
+<span class="fc" id="L265">        this.listen();</span>
+<span class="fc" id="L266">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

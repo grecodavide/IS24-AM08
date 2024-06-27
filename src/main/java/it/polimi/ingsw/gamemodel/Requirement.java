@@ -3,7 +3,7 @@ package it.polimi.ingsw.gamemodel;
 import java.io.Serial;
 import java.io.Serializable;
 
-/*
+/**
  * A condition must be met in order to play a golden card and to get points from the objectives. Those requirements are both represented by this class
  */
 public abstract class Requirement implements Serializable {

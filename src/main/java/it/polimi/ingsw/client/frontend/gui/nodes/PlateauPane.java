@@ -10,6 +10,9 @@ import javafx.scene.layout.Pane;
 
 import java.util.HashMap;
 
+/**
+ * JavaFX node, Pane showing all the player pawns and points
+ */
 public class PlateauPane extends Pane {
     public static double pawnSize = 64;
     public static double positionOffset = -6;
@@ -17,6 +20,9 @@ public class PlateauPane extends Pane {
     HashMap<String, ImageView> players;
     HashMap<String, Integer> points;
 
+    /**
+     * Constructor of the node
+     */
     public PlateauPane() {
         players = new HashMap<>();
         positions = new HashMap<>();
@@ -51,17 +57,6 @@ public class PlateauPane extends Pane {
         positions.put(27, new Pair<>(342.0, 141.0));
         positions.put(28, new Pair<>(342.0, 225.0));
         positions.put(29, new Pair<>(199.0, 158.0));
-        // TODO Remove testing method
-        this.setOnMousePressed((e) -> {
-            for (String p : this.points.keySet()) {
-                if (e.getButton() == MouseButton.PRIMARY) {
-                    this.setPoints(p, this.points.get(p) + 1);
-                } else if (e.getButton() == MouseButton.SECONDARY) {
-                    this.setPoints(p, this.points.get(p) - 1);
-                }
-                return;
-            }
-        });
     }
 
     /**
@@ -76,7 +71,6 @@ public class PlateauPane extends Pane {
         img.setFitHeight(pawnSize);
         players.put(player, img);
         setPoints(player, 0);
-        this.getChildren().add(img);
     }
 
     /**
@@ -89,14 +83,20 @@ public class PlateauPane extends Pane {
         if (points > 29) {
             return;
         }
-        Pair<Double, Double> position = convertCoords(positions.get(points));
-        // Calculate offset because of players in the same position
-        int offset = this.playersAtPosition(points);
-        this.points.put(player, points);
+        if (!this.points.containsKey(player) || this.points.get(player) != points) {
+            Pair<Double, Double> position = convertCoords(positions.get(points));
+            // Calculate offset because of players in the same position
+            int offset = this.playersAtPosition(points);
+            this.points.put(player, points);
 
-        ImageView playerPawn = players.get(player);
-        playerPawn.setLayoutX(position.first());
-        playerPawn.setLayoutY(position.second() + offset * positionOffset);
+            ImageView playerPawn = players.get(player);
+            playerPawn.setLayoutX(position.first());
+            playerPawn.setLayoutY(position.second() + offset * positionOffset);
+
+            if (this.getChildren().contains(playerPawn))
+                this.getChildren().remove(playerPawn);
+            this.getChildren().add(playerPawn);
+        }
     }
 
     /**

@@ -1,0 +1,553 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GraphicalView.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.client.frontend</a> &gt; <span class="el_source">GraphicalView.java</span></div><h1>GraphicalView.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.client.frontend;
+
+import java.util.*;
+import it.polimi.ingsw.client.network.NetworkHandler;
+import it.polimi.ingsw.gamemodel.*;
+import it.polimi.ingsw.utils.AvailableMatch;
+import it.polimi.ingsw.utils.LeaderboardEntry;
+import it.polimi.ingsw.utils.Pair;
+import it.polimi.ingsw.utils.RequestStatus;
+
+/**
+ * Class to manage graphical clients
+ */
+public abstract class GraphicalView {
+    protected NetworkHandler networkHandler;
+    protected Map&lt;String, ClientBoard&gt; clientBoards;
+    protected List&lt;String&gt; players; // ordered by turn
+    protected String currentPlayer;
+    protected Pair&lt;Objective, Objective&gt; visibleObjectives;
+    protected Map&lt;DrawSource, PlayableCard&gt; visiblePlayableCards;
+    protected Pair&lt;Symbol, Symbol&gt; decksTopReign;
+<span class="nc" id="L22">    protected boolean lastTurn = false;</span>
+    protected List&lt;AvailableMatch&gt; availableMatches;
+    protected String username;
+    protected final LastRequest lastRequest;
+<span class="nc" id="L26">    private boolean matchStarted = false;</span>
+<span class="nc" id="L27">    private final Boolean sync = true;</span>
+
+    /**
+     * Class constructor.
+     */
+<span class="nc" id="L32">    public GraphicalView() {</span>
+<span class="nc" id="L33">        this.lastRequest = new LastRequest();</span>
+<span class="nc" id="L34">        this.lastRequest.setStatus(RequestStatus.PENDING);</span>
+<span class="nc" id="L35">    }</span>
+    
+    /**
+     * Sets the username of the corresponding player.
+     * 
+     * @param username The chosen username
+     */
+    protected void setUsername(String username) {
+<span class="nc" id="L43">        this.username = username;</span>
+<span class="nc" id="L44">        this.networkHandler.setUsername(username);</span>
+<span class="nc" id="L45">    }</span>
+    
+    /**
+     * @return Whether is the last turn or not.
+     */
+    public boolean isLastTurn() {
+<span class="nc" id="L51">        return this.lastTurn;</span>
+    }
+    
+    /**
+     * Sets the last request's status.
+     * 
+     * @param status Last request's status
+     */
+    public void setLastRequestStatus(RequestStatus status) {
+<span class="nc" id="L60">        this.lastRequest.setStatus(status);</span>
+<span class="nc" id="L61">    }</span>
+
+    /**
+     * Sets the internal state according to the occurrence of an error.
+     *
+     * @param exception The thrown exception
+     */
+    public void notifyError(Exception exception) {
+<span class="nc" id="L69">        this.setLastRequestStatus(RequestStatus.FAILED);</span>
+<span class="nc" id="L70">    }</span>
+
+    /**
+     * Sets the network interface in order to communicate.
+     *
+     * @param networkHandler the interface to communicate
+     */
+    public void setNetworkHandler(NetworkHandler networkHandler) {
+<span class="nc" id="L78">        this.networkHandler = networkHandler;</span>
+<span class="nc" id="L79">    }</span>
+
+    /**
+     * Tries to create a match.
+     *
+     * @param maxPlayers maximum amount of players
+     * @param matchName The match's name
+     */
+    public void createMatch(String matchName, Integer maxPlayers) {
+<span class="nc" id="L88">        this.setLastRequestStatus(RequestStatus.PENDING);</span>
+<span class="nc" id="L89">        this.networkHandler.createMatch(matchName, maxPlayers);</span>
+<span class="nc" id="L90">    }</span>
+
+    /**
+     * Tries to join a match.
+     *
+     * @param matchName the match's name
+     */
+    public void joinMatch(String matchName) {
+<span class="nc" id="L98">        this.setLastRequestStatus(RequestStatus.PENDING);</span>
+<span class="nc" id="L99">        this.networkHandler.joinMatch(matchName);</span>
+<span class="nc" id="L100">    }</span>
+
+    /**
+     * Sends a broadcast text.
+     * 
+     * @param text The content
+     */
+    public void sendBroadcastText(String text) {
+<span class="nc" id="L108">        this.networkHandler.sendBroadcastText(text);</span>
+<span class="nc" id="L109">    }</span>
+    
+    /**
+     * Sends a private text.
+     * 
+     * @param recipient The recipient
+     * @param text The content
+     */
+    public void sendPrivateText(String recipient, String text) {
+<span class="nc" id="L118">        this.networkHandler.sendPrivateText(recipient, text);</span>
+<span class="nc" id="L119">    }</span>
+
+    /**
+     * Draws an initial card for the player.
+     */
+    public void drawInitialCard() {
+<span class="nc" id="L125">        this.setLastRequestStatus(RequestStatus.PENDING);</span>
+<span class="nc" id="L126">        this.networkHandler.drawInitialCard();</span>
+<span class="nc" id="L127">    }</span>
+
+    /**
+     * Communicates the chosen initial card side.
+     *
+     * @param side The side on which play the initial card drawn using {@link #drawInitialCard()}
+     */
+    public void chooseInitialCardSide(Side side) {
+<span class="nc" id="L135">        this.setLastRequestStatus(RequestStatus.PENDING);</span>
+<span class="nc" id="L136">        this.networkHandler.chooseInitialCardSide(side);</span>
+<span class="nc" id="L137">    }</span>
+
+    /**
+     * Draws two secret objectives.
+     */
+    public void drawSecretObjectives() {
+<span class="nc" id="L143">        this.setLastRequestStatus(RequestStatus.PENDING);</span>
+<span class="nc" id="L144">        this.networkHandler.drawSecretObjectives();</span>
+<span class="nc" id="L145">    }</span>
+
+    /**
+     * Communicates the chosen secret objective.
+     *
+     * @param objective The chosen objective
+     */
+    public void chooseSecretObjective(Objective objective) {
+<span class="nc" id="L153">        this.setLastRequestStatus(RequestStatus.PENDING);</span>
+<span class="nc" id="L154">        this.clientBoards.get(this.username).setSecretObjective(objective);</span>
+<span class="nc" id="L155">        this.networkHandler.chooseSecretObjective(objective);</span>
+<span class="nc" id="L156">    }</span>
+
+    /**
+     * Plays a card.
+     *
+     * @param coords The coordinates on which to place the card
+     * @param card   The PlayableCard to play
+     * @param side   The side on which to play the chosen card
+     */
+    public void playCard(Pair&lt;Integer, Integer&gt; coords, PlayableCard card, Side side) {
+<span class="nc" id="L166">        this.setLastRequestStatus(RequestStatus.PENDING);</span>
+<span class="nc" id="L167">        new Thread(() -&gt; this.networkHandler.playCard(coords, card, side)).start();</span>
+<span class="nc" id="L168">    }</span>
+
+    /**
+     * Draws a card.
+     *
+     * @param source The drawing source to draw the card from
+     */
+    public void drawCard(DrawSource source) {
+<span class="nc" id="L176">        this.setLastRequestStatus(RequestStatus.PENDING);</span>
+<span class="nc" id="L177">        this.networkHandler.drawCard(source);</span>
+<span class="nc" id="L178">    }</span>
+
+    /**
+     * Method used to show the turn has changed.
+     */
+    public abstract void changePlayer();
+
+    /**
+     * Goes to the next turn, making sure that the current player is set and that he plays the right
+     * turn (choose initial card/objective, or make a move).
+     */
+    private void nextPlayer() {
+<span class="nc bnc" id="L190" title="All 2 branches missed.">        if (this.currentPlayer == null)</span>
+<span class="nc" id="L191">            this.currentPlayer = this.players.get(0);</span>
+        else
+<span class="nc" id="L193">            this.currentPlayer = this.players.get((this.players.indexOf(currentPlayer) + 1) % this.players.size());</span>
+
+
+<span class="nc bnc" id="L196" title="All 2 branches missed.">        if (this.currentPlayer.equals(this.username)) {</span>
+<span class="nc bnc" id="L197" title="All 2 branches missed.">            if (this.clientBoards.get(this.username).getPlaced().isEmpty())</span>
+<span class="nc" id="L198">                this.drawInitialCard();</span>
+<span class="nc bnc" id="L199" title="All 2 branches missed.">            else if (this.clientBoards.get(this.username).getObjective() == null)</span>
+<span class="nc" id="L200">                this.drawSecretObjectives();</span>
+            else
+<span class="nc" id="L202">                this.makeMove();</span>
+        } else {
+<span class="nc" id="L204">            this.changePlayer();</span>
+        }
+<span class="nc" id="L206">    }</span>
+
+
+    /**
+     * Ask the user to make a play. Must call {@link GraphicalView#playCard(Pair, PlayableCard, Side)}.
+     */
+    public abstract void makeMove();
+
+
+    /**
+     * Starts match on the client side, setting all variables to their initial values.
+     *
+     * @param playersUsernamesAndPawns Map containing all players' pawns, indexed by their username
+     * @param playersHands             Map containing all the players' hands, indexed by their username
+     * @param visibleObjectives        The two objectives common to every player
+     * @param visiblePlayableCards     The four cards that can be drawn, visible to everyone
+     * @param decksTopReign            the reigns of the two decks' top
+     */
+    public void matchStarted(Map&lt;String, Color&gt; playersUsernamesAndPawns, Map&lt;String, List&lt;PlayableCard&gt;&gt; playersHands,
+                             Pair&lt;Objective, Objective&gt; visibleObjectives, Map&lt;DrawSource, PlayableCard&gt; visiblePlayableCards,
+                             Pair&lt;Symbol, Symbol&gt; decksTopReign) {
+<span class="nc" id="L227">        this.setupMatch(playersUsernamesAndPawns, playersHands, visibleObjectives, visiblePlayableCards, decksTopReign);</span>
+<span class="nc" id="L228">        this.notifyMatchStarted();</span>
+<span class="nc" id="L229">        this.nextPlayer();</span>
+<span class="nc" id="L230">    }</span>
+
+    /**
+     * Resumes match on the client side, setting all variables to their initial values.
+     *
+     * @param playersUsernamesAndPawns Map containing all players' pawns, indexed by their username
+     * @param playersHands             Map containing all the players' hands, indexed by their username
+     * @param visibleObjectives        The two objectives common to every player
+     * @param visiblePlayableCards     The four cards that can be drawn, visible to everyone
+     * @param decksTopReign            the reigns of the two decks' top
+     * @param secretObjective          Secret objective of the current player
+     * @param availableResources       Available resources of all the players
+     * @param placedCards              Placed cards of all the players
+     * @param playerPoints             Points of all the players
+     * @param currentPlayer            The current player
+     * @param drawPhase                If the match is resumed in draw phase
+     */
+    public void resumeMatch(Map&lt;String, Color&gt; playersUsernamesAndPawns, Map&lt;String, List&lt;PlayableCard&gt;&gt; playersHands,
+                            Pair&lt;Objective, Objective&gt; visibleObjectives, Map&lt;DrawSource, PlayableCard&gt; visiblePlayableCards,
+                            Pair&lt;Symbol, Symbol&gt; decksTopReign, Objective secretObjective, Map&lt;String, Map&lt;Symbol, Integer&gt;&gt; availableResources,
+                            Map&lt;String, Map&lt;Pair&lt;Integer, Integer&gt;, PlacedCard&gt;&gt; placedCards, Map&lt;String, Integer&gt; playerPoints, String currentPlayer, boolean drawPhase) {
+<span class="nc" id="L251">        this.setupMatch(playersUsernamesAndPawns, playersHands, visibleObjectives, visiblePlayableCards, decksTopReign);</span>
+<span class="nc" id="L252">        this.clientBoards.get(username).setSecretObjective(secretObjective);</span>
+<span class="nc bnc" id="L253" title="All 2 branches missed.">        for (String player : placedCards.keySet()) {</span>
+<span class="nc" id="L254">            ClientBoard clientBoard = this.clientBoards.get(player);</span>
+<span class="nc" id="L255">            Map&lt;Pair&lt;Integer, Integer&gt;, PlacedCard&gt; playerBoard = placedCards.get(player);</span>
+<span class="nc" id="L256">            List&lt;Pair&lt;Integer, Integer&gt;&gt; orderedCards = playerBoard.keySet().stream()</span>
+<span class="nc" id="L257">                    .sorted(Comparator.comparingInt(c -&gt; playerBoard.get(c).getTurn()))</span>
+<span class="nc" id="L258">                    .toList();</span>
+<span class="nc bnc" id="L259" title="All 2 branches missed.">            for (Pair&lt;Integer, Integer&gt; cardCoord : orderedCards) {</span>
+<span class="nc bnc" id="L260" title="All 2 branches missed.">                if (cardCoord.equals(new Pair&lt;&gt;(0, 0))) {</span>
+<span class="nc" id="L261">                    clientBoard.setInitial((InitialCard) playerBoard.get(cardCoord).getCard());</span>
+<span class="nc" id="L262">                    clientBoard.placeInitial(playerBoard.get(cardCoord).getPlayedSide(),</span>
+<span class="nc" id="L263">                            availableResources.get(player));</span>
+                } else {
+<span class="nc" id="L265">                    clientBoard.placeCard(cardCoord,</span>
+<span class="nc" id="L266">                            (PlayableCard) playerBoard.get(cardCoord).getCard(),</span>
+<span class="nc" id="L267">                            playerBoard.get(cardCoord).getPlayedSide(),</span>
+<span class="nc" id="L268">                            playerPoints.get(player), availableResources.get(player)</span>
+                    );
+                }
+<span class="nc" id="L271">            }</span>
+<span class="nc" id="L272">        }</span>
+<span class="nc" id="L273">        this.currentPlayer = currentPlayer;</span>
+<span class="nc" id="L274">        this.notifyMatchResumed(drawPhase);</span>
+<span class="nc" id="L275">        this.setLastRequestStatus(RequestStatus.SUCCESSFUL);</span>
+<span class="nc" id="L276">    }</span>
+
+    
+    /**
+     * Initialize everything about the match.
+     * 
+     * @param playersUsernamesAndPawns Map from player's username to pawn color
+     * @param playersHands Map from player's username to hand
+     * @param visibleObjectives Common objectives
+     * @param visiblePlayableCards Common cards that can be drawn
+     * @param decksTopReign The two decks' top cards
+     */
+    private void setupMatch(Map&lt;String, Color&gt; playersUsernamesAndPawns, Map&lt;String, List&lt;PlayableCard&gt;&gt; playersHands,
+                            Pair&lt;Objective, Objective&gt; visibleObjectives, Map&lt;DrawSource, PlayableCard&gt; visiblePlayableCards,
+                            Pair&lt;Symbol, Symbol&gt; decksTopReign) {
+<span class="nc" id="L291">        synchronized (sync) {</span>
+<span class="nc" id="L292">            this.players = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L293">            this.clientBoards = new HashMap&lt;&gt;();</span>
+            Color curr;
+<span class="nc" id="L295">            playersUsernamesAndPawns.forEach((player, pawn) -&gt; this.players.add(player));</span>
+
+<span class="nc bnc" id="L297" title="All 2 branches missed.">            for (String username : playersUsernamesAndPawns.keySet()) {</span>
+<span class="nc" id="L298">                curr = playersUsernamesAndPawns.get(username);</span>
+<span class="nc bnc" id="L299" title="All 5 branches missed.">                switch (curr) {</span>
+                    case Color.RED:
+<span class="nc" id="L301">                        this.players.set(0, username);</span>
+<span class="nc" id="L302">                        break;</span>
+                    case Color.BLUE:
+<span class="nc" id="L304">                        this.players.set(1, username);</span>
+<span class="nc" id="L305">                        break;</span>
+                    case Color.GREEN:
+<span class="nc" id="L307">                        this.players.set(2, username);</span>
+<span class="nc" id="L308">                        break;</span>
+                    case Color.YELLOW:
+<span class="nc" id="L310">                        this.players.set(3, username);</span>
+<span class="nc" id="L311">                        break;</span>
+                    default:
+                        break;
+                }
+<span class="nc" id="L315">            }</span>
+
+<span class="nc" id="L317">            this.currentPlayer = null;</span>
+
+<span class="nc" id="L319">            playersHands.forEach((username, hand) -&gt; {</span>
+<span class="nc" id="L320">                this.clientBoards.put(username, new ClientBoard(playersUsernamesAndPawns.get(username), hand));</span>
+<span class="nc" id="L321">            });</span>
+
+<span class="nc" id="L323">            this.visiblePlayableCards = visiblePlayableCards;</span>
+<span class="nc" id="L324">            this.visibleObjectives = visibleObjectives;</span>
+<span class="nc" id="L325">            this.decksTopReign = decksTopReign;</span>
+<span class="nc" id="L326">            matchStarted = true;</span>
+<span class="nc" id="L327">            sync.notifyAll();</span>
+<span class="nc" id="L328">        }</span>
+<span class="nc" id="L329">    }</span>
+    /**
+     * Method that shows the user that the match has started.
+     */
+    protected abstract void notifyMatchStarted();
+
+    /**
+     * Method that shows the user that the match has resumed.
+     */
+    protected abstract void notifyMatchResumed(boolean  drawPhase);
+
+    /**
+     * Receive the list of matches currently available
+     * @param availableMatches the list of available matches
+     */
+    public void receiveAvailableMatches(List&lt;AvailableMatch&gt; availableMatches) {
+<span class="nc" id="L345">        this.setLastRequestStatus(RequestStatus.SUCCESSFUL);</span>
+<span class="nc" id="L346">        this.availableMatches = availableMatches;</span>
+<span class="nc" id="L347">    }</span>
+
+    /**
+     * Give the user its initial card.
+     *
+     * @param initialCard the player's initial card
+     */
+    public void giveInitialCard(InitialCard initialCard) {
+<span class="nc" id="L355">        this.setLastRequestStatus(RequestStatus.SUCCESSFUL);</span>
+<span class="nc" id="L356">        this.clientBoards.get(this.username).setInitial(initialCard);</span>
+<span class="nc" id="L357">    }</span>
+
+
+    /**
+     * Gives the player two secret objectives to choose from.
+     *
+     * @param secretObjectives the two objectives to choose from
+     */
+    public void giveSecretObjectives(Pair&lt;Objective, Objective&gt; secretObjectives) {
+<span class="nc" id="L366">        this.setLastRequestStatus(RequestStatus.SUCCESSFUL);</span>
+<span class="nc" id="L367">    }</span>
+
+    /**
+     * Notifies other players that someone drew the initial card.
+     *
+     * @param someoneUsername Player who drew the initial
+     * @param card            The card he drew
+     */
+    public void someoneDrewInitialCard(String someoneUsername, InitialCard card) {
+<span class="nc bnc" id="L376" title="All 2 branches missed.">        if (this.username.equals(someoneUsername)) {</span>
+<span class="nc" id="L377">            this.setLastRequestStatus(RequestStatus.SUCCESSFUL);</span>
+        }
+<span class="nc" id="L379">        new Thread( () -&gt; {</span>
+<span class="nc" id="L380">            synchronized (sync) {</span>
+<span class="nc bnc" id="L381" title="All 2 branches missed.">                while (!matchStarted) {</span>
+                    try {
+<span class="nc" id="L383">                        sync.wait();</span>
+<span class="nc" id="L384">                    } catch (InterruptedException e) {</span>
+<span class="nc" id="L385">                        throw new RuntimeException(e);</span>
+<span class="nc" id="L386">                    }</span>
+                }
+<span class="nc" id="L388">                this.clientBoards.get(someoneUsername).setInitial(card);</span>
+<span class="nc" id="L389">            }</span>
+<span class="nc" id="L390">        }).start();</span>
+<span class="nc" id="L391">    }</span>
+
+
+    /**
+     * Effectively place the initial card on the player's board, on the right side. Note that the card
+     * must have already been set.
+     *
+     * @param availableResources Currently available resources for the player
+     * @param someoneUsername Player who chose the initial card's side
+     * @param side            Chosen side
+     */
+    public void someoneSetInitialSide(String someoneUsername, Side side, Map&lt;Symbol, Integer&gt; availableResources) {
+<span class="nc bnc" id="L403" title="All 2 branches missed.">        if (this.username.equals(someoneUsername)) {</span>
+<span class="nc" id="L404">            this.setLastRequestStatus(RequestStatus.SUCCESSFUL);</span>
+        }
+<span class="nc" id="L406">        this.clientBoards.get(someoneUsername).placeInitial(side, availableResources);</span>
+<span class="nc" id="L407">        this.nextPlayer();</span>
+<span class="nc" id="L408">    }</span>
+
+
+    /**
+     * Notifies other players that someone is choosing the secret objective. They should not know from
+     * which objective he is choosing, so they are not passed.
+     *
+     * @param someoneUsername Player who is choosing
+     */
+    public void someoneDrewSecretObjective(String someoneUsername) {
+<span class="nc bnc" id="L418" title="All 2 branches missed.">        if (this.username.equals(someoneUsername)) {</span>
+<span class="nc" id="L419">            this.setLastRequestStatus(RequestStatus.SUCCESSFUL);</span>
+        }
+<span class="nc" id="L421">    }</span>
+    
+    /**
+     * Changes the current player and updates last request's status to {@link RequestStatus#SUCCESSFUL}.
+     * 
+     * @param someoneUsername The player who chose the objective
+     */
+    public void someoneChoseSecretObjective(String someoneUsername) {
+<span class="nc bnc" id="L429" title="All 2 branches missed.">        if (this.username.equals(someoneUsername)) {</span>
+<span class="nc" id="L430">            this.setLastRequestStatus(RequestStatus.SUCCESSFUL);</span>
+        }
+<span class="nc" id="L432">        this.nextPlayer();</span>
+<span class="nc" id="L433">    }</span>
+
+
+    /**
+     * Actually places a card on the player's board (so the Player tried to place a card and it was a
+     * valid move).
+     *
+     * @param someoneUsername    The player who made the move
+     * @param coords             where he placed the card
+     * @param card               the placed card
+     * @param side               the side the card was placed on
+     * @param points             the total points of the player after he placed the card
+     * @param availableResources the available resources of the player after he placed the card
+     */
+    public void someonePlayedCard(String someoneUsername, Pair&lt;Integer, Integer&gt; coords, PlayableCard card, Side side, int points,
+                                  Map&lt;Symbol, Integer&gt; availableResources) {
+<span class="nc bnc" id="L449" title="All 2 branches missed.">        if (this.username.equals(someoneUsername)) {</span>
+<span class="nc" id="L450">            this.setLastRequestStatus(RequestStatus.SUCCESSFUL);</span>
+        }
+<span class="nc bnc" id="L452" title="All 4 branches missed.">        if (points &gt;= 20 &amp;&amp; !this.lastTurn) {</span>
+<span class="nc" id="L453">            this.lastTurn = true;</span>
+<span class="nc" id="L454">            this.notifyLastTurn();</span>
+        }
+<span class="nc" id="L456">        this.clientBoards.get(someoneUsername).placeCard(coords, card, side, points, availableResources);</span>
+<span class="nc" id="L457">    }</span>
+
+
+    /**
+     * Handles the replacement of the last card drawn, and changes turn.
+     *
+     * @param someoneUsername Player who drew the card
+     * @param source          From where he drew the card
+     * @param card            The card he drew
+     * @param replacementCard The replacement card, which will be null if the {@link DrawSource} is a
+     *                        deck
+     * @param deckTopReigns   Current deck top reigns
+     */
+    public void someoneDrewCard(String someoneUsername, DrawSource source, PlayableCard card, PlayableCard replacementCard,
+                                Pair&lt;Symbol, Symbol&gt; deckTopReigns) {
+<span class="nc bnc" id="L472" title="All 2 branches missed.">        if (this.username.equals(someoneUsername)) {</span>
+<span class="nc" id="L473">            this.setLastRequestStatus(RequestStatus.SUCCESSFUL);</span>
+        }
+<span class="nc bnc" id="L475" title="All 4 branches missed.">        if (!source.equals(DrawSource.GOLDS_DECK) &amp;&amp; !source.equals(DrawSource.RESOURCES_DECK)) {</span>
+<span class="nc" id="L476">            visiblePlayableCards.put(source, replacementCard);</span>
+        }
+<span class="nc" id="L478">        this.decksTopReign = deckTopReigns;</span>
+
+<span class="nc bnc" id="L480" title="All 6 branches missed.">        if (decksTopReign.first() == null &amp;&amp; decksTopReign.second() == null &amp;&amp; !this.lastTurn) {</span>
+<span class="nc" id="L481">            this.lastTurn = true;</span>
+<span class="nc" id="L482">            this.notifyLastTurn();</span>
+        }
+<span class="nc" id="L484">        this.clientBoards.get(someoneUsername).drawCard(card);</span>
+
+<span class="nc" id="L486">        this.nextPlayer();</span>
+<span class="nc" id="L487">    }</span>
+
+    /**
+     * Notifies the player that this is the last turn he can play.
+     */
+    public void notifyLastTurn() {
+<span class="nc" id="L493">        this.lastTurn = true;</span>
+<span class="nc" id="L494">    }</span>
+
+    /**
+     * Notifies the player that someone joined the lobby.
+     *
+     * @param joinedPlayers List of the players currently in the match
+     * @param someoneUsername Player who joined
+     */
+    public void someoneJoined(String someoneUsername, List&lt;String&gt; joinedPlayers) {
+<span class="nc bnc" id="L503" title="All 2 branches missed.">        if (this.username.equals(someoneUsername)) {</span>
+<span class="nc" id="L504">            this.setLastRequestStatus(RequestStatus.SUCCESSFUL);</span>
+        }
+<span class="nc" id="L506">    }</span>
+
+    /**
+     * Notifies the player that someone quit the lobby.
+     *
+     * @param someoneUsername Player who quit
+     */
+    public abstract void someoneQuit(String someoneUsername);
+
+
+    /**
+     * Shows the player the match's leaderboard after the game ended.
+     *
+     * @param ranking Ranking of players
+     */
+    public abstract void matchFinished(List&lt;LeaderboardEntry&gt; ranking);
+
+    /**
+     * Notifies that someone sent a broadcast text.
+     *
+     * @param someoneUsername Player who sent the text
+     * @param text            Text he sent
+     */
+    public void someoneSentBroadcastText(String someoneUsername, String text) {
+<span class="nc bnc" id="L530" title="All 2 branches missed.">        if (this.username.equals(someoneUsername)) {</span>
+<span class="nc" id="L531">            this.setLastRequestStatus(RequestStatus.SUCCESSFUL);</span>
+        }
+<span class="nc" id="L533">    }</span>
+
+    /**
+     * Notifies the player that someone sent him a private text.
+     *
+     * @param someoneUsername Player who sent the private text
+     * @param text            Text he sent
+     */
+    public void someoneSentPrivateText(String someoneUsername, String text) {
+<span class="nc bnc" id="L542" title="All 2 branches missed.">        if (this.username.equals(someoneUsername)) {</span>
+<span class="nc" id="L543">            this.setLastRequestStatus(RequestStatus.SUCCESSFUL);</span>
+        }
+<span class="nc" id="L545">    }</span>
+
+    /**
+     * Notify the client that the connection with the server
+     * has been lost.
+     */
+    public abstract void notifyConnectionLost();
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

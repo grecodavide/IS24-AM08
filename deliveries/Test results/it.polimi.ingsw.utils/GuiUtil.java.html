@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GuiUtil.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.utils</a> &gt; <span class="el_source">GuiUtil.java</span></div><h1>GuiUtil.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.utils;
+
+import it.polimi.ingsw.client.frontend.gui.GraphicalApplication;
+import it.polimi.ingsw.exceptions.AlreadyUsedUsernameException;
+import it.polimi.ingsw.exceptions.WrongChoiceException;
+import it.polimi.ingsw.exceptions.WrongStateException;
+import it.polimi.ingsw.exceptions.WrongTurnException;
+import it.polimi.ingsw.gamemodel.*;
+import javafx.fxml.FXMLLoader;
+
+import java.io.IOException;
+import java.rmi.RemoteException;
+import java.util.Locale;
+
+<span class="nc" id="L15">public class GuiUtil {</span>
+<span class="fc" id="L16">    public static String playableCardsPath = &quot;/images/playable_cards&quot;;</span>
+<span class="fc" id="L17">    public static String objectivesPath = &quot;/images/objectives&quot;;</span>
+<span class="fc" id="L18">    public static String initialsPath = &quot;/images/initial_cards&quot;;</span>
+<span class="fc" id="L19">    public static String pawnsPath = &quot;/images/pawn_colors&quot;;</span>
+
+    /**
+     * Get a node from the given FXML
+     * @param path path of the fxml
+     * @return the requested node
+     * @param &lt;T&gt; type of the expected node
+     * @throws IOException if there are errors reading the file
+     */
+    public static &lt;T&gt;T getFromFXML(String path) throws IOException {
+<span class="nc" id="L29">        FXMLLoader loader = GuiUtil.getLoader(path);</span>
+<span class="nc" id="L30">        return loader.load();</span>
+    }
+
+    /**
+     * Check if the username/match name is valid
+     * The name must be alphanumeric and between 1 and 32 characters
+     * @param name string to check
+     * @return if the name is valid
+     */
+    public static boolean isValidName(String name) {
+<span class="fc" id="L40">        return name.matches(&quot;^[a-zA-Z0-9]{1,32}$&quot;);</span>
+    }
+
+    /**
+     * Get the loader from the specified path
+     * @param path file path of fxml
+     * @return loader
+     */
+    public static FXMLLoader getLoader(String path) {
+<span class="nc" id="L49">        return new FXMLLoader(GraphicalApplication.class.getResource(path));</span>
+    }
+
+    /**
+     * Applies the specified CSS to a javafx scene parent
+     * @param w The parent to apply the css to
+     * @param path Path of the css file
+     */
+    public static void applyCSS(javafx.scene.Parent w, String path) {
+<span class="nc" id="L58">        w.getStylesheets().addAll(GraphicalApplication.class.getResource(path).toExternalForm());</span>
+<span class="nc" id="L59">    }</span>
+
+    /**
+     * Get the image path of a playable card
+     * @param card card to get the image
+     * @param side side of the card
+     * @return the path as a string
+     */
+    public static String getImagePath(PlayableCard card, Side side) {
+<span class="nc bnc" id="L68" title="All 2 branches missed.">        if (side.equals(Side.FRONT)) {</span>
+<span class="nc" id="L69">            return playableCardsPath + &quot;/&quot; + card.getId() + &quot;.png&quot;;</span>
+        } else {
+<span class="nc bnc" id="L71" title="All 2 branches missed.">            return switch (card){</span>
+<span class="nc" id="L72">                case GoldCard ignored -&gt; getGoldsBack(card.getReign());</span>
+<span class="nc" id="L73">                case ResourceCard ignored -&gt; getResourcesBack(card.getReign());</span>
+            };
+        }
+    }
+
+    /**
+     * Get the back of a resource card
+     * @param symbol symbol of the resource card
+     * @return the path as a string
+     */
+    public static String getResourcesBack(Symbol symbol) {
+<span class="nc" id="L84">        String reign = symbol.toString().toUpperCase();</span>
+<span class="nc" id="L85">        return playableCardsPath + &quot;/&quot; + reign + &quot;-resources-back.png&quot;;</span>
+    }
+
+    /**
+     * Get the back of a gold card
+     * @param symbol symbol of the gold card
+     * @return the path as a string
+     */
+    public static String getGoldsBack(Symbol symbol) {
+<span class="nc" id="L94">        String reign = symbol.toString().toUpperCase();</span>
+<span class="nc" id="L95">        return playableCardsPath + &quot;/&quot; + reign + &quot;-golds-back.png&quot;;</span>
+    }
+
+    /**
+     * Get the image path of an intial card
+     * @param card card to get the image
+     * @param side side of the card
+     * @return the path as a string
+     */
+    public static String getImagePath(InitialCard card, Side side) {
+<span class="nc" id="L105">        return initialsPath + &quot;/&quot; + side.toString() + &quot;/&quot; + card.getId() + &quot;.png&quot;;</span>
+    }
+
+    /**
+     * Get the image path of an objective card
+     * @param obj card to get the image
+     * @param side side of the card
+     * @return the path as a string
+     */
+    public static String getImagePath(Objective obj, Side side) {
+<span class="nc bnc" id="L115" title="All 2 branches missed.">        if (side.equals(Side.FRONT))</span>
+<span class="nc" id="L116">            return objectivesPath + &quot;/&quot; + obj.getID() + &quot;.png&quot;;</span>
+        else
+<span class="nc" id="L118">            return objectivesPath + &quot;/objectives-back.png&quot;;</span>
+    }
+
+    /**
+     * Get image path of a pawn
+     * @param color color of the pawn
+     * @return the path as a string
+     */
+    public static String getPawnImagePath(Color color) {
+<span class="nc" id="L127">        return pawnsPath + &quot;/&quot; + color.toString().toLowerCase(Locale.ROOT) + &quot;-pawn.png&quot;;</span>
+    }
+
+    /**
+     * Get image path of the black pawn
+     * @return the path as a string
+     */
+    public static String getBlackPawnImagePath() {
+<span class="nc" id="L135">        return pawnsPath + &quot;/black-pawn.png&quot;;</span>
+    }
+
+    /**
+     * Get the hex code of the given color
+     * @param color color to convert
+     * @return the hex code of color
+     */
+    public static String getHexFromColor(Color color) {
+<span class="nc bnc" id="L144" title="All 4 branches missed.">        return switch (color) {</span>
+<span class="nc" id="L145">            case RED -&gt; &quot;#C00402&quot;;</span>
+<span class="nc" id="L146">            case BLUE -&gt; &quot;#0C6692&quot;;</span>
+<span class="nc" id="L147">            case GREEN -&gt; &quot;#195C00&quot;;</span>
+<span class="nc" id="L148">            case YELLOW -&gt; &quot;#BEA013&quot;;</span>
+        };
+    }
+
+    /**
+     * Translate exception type into human-readable titles
+     * @param e exception to translate
+     * @return human-readable title
+     */
+    public static String getExceptionTitle(Exception e) {
+<span class="nc bnc" id="L158" title="All 6 branches missed.">        return switch (e) {</span>
+<span class="nc" id="L159">            case WrongStateException ignored -&gt; &quot;Wrong turn!&quot;;</span>
+<span class="nc" id="L160">            case WrongChoiceException ignored -&gt; &quot;Wrong move!&quot;;</span>
+<span class="nc" id="L161">            case AlreadyUsedUsernameException ignored -&gt; &quot;Username already used!&quot;;</span>
+<span class="nc" id="L162">            case WrongTurnException ignored -&gt; &quot;It is not your turn!&quot;;</span>
+<span class="nc" id="L163">            case RemoteException ignored -&gt; &quot;Connection error&quot;;</span>
+<span class="nc" id="L164">            default -&gt; &quot;Error!&quot;;</span>
+        };
+    }
+
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

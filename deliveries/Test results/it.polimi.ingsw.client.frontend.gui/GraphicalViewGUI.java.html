@@ -1,0 +1,511 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GraphicalViewGUI.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.client.frontend.gui</a> &gt; <span class="el_source">GraphicalViewGUI.java</span></div><h1>GraphicalViewGUI.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.client.frontend.gui;
+
+import java.io.IOException;
+import java.rmi.RemoteException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import it.polimi.ingsw.client.frontend.ClientBoard;
+import it.polimi.ingsw.client.frontend.GraphicalView;
+import it.polimi.ingsw.client.frontend.MatchStatus;
+import it.polimi.ingsw.client.frontend.ShownCard;
+import it.polimi.ingsw.client.frontend.gui.controllers.*;
+import it.polimi.ingsw.client.frontend.gui.nodes.CardView;
+import it.polimi.ingsw.gamemodel.*;
+import it.polimi.ingsw.utils.*;
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import javafx.scene.layout.StackPane;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+
+/**
+ * JavaFX implementation of Codex Naturalis client
+ */
+public class GraphicalViewGUI extends GraphicalView {
+    private final Stage stage;
+    // Controllers
+    private Map&lt;String, PlayerTabController&gt; playerTabControllers;
+    private MatchSceneController matchSceneController;
+    private WaitingSceneController waitingSceneController;
+    private LobbySceneController lobbySceneController;
+    private RankingSceneController rankingSceneController;
+    private ChatPaneController chatPaneController;
+
+    // Match state management
+<span class="nc" id="L38">    MatchStatus matchState = MatchStatus.LOBBY;</span>
+
+    // Temporary vars
+    private String matchName;
+    private List&lt;AvailableMatch&gt; lastAvailableMatches;
+    private Integer maxPlayers;
+
+    /**
+     * Initialize on a given JavaFX stage
+     * @param stage the main stage of the application
+     */
+<span class="nc" id="L49">    public GraphicalViewGUI(Stage stage) {</span>
+<span class="nc" id="L50">        this.stage = stage;</span>
+<span class="nc" id="L51">    }</span>
+
+    @Override
+    public void changePlayer() {
+<span class="nc" id="L55">        Platform.runLater(() -&gt; {</span>
+            // Notify to each player tab if it is his turn and disable his hand card interactions
+            // this is needed in order to disable this client's interactions after his turn has finished
+<span class="nc bnc" id="L58" title="All 2 branches missed.">            for (String username : playerTabControllers.keySet()) {</span>
+<span class="nc" id="L59">                PlayerTabController tab = playerTabControllers.get(username);</span>
+<span class="nc" id="L60">                boolean isCurrent = username.equals(currentPlayer);</span>
+
+<span class="nc" id="L62">                tab.setCurrentPlayer(isCurrent);</span>
+<span class="nc" id="L63">                tab.enablePlaceCardInteractions(false);</span>
+<span class="nc" id="L64">            }</span>
+<span class="nc" id="L65">        });</span>
+<span class="nc" id="L66">    }</span>
+
+    /**
+     * Method called everytime it's this client turn.
+     */
+    @Override
+    public void makeMove() {
+<span class="nc" id="L73">        this.changePlayer();</span>
+<span class="nc" id="L74">        Platform.runLater(() -&gt; {</span>
+<span class="nc" id="L75">            matchSceneController.setFocus(this.username);</span>
+
+            // Enable the hand cards interactions, so that they can be dragged
+<span class="nc" id="L78">            playerTabControllers.get(this.username).enablePlaceCardInteractions(true);</span>
+<span class="nc" id="L79">            playerTabControllers.get(this.username).setStateTitle(&quot;Play a card&quot;);</span>
+<span class="nc" id="L80">        });</span>
+<span class="nc" id="L81">    }</span>
+
+    @Override
+    public void createMatch(String matchName, Integer maxPlayers) {
+<span class="nc" id="L85">        super.createMatch(matchName, maxPlayers);</span>
+<span class="nc" id="L86">        this.matchName = matchName;</span>
+<span class="nc" id="L87">        this.maxPlayers = maxPlayers;</span>
+<span class="nc" id="L88">    }</span>
+
+    @Override
+    public void joinMatch(String matchName) {
+<span class="nc" id="L92">        super.joinMatch(matchName);</span>
+<span class="nc" id="L93">        this.matchName = matchName;</span>
+<span class="nc" id="L94">    }</span>
+
+    @Override
+    protected void notifyMatchStarted() {
+<span class="nc" id="L98">        this.setupMatch(false, false);</span>
+<span class="nc" id="L99">    }</span>
+
+    @Override
+    protected void notifyMatchResumed(boolean drawPhase) {
+<span class="nc" id="L103">        this.setupMatch(true, drawPhase);</span>
+<span class="nc" id="L104">    }</span>
+
+    /**
+     * Set match scene and populate elements on match start
+     * @param matchResumed if the match is resumed
+     */
+    private void setupMatch(boolean matchResumed, boolean drawPhase) {
+<span class="nc" id="L111">        matchState = MatchStatus.MATCH_STATE;</span>
+<span class="nc" id="L112">        Platform.runLater(() -&gt; {</span>
+            try {
+<span class="nc bnc" id="L114" title="All 2 branches missed.">                if (waitingSceneController == null) {</span>
+<span class="nc" id="L115">                    waitingSceneController = new WaitingSceneController();</span>
+<span class="nc" id="L116">                    waitingSceneController.setGraphicalView(this);</span>
+<span class="nc" id="L117">                    waitingSceneController.setStage(stage);</span>
+                }
+<span class="nc" id="L119">                matchSceneController = waitingSceneController.showMatch();</span>
+<span class="nc" id="L120">            } catch (IOException e) {</span>
+<span class="nc" id="L121">                throw new RuntimeException(e);</span>
+<span class="nc" id="L122">            }</span>
+            // Set visible objectives
+<span class="nc" id="L124">            matchSceneController.setObjectives(super.visibleObjectives);</span>
+            // Set visible draw sources
+<span class="nc" id="L126">            super.visiblePlayableCards.forEach((drawSource, playableCard) -&gt; {</span>
+<span class="nc" id="L127">                matchSceneController.setDrawSource(drawSource, playableCard, playableCard.getReign());</span>
+<span class="nc" id="L128">            });</span>
+<span class="nc" id="L129">            matchSceneController.setDrawSource(DrawSource.GOLDS_DECK, null, super.decksTopReign.first());</span>
+<span class="nc" id="L130">            matchSceneController.setDrawSource(DrawSource.RESOURCES_DECK, null, super.decksTopReign.second());</span>
+
+            // Create players tabs, assign colors and their hands
+<span class="nc" id="L133">            int n = 0;</span>
+<span class="nc" id="L134">            playerTabControllers = new HashMap&lt;&gt;();</span>
+<span class="nc bnc" id="L135" title="All 2 branches missed.">            for (String p : super.players) {</span>
+                try {
+<span class="nc" id="L137">                    PlayerTabController controller = matchSceneController.addPlayerTab(p, Color.values()[n]);</span>
+<span class="nc" id="L138">                    playerTabControllers.put(p, controller);</span>
+<span class="nc" id="L139">                    controller.setHandCards(super.clientBoards.get(p).getHand());</span>
+                    // Disable the interaction with hand cards on all player tabs
+<span class="nc" id="L141">                    controller.enablePlaceCardInteractions(false);</span>
+<span class="nc" id="L142">                } catch (IOException e) {</span>
+<span class="nc" id="L143">                    throw new RuntimeException(e);</span>
+<span class="nc" id="L144">                }</span>
+<span class="nc" id="L145">                n++;</span>
+<span class="nc" id="L146">            }</span>
+
+            // Initialize the chat pane
+<span class="nc" id="L149">            chatPaneController = matchSceneController.getChatPane();</span>
+<span class="nc" id="L150">            playerTabControllers.forEach((tabUsername, controller) -&gt; {</span>
+<span class="nc bnc" id="L151" title="All 2 branches missed.">                if (!tabUsername.equals(this.username))</span>
+<span class="nc" id="L152">                    chatPaneController.addPlayer(tabUsername);</span>
+<span class="nc" id="L153">            });</span>
+
+            // By default, disable draw sources interactions
+<span class="nc" id="L156">            matchSceneController.enableDrawSourcesInteractions(false);</span>
+<span class="nc bnc" id="L157" title="All 2 branches missed.">            if (matchResumed) this.setupResumedMatch(drawPhase);</span>
+<span class="nc" id="L158">        });</span>
+<span class="nc" id="L159">    }</span>
+
+    /**
+     * Populate extra elements after match resumed
+     */
+    private void setupResumedMatch(boolean drawPhase) {
+<span class="nc" id="L165">        playerTabControllers.forEach(((username, playerTabController) -&gt; {</span>
+<span class="nc" id="L166">            ClientBoard playerBoard = clientBoards.get(username);</span>
+<span class="nc" id="L167">            playerTabController.setSecretObjective(playerBoard.getObjective());</span>
+
+            // Place the initial card
+<span class="nc" id="L170">            playerTabController.getBoard().addCard(new Pair&lt;&gt;(0, 0), (InitialCard) playerBoard.getPlaced().get(0).card(), playerBoard.getPlaced().get(0).side());</span>
+
+            // Place all the other cards
+<span class="nc" id="L173">            Map&lt;Integer, ShownCard&gt; placed = playerBoard.getPlaced();</span>
+<span class="nc bnc" id="L174" title="All 2 branches missed.">            for (Integer turn : placed.keySet()) {</span>
+<span class="nc bnc" id="L175" title="All 2 branches missed.">                if (turn &gt; 0) {</span>
+<span class="nc" id="L176">                    playerTabController.getBoard().addCard(placed.get(turn).coords(), (PlayableCard) placed.get(turn).card(), placed.get(turn).side());</span>
+                }
+<span class="nc" id="L178">            }</span>
+
+            // Set points and available resources
+<span class="nc" id="L181">            playerTabController.setPoints(playerBoard.getPoints());</span>
+<span class="nc" id="L182">            matchSceneController.plateauPane.setPoints(username, playerBoard.getPoints());</span>
+<span class="nc" id="L183">            playerTabController.setResources(playerBoard.getAvailableResources());</span>
+<span class="nc" id="L184">        }));</span>
+
+        // Enable interactions if it is the current user turn
+<span class="nc" id="L187">        this.changePlayer();</span>
+<span class="nc bnc" id="L188" title="All 2 branches missed.">        if (currentPlayer.equals(username)) {</span>
+<span class="nc bnc" id="L189" title="All 2 branches missed.">            if (!drawPhase) {</span>
+<span class="nc" id="L190">                this.makeMove();</span>
+<span class="nc" id="L191">                playerTabControllers.get(username).enablePlaceCardInteractions(true);</span>
+            } else {
+                // Draw interactions
+                // Set focus on the table
+<span class="nc" id="L195">                matchSceneController.setFocusToTable();</span>
+<span class="nc" id="L196">                matchSceneController.setStateTitle(&quot;Draw a card&quot;);</span>
+                // Enable draw sources interactions
+<span class="nc" id="L198">                matchSceneController.enableDrawSourcesInteractions(true);</span>
+            }
+        }
+<span class="nc" id="L201">    }</span>
+
+    @Override
+    public void giveInitialCard(InitialCard initialCard) {
+<span class="nc" id="L205">        super.giveInitialCard(initialCard);</span>
+<span class="nc" id="L206">        this.changePlayer();</span>
+<span class="nc" id="L207">        Platform.runLater(() -&gt; {</span>
+<span class="nc" id="L208">            playerTabControllers.get(username).giveInitialCard(initialCard);</span>
+<span class="nc" id="L209">            matchSceneController.setFocus(username);</span>
+<span class="nc" id="L210">        });</span>
+<span class="nc" id="L211">    }</span>
+
+    @Override
+    public void giveSecretObjectives(Pair&lt;Objective, Objective&gt; secretObjectives) {
+<span class="nc" id="L215">        super.giveSecretObjectives(secretObjectives);</span>
+<span class="nc" id="L216">        this.changePlayer();</span>
+<span class="nc" id="L217">        Platform.runLater(() -&gt; {</span>
+<span class="nc" id="L218">            playerTabControllers.get(username).giveSecretObjectives(secretObjectives);</span>
+<span class="nc" id="L219">            matchSceneController.setFocus(username);</span>
+<span class="nc" id="L220">        });</span>
+<span class="nc" id="L221">    }</span>
+
+    @Override
+    public void someoneDrewInitialCard(String someoneUsername, InitialCard card) {
+<span class="nc" id="L225">        super.someoneDrewInitialCard(someoneUsername, card);</span>
+<span class="nc" id="L226">        Platform.runLater(() -&gt; playerTabControllers.get(someoneUsername).someoneDrewInitialCard(card));</span>
+<span class="nc" id="L227">    }</span>
+
+    @Override
+    public void someoneSetInitialSide(String someoneUsername, Side side, Map&lt;Symbol, Integer&gt; availableResources) {
+<span class="nc" id="L231">        super.someoneSetInitialSide(someoneUsername, side, availableResources);</span>
+<span class="nc" id="L232">        Platform.runLater(() -&gt; {</span>
+<span class="nc" id="L233">            PlayerTabController playerTabController = playerTabControllers.get(someoneUsername);</span>
+<span class="nc" id="L234">            playerTabController.removePlayerChoiceContainer();</span>
+<span class="nc" id="L235">            InitialCard card = super.clientBoards.get(someoneUsername).getInitialCard();</span>
+<span class="nc" id="L236">            CardView initial = playerTabController.getBoard().addCard(new Pair&lt;&gt;(0, 0), card, side);</span>
+<span class="nc" id="L237">            initial.setToken(Color.values()[players.indexOf(someoneUsername)]);</span>
+<span class="nc" id="L238">        });</span>
+<span class="nc" id="L239">    }</span>
+
+    @Override
+    public void someoneDrewSecretObjective(String someoneUsername) {
+<span class="nc" id="L243">        super.someoneDrewSecretObjective(someoneUsername);</span>
+<span class="nc" id="L244">        PlayerTabController playerTabController = playerTabControllers.get(someoneUsername);</span>
+<span class="nc" id="L245">        Platform.runLater(playerTabController::someoneDrewSecretObjective);</span>
+<span class="nc" id="L246">    }</span>
+
+    @Override
+    public void someoneChoseSecretObjective(String someoneUsername) {
+<span class="nc" id="L250">        super.someoneChoseSecretObjective(someoneUsername);</span>
+<span class="nc" id="L251">        Platform.runLater(() -&gt; {</span>
+<span class="nc" id="L252">            PlayerTabController playerTabController = playerTabControllers.get(someoneUsername);</span>
+<span class="nc" id="L253">            playerTabController.removePlayerChoiceContainer();</span>
+<span class="nc bnc" id="L254" title="All 2 branches missed.">            if (someoneUsername.equals(username)) {</span>
+<span class="nc" id="L255">                playerTabController.setSecretObjective(clientBoards.get(username).getObjective());</span>
+            } else {
+<span class="nc" id="L257">                playerTabController.setSecretObjective(null);</span>
+            }
+<span class="nc" id="L259">        });</span>
+<span class="nc" id="L260">    }</span>
+
+    @Override
+    public void notifyLastTurn() {
+<span class="nc bnc" id="L264" title="All 2 branches missed.">        for (PlayerTabController t : playerTabControllers.values()) {</span>
+<span class="nc" id="L265">            Platform.runLater(() -&gt; t.setStateTitle(&quot;Last turn, play carefully!&quot;));</span>
+<span class="nc" id="L266">        }</span>
+<span class="nc" id="L267">    }</span>
+
+    @Override
+    public void someoneJoined(String someoneUsername, List&lt;String&gt; joinedPlayers) {
+<span class="nc bnc" id="L271" title="All 4 branches missed.">        if (!matchState.equals(MatchStatus.WAIT_STATE) &amp;&amp; !matchState.equals(MatchStatus.LOBBY)) {</span>
+<span class="nc" id="L272">            return;</span>
+        }
+<span class="nc" id="L274">        super.someoneJoined(someoneUsername, joinedPlayers);</span>
+<span class="nc bnc" id="L275" title="All 2 branches missed.">        if (this.maxPlayers == null) {</span>
+<span class="nc" id="L276">            maxPlayers = lastAvailableMatches.stream()</span>
+<span class="nc" id="L277">                    .filter((m) -&gt; m.name().equals(matchName))</span>
+<span class="nc" id="L278">                    .mapToInt(AvailableMatch::maxPlayers)</span>
+<span class="nc" id="L279">                    .toArray()[0];</span>
+        }
+<span class="nc bnc" id="L281" title="All 2 branches missed.">        if (username.equals(someoneUsername)) {</span>
+<span class="nc" id="L282">            matchState = MatchStatus.WAIT_STATE;</span>
+<span class="nc" id="L283">            Platform.runLater(() -&gt; {</span>
+                try {
+<span class="nc" id="L285">                    waitingSceneController = lobbySceneController.showWaitScene();</span>
+<span class="nc" id="L286">                } catch (Exception e) {</span>
+<span class="nc" id="L287">                    throw new RuntimeException(e);</span>
+<span class="nc" id="L288">                }</span>
+<span class="nc" id="L289">                waitingSceneController.setCurrentPlayers(joinedPlayers.size());</span>
+<span class="nc" id="L290">                waitingSceneController.setMatchName(matchName);</span>
+<span class="nc" id="L291">                waitingSceneController.setMaxPlayers(maxPlayers);</span>
+<span class="nc bnc" id="L292" title="All 2 branches missed.">                for (String player : joinedPlayers) {</span>
+<span class="nc" id="L293">                    waitingSceneController.addPlayer(player);</span>
+<span class="nc" id="L294">                }</span>
+<span class="nc" id="L295">            });</span>
+        } else {
+<span class="nc" id="L297">            Platform.runLater(() -&gt; {</span>
+<span class="nc" id="L298">                waitingSceneController.addPlayer(someoneUsername);</span>
+<span class="nc" id="L299">                waitingSceneController.setCurrentPlayers(joinedPlayers.size());</span>
+<span class="nc" id="L300">            });</span>
+        }
+<span class="nc" id="L302">    }</span>
+
+    @Override
+    public void someoneQuit(String someoneUsername) {
+<span class="nc bnc" id="L306" title="All 2 branches missed.">        if (matchState.equals(MatchStatus.WAIT_STATE)) {</span>
+<span class="nc" id="L307">            Platform.runLater(() -&gt; {</span>
+<span class="nc" id="L308">                waitingSceneController.removePlayer(someoneUsername);</span>
+<span class="nc" id="L309">                waitingSceneController.setCurrentPlayers(waitingSceneController.getCurrentPlayers()-1);</span>
+<span class="nc" id="L310">            });</span>
+<span class="nc bnc" id="L311" title="All 4 branches missed.">        } else if (networkHandler.isConnected() &amp;&amp; !matchState.equals(MatchStatus.FINAL_STATE)) {</span>
+<span class="nc" id="L312">            notifyError(&quot;Player Quit&quot;, &quot;Match finished because &quot; + someoneUsername + &quot; quit&quot;);</span>
+        }
+<span class="nc" id="L314">    }</span>
+
+    @Override
+    public void matchFinished(List&lt;LeaderboardEntry&gt; ranking) {
+<span class="nc" id="L318">        Platform.runLater(() -&gt; {</span>
+            try {
+<span class="nc" id="L320">                matchState = MatchStatus.FINAL_STATE;</span>
+<span class="nc" id="L321">                rankingSceneController = matchSceneController.showRankingScene();</span>
+<span class="nc" id="L322">                ranking.forEach((entry) -&gt; {</span>
+<span class="nc bnc" id="L323" title="All 2 branches missed.">                    if (entry.username().equals(this.username)) {</span>
+<span class="nc" id="L324">                        rankingSceneController.setVictory(entry.winner());</span>
+                    }
+<span class="nc" id="L326">                    rankingSceneController.addRanking(entry);</span>
+<span class="nc" id="L327">                });</span>
+<span class="nc" id="L328">            } catch (IOException e) {</span>
+<span class="nc" id="L329">                throw new RuntimeException(e);</span>
+<span class="nc" id="L330">            }</span>
+<span class="nc" id="L331">        });</span>
+<span class="nc" id="L332">    }</span>
+
+    @Override
+    public void someoneSentBroadcastText(String someoneUsername, String text) {
+<span class="nc" id="L336">        Platform.runLater(() -&gt; {</span>
+<span class="nc bnc" id="L337" title="All 2 branches missed.">            if (someoneUsername.equals(this.username))</span>
+<span class="nc" id="L338">                chatPaneController.confirmSubmitBroadcastMessage(text);</span>
+            else
+<span class="nc" id="L340">                chatPaneController.receiveBroadcastMessage(someoneUsername, text);</span>
+<span class="nc" id="L341">        });</span>
+<span class="nc" id="L342">    }</span>
+
+    @Override
+    public void someoneSentPrivateText(String someoneUsername, String text) {
+<span class="nc" id="L346">        Platform.runLater(() -&gt; {</span>
+<span class="nc bnc" id="L347" title="All 2 branches missed.">            if (someoneUsername.equals(this.username))</span>
+<span class="nc" id="L348">                chatPaneController.confirmSubmitPrivateMessage(text);</span>
+            else
+<span class="nc" id="L350">                chatPaneController.receivePrivateMessage(someoneUsername, text);</span>
+<span class="nc" id="L351">        });</span>
+<span class="nc" id="L352">    }</span>
+
+    @Override
+    public void someonePlayedCard(String someoneUsername, Pair&lt;Integer, Integer&gt; coords, PlayableCard card, Side side, int points, Map&lt;Symbol, Integer&gt; availableResources) {
+<span class="nc" id="L356">        super.someonePlayedCard(someoneUsername, coords, card, side, points, availableResources);</span>
+<span class="nc" id="L357">        Platform.runLater(() -&gt; {</span>
+<span class="nc" id="L358">            PlayerTabController controller = playerTabControllers.get(someoneUsername);</span>
+<span class="nc" id="L359">            controller.placeCard(coords, card, side);</span>
+<span class="nc" id="L360">            controller.setPoints(points);</span>
+<span class="nc" id="L361">            matchSceneController.setPlateauPoints(someoneUsername, points);</span>
+<span class="nc" id="L362">            controller.setHandCards(clientBoards.get(someoneUsername).getHand());</span>
+<span class="nc" id="L363">            controller.setResources(availableResources);</span>
+
+            // If the player that played a card is this client
+<span class="nc bnc" id="L366" title="All 2 branches missed.">            if (someoneUsername.equals(this.username)) {</span>
+                // Set the focus on the plateau tab
+<span class="nc" id="L368">                matchSceneController.setFocusToTable();</span>
+<span class="nc" id="L369">                matchSceneController.setStateTitle(&quot;Draw a card&quot;);</span>
+                // Enable draw sources interactions
+<span class="nc" id="L371">                matchSceneController.enableDrawSourcesInteractions(true);</span>
+            } else {
+<span class="nc" id="L373">                matchSceneController.setStateTitle(someoneUsername + &quot; is drawing a card...&quot;);</span>
+            }
+<span class="nc" id="L375">            playerTabControllers.get(someoneUsername).setStateTitle(&quot;&quot;);</span>
+<span class="nc" id="L376">        });</span>
+<span class="nc" id="L377">    }</span>
+
+    @Override
+    public void someoneDrewCard(String someoneUsername, DrawSource source, PlayableCard card, PlayableCard replacementCard,
+                                Pair&lt;Symbol, Symbol&gt; deckTopReigns) {
+<span class="nc" id="L382">        super.someoneDrewCard(someoneUsername, source, card, replacementCard, deckTopReigns);</span>
+<span class="nc" id="L383">        Platform.runLater(() -&gt; {</span>
+<span class="nc" id="L384">            PlayerTabController tab = playerTabControllers.get(someoneUsername);</span>
+<span class="nc" id="L385">            tab.setHandCards(clientBoards.get(someoneUsername).getHand());</span>
+<span class="nc bnc" id="L386" title="All 4 branches missed.">            if (!source.equals(DrawSource.GOLDS_DECK) &amp;&amp; !source.equals(DrawSource.RESOURCES_DECK)) {</span>
+<span class="nc" id="L387">                matchSceneController.setDrawSource(source, replacementCard, replacementCard.getReign());</span>
+            }
+<span class="nc" id="L389">            matchSceneController.setDrawSource(DrawSource.GOLDS_DECK, null, deckTopReigns.first());</span>
+<span class="nc" id="L390">            matchSceneController.setDrawSource(DrawSource.RESOURCES_DECK, null, deckTopReigns.second());</span>
+
+            // If the player that drew a card is this client, disable draw source interactions
+<span class="nc bnc" id="L393" title="All 2 branches missed.">            if (someoneUsername.equals(this.username)) {</span>
+<span class="nc" id="L394">                matchSceneController.enableDrawSourcesInteractions(false);</span>
+<span class="nc" id="L395">                matchSceneController.setFocus(this.username);</span>
+            }
+            // Remove draw title
+<span class="nc" id="L398">            matchSceneController.setStateTitle(&quot;&quot;);</span>
+<span class="nc" id="L399">        });</span>
+<span class="nc" id="L400">    }</span>
+
+    @Override
+    public void notifyError(Exception exception) {
+<span class="nc" id="L404">        this.notifyError(GuiUtil.getExceptionTitle(exception), exception.getMessage());</span>
+<span class="nc" id="L405">    }</span>
+
+    /**
+     * Notify an error
+     * @param title title of the error
+     * @param description description of the error
+     */
+    public void notifyError(String title, String description) {
+<span class="nc" id="L413">        Platform.runLater(() -&gt; {</span>
+            try {
+                // Load the error node from the fxml file
+
+<span class="nc" id="L417">                FXMLLoader loader = GuiUtil.getLoader(&quot;/fxml/error.fxml&quot;);</span>
+<span class="nc" id="L418">                StackPane root = loader.load();</span>
+<span class="nc" id="L419">                ErrorSceneController controller = loader.getController();</span>
+
+<span class="nc" id="L421">                Stage dialog = new Stage();</span>
+<span class="nc" id="L422">                Scene errorScene = new Scene(root, ErrorSceneController.windowWidth, ErrorSceneController.windowHeight);</span>
+
+                // Initialize attributes
+<span class="nc" id="L425">                GuiUtil.applyCSS(root, &quot;/css/style.css&quot;);</span>
+<span class="nc" id="L426">                controller.setTitle(title);</span>
+<span class="nc" id="L427">                controller.setText(description);</span>
+
+<span class="nc" id="L429">                dialog.setScene(errorScene);</span>
+<span class="nc" id="L430">                dialog.setTitle(&quot;Error&quot;);</span>
+<span class="nc" id="L431">                dialog.initOwner(this.stage);</span>
+<span class="nc" id="L432">                dialog.initModality(Modality.APPLICATION_MODAL);</span>
+<span class="nc" id="L433">                dialog.setResizable(false);</span>
+<span class="nc" id="L434">                dialog.sizeToScene();</span>
+
+                // Show the modal window (stage)
+<span class="nc" id="L437">                dialog.show();</span>
+<span class="nc" id="L438">            } catch (IOException e) {</span>
+<span class="nc" id="L439">                throw new RuntimeException(e);</span>
+<span class="nc" id="L440">            }</span>
+<span class="nc" id="L441">        });</span>
+<span class="nc" id="L442">    }</span>
+
+    public void setUsername(String username) {
+<span class="nc" id="L445">        this.username = username;</span>
+<span class="nc" id="L446">        networkHandler.setUsername(username);</span>
+<span class="nc" id="L447">    }</span>
+
+    /**
+     * Getter for the client username
+     * @return client username
+     */
+    public String getUsername() {
+<span class="nc" id="L454">        return username;</span>
+    }
+
+    /**
+     * Request available matches to the server
+     */
+    public void getAvailableMatches() {
+<span class="nc" id="L461">        this.setLastRequestStatus(RequestStatus.PENDING);</span>
+<span class="nc" id="L462">        this.networkHandler.getAvailableMatches();</span>
+<span class="nc" id="L463">    }</span>
+
+    @Override
+    public void receiveAvailableMatches(List&lt;AvailableMatch&gt; availableMatches) {
+<span class="nc" id="L467">        super.receiveAvailableMatches(availableMatches);</span>
+<span class="nc" id="L468">        lastAvailableMatches = availableMatches;</span>
+<span class="nc" id="L469">        Platform.runLater(() -&gt; lobbySceneController.updateMatches(availableMatches));</span>
+<span class="nc" id="L470">    }</span>
+
+    /**
+     * Set the lobby scene controller
+     * @param lobbySceneController controller of the lobby scene
+     */
+    public void setLobbySceneController(LobbySceneController lobbySceneController) {
+<span class="nc" id="L477">        this.lobbySceneController = lobbySceneController;</span>
+<span class="nc" id="L478">        this.getAvailableMatches();</span>
+<span class="nc" id="L479">    }</span>
+
+    /**
+     * Main class to launch the applicaiton
+     * @param args command line arguments
+     */
+    public static void main(String[] args) {
+<span class="nc" id="L486">        Application.launch(GraphicalApplication.class, args);</span>
+<span class="nc" id="L487">    }</span>
+
+    @Override
+    public void notifyConnectionLost() {
+<span class="nc" id="L491">        notifyError(new RemoteException(&quot;Connection to the server lost&quot;));</span>
+<span class="nc" id="L492">        RankingSceneController r = new RankingSceneController();</span>
+<span class="nc" id="L493">            Platform.runLater(() -&gt; {</span>
+                try {
+<span class="nc" id="L495">                    r.setStage(stage);</span>
+<span class="nc" id="L496">                    r.setGraphicalView(this);</span>
+<span class="nc" id="L497">                    r.showConnectionScene();</span>
+<span class="nc" id="L498">                } catch (IOException e) {</span>
+<span class="nc" id="L499">                    throw new RuntimeException(e);</span>
+<span class="nc" id="L500">                }</span>
+<span class="nc" id="L501">            });</span>
+<span class="nc" id="L502">    }</span>
+
+    /**
+     * Request disconnection from the network
+     */
+    public void disconnect() {
+<span class="nc" id="L508">        networkHandler.disconnect();</span>
+<span class="nc" id="L509">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

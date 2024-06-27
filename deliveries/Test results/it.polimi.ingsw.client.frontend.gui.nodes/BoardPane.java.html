@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BoardPane.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.client.frontend.gui.nodes</a> &gt; <span class="el_source">BoardPane.java</span></div><h1>BoardPane.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.client.frontend.gui.nodes;
+
+import it.polimi.ingsw.gamemodel.*;
+import it.polimi.ingsw.utils.CardsManager;
+import it.polimi.ingsw.utils.GuiUtil;
+import it.polimi.ingsw.utils.Pair;
+import javafx.scene.Node;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
+import javafx.scene.layout.Pane;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Game board, manages card display
+ */
+public class BoardPane extends Pane {
+    // Card dimensions
+<span class="nc" id="L22">    public static double cardWidth = CardView.cardWidth;</span>
+<span class="nc" id="L23">    public static double cardHeight = CardView.cardHeight;</span>
+<span class="nc" id="L24">    public static double cardBorderW = 44.8;</span>
+<span class="nc" id="L25">    public static double cardBorderH = 52.6;</span>
+    // Currently placed cards
+<span class="nc" id="L27">    public List&lt;Pair&lt;Integer, Integer&gt;&gt; takenSpots = new ArrayList&lt;&gt;();</span>
+
+    /**
+     * Constructor of BoardPane
+     */
+    public BoardPane() {
+<span class="nc" id="L33">        super();</span>
+<span class="nc" id="L34">    }</span>
+
+    /**
+     * Add a card to the board
+     * @param position relative coordinates of the card
+     * @param card card to add
+     * @param side side of the card to add
+     */
+    public void addCard(Pair&lt;Integer, Integer&gt; position, PlayableCard card, Side side) {
+<span class="nc" id="L43">        CardView c = new CardView(card, side);</span>
+<span class="nc" id="L44">        c.getProperties().put(&quot;gameCoords&quot;, position);</span>
+<span class="nc" id="L45">        displayCard(position, c);</span>
+<span class="nc" id="L46">        takenSpots.add(position);</span>
+<span class="nc" id="L47">    }</span>
+
+    /**
+     * Add a card to the board
+     * @param position relative coordinates of the card
+     * @param card card to add
+     * @param side side of the card to add
+     * @return the added CardView
+     */
+    public CardView addCard(Pair&lt;Integer, Integer&gt; position, InitialCard card, Side side) {
+<span class="nc" id="L57">        CardView c = new CardView(card, side);</span>
+<span class="nc" id="L58">        displayCard(position, c);</span>
+<span class="nc" id="L59">        takenSpots.add(position);</span>
+<span class="nc" id="L60">        c.getProperties().put(&quot;gameCoords&quot;, position);</span>
+<span class="nc" id="L61">        return c;</span>
+    }
+
+    /**
+     * Sets the layout coordinates of the card and adds it to the board
+     * @param position position of the card to place
+     * @param c CardView of the card
+     */
+    private void displayCard(Pair&lt;Integer, Integer&gt; position, CardView c) {
+<span class="nc" id="L70">        Pair&lt;Double, Double&gt; coords = convertCoordinates(position);</span>
+<span class="nc" id="L71">        c.setLayoutX(coords.first());</span>
+<span class="nc" id="L72">        c.setLayoutY(coords.second());</span>
+<span class="nc" id="L73">        this.getChildren().add(c);</span>
+<span class="nc" id="L74">    }</span>
+
+    /**
+     * Convert coordinates from game coordinate to JavaFX Board coordinates
+     * @param coords coordinate to convert
+     * @return converted coordinates
+     */
+    public Pair&lt;Double, Double&gt; convertCoordinates(Pair&lt;Integer, Integer&gt; coords) {
+<span class="nc" id="L82">        double boardWidth = super.getPrefWidth();</span>
+<span class="nc" id="L83">        double boardHeight = super.getPrefHeight();</span>
+<span class="nc" id="L84">        double w = boardWidth/2 + (coords.first() * (cardWidth - cardBorderW));</span>
+<span class="nc" id="L85">        double h = boardHeight/2 - (coords.second() * (cardHeight - cardBorderH));</span>
+<span class="nc" id="L86">        return new Pair&lt;&gt;(w, h);</span>
+    }
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

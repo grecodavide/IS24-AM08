@@ -8,7 +8,15 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * Serialize game cards into json
+ */
 public class CardsSerializer {
+
+    /**
+     * Function that serializes the cards
+     * @param args arguments
+     */
     public static void main(String[] args) {
         // cards
         InitialCard initialCard;
@@ -284,7 +292,7 @@ public class CardsSerializer {
             topLeft = Symbol.FUNGUS;
             topRight = Symbol.INSECT;
             bottomLeft = Symbol.PARCHMENT;
-            bottomRight = Symbol.EMPTY_CORNER;
+            bottomRight = Symbol.FULL_CORNER;
             resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);
             resourceCardMap.put(resourceCard.getId(), resourceCard);
 
@@ -468,7 +476,7 @@ public class CardsSerializer {
             topRight = Symbol.EMPTY_CORNER;
             bottomLeft = Symbol.ANIMAL;
             bottomRight = Symbol.FULL_CORNER;
-            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, points);
+            resourceCard = new ResourceCard(new CardFace(topLeft, topRight, bottomLeft, bottomRight, Collections.emptySet()), reign, 0);
             resourceCardMap.put(resourceCard.getId(), resourceCard);
         } catch (InvalidResourceException e) {
             throw new RuntimeException(e);

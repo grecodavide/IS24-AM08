@@ -48,6 +48,9 @@ public class Objective implements Serializable {
         return this.req;
     }
 
+    /**
+     * @return the id of the objective card
+     */
     public Integer getID() {
         return this.id;
     }

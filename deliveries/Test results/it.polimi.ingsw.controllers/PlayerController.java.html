@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PlayerController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.controllers</a> &gt; <span class="el_source">PlayerController.java</span></div><h1>PlayerController.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.controllers;
+
+import it.polimi.ingsw.exceptions.AlreadyUsedUsernameException;
+import it.polimi.ingsw.exceptions.ChosenMatchException;
+import it.polimi.ingsw.exceptions.WrongNameException;
+import it.polimi.ingsw.exceptions.WrongStateException;
+import it.polimi.ingsw.gamemodel.Match;
+import it.polimi.ingsw.gamemodel.MatchObserver;
+import it.polimi.ingsw.gamemodel.Player;
+import it.polimi.ingsw.utils.GuiUtil;
+
+import java.util.Optional;
+
+/**
+ * Controller for a match player, the only agent needing a view and so a controller in this
+ * application. This class subclasses instances are given (in RMI case) / reachable (in TCP case) on
+ * the network and collected by a corresponding view (RMI view or TCP view); then this class commits
+ * its two subclasses {@link PlayerControllerRMI} and {@link PlayerControllerTCP} to implement all
+ * the methods needed by a generic view to play in a match. This class implements
+ * {@link MatchObserver} since its instances subscribe themselves to a Match, as mentioned in
+ * {@link #PlayerController(String, Match)}; this is needed to allow this class to behave as a
+ * bridge between a view and a match.
+ */
+public abstract sealed class PlayerController implements MatchObserver permits PlayerControllerRMI, PlayerControllerTCP {
+    protected Player player;
+    protected final Match match;
+
+    /**
+     * Instantiates the internal Player with the given username and sets the internal Match reference to
+     * the given one, furthermore add the new Player instance to the match and subscribe this class
+     * instance to the match observers.
+     *
+     * @param username The username of the new player of the Match
+     * @param match    The match to which this PlayerClass must pertain
+     */
+<span class="fc" id="L36">    public PlayerController(String username, Match match) {</span>
+<span class="fc" id="L37">        this.player = new Player(username, match);</span>
+<span class="fc" id="L38">        this.match = match;</span>
+<span class="fc" id="L39">    }</span>
+
+    /**
+     * Gets the player linked to this PlayerController instance.
+     *
+     * @return The player linked to this instance
+     */
+    public Player getPlayer() {
+<span class="fc" id="L47">        return player;</span>
+    }
+
+    /**
+     * Tries to effectively join a match, adding himself to the list of observers and the corresponding
+     * player to the match, if the username is valid.
+     *
+     * @throws AlreadyUsedUsernameException If the username is already taken
+     * @throws WrongStateException          If the match currently does not accept new players
+     * @throws ChosenMatchException         If the chosen match is not valid
+     * @throws WrongNameException           If the chosen username is not acceptable due to alphabetical restrictions
+     * @throws IllegalArgumentException     If the player is already in the match or too many players would be in the match
+     */
+    public void sendJoined() throws IllegalArgumentException, AlreadyUsedUsernameException, WrongStateException, ChosenMatchException, WrongNameException {
+<span class="pc bpc" id="L61" title="1 of 2 branches missed.">        if (!GuiUtil.isValidName(this.player.getUsername())) {</span>
+<span class="nc" id="L62">            throw new WrongNameException(&quot;The match name must be alphanumeric with maximum 32 characters&quot;);</span>
+        }
+<span class="pc bpc" id="L64" title="1 of 2 branches missed.">        if (match == null) {</span>
+<span class="nc" id="L65">            throw new ChosenMatchException(&quot;The specified match does not exist&quot;);</span>
+        }
+
+        try {
+<span class="fc" id="L69">            synchronized (match) {</span>
+<span class="pc bpc" id="L70" title="1 of 2 branches missed.">                if (!match.isRejoinable()) {</span>
+<span class="fc" id="L71">                    match.subscribeObserver(this);</span>
+<span class="fc" id="L72">                    match.addPlayer(this.player);</span>
+                } else {
+                    // Rejoin a match
+                    // Get the player with the same username and not already connected
+<span class="nc" id="L76">                    Optional&lt;Player&gt; playerOptional = match.getPlayers().stream()</span>
+<span class="nc" id="L77">                            .filter((p) -&gt; p.getUsername().equals(player.getUsername()))</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">                            .filter((p) -&gt; !p.isConnected())</span>
+<span class="nc" id="L79">                            .findFirst();</span>
+<span class="nc bnc" id="L80" title="All 2 branches missed.">                    if (playerOptional.isPresent()) {</span>
+<span class="nc" id="L81">                        player = playerOptional.get();</span>
+<span class="nc" id="L82">                        player.setConnected(true);</span>
+<span class="nc" id="L83">                        match.subscribeObserver(this);</span>
+<span class="nc" id="L84">                        this.matchResumed();</span>
+                    } else {
+<span class="nc" id="L86">                        throw new WrongStateException(&quot;There is no disconnected player with this username&quot;);</span>
+                    }
+                }
+<span class="fc" id="L89">            }</span>
+<span class="fc" id="L90">        } catch (AlreadyUsedUsernameException | IllegalArgumentException e) {</span>
+<span class="fc" id="L91">            match.unsubscribeObserver(this);</span>
+<span class="fc" id="L92">            throw e;</span>
+<span class="fc" id="L93">        }</span>
+<span class="fc" id="L94">    }</span>
+
+    /**
+     * Notifies the view that match has resumed after a server crash.
+     */
+    public abstract void matchResumed();
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

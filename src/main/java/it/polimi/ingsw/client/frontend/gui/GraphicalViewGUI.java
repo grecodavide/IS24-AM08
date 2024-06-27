@@ -1,27 +1,29 @@
 package it.polimi.ingsw.client.frontend.gui;
 
+import java.io.IOException;
+import java.rmi.RemoteException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import it.polimi.ingsw.client.frontend.ClientBoard;
 import it.polimi.ingsw.client.frontend.GraphicalView;
 import it.polimi.ingsw.client.frontend.MatchStatus;
 import it.polimi.ingsw.client.frontend.ShownCard;
 import it.polimi.ingsw.client.frontend.gui.controllers.*;
-import it.polimi.ingsw.controllers.PlayerController;
+import it.polimi.ingsw.client.frontend.gui.nodes.CardView;
 import it.polimi.ingsw.gamemodel.*;
 import it.polimi.ingsw.utils.*;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+/**
+ * JavaFX implementation of Codex Naturalis client
+ */
 public class GraphicalViewGUI extends GraphicalView {
     private final Stage stage;
     // Controllers
@@ -40,6 +42,10 @@ public class GraphicalViewGUI extends GraphicalView {
     private List<AvailableMatch> lastAvailableMatches;
     private Integer maxPlayers;
 
+    /**
+     * Initialize on a given JavaFX stage
+     * @param stage the main stage of the application
+     */
     public GraphicalViewGUI(Stage stage) {
         this.stage = stage;
     }
@@ -89,9 +95,27 @@ public class GraphicalViewGUI extends GraphicalView {
 
     @Override
     protected void notifyMatchStarted() {
+        this.setupMatch(false, false);
+    }
+
+    @Override
+    protected void notifyMatchResumed(boolean drawPhase) {
+        this.setupMatch(true, drawPhase);
+    }
+
+    /**
+     * Set match scene and populate elements on match start
+     * @param matchResumed if the match is resumed
+     */
+    private void setupMatch(boolean matchResumed, boolean drawPhase) {
         matchState = MatchStatus.MATCH_STATE;
         Platform.runLater(() -> {
             try {
+                if (waitingSceneController == null) {
+                    waitingSceneController = new WaitingSceneController();
+                    waitingSceneController.setGraphicalView(this);
+                    waitingSceneController.setStage(stage);
+                }
                 matchSceneController = waitingSceneController.showMatch();
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -100,7 +124,6 @@ public class GraphicalViewGUI extends GraphicalView {
             matchSceneController.setObjectives(super.visibleObjectives);
             // Set visible draw sources
             super.visiblePlayableCards.forEach((drawSource, playableCard) -> {
-                System.out.println(drawSource + ": " + playableCard.getId());
                 matchSceneController.setDrawSource(drawSource, playableCard, playableCard.getReign());
             });
             matchSceneController.setDrawSource(DrawSource.GOLDS_DECK, null, super.decksTopReign.first());
@@ -131,7 +154,50 @@ public class GraphicalViewGUI extends GraphicalView {
 
             // By default, disable draw sources interactions
             matchSceneController.enableDrawSourcesInteractions(false);
+            if (matchResumed) this.setupResumedMatch(drawPhase);
         });
+    }
+
+    /**
+     * Populate extra elements after match resumed
+     */
+    private void setupResumedMatch(boolean drawPhase) {
+        playerTabControllers.forEach(((username, playerTabController) -> {
+            ClientBoard playerBoard = clientBoards.get(username);
+            playerTabController.setSecretObjective(playerBoard.getObjective());
+
+            // Place the initial card
+            playerTabController.getBoard().addCard(new Pair<>(0, 0), (InitialCard) playerBoard.getPlaced().get(0).card(), playerBoard.getPlaced().get(0).side());
+
+            // Place all the other cards
+            Map<Integer, ShownCard> placed = playerBoard.getPlaced();
+            for (Integer turn : placed.keySet()) {
+                if (turn > 0) {
+                    playerTabController.getBoard().addCard(placed.get(turn).coords(), (PlayableCard) placed.get(turn).card(), placed.get(turn).side());
+                }
+            }
+
+            // Set points and available resources
+            playerTabController.setPoints(playerBoard.getPoints());
+            matchSceneController.plateauPane.setPoints(username, playerBoard.getPoints());
+            playerTabController.setResources(playerBoard.getAvailableResources());
+        }));
+
+        // Enable interactions if it is the current user turn
+        this.changePlayer();
+        if (currentPlayer.equals(username)) {
+            if (!drawPhase) {
+                this.makeMove();
+                playerTabControllers.get(username).enablePlaceCardInteractions(true);
+            } else {
+                // Draw interactions
+                // Set focus on the table
+                matchSceneController.setFocusToTable();
+                matchSceneController.setStateTitle("Draw a card");
+                // Enable draw sources interactions
+                matchSceneController.enableDrawSourcesInteractions(true);
+            }
+        }
     }
 
     @Override
@@ -167,7 +233,8 @@ public class GraphicalViewGUI extends GraphicalView {
             PlayerTabController playerTabController = playerTabControllers.get(someoneUsername);
             playerTabController.removePlayerChoiceContainer();
             InitialCard card = super.clientBoards.get(someoneUsername).getInitialCard();
-            playerTabController.getBoard().addCard(new Pair<>(0, 0), card, side);
+            CardView initial = playerTabController.getBoard().addCard(new Pair<>(0, 0), card, side);
+            initial.setToken(Color.values()[players.indexOf(someoneUsername)]);
         });
     }
 
@@ -237,9 +304,12 @@ public class GraphicalViewGUI extends GraphicalView {
     @Override
     public void someoneQuit(String someoneUsername) {
         if (matchState.equals(MatchStatus.WAIT_STATE)) {
-            Platform.runLater(() -> {waitingSceneController.removePlayer(someoneUsername);});
-        } else {
-            notifyError(new Exception("Someone Quit"));
+            Platform.runLater(() -> {
+                waitingSceneController.removePlayer(someoneUsername);
+                waitingSceneController.setCurrentPlayers(waitingSceneController.getCurrentPlayers()-1);
+            });
+        } else if (networkHandler.isConnected() && !matchState.equals(MatchStatus.FINAL_STATE)) {
+            notifyError("Player Quit", "Match finished because " + someoneUsername + " quit");
         }
     }
 
@@ -247,6 +317,7 @@ public class GraphicalViewGUI extends GraphicalView {
     public void matchFinished(List<LeaderboardEntry> ranking) {
         Platform.runLater(() -> {
             try {
+                matchState = MatchStatus.FINAL_STATE;
                 rankingSceneController = matchSceneController.showRankingScene();
                 ranking.forEach((entry) -> {
                     if (entry.username().equals(this.username)) {
@@ -307,12 +378,16 @@ public class GraphicalViewGUI extends GraphicalView {
 
     @Override
     public void someoneDrewCard(String someoneUsername, DrawSource source, PlayableCard card, PlayableCard replacementCard,
-                                Symbol replacementCardReign) {
-        super.someoneDrewCard(someoneUsername, source, card, replacementCard, replacementCardReign);
+                                Pair<Symbol, Symbol> deckTopReigns) {
+        super.someoneDrewCard(someoneUsername, source, card, replacementCard, deckTopReigns);
         Platform.runLater(() -> {
             PlayerTabController tab = playerTabControllers.get(someoneUsername);
             tab.setHandCards(clientBoards.get(someoneUsername).getHand());
-            matchSceneController.setDrawSource(source, replacementCard, replacementCardReign);
+            if (!source.equals(DrawSource.GOLDS_DECK) && !source.equals(DrawSource.RESOURCES_DECK)) {
+                matchSceneController.setDrawSource(source, replacementCard, replacementCard.getReign());
+            }
+            matchSceneController.setDrawSource(DrawSource.GOLDS_DECK, null, deckTopReigns.first());
+            matchSceneController.setDrawSource(DrawSource.RESOURCES_DECK, null, deckTopReigns.second());
 
             // If the player that drew a card is this client, disable draw source interactions
             if (someoneUsername.equals(this.username)) {
@@ -326,8 +401,15 @@ public class GraphicalViewGUI extends GraphicalView {
 
     @Override
     public void notifyError(Exception exception) {
-        System.out.println(exception.getMessage());
+        this.notifyError(GuiUtil.getExceptionTitle(exception), exception.getMessage());
+    }
 
+    /**
+     * Notify an error
+     * @param title title of the error
+     * @param description description of the error
+     */
+    public void notifyError(String title, String description) {
         Platform.runLater(() -> {
             try {
                 // Load the error node from the fxml file
@@ -341,7 +423,9 @@ public class GraphicalViewGUI extends GraphicalView {
 
                 // Initialize attributes
                 GuiUtil.applyCSS(root, "/css/style.css");
-                controller.setErrror(exception);
+                controller.setTitle(title);
+                controller.setText(description);
+
                 dialog.setScene(errorScene);
                 dialog.setTitle("Error");
                 dialog.initOwner(this.stage);
@@ -359,30 +443,68 @@ public class GraphicalViewGUI extends GraphicalView {
 
     public void setUsername(String username) {
         this.username = username;
-        networkView.setUsername(username);
+        networkHandler.setUsername(username);
     }
 
+    /**
+     * Getter for the client username
+     * @return client username
+     */
     public String getUsername() {
         return username;
     }
 
+    /**
+     * Request available matches to the server
+     */
     public void getAvailableMatches() {
         this.setLastRequestStatus(RequestStatus.PENDING);
-        this.networkView.getAvailableMatches();
+        this.networkHandler.getAvailableMatches();
     }
 
+    @Override
     public void receiveAvailableMatches(List<AvailableMatch> availableMatches) {
         super.receiveAvailableMatches(availableMatches);
         lastAvailableMatches = availableMatches;
         Platform.runLater(() -> lobbySceneController.updateMatches(availableMatches));
     }
 
+    /**
+     * Set the lobby scene controller
+     * @param lobbySceneController controller of the lobby scene
+     */
     public void setLobbySceneController(LobbySceneController lobbySceneController) {
         this.lobbySceneController = lobbySceneController;
         this.getAvailableMatches();
     }
 
+    /**
+     * Main class to launch the applicaiton
+     * @param args command line arguments
+     */
     public static void main(String[] args) {
         Application.launch(GraphicalApplication.class, args);
+    }
+
+    @Override
+    public void notifyConnectionLost() {
+        notifyError(new RemoteException("Connection to the server lost"));
+        RankingSceneController r = new RankingSceneController();
+            Platform.runLater(() -> {
+                try {
+                    r.setStage(stage);
+                    r.setGraphicalView(this);
+                    r.showConnectionScene();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+    }
+
+    /**
+     * Request disconnection from the network
+     */
+    public void disconnect() {
+        networkHandler.disconnect();
     }
 }

@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ClientReceiver.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.network.tcp</a> &gt; <span class="el_source">ClientReceiver.java</span></div><h1>ClientReceiver.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.network.tcp;
+
+import java.io.IOException;
+import java.net.Socket;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import it.polimi.ingsw.client.frontend.GraphicalView;
+import it.polimi.ingsw.client.network.NetworkHandlerTCP;
+import it.polimi.ingsw.gamemodel.*;
+import it.polimi.ingsw.network.messages.errors.ErrorMessage;
+import it.polimi.ingsw.network.messages.responses.*;
+import it.polimi.ingsw.utils.CardsManager;
+import it.polimi.ingsw.utils.Pair;
+import it.polimi.ingsw.utils.PlacedCardRecord;
+
+/**
+ * Receives messages from server to client
+ */
+public class ClientReceiver implements Runnable {
+    private NetworkHandlerTCP networkHandler;
+    private Socket socket;
+    private IOHandler io;
+    private Map&lt;Integer, InitialCard&gt; initialCards;
+    private Map&lt;Integer, ResourceCard&gt; resourceCards;
+    private Map&lt;Integer, GoldCard&gt; goldCards;
+    private Map&lt;Integer, Objective&gt; objectives;
+
+
+    /**
+     * Class constructor.
+     * 
+     * @param networkHandler The network view that should call the {@link GraphicalView} methods
+     * @param socket The socket opened
+     * 
+     * @throws IOException If there was an error with the socket's streams
+     */
+<span class="nc" id="L39">    public ClientReceiver(NetworkHandlerTCP networkHandler, Socket socket) throws IOException {</span>
+<span class="nc" id="L40">        this.networkHandler = networkHandler;</span>
+<span class="nc" id="L41">        this.socket = socket;</span>
+<span class="nc" id="L42">        this.io = new IOHandler(socket);</span>
+<span class="nc" id="L43">        this.io = networkHandler.getIO();</span>
+
+<span class="nc" id="L45">        CardsManager cardsManager = CardsManager.getInstance();</span>
+<span class="nc" id="L46">        this.initialCards = cardsManager.getInitialCards();</span>
+<span class="nc" id="L47">        this.resourceCards = cardsManager.getResourceCards();</span>
+<span class="nc" id="L48">        this.goldCards = cardsManager.getGoldCards();</span>
+<span class="nc" id="L49">        this.objectives = cardsManager.getObjectives();</span>
+<span class="nc" id="L50">    }</span>
+
+
+    /**
+     * Get a playable card by its ID.
+     * 
+     * @param cardID The card ID
+     * 
+     * @return The playable card
+     */
+    private PlayableCard getPlayable(Integer cardID) {
+<span class="nc" id="L61">        PlayableCard card = this.resourceCards.get(cardID);</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">        if (card == null) {</span>
+<span class="nc" id="L63">            return this.goldCards.get(cardID);</span>
+        }
+<span class="nc" id="L65">        return card;</span>
+    }
+
+    /**
+     * Parses a map from coordinates to {@link PlacedCard} to a map from coordinates to
+     * {@link PlacedCardRecord}.
+     * 
+     * @param board The map from coordinates to {@link PlacedCard}
+     * 
+     * @return The map from coordinates to {@link PlacedCardRecord}
+     */
+    private Map&lt;Pair&lt;Integer, Integer&gt;, PlacedCard&gt; getPlacedMap(
+            Map&lt;Integer, PlacedCardRecord&gt; board) {
+<span class="nc" id="L78">        Map&lt;Pair&lt;Integer, Integer&gt;, PlacedCard&gt; result = new HashMap&lt;&gt;();</span>
+
+<span class="nc" id="L80">        board.forEach((turn, placedCardRecord) -&gt; {</span>
+<span class="nc bnc" id="L81" title="All 4 branches missed.">            if (placedCardRecord.x().equals(0) &amp;&amp; placedCardRecord.y().equals(0)) {</span>
+<span class="nc" id="L82">                result.put(new Pair&lt;Integer, Integer&gt;(placedCardRecord.x(), placedCardRecord.y()),</span>
+<span class="nc" id="L83">                        new PlacedCard(this.initialCards.get(placedCardRecord.cardID()),</span>
+<span class="nc" id="L84">                                placedCardRecord.side(), turn));</span>
+            } else {
+<span class="nc" id="L86">                result.put(new Pair&lt;Integer, Integer&gt;(placedCardRecord.x(), placedCardRecord.y()),</span>
+<span class="nc" id="L87">                        new PlacedCard(this.getPlayable(placedCardRecord.cardID()),</span>
+<span class="nc" id="L88">                                placedCardRecord.side(), turn));</span>
+            }
+<span class="nc" id="L90">        });</span>
+
+<span class="nc" id="L92">        return result;</span>
+    }
+
+
+    /**
+     * Parses the message and resumes the match.
+     * 
+     * @param msg The message containing the match status
+     * 
+     * @throws IOException if there was a problem with the socket stream
+     */
+    private void resumeMatch(MatchResumedMessage msg) throws IOException {
+<span class="nc" id="L104">        Map&lt;String, Color&gt; playersUsernamesAndPawns = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L105">        Map&lt;String, List&lt;PlayableCard&gt;&gt; playersHands = new HashMap&lt;&gt;();</span>
+        Pair&lt;Objective, Objective&gt; visibleObjectives;
+<span class="nc" id="L107">        Map&lt;DrawSource, PlayableCard&gt; visiblePlayableCards = new HashMap&lt;&gt;();</span>
+        Pair&lt;Symbol, Symbol&gt; decksTopReigns;
+        Objective secretObjective;
+<span class="nc" id="L110">        Map&lt;String, Map&lt;Symbol, Integer&gt;&gt; availableResources = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L111">        Map&lt;String, Map&lt;Pair&lt;Integer, Integer&gt;, PlacedCard&gt;&gt; placedCards = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L112">        Map&lt;String, Integer&gt; playerPoints = new HashMap&lt;&gt;();</span>
+        String currentPlayer;
+        boolean drawPhase;
+
+<span class="nc" id="L116">        playersUsernamesAndPawns = msg.getPlayersUsernamesAndPawns();</span>
+<span class="nc" id="L117">        playersHands = msg.getPlayersHands().entrySet().stream()</span>
+<span class="nc" id="L118">                .collect(Collectors.toMap(Map.Entry::getKey, entry -&gt; entry.getValue().stream()</span>
+<span class="nc" id="L119">                        .map(cardID -&gt; this.getPlayable(cardID)).collect(Collectors.toList())));</span>
+<span class="nc" id="L120">        Pair&lt;Integer, Integer&gt; visibleObjectivesID = msg.getVisibleObjectives();</span>
+<span class="nc" id="L121">        visibleObjectives =</span>
+<span class="nc" id="L122">                new Pair&lt;Objective, Objective&gt;(this.objectives.get(visibleObjectivesID.first()),</span>
+<span class="nc" id="L123">                        this.objectives.get(visibleObjectivesID.second()));</span>
+<span class="nc" id="L124">        visiblePlayableCards = msg.getVisiblePlayableCards().entrySet().stream().collect(</span>
+<span class="nc" id="L125">                Collectors.toMap(Map.Entry::getKey, entry -&gt; this.getPlayable(entry.getValue())));</span>
+<span class="nc" id="L126">        decksTopReigns = msg.getDecksTopReigns();</span>
+<span class="nc" id="L127">        secretObjective = this.objectives.get(msg.getSecretObjective());</span>
+<span class="nc" id="L128">        availableResources = msg.getAvailableResources();</span>
+<span class="nc" id="L129">        msg.getPlacedCards()</span>
+<span class="nc" id="L130">                .forEach((player, board) -&gt; placedCards.put(player, this.getPlacedMap(board)));</span>
+<span class="nc" id="L131">        playerPoints = msg.getPlayerPoints();</span>
+<span class="nc" id="L132">        currentPlayer = msg.getCurrentPlayer();</span>
+<span class="nc" id="L133">        drawPhase = msg.isDrawPhase();</span>
+
+<span class="nc" id="L135">        this.networkHandler.matchResumed(playersUsernamesAndPawns, playersHands, visibleObjectives,</span>
+                visiblePlayableCards, decksTopReigns, secretObjective, availableResources,
+                placedCards, playerPoints, currentPlayer, drawPhase);
+<span class="nc" id="L138">    }</span>
+
+    /**
+     * Parses a message and calls the corresponding
+     * {@link it.polimi.ingsw.client.network.NetworkHandler}'s view.
+     * 
+     * @param message The message to be parsed
+     */
+    private void parseMessage(String message) {
+        try {
+<span class="nc" id="L148">            ResponseMessage response = (ResponseMessage) io.stringToMsg(message);</span>
+<span class="nc" id="L149">            String username = response.getUsername();</span>
+<span class="nc bnc" id="L150" title="All 15 branches missed.">            switch (response) {</span>
+<span class="nc" id="L151">                case AvailableMatchesMessage msg:</span>
+<span class="nc" id="L152">                    this.networkHandler.receiveAvailableMatches(msg.getMatches());</span>
+<span class="nc" id="L153">                    break;</span>
+<span class="nc" id="L154">                case MatchResumedMessage msg:</span>
+<span class="nc" id="L155">                    this.resumeMatch(msg);</span>
+<span class="nc" id="L156">                    break;</span>
+<span class="nc" id="L157">                case MatchStartedMessage msg:</span>
+<span class="nc" id="L158">                    Map&lt;String, List&lt;PlayableCard&gt;&gt; hands = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L159">                    msg.getPlayerHands()</span>
+<span class="nc" id="L160">                            .forEach((player, hand) -&gt; hands.put(player,</span>
+<span class="nc" id="L161">                                    List.of(hand).stream().map(card -&gt; this.getPlayable(card))</span>
+<span class="nc" id="L162">                                            .collect(Collectors.toList())));</span>
+
+<span class="nc" id="L164">                    Pair&lt;Objective, Objective&gt; objectives = new Pair&lt;Objective, Objective&gt;(</span>
+<span class="nc" id="L165">                            this.objectives.get(msg.getVisibleObjectives()[0]),</span>
+<span class="nc" id="L166">                            this.objectives.get(msg.getVisibleObjectives()[1]));</span>
+
+<span class="nc" id="L168">                    Map&lt;DrawSource, PlayableCard&gt; visibles = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L169">                    msg.getVisibleCards().forEach(</span>
+<span class="nc" id="L170">                            (source, card) -&gt; visibles.put(source, this.getPlayable(card)));</span>
+
+<span class="nc" id="L172">                    Pair&lt;Symbol, Symbol&gt; decksTop = new Pair&lt;Symbol, Symbol&gt;(</span>
+<span class="nc" id="L173">                            msg.getVisibleDeckReigns()[0], msg.getVisibleDeckReigns()[1]);</span>
+
+<span class="nc" id="L175">                    this.networkHandler.matchStarted(msg.getPlayerPawnColors(), hands, objectives,</span>
+                            visibles, decksTop);
+<span class="nc" id="L177">                    break;</span>
+<span class="nc" id="L178">                case SomeoneDrewInitialCardMessage msg:</span>
+<span class="nc bnc" id="L179" title="All 2 branches missed.">                    if (username.equals(this.networkHandler.getUsername())) {</span>
+<span class="nc" id="L180">                        this.networkHandler</span>
+<span class="nc" id="L181">                                .giveInitialCard(this.initialCards.get(msg.getInitialCardID()));</span>
+                    } else {
+<span class="nc" id="L183">                        this.networkHandler.someoneDrewInitialCard(username,</span>
+<span class="nc" id="L184">                                this.initialCards.get(msg.getInitialCardID()));</span>
+                    }
+<span class="nc" id="L186">                    break;</span>
+<span class="nc" id="L187">                case SomeoneDrewSecretObjectivesMessage msg:</span>
+<span class="nc bnc" id="L188" title="All 2 branches missed.">                    if (username.equals(this.networkHandler.getUsername())) {</span>
+<span class="nc" id="L189">                        Pair&lt;Objective, Objective&gt; objs =</span>
+<span class="nc" id="L190">                                new Pair&lt;&gt;(this.objectives.get(msg.getFirstID()),</span>
+<span class="nc" id="L191">                                        this.objectives.get(msg.getSecondID()));</span>
+<span class="nc" id="L192">                        this.networkHandler.giveSecretObjectives(objs);</span>
+<span class="nc" id="L193">                    } else {</span>
+<span class="nc" id="L194">                        this.networkHandler.someoneDrewSecretObjective(username);</span>
+                    }
+<span class="nc" id="L196">                    break;</span>
+<span class="nc" id="L197">                case SomeoneSetInitialSideMessage msg:</span>
+<span class="nc" id="L198">                    this.networkHandler.someoneSetInitialSide(username, msg.getSide(),</span>
+<span class="nc" id="L199">                            msg.getAvailableResources());</span>
+<span class="nc" id="L200">                    break;</span>
+<span class="nc" id="L201">                case SomeoneChoseSecretObjectiveMessage msg:</span>
+<span class="nc" id="L202">                    this.networkHandler.someoneChoseSecretObjective(username);</span>
+<span class="nc" id="L203">                    break;</span>
+<span class="nc" id="L204">                case SomeonePlayedCardMessage msg:</span>
+<span class="nc" id="L205">                    Pair&lt;Integer, Integer&gt; coords =</span>
+<span class="nc" id="L206">                            new Pair&lt;Integer, Integer&gt;(msg.getX(), msg.getY());</span>
+<span class="nc" id="L207">                    this.networkHandler.someonePlayedCard(username, coords,</span>
+<span class="nc" id="L208">                            this.getPlayable(msg.getCardID()), msg.getSide(), msg.getPoints(),</span>
+<span class="nc" id="L209">                            msg.getAvailableResources());</span>
+<span class="nc" id="L210">                    break;</span>
+<span class="nc" id="L211">                case SomeoneDrewCardMessage msg:</span>
+<span class="nc" id="L212">                    this.networkHandler.someoneDrewCard(username, msg.getDrawSource(),</span>
+<span class="nc" id="L213">                            this.getPlayable(msg.getCardID()),</span>
+<span class="nc" id="L214">                            this.getPlayable(msg.getReplacementCardID()), msg.getDeckTopReigns());</span>
+<span class="nc" id="L215">                    break;</span>
+<span class="nc" id="L216">                case SomeoneJoinedMessage msg:</span>
+<span class="nc" id="L217">                    this.networkHandler.someoneJoined(username, msg.getJoinedPlayers());</span>
+<span class="nc" id="L218">                    break;</span>
+<span class="nc" id="L219">                case SomeoneQuitMessage msg:</span>
+<span class="nc" id="L220">                    this.networkHandler.someoneQuit(username);</span>
+<span class="nc" id="L221">                    break;</span>
+<span class="nc" id="L222">                case MatchFinishedMessage msg:</span>
+<span class="nc" id="L223">                    this.networkHandler.matchFinished(msg.getRanking());</span>
+<span class="nc" id="L224">                    break;</span>
+<span class="nc" id="L225">                case SomeoneSentBroadcastTextMessage msg:</span>
+<span class="nc" id="L226">                    this.networkHandler.someoneSentBroadcastText(username, msg.getText());</span>
+<span class="nc" id="L227">                    break;</span>
+<span class="nc" id="L228">                case SomeoneSentPrivateTextMessage msg:</span>
+<span class="nc" id="L229">                    this.networkHandler.someoneSentPrivateText(username, msg.getText());</span>
+<span class="nc" id="L230">                    break;</span>
+                default:
+                    break;
+            }
+<span class="nc" id="L234">        } catch (Exception e) {</span>
+<span class="nc" id="L235">            this.sendError(message);</span>
+<span class="nc" id="L236">        }</span>
+
+<span class="nc" id="L238">    }</span>
+
+
+    /**
+     * Sends an error to the server.
+     * 
+     * @param message The error message
+     */
+    private void sendError(String message) {
+        try {
+<span class="nc" id="L248">            ErrorMessage msg = (ErrorMessage) this.io.stringToMsg(message);</span>
+<span class="nc" id="L249">            Exception exception = new Exception(msg.getMessage());</span>
+<span class="nc" id="L250">            this.networkHandler.notifyError(exception);</span>
+<span class="nc" id="L251">        } catch (Exception e) {</span>
+            // Nothing to do, received an invalid object
+<span class="nc" id="L253">        }</span>
+<span class="nc" id="L254">    }</span>
+
+    
+    /**
+     * Receives answers from the server and tries to parse it (in a new thread)
+     */
+    @Override
+    public void run() {
+        String message;
+<span class="nc bnc" id="L263" title="All 4 branches missed.">        while (!this.socket.isClosed() &amp;&amp; this.socket.isConnected()) {</span>
+            try {
+<span class="nc" id="L265">                message = this.io.readMsg();</span>
+<span class="nc" id="L266">                final String finalMessage = message;</span>
+<span class="nc" id="L267">                new Thread(() -&gt; {</span>
+<span class="nc" id="L268">                    this.parseMessage(finalMessage);</span>
+<span class="nc" id="L269">                }).start();</span>
+<span class="nc" id="L270">            } catch (IOException | ClassNotFoundException e) {</span>
+<span class="nc" id="L271">            }</span>
+        }
+<span class="nc" id="L273">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

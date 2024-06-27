@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ResponseMessage.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.network.messages.responses</a> &gt; <span class="el_source">ResponseMessage.java</span></div><h1>ResponseMessage.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.network.messages.responses;
+
+import it.polimi.ingsw.network.messages.Message;
+
+/**
+ * Messages sent from the server to the clients to update them about another
+ * user's move or to the consequence of their action
+ */
+public sealed class ResponseMessage extends Message permits AvailableMatchesMessage, MatchFinishedMessage, MatchStartedMessage,
+        SomeoneJoinedMessage, SomeoneQuitMessage, SomeoneChoseSecretObjectiveMessage, SomeoneDrewCardMessage, SomeoneDrewInitialCardMessage,
+        SomeoneDrewSecretObjectivesMessage, SomeonePlayedCardMessage, SomeoneSetInitialSideMessage,
+        SomeoneSentBroadcastTextMessage, SomeoneSentPrivateTextMessage, MatchResumedMessage {
+    private final String username;
+<span class="fc" id="L14">    private final String response = this.getClass().getSimpleName().replace(&quot;Message&quot;, &quot;&quot;);</span>
+
+    /**
+     * @return username of the user that did the action
+     * null if not specified by the protocol
+     */
+    public String getUsername() {
+<span class="nc" id="L21">        return username;</span>
+    }
+
+    /**
+     * @return repsonse type
+     */
+    public String getResponse() {
+<span class="nc" id="L28">        return response;</span>
+    }
+
+<span class="fc" id="L31">    public ResponseMessage(String username) {</span>
+<span class="fc" id="L32">        this.username = username;</span>
+<span class="fc" id="L33">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

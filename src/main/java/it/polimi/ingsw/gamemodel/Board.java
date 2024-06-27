@@ -4,6 +4,8 @@ import it.polimi.ingsw.exceptions.CardException;
 import it.polimi.ingsw.exceptions.HandException;
 import it.polimi.ingsw.utils.Pair;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,7 +14,10 @@ import java.util.Map;
 /**
  * Board is the class that contains all the information relative to a {@link Player}'s status
  */
-public class Board {
+public class Board implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     private final List<PlayableCard> currentHand;
     private final Map<Pair<Integer, Integer>, PlacedCard> placed;
     private final Map<Symbol, Integer> availableResources;
@@ -151,11 +156,12 @@ public class Board {
                 availableResources.put(s, availableResources.get(s) + 1);
             }
         }
-
-        switch (card) {
-            case GoldCard gold -> points = gold.calculatePoints(this, coord);
-            case ResourceCard resource -> points = resource.getPoints();
-            default -> throw new CardException("Unknown card type: " + card.getClass() + "!");
+        if (side.equals(Side.FRONT)) {
+            switch (card) {
+                case GoldCard gold -> points = gold.calculatePoints(this, coord);
+                case ResourceCard resource -> points = resource.getPoints();
+                default -> throw new CardException("Unknown card type: " + card.getClass() + "!");
+            }
         }
 
         return points;
@@ -189,7 +195,6 @@ public class Board {
         if (placed.containsKey(coord)) {
             return PlacementOutcome.INVALID_COORDS;
         }
-        // TODO: To test again
         if (card instanceof GoldCard gold && side == Side.FRONT) {
             if (gold.getRequirement().timesMet(this) == 0)
                 return PlacementOutcome.INVALID_ENOUGH_RESOURCES;

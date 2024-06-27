@@ -8,6 +8,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
@@ -16,7 +17,9 @@ import javafx.util.Duration;
 
 import java.util.*;
 
-// TODO: to finish implementation
+/**
+ * JavaFX controller for the chat pane
+ */
 public class ChatPaneController extends SceneController {
     @FXML
     private Button sendMessageBtn;
@@ -59,19 +62,12 @@ public class ChatPaneController extends SceneController {
 
         // Send message written in input box on send message button clicked
         sendMessageBtn.setOnMouseClicked(mouseEvent -> {
-            String inputText = chatInputText.getText();
-            String selectedChatName = chatSelector.getSelectionModel().getSelectedItem();
-
-            if (!inputText.isBlank()) {
-                if (selectedChatName.equals("broadcast")) {
-                    super.view.sendBroadcastText(inputText);
-                } else {
-                    super.view.sendPrivateText(selectedChatName, inputText);
-                    unconfirmedPrivateMessagesReceivers.offer(selectedChatName);
-                }
+            this.submitMessage();
+        });
+        chatInputText.setOnKeyPressed(keyEvent -> {
+            if (keyEvent.getCode() == KeyCode.ENTER)  {
+                this.submitMessage();
             }
-
-            chatInputText.clear();
         });
 
         // Switch to chat when a chatSelector item is clicked
@@ -84,6 +80,25 @@ public class ChatPaneController extends SceneController {
         });
     }
 
+    /**
+     * Submit a message written in the chat. Calls the network and
+     * clears the input field
+     */
+    private void submitMessage() {
+        String inputText = chatInputText.getText();
+        String selectedChatName = chatSelector.getSelectionModel().getSelectedItem();
+
+        if (!inputText.isBlank()) {
+            if (selectedChatName.equals("broadcast")) {
+                super.view.sendBroadcastText(inputText);
+            } else {
+                super.view.sendPrivateText(selectedChatName, inputText);
+                unconfirmedPrivateMessagesReceivers.offer(selectedChatName);
+            }
+        }
+
+        chatInputText.clear();
+    }
     /**
      * Adds a player to the chat.
      *

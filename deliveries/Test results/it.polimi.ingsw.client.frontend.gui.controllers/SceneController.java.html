@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SceneController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.client.frontend.gui.controllers</a> &gt; <span class="el_source">SceneController.java</span></div><h1>SceneController.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.client.frontend.gui.controllers;
+
+import it.polimi.ingsw.client.frontend.gui.GraphicalViewGUI;
+import it.polimi.ingsw.utils.GuiUtil;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.stage.Stage;
+
+import java.io.IOException;
+
+/**
+ * JavaFX controller of a scene
+ */
+<span class="nc" id="L14">public abstract class SceneController {</span>
+    protected GraphicalViewGUI view;
+    protected Stage stage;
+
+    /**
+     * Method to be called to do actions after the controller attributes are set
+     * @throws IOException
+     */
+    public void initializePostController() throws IOException{
+<span class="nc" id="L23">    }</span>
+
+    /**
+     * This method is run when the controller is initialized
+     * @throws IOException if there is a file error
+     */
+    public abstract void initialize() throws IOException;
+
+    /**
+     * Set the graphical view for the controller
+     * @param view graphical view
+     */
+    public void setGraphicalView(GraphicalViewGUI view) {
+<span class="nc" id="L36">        this.view = view;</span>
+<span class="nc" id="L37">    }</span>
+
+    /**
+     * Set the main stage the controller is in
+     * @param stage JavaFX stage
+     */
+    public void setStage(Stage stage) {
+<span class="nc" id="L44">        this.stage = stage;</span>
+<span class="nc" id="L45">    }</span>
+
+    /**
+     * Load a node from a FXML file path, assign properties to the controller
+     * and to the node
+     * @param path path of the FXML file
+     * @return the node on top of the FXML
+     * @param &lt;T&gt; Type of the node
+     * @throws IOException
+     */
+    protected &lt;T extends Node&gt;T loadScene(String path) throws IOException {
+<span class="nc" id="L56">        FXMLLoader loader = GuiUtil.getLoader(path);</span>
+<span class="nc" id="L57">        T result = loader.load();</span>
+<span class="nc" id="L58">        setControllerAttributes(loader, result);</span>
+<span class="nc" id="L59">        return result;</span>
+    }
+
+    /**
+     * Set graphical view and the main stage properties to the scene controller
+     * @param loader FXMLL Loader of the scene
+     * @throws IOException in case of exception
+     */
+    protected void setControllerAttributes(FXMLLoader loader) throws IOException {
+<span class="nc" id="L68">        SceneController controller = loader.getController();</span>
+<span class="nc" id="L69">        controller.setGraphicalView(view);</span>
+<span class="nc" id="L70">        controller.setStage(stage);</span>
+<span class="nc" id="L71">        controller.initializePostController();</span>
+<span class="nc" id="L72">    }</span>
+    /**
+     * Set graphical view and the main stage properties to the scene controller
+     * also sets the &quot;Controller&quot; property for the given node
+     * @param loader FXMLL Loader of the scene
+     * @throws IOException in case of exception
+     */
+    protected void setControllerAttributes(FXMLLoader loader, Node node) throws IOException {
+<span class="nc" id="L80">        setControllerAttributes(loader);</span>
+<span class="nc" id="L81">        node.getProperties().put(&quot;Controller&quot;, loader.getController());</span>
+<span class="nc" id="L82">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

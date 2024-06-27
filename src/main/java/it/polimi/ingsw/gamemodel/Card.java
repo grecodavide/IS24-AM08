@@ -16,6 +16,9 @@ public abstract class Card implements Serializable {
     protected CardFace back;
     protected Integer id;
 
+    /**
+     * Empty constructor used for deserialization.
+     */
     public Card() {
 
     }
@@ -34,6 +37,10 @@ public abstract class Card implements Serializable {
         };
     }
 
+    
+    /**
+     * @return The card ID
+     */
     public Integer getId() {
         return this.id;
     }

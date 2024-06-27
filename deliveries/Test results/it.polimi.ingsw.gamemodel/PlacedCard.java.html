@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PlacedCard.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.gamemodel</a> &gt; <span class="el_source">PlacedCard.java</span></div><h1>PlacedCard.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.gamemodel;
+
+import java.io.Serial;
+import java.io.Serializable;
+
+/**
+ * This class handles the card already placed on the board, since we need to remember which card covers which
+ */
+public class PlacedCard implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    private Card card;
+    private int turn;
+    private Side playedSide;
+
+    /**
+     * Class constructor, which only needs to initialize the card and the turn it is played, as well as the side it was played on
+     *
+     * @param card       the {@link Card} played
+     * @param playedSide the side the card was played on
+     * @param turn       the turn said card is played. Needed to know which card covers which, since a card played in a certain turn will
+     *                   always cover one played before
+     */
+<span class="fc" id="L25">    public PlacedCard(Card card, Side playedSide, int turn) {</span>
+<span class="fc" id="L26">        this.card = card;</span>
+<span class="fc" id="L27">        this.turn = turn;</span>
+<span class="fc" id="L28">        this.playedSide = playedSide;</span>
+<span class="fc" id="L29">    }</span>
+
+    /**
+     * Getter for the PlacedCard class
+     *
+     * @return the card just placed.
+     */
+    public Card getCard() {
+<span class="fc" id="L37">        return this.card;</span>
+    }
+
+    /**
+     * Getter for the PlacedCard class
+     *
+     * @return turn in which the card was just placed.
+     */
+    public int getTurn() {
+<span class="nc" id="L46">        return this.turn;</span>
+    }
+
+    /**
+     * Getter for the PlacedCard class
+     *
+     * @return side the card was played
+     */
+    public Side getPlayedSide() {
+<span class="fc" id="L55">        return this.playedSide;</span>
+    }
+
+
+    /**
+     * Getter for the Card face
+     *
+     * @return the topological description of the side the card was played on
+     */
+    public CardFace getPlayedCardFace() {
+<span class="fc" id="L65">        return this.card.getSide(this.playedSide);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

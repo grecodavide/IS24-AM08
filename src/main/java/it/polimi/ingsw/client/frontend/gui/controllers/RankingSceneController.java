@@ -1,22 +1,40 @@
 package it.polimi.ingsw.client.frontend.gui.controllers;
 
+import it.polimi.ingsw.client.frontend.gui.GraphicalApplication;
+import it.polimi.ingsw.client.frontend.gui.GraphicalViewGUI;
+import it.polimi.ingsw.utils.GuiUtil;
 import it.polimi.ingsw.utils.LeaderboardEntry;
 import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
 import java.io.IOException;
 
+/**
+ * JavaFX Controller of the ranking scene, shows the leaderboard after the match is finished
+ */
 public class RankingSceneController extends SceneController {
 
     public VBox leaderboardContainer;
     public static double tableSize = 700;
     public Label victoryLabel;
+    public Button playAgainButton;
 
     @Override
     public void initialize() throws IOException {
 
+    }
+
+    @Override
+    public void initializePostController() {
+        playAgainButton.setOnAction(event -> {
+            try {
+                showConnectionScene();
+            } catch (IOException e) {}
+        });
     }
 
     /**
@@ -62,4 +80,18 @@ public class RankingSceneController extends SceneController {
         }
     }
 
+    /**
+     * Show the connection scene
+     * @throws IOException in case of file errors
+     */
+    public void showConnectionScene() throws IOException {
+        view.disconnect();
+        view = new GraphicalViewGUI(stage);
+        StackPane root = this.loadScene("/fxml/connection.fxml");
+        // Add stylesheet
+        GuiUtil.applyCSS(root, "/css/style.css");
+        // Create the connection scene
+        Scene connectionScene = new Scene(root, GraphicalApplication.screenWidth, GraphicalApplication.screenHeight);
+        stage.setScene(connectionScene);
+    }
 }

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SomeoneJoinedMessage.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.network.messages.responses</a> &gt; <span class="el_source">SomeoneJoinedMessage.java</span></div><h1>SomeoneJoinedMessage.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.network.messages.responses;
+
+import it.polimi.ingsw.gamemodel.Player;
+
+import java.util.List;
+
+/**
+ * This response is sent when a player joins the current match.
+ */
+public final class SomeoneJoinedMessage extends ResponseMessage {
+    private final List&lt;String&gt; joinedPlayers;
+    private final int maxPlayers;
+
+    public SomeoneJoinedMessage(String username, List&lt;Player&gt; joinedPlayers, int maxPlayers) {
+<span class="fc" id="L15">        super(username);</span>
+<span class="fc" id="L16">        this.joinedPlayers = joinedPlayers.stream().map(Player::getUsername).toList();</span>
+<span class="fc" id="L17">        this.maxPlayers = maxPlayers;</span>
+<span class="fc" id="L18">    }</span>
+
+    /**
+     * @return Usernames of players currently in the match
+     */
+    public List&lt;String&gt; getJoinedPlayers() {
+<span class="nc" id="L24">        return joinedPlayers;</span>
+    }
+
+    /**
+     * @return Maximum amount of players the match can hold
+     */
+    public int getMaxPlayers() {
+<span class="nc" id="L31">        return maxPlayers;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

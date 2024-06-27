@@ -1,0 +1,818 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Match.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.gamemodel</a> &gt; <span class="el_source">Match.java</span></div><h1>Match.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.gamemodel;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import it.polimi.ingsw.exceptions.*;
+import it.polimi.ingsw.utils.Pair;
+
+/**
+ * Represents the match played by {@link Player} instances, therefore implements a slice of game logic
+ * using drawCard(...), setInitialSide(...), setSecretObjective(...), proposeSecretObjective(...), etc.
+ * Other methods serve the purpose of being called by {@link MatchState} subclasses in order to notify the change
+ * of the current game state or trigger some changes in the match, such as setupBoards(...),
+ * doStart(...), etc.
+ * Few methods are called by the current player of the match, used to trigger a change in the match and so notify that
+ * an event occurred, such as nextPlayer(...).
+ */
+public class Match implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    private final List&lt;Player&gt; players;
+    private final int maxPlayers;
+    private Player currentPlayer;
+
+    private MatchState currentState;
+
+    // All cards decks
+    private final GameDeck&lt;InitialCard&gt; initialsDeck;
+    private final GameDeck&lt;ResourceCard&gt; resourcesDeck;
+    private final GameDeck&lt;GoldCard&gt; goldsDeck;
+    private final GameDeck&lt;Objective&gt; objectivesDeck;
+
+    // All the visible cards on the common table
+    private final Map&lt;DrawSource, PlayableCard&gt; visiblePlayableCards;
+    private Pair&lt;Objective, Objective&gt; visibleObjectives;
+
+    private Pair&lt;Objective, Objective&gt; currentProposedObjectives;
+    private InitialCard currentGivenInitialCard;
+
+    // Denotes if the match has been started/finished
+<span class="fc" id="L44">    private boolean started = false;</span>
+<span class="fc" id="L45">    private boolean initialTurnFinished = false;</span>
+<span class="fc" id="L46">    private boolean lastTurn = false;</span>
+<span class="fc" id="L47">    private boolean finished = false;</span>
+
+    // Current match turn as an integer (incremental)
+    private int turn;
+
+    // Players ranking of the match at the end of it.
+    // The List order represents the ranking order, the Boolean represent if the related player is a winner.
+    // This is needed since the match can end in a tie, in such case the first two/three players of the List will have a
+    // True flag.
+    private List&lt;Pair&lt;Player, Boolean&gt;&gt; playersFinalRanking;
+
+    // List of observers
+    private transient List&lt;MatchObserver&gt; observers;
+
+    /**
+     * Initializes main Match attributes and allocate the attribute players List, assuming no parameter is null.
+     *
+     * @param maxPlayers     maximum number of players to be added to the match, chosen by the first player joining the match
+     * @param initialsDeck   deck of initial cards
+     * @param resourcesDeck  deck of resource cards
+     * @param goldsDeck      deck of gold cards
+     * @param objectivesDeck deck of objectives
+     * @throws IllegalArgumentException if the decks provided do not have enough cards to start a game or maxPlayers are not 2,3,4
+     */
+<span class="fc" id="L71">    public Match(int maxPlayers, GameDeck&lt;InitialCard&gt; initialsDeck, GameDeck&lt;ResourceCard&gt; resourcesDeck, GameDeck&lt;GoldCard&gt; goldsDeck, GameDeck&lt;Objective&gt; objectivesDeck) throws IllegalArgumentException {</span>
+<span class="fc" id="L72">        this.maxPlayers = maxPlayers;</span>
+<span class="fc" id="L73">        this.initialsDeck = initialsDeck;</span>
+<span class="fc" id="L74">        this.resourcesDeck = resourcesDeck;</span>
+<span class="fc" id="L75">        this.goldsDeck = goldsDeck;</span>
+<span class="fc" id="L76">        this.objectivesDeck = objectivesDeck;</span>
+<span class="fc" id="L77">        this.currentState = new WaitState(this);</span>
+
+<span class="fc bfc" id="L79" title="All 2 branches covered.">        if (goldsDeck.getSize() &lt; maxPlayers + 2)</span>
+<span class="fc" id="L80">            throw new IllegalArgumentException(&quot;goldsDeck does not have enough cards&quot;);</span>
+<span class="fc bfc" id="L81" title="All 2 branches covered.">        else if (resourcesDeck.getSize() &lt; maxPlayers * 2 + 2)</span>
+<span class="fc" id="L82">            throw new IllegalArgumentException(&quot;resourcesDeck does not have enough cards&quot;);</span>
+<span class="fc bfc" id="L83" title="All 2 branches covered.">        else if (initialsDeck.getSize() &lt; maxPlayers)</span>
+<span class="fc" id="L84">            throw new IllegalArgumentException(&quot;initialDeck does not have enough cards&quot;);</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">        else if (objectivesDeck.getSize() &lt; 6)</span>
+<span class="fc" id="L86">            throw new IllegalArgumentException(&quot;objectivesDeck does not have enough cards&quot;);</span>
+<span class="pc bpc" id="L87" title="2 of 4 branches missed.">        else if (maxPlayers &lt; 2 || maxPlayers &gt; 4)</span>
+<span class="nc" id="L88">            throw new IllegalArgumentException(&quot;The players must be at least 2 or maximum 4&quot;);</span>
+
+<span class="fc" id="L90">        this.players = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L91">        this.visiblePlayableCards = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L92">    }</span>
+
+    /**
+     * Adds a new player to the match, assuming it's not null.
+     * Note: Called by the Controller when a player joins the match.
+     *
+     * @param player player to be added to the match
+     * @throws WrongStateException      if called while in a state that doesn't allow adding players
+     * @throws AlreadyUsedUsernameException if there is already a player in the match that has the same username
+     */
+    public void addPlayer(Player player) throws WrongStateException, AlreadyUsedUsernameException {
+<span class="fc" id="L103">        synchronized (this) {</span>
+<span class="fc" id="L104">            List&lt;String&gt; playersUsernames = getPlayers().stream().map(Player::getUsername).toList();</span>
+
+<span class="fc bfc" id="L106" title="All 2 branches covered.">            if (playersUsernames.contains(player.getUsername()))</span>
+<span class="fc" id="L107">                throw new AlreadyUsedUsernameException(&quot;The chosen username is already in use&quot;);</span>
+
+<span class="fc" id="L109">            currentState.addPlayer();</span>
+<span class="fc" id="L110">            players.add(player);</span>
+<span class="fc" id="L111">            notifyObservers(observer -&gt; observer.someoneJoined(player));</span>
+<span class="fc" id="L112">            currentState.transition();</span>
+<span class="fc" id="L113">        }</span>
+<span class="fc" id="L114">    }</span>
+
+    /**
+     * Removes a player from the match, assuming the player is in the match.
+     * Note: Called by the Controller when a player quits the match.
+     *
+     * @param player player to be removed from the match
+     */
+    public void removePlayer(Player player) {
+<span class="fc" id="L123">        synchronized (this) {</span>
+<span class="fc bfc" id="L124" title="All 2 branches covered.">            if (players.contains(player)) {</span>
+<span class="fc" id="L125">                players.remove(player);</span>
+                // If in a state different from the wait state, end the match
+<span class="fc" id="L127">                currentState.removePlayer();</span>
+<span class="fc" id="L128">                notifyObservers(observer -&gt; observer.someoneQuit(player));</span>
+            }
+<span class="fc" id="L130">        }</span>
+<span class="fc" id="L131">    }</span>
+
+    /**
+     * Verifies if the match is full, thus no more players can join.
+     * Note: Used by the Controller
+     *
+     * @return true if the match is full, false otherwise
+     */
+    public boolean isFull() {
+<span class="pc bpc" id="L140" title="1 of 4 branches missed.">        return !finished &amp;&amp; players.size() == maxPlayers;</span>
+    }
+
+    /**
+     * Modifies the current player according to the next turn: if it's the first turn, the current player is the first
+     * one in the players List, the turn order then follows the players List order, in a circular way.
+     * Ex. 1st -&gt; 2nd -&gt; 3rd ---&gt; 1st -&gt; 2nd etc.
+     * Note: Called by NextTurnState every time a new turn starts.
+     */
+    protected void nextPlayer() {
+<span class="pc bpc" id="L150" title="1 of 2 branches missed.">        if (!players.isEmpty()) {</span>
+            // If player has never been initialized OR the current player is the last one
+<span class="fc bfc" id="L152" title="All 4 branches covered.">            if (currentPlayer == null || currentPlayer.equals(players.getLast())) {</span>
+                // Set currentPlayer as the first one
+<span class="fc" id="L154">                currentPlayer = players.getFirst();</span>
+
+<span class="fc" id="L156">                turn++;</span>
+            } else {
+                // Get the index of the current player and choose the next one
+<span class="fc" id="L159">                int currentPlayerIndex = players.indexOf(currentPlayer);</span>
+<span class="fc" id="L160">                currentPlayer = players.get(currentPlayerIndex + 1);</span>
+<span class="fc" id="L161">            }</span>
+        } else {
+<span class="nc" id="L163">            throw new RuntimeException(&quot;No players in the match, the next player cannot be set&quot;);</span>
+        }
+<span class="fc" id="L165">    }</span>
+
+    /**
+     * Verifies if the match is finished.
+     * Note: Called by the Controller and NextTurnState.
+     *
+     * @return true if the match is finished, false otherwise
+     */
+    public boolean isFinished() {
+<span class="fc" id="L174">        return finished;</span>
+    }
+
+    /**
+     * Marks the initial turn as finished, assuming the initial turn hasn't finished yet.
+     * Called by ChooseInitialCardState once the initial turn is finished.
+     */
+    protected void doInitialTurnFinish() {
+<span class="fc" id="L182">        initialTurnFinished = true;</span>
+<span class="fc" id="L183">    }</span>
+
+    /**
+     * Verifies if the initial turn is finished.
+     * Note: Called by NextTurnState.
+     *
+     * @return true if the initial turn is finished, false otherwise
+     */
+    public boolean isInitialTurnFinished() {
+<span class="fc" id="L192">        return initialTurnFinished;</span>
+    }
+
+    /**
+     * Marks the match as started, assuming the match hasn't started yet.
+     * Note: Called by ChooseSecretObjectiveState once the match is ready to start.
+     */
+    protected void doStart() {
+<span class="fc" id="L200">        started = true;</span>
+<span class="fc" id="L201">    }</span>
+
+    /**
+     * Verifies if the match is started.
+     * Note: Called by NextTurnState to check when to effectively start the match.
+     *
+     * @return true if the match is started, false otherwise
+     */
+    public boolean isStarted() {
+<span class="fc" id="L210">        return started;</span>
+    }
+
+    /**
+     * Gets the player who's playing (or choosing the secret objective) at the moment.
+     * Note: Used by the Controller.
+     *
+     * @return the player playing at the moment, null if the match has never reached NextTurnState
+     */
+    public Player getCurrentPlayer() {
+<span class="fc" id="L220">        return currentPlayer;</span>
+    }
+
+    /**
+     * Gets the match players.
+     *
+     * @return the match players in a List, dynamically defined as an ArrayList
+     */
+    public List&lt;Player&gt; getPlayers() {
+<span class="fc" id="L229">        return players;</span>
+    }
+
+    /**
+     * Sets the current match state, assuming it's not null.
+     * Note: Called by each state to let the match enter to the next state.
+     *
+     * @param state the state in which the match has to be
+     */
+    protected void setState(MatchState state) {
+<span class="fc" id="L239">        this.currentState = state;</span>
+<span class="fc" id="L240">    }</span>
+
+    /**
+     * Draws a card from the initial cards deck
+     *
+     * @return the card drawn from the initial cards deck
+     * @throws WrongStateException if called while in a state that doesn't allow drawing an initial card
+     */
+    protected InitialCard drawInitialCard() throws WrongStateException {
+<span class="fc" id="L249">        currentState.drawInitialCard();</span>
+
+        try {
+<span class="fc" id="L252">            currentGivenInitialCard = initialsDeck.pop();</span>
+<span class="nc" id="L253">        } catch (DeckException e) {</span>
+<span class="nc" id="L254">            throw new RuntimeException(e);</span>
+<span class="fc" id="L255">        }</span>
+
+        // Notify observers and trigger state transition
+<span class="fc" id="L258">        Player copy = new Player(currentPlayer);</span>
+<span class="fc" id="L259">        notifyObservers(observer -&gt; observer.someoneDrewInitialCard(copy, currentGivenInitialCard));</span>
+<span class="fc" id="L260">        currentState.transition();</span>
+
+<span class="fc" id="L262">        return currentGivenInitialCard;</span>
+    }
+
+    /**
+     * Extracts two cards from the deck of objectives and returns them.
+     * Note: Called by the Controller.
+     *
+     * @return two objective cards extracted from the objectives deck
+     */
+    protected Pair&lt;Objective, Objective&gt; proposeSecretObjectives() throws WrongStateException {
+<span class="fc" id="L272">        currentState.proposeSecretObjectives();</span>
+        try {
+<span class="fc" id="L274">            Objective obj1 = objectivesDeck.pop();</span>
+<span class="fc" id="L275">            Objective obj2 = objectivesDeck.pop();</span>
+
+<span class="fc" id="L277">            currentProposedObjectives = new Pair&lt;&gt;(obj1, obj2);</span>
+
+            // Notify observers and trigger state transition
+<span class="fc" id="L280">            Player copy = new Player(currentPlayer);</span>
+<span class="fc" id="L281">            notifyObservers(observer -&gt; observer.someoneDrewSecretObjective(copy, currentProposedObjectives));</span>
+<span class="fc" id="L282">            currentState.transition();</span>
+
+<span class="fc" id="L284">            return currentProposedObjectives;</span>
+<span class="nc" id="L285">        } catch (DeckException e) {</span>
+<span class="nc" id="L286">            throw new RuntimeException(e);</span>
+        }
+    }
+
+    /**
+     * Checks that the given objective is one of the proposed ones to the current player
+     * and put the discarded objective back in the objectives deck.
+     * Note: Called by the current player
+     *
+     * @param objective the accepted objective by the player (NOT the discarded one)
+     */
+    protected void setSecretObjective(Objective objective) throws WrongChoiceException, WrongStateException {
+<span class="fc" id="L298">        currentState.chooseSecretObjective();</span>
+
+        // Get proposed objectives
+<span class="fc" id="L301">        Objective firstProposedObjective = currentProposedObjectives.first();</span>
+<span class="fc" id="L302">        Objective secondProposedObjective = currentProposedObjectives.second();</span>
+
+        // Check if the chosen objective is one of the proposed ones and put it back in the deck
+<span class="fc bfc" id="L305" title="All 2 branches covered.">        if (objective.equals(firstProposedObjective))</span>
+<span class="fc" id="L306">            objectivesDeck.add(secondProposedObjective);</span>
+<span class="pc bpc" id="L307" title="1 of 2 branches missed.">        else if (objective.equals(secondProposedObjective))</span>
+<span class="nc" id="L308">            objectivesDeck.add(firstProposedObjective);</span>
+        else
+            // If the objective is not one of the proposed ones, throw an exception
+<span class="fc" id="L311">            throw new WrongChoiceException(&quot;The chosen objective is not one of the proposed ones&quot;);</span>
+
+        // Notify observers and trigger state transition
+<span class="fc" id="L314">        Player copy = new Player(currentPlayer);</span>
+<span class="fc" id="L315">        notifyObservers(observer -&gt; observer.someoneChoseSecretObjective(copy, objective));</span>
+<span class="fc" id="L316">        currentState.transition();</span>
+<span class="fc" id="L317">    }</span>
+
+    /**
+     * Shuffles the players turns order and gives them their pawn color.
+     * Note: Called by SetupState.
+     */
+    protected void setupPlayers() {
+        // Shuffle players List
+<span class="fc" id="L325">        Collections.shuffle(players);</span>
+
+        // Set players' colors
+<span class="fc bfc" id="L328" title="All 2 branches covered.">        for (int i = 0; i &lt; maxPlayers; i++) {</span>
+<span class="fc" id="L329">            players.get(i).setColor(Color.values()[i]);</span>
+        }
+<span class="fc" id="L331">    }</span>
+
+    /**
+     * Shuffles all thr cards decks and places the visible cards on the board
+     * Note: Called by SetupState.
+     */
+    protected void setupDecks() {
+        // Shuffle each deck
+<span class="fc" id="L339">        initialsDeck.shuffle();</span>
+<span class="fc" id="L340">        resourcesDeck.shuffle();</span>
+<span class="fc" id="L341">        goldsDeck.shuffle();</span>
+<span class="fc" id="L342">        objectivesDeck.shuffle();</span>
+
+        try {
+            // Pop two resources to be placed on the common table
+<span class="fc" id="L346">            ResourceCard resourceCard1 = resourcesDeck.pop();</span>
+<span class="fc" id="L347">            ResourceCard resourceCard2 = resourcesDeck.pop();</span>
+
+            // Pop two golds to be placed on the common table
+<span class="fc" id="L350">            GoldCard goldCard1 = goldsDeck.pop();</span>
+<span class="fc" id="L351">            GoldCard goldCard2 = goldsDeck.pop();</span>
+
+            // Pop two golds to be placed on the common table
+<span class="fc" id="L354">            Objective objective1 = objectivesDeck.pop();</span>
+<span class="fc" id="L355">            Objective objective2 = objectivesDeck.pop();</span>
+
+            // Put golds and resources in visiblePlayableCards
+<span class="fc" id="L358">            visiblePlayableCards.put(DrawSource.FIRST_VISIBLE, goldCard1);</span>
+<span class="fc" id="L359">            visiblePlayableCards.put(DrawSource.SECOND_VISIBLE, goldCard2);</span>
+<span class="fc" id="L360">            visiblePlayableCards.put(DrawSource.THIRD_VISIBLE, resourceCard1);</span>
+<span class="fc" id="L361">            visiblePlayableCards.put(DrawSource.FOURTH_VISIBLE, resourceCard2);</span>
+
+<span class="fc" id="L363">            visibleObjectives = new Pair&lt;&gt;(objective1, objective2);</span>
+<span class="nc" id="L364">        } catch (DeckException e) {</span>
+<span class="nc" id="L365">            throw new RuntimeException(e);</span>
+<span class="fc" id="L366">        }</span>
+<span class="fc" id="L367">    }</span>
+
+    /**
+     * Gives one gold card and two resource cards to each player (hand)
+     * and sets the initial card for each of them.
+     * Note: Called by WaitState.
+     */
+    protected void setupBoards() {
+        // Give starting cards to players
+<span class="fc bfc" id="L376" title="All 2 branches covered.">        for (Player player : players) {</span>
+            try {
+                // Pop a card from the resources deck and one from the golds deck
+<span class="fc" id="L379">                GoldCard goldCard = goldsDeck.pop();</span>
+<span class="fc" id="L380">                ResourceCard resourceCard1 = resourcesDeck.pop();</span>
+<span class="fc" id="L381">                ResourceCard resourceCard2 = resourcesDeck.pop();</span>
+
+                // Add each card to the player's hand
+<span class="fc" id="L384">                player.getBoard().addHandCard(goldCard);</span>
+<span class="fc" id="L385">                player.getBoard().addHandCard(resourceCard1);</span>
+<span class="fc" id="L386">                player.getBoard().addHandCard(resourceCard2);</span>
+<span class="nc" id="L387">            } catch (Exception e) {</span>
+<span class="nc" id="L388">                throw new RuntimeException(e);</span>
+<span class="fc" id="L389">            }</span>
+<span class="fc" id="L390">        }</span>
+<span class="fc" id="L391">    }</span>
+
+    /**
+     * Makes the chosen move on the board of the current player (known because of the internal Match state);
+     * in particular, checks if the placement is valid, then places the card on the player's board and add points
+     * to the player.
+     * Note: Called by the current player.
+     *
+     * @param coords coordinates in which to place the card
+     * @param card   card to place
+     * @param side   side of the card to be placed
+     * @throws WrongStateException  if called while in a state that doesn't allow making moves
+     * @throws WrongChoiceException if the move is not allowed (placement not allowed, or not enough resources, or card
+     *                              not in player's hand)
+     */
+    protected void makeMove(Pair&lt;Integer, Integer&gt; coords, PlayableCard card, Side side) throws WrongStateException, WrongChoiceException {
+<span class="fc" id="L407">        currentState.makeMove();</span>
+
+<span class="fc" id="L409">        Board currentPlayerBoard = currentPlayer.getBoard();</span>
+
+        PlacementOutcome outcome;
+        try {
+<span class="fc" id="L413">            outcome = currentPlayerBoard.verifyCardPlacement(coords, card, side);</span>
+<span class="fc" id="L414">        } catch (CardException e) {</span>
+<span class="fc" id="L415">            throw new WrongChoiceException(e.getMessage());</span>
+<span class="fc" id="L416">        }</span>
+
+        // If placing the card in the current player's board is allowed by rules
+<span class="pc bpc" id="L419" title="1 of 4 branches missed.">        switch (outcome) {</span>
+            case VALID:
+                // Place the card in the current player's board
+                // and save the points possibly gained because of the move
+                int gainedPoints;
+                try {
+<span class="fc" id="L425">                    gainedPoints = currentPlayerBoard.placeCard(coords, card, side, turn);</span>
+<span class="nc" id="L426">                } catch (CardException e) {</span>
+<span class="nc" id="L427">                    throw new RuntimeException(e);</span>
+<span class="fc" id="L428">                }</span>
+
+                // Remove the card from the player's hand
+                // since it has been placed on the board
+                try {
+<span class="fc" id="L433">                    currentPlayerBoard.removeHandCard(card);</span>
+<span class="nc" id="L434">                } catch (HandException e) {</span>
+<span class="nc" id="L435">                    throw new RuntimeException(e);</span>
+<span class="fc" id="L436">                }</span>
+
+                // Update the current player's points
+<span class="fc" id="L439">                currentPlayer.addPoints(gainedPoints);</span>
+
+                // If the current player reaches 20 points or more
+                // the last turn of the match starts
+<span class="pc bpc" id="L443" title="1 of 2 branches missed.">                if (currentPlayer.getPoints() &gt;= 20)</span>
+<span class="nc" id="L444">                    lastTurn = true;</span>
+
+                // Notify observers and trigger state transition
+<span class="fc" id="L447">                Player copy = new Player(currentPlayer);</span>
+<span class="fc" id="L448">                notifyObservers(observer -&gt; observer.someonePlayedCard(copy, coords, card, side));</span>
+<span class="fc" id="L449">                currentState.transition();</span>
+
+<span class="fc" id="L451">                break;</span>
+            case INVALID_COORDS:
+<span class="fc" id="L453">                throw new WrongChoiceException(&quot;Invalid coordinates!&quot;);</span>
+            case INVALID_ENOUGH_RESOURCES:
+<span class="fc" id="L455">                throw new WrongChoiceException(&quot;Not enough resources!&quot;);</span>
+        }
+<span class="fc" id="L457">    }</span>
+
+    /**
+     * Draws a card from the passed source. If the caller wants to draw one of the four visible cards, a rule is applied:
+     * the first and second visible cards (FIRST/SECOND_VISIBLE) will be substituted by a gold card if possible, if not,
+     * by a resource card, if not again, they will be null (then not substituted); the first and second visible cards
+     * (THIRD/FOURTH_VISIBLE) will be substituted by a resource card if possible, if not, by a gold card, if not again,
+     * they will be null (then not substituted).
+     * Note: Called by the current player.
+     *
+     * @param source the source to draw a card from
+     * @return the card drawn
+     * @throws WrongStateException  if called while in a state that doesn't allow making moves
+     * @throws WrongChoiceException if the source does not have cards
+     */
+    protected PlayableCard drawCard(DrawSource source) throws WrongStateException, WrongChoiceException {
+        PlayableCard card;
+<span class="fc" id="L474">        PlayableCard replacementCard = null;</span>
+
+<span class="fc" id="L476">        currentState.drawCard();</span>
+
+<span class="pc bpc" id="L478" title="1 of 5 branches missed.">        switch (source) {</span>
+            case GOLDS_DECK -&gt; {
+                try {
+<span class="fc" id="L481">                    card = goldsDeck.pop();</span>
+<span class="fc" id="L482">                    replacementCard = goldsDeck.peek();</span>
+<span class="fc" id="L483">                } catch (DeckException e) {</span>
+<span class="fc" id="L484">                    throw new WrongChoiceException(&quot;The gold cards deck is empty!&quot;);</span>
+<span class="fc" id="L485">                }</span>
+            }
+
+            case RESOURCES_DECK -&gt; {
+                try {
+<span class="fc" id="L490">                    card = resourcesDeck.pop();</span>
+<span class="fc" id="L491">                    replacementCard = resourcesDeck.peek();</span>
+<span class="fc" id="L492">                } catch (DeckException e) {</span>
+<span class="fc" id="L493">                    throw new WrongChoiceException(&quot;The resource cards deck is empty!&quot;);</span>
+<span class="fc" id="L494">                }</span>
+            }
+
+            case FIRST_VISIBLE, SECOND_VISIBLE -&gt; {
+<span class="fc" id="L498">                card = visiblePlayableCards.get(source);</span>
+
+                // If not present (e.g. on the last turn both decks are empty, so remaining turns will be played
+                // drawing the four visible cards, but they won't be substituted by others) throw an exception
+<span class="pc bpc" id="L502" title="1 of 2 branches missed.">                if (card == null)</span>
+<span class="nc" id="L503">                    throw new WrongChoiceException(&quot;There is no visible card in the chosen position!&quot;);</span>
+
+                // If the golds deck is NOT empty, substitute the first/second visible
+                // card with a new gold
+<span class="fc bfc" id="L507" title="All 2 branches covered.">                if (!goldsDeck.isEmpty()) {</span>
+<span class="fc" id="L508">                    replacementCard = goldsDeck.poll();</span>
+<span class="fc" id="L509">                    visiblePlayableCards.put(source, replacementCard);</span>
+                }
+                // If the golds deck is empty, substitute the first/second visible
+                // card with a resource
+                else {
+<span class="fc" id="L514">                    replacementCard = resourcesDeck.poll();</span>
+<span class="fc" id="L515">                    visiblePlayableCards.put(source, replacementCard);</span>
+                    // If the resources deck is empty too, the GameDeck.poll() method returns null,
+                    // then the corresponding visible card will be null
+                }
+<span class="fc" id="L519">            }</span>
+
+            case THIRD_VISIBLE, FOURTH_VISIBLE -&gt; {
+<span class="fc" id="L522">                card = visiblePlayableCards.get(source);</span>
+
+                // If not present (e.g. on the last turn both decks are empty, so remaining turns will be played
+                // drawing the four visible cards, but they won't be substituted by others) throw an exception
+<span class="pc bpc" id="L526" title="1 of 2 branches missed.">                if (card == null)</span>
+<span class="nc" id="L527">                    throw new WrongChoiceException(&quot;There is no visible card in the chosen position!&quot;);</span>
+
+                // If the resources deck is NOT empty, substitute the third/fourth visible
+                // card with a new resource
+<span class="pc bpc" id="L531" title="1 of 2 branches missed.">                if (!resourcesDeck.isEmpty()) {</span>
+<span class="fc" id="L532">                    replacementCard = resourcesDeck.poll();</span>
+<span class="fc" id="L533">                    visiblePlayableCards.put(source, replacementCard);</span>
+                }
+                // If the resources deck is empty, substitute the third/fourth visible
+                // card with a gold
+                else {
+<span class="nc" id="L538">                    replacementCard = goldsDeck.poll();</span>
+<span class="nc" id="L539">                    visiblePlayableCards.put(source, replacementCard);</span>
+                }
+                // If the golds deck is empty too, the GameDeck.poll() method returns null,
+                // then the corresponding visible card will be null
+<span class="nc" id="L543">            }</span>
+
+<span class="nc" id="L545">            default -&gt; throw new RuntimeException(&quot;Unexpected value of source&quot;);</span>
+        }
+
+<span class="fc bfc" id="L548" title="All 4 branches covered.">        if (goldsDeck.isEmpty() &amp;&amp; resourcesDeck.isEmpty())</span>
+<span class="fc" id="L549">            lastTurn = true;</span>
+
+        // If the current player is the last one in the match turns rotation, i.e. the last one in the players List
+        // AND the current turn is the last one the match is now finished
+<span class="fc bfc" id="L553" title="All 4 branches covered.">        if (currentPlayer.equals(players.getLast()) &amp;&amp; lastTurn)</span>
+<span class="fc" id="L554">            finished = true;</span>
+
+        // Notify observers and trigger state transition
+<span class="fc" id="L557">        PlayableCard replacementCardFinal = replacementCard;</span>
+<span class="fc" id="L558">        Player copy = new Player(currentPlayer);</span>
+<span class="fc" id="L559">        notifyObservers(observer -&gt; observer.someoneDrewCard(copy, source, card, replacementCardFinal));</span>
+<span class="fc" id="L560">        currentState.transition();</span>
+
+<span class="fc" id="L562">        return card;</span>
+    }
+
+    /**
+     * Sets the current player's initial card side.
+     *
+     * @param side the side to put the initial card on
+     * @throws WrongStateException if called while in a state that doesn't allow choosing the initial card side
+     */
+    protected void setInitialSide(Side side, Map&lt;Symbol, Integer&gt; availableResources) throws WrongStateException {
+<span class="fc" id="L572">        currentState.chooseInitialSide();</span>
+
+        try {
+<span class="fc" id="L575">            currentPlayer.getBoard().setInitialCard(currentGivenInitialCard, side);</span>
+<span class="nc" id="L576">        } catch (CardException e) {</span>
+<span class="nc" id="L577">            throw new RuntimeException(e);</span>
+<span class="fc" id="L578">        }</span>
+
+<span class="fc" id="L580">        currentGivenInitialCard = null;</span>
+
+        // Notify observers and trigger state transition
+<span class="fc" id="L583">        Player copy = new Player(currentPlayer);</span>
+<span class="fc" id="L584">        notifyObservers(observer -&gt; observer.someoneSetInitialSide(copy, side, availableResources));</span>
+<span class="fc" id="L585">        currentState.transition();</span>
+<span class="fc" id="L586">    }</span>
+
+    // Returns a Map that links each player to the number of DIFFERENT objectives achieved
+    private Map&lt;Player, Integer&gt; checkObjectivesAchievement() {
+        // Map that links each player to the number of DIFFERENT objectives achieved
+<span class="fc" id="L591">        Map&lt;Player, Integer&gt; playersAchievedObjectives = new HashMap&lt;&gt;();</span>
+
+<span class="fc" id="L593">        Objective firstObjective = visibleObjectives.first();</span>
+<span class="fc" id="L594">        Objective secondObjective = visibleObjectives.second();</span>
+
+<span class="fc bfc" id="L596" title="All 2 branches covered.">        for (Player p : players) {</span>
+<span class="fc" id="L597">            Board board = p.getBoard();</span>
+<span class="fc" id="L598">            Objective secretObjective = p.getSecretObjective();</span>
+<span class="fc" id="L599">            int numAchievedObjectives = 0;</span>
+
+            // Add to the player the points of the specific objective MULTIPLIED BY how many times they met the
+            // objective requirement
+<span class="fc bfc" id="L603" title="All 2 branches covered.">            if (secretObjective != null)</span>
+<span class="fc" id="L604">                p.addPoints(secretObjective.getPoints() * secretObjective.getReq().timesMet(board));</span>
+<span class="fc" id="L605">            p.addPoints(firstObjective.getPoints() * firstObjective.getReq().timesMet(board));</span>
+<span class="fc" id="L606">            p.addPoints(secondObjective.getPoints() * secondObjective.getReq().timesMet(board));</span>
+
+            // Count the number of achieved objectives by the player
+<span class="fc bfc" id="L609" title="All 4 branches covered.">            if (secretObjective != null &amp;&amp; secretObjective.getReq().timesMet(board) &gt;= 1)</span>
+<span class="fc" id="L610">                numAchievedObjectives++;</span>
+<span class="fc bfc" id="L611" title="All 2 branches covered.">            if (firstObjective.getReq().timesMet(board) &gt;= 1)</span>
+<span class="fc" id="L612">                numAchievedObjectives++;</span>
+<span class="fc bfc" id="L613" title="All 2 branches covered.">            if (secondObjective.getReq().timesMet(board) &gt;= 1)</span>
+<span class="fc" id="L614">                numAchievedObjectives++;</span>
+
+<span class="fc" id="L616">            playersAchievedObjectives.put(p, numAchievedObjectives);</span>
+<span class="fc" id="L617">        }</span>
+
+<span class="fc" id="L619">        return playersAchievedObjectives;</span>
+    }
+
+    /**
+     * Calculates the winner (or winners)
+     */
+    protected void decideWinner() {
+<span class="fc" id="L626">        finished = true;</span>
+<span class="fc" id="L627">        playersFinalRanking = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L628">        Map&lt;Player, Integer&gt; achievedObjectives = checkObjectivesAchievement();</span>
+
+<span class="fc" id="L630">        List&lt;Player&gt; sortedPlayers = players.stream()</span>
+<span class="fc" id="L631">                .sorted(</span>
+                        // Create a comparator that firstly sorts based on player points
+                        // and secondly, in case of same points, on the number of achieved objectives
+                        // Please note: reversed() since the default sort is ascending (min first), but the expected
+                        // results requires a descending sort (max points/objectives first)
+<span class="fc" id="L636">                        Comparator.comparingInt(Player::getPoints)</span>
+<span class="fc" id="L637">                                .thenComparing(achievedObjectives::get)</span>
+<span class="fc" id="L638">                                .reversed()</span>
+                )
+<span class="fc" id="L640">                .toList();</span>
+
+<span class="fc" id="L642">        Player bestPlayer = sortedPlayers.getFirst();</span>
+<span class="fc" id="L643">        int bestAchievedObjectives = achievedObjectives.get(bestPlayer);</span>
+<span class="fc" id="L644">        int bestPoints = bestPlayer.getPoints();</span>
+        boolean isWinner;
+
+<span class="fc bfc" id="L647" title="All 2 branches covered.">        for (Player p : sortedPlayers) {</span>
+            // If the current player has as many points and as many achieved objectives as the winner,
+            // then they're winner too
+<span class="fc bfc" id="L650" title="All 4 branches covered.">            isWinner = p.getPoints() == bestPoints &amp;&amp; achievedObjectives.get(p) == bestAchievedObjectives;</span>
+
+<span class="fc" id="L652">            playersFinalRanking.add(new Pair&lt;&gt;(p, isWinner));</span>
+<span class="fc" id="L653">        }</span>
+
+        // Notify observers
+<span class="fc" id="L656">        notifyObservers(MatchObserver::matchFinished);</span>
+<span class="fc" id="L657">    }</span>
+
+    /**
+     * Getter for the final ranking of players. Return a valid result if and only if called when the match is in the
+     * FinalState, so it's finished.
+     *
+     * @return Players ranking of the match at the end of it; the List order represents the ranking order, the Boolean
+     * represent if the related player is a winner; this is needed since the match can end in a tie, in such case the
+     * first two/three players of the List will have a True flag
+     */
+    public List&lt;Pair&lt;Player, Boolean&gt;&gt; getPlayersFinalRanking() {
+<span class="fc" id="L668">        return playersFinalRanking;</span>
+    }
+
+    /**
+     * Returns the visible objectives.
+     *
+     * @return a Pair containing the two visible objectives
+     */
+    public Pair&lt;Objective, Objective&gt; getVisibleObjectives() {
+<span class="fc" id="L677">        return visibleObjectives;</span>
+    }
+
+    /**
+     * Getter for the four visible playable cards (i.e. resource cards and gold cards, not objectives) on the common
+     * table.
+     *
+     * @return a Map that links each visible playable card to a DrawSource (restricted to FIRST_VISIBLE, SECOND_VISIBLE,
+     * THIRD_VISIBLE, FOURTH_VISIBLE)
+     */
+    public Map&lt;DrawSource, PlayableCard&gt; getVisiblePlayableCards() {
+<span class="fc" id="L688">        return visiblePlayableCards;</span>
+    }
+
+    /**
+     * Getter for the current match state.
+     *
+     * @return the current state of the match
+     */
+    public MatchState getCurrentState() {
+<span class="fc" id="L697">        return currentState;</span>
+    }
+
+    /**
+     * Getter for the cards back on the top of the decks (i.e. those visible top cards).
+     * Both of them always contain just a reign.
+     *
+     * @return Pair of two reign Symbol (see {@link Symbol}.getReigns()), the first one regards the
+     * top card of gold cards deck, the second one regards the top card of resource cards deck
+     */
+    public Pair&lt;Symbol, Symbol&gt; getDecksTopReigns() {
+<span class="fc" id="L708">        PlayableCard goldCard = goldsDeck.peek();</span>
+<span class="fc" id="L709">        PlayableCard resourceCard = resourcesDeck.peek();</span>
+
+        Symbol goldReign;
+        Symbol resourceReign;
+
+<span class="fc bfc" id="L714" title="All 2 branches covered.">        if (goldCard == null) {</span>
+<span class="fc" id="L715">            goldReign = null;</span>
+        } else {
+<span class="fc" id="L717">            goldReign = goldCard.getReign();</span>
+        }
+
+<span class="fc bfc" id="L720" title="All 2 branches covered.">        if (resourceCard == null) {</span>
+<span class="fc" id="L721">            resourceReign = null;</span>
+        } else {
+<span class="fc" id="L723">            resourceReign = resourceCard.getReign();</span>
+        }
+
+<span class="fc" id="L726">        return new Pair&lt;&gt;(goldReign, resourceReign);</span>
+    }
+
+    /**
+     * Getter for the maximum number of player for the match
+     *
+     * @return The maximum number of player
+     */
+    public int getMaxPlayers() {
+<span class="fc" id="L735">        return maxPlayers;</span>
+    }
+
+    /**
+     * Adds the given MatchObserver to those observers notified on match events.
+     *
+     * @param observer The observer to be notified from now on when an event occurs
+     */
+    public void subscribeObserver(MatchObserver observer) {
+<span class="fc bfc" id="L744" title="All 2 branches covered.">        if (observers == null) {</span>
+<span class="fc" id="L745">            observers = new ArrayList&lt;&gt;();</span>
+        }
+<span class="fc" id="L747">        observers.add(observer);</span>
+<span class="fc" id="L748">    }</span>
+
+    /**
+     * Removes the given MatchObserver to those observers notified on match events.
+     *
+     * @param observer The observer to be removed
+     */
+    public void unsubscribeObserver(MatchObserver observer) {
+<span class="fc" id="L756">        observers.remove(observer);</span>
+<span class="fc" id="L757">    }</span>
+
+    /**
+     * Notifies all match observers that the match has started.
+     * It's called by WaitState methods after the match setup, that's why it needs to be protected.
+     */
+    protected void notifyMatchStart() {
+<span class="fc" id="L764">        notifyObservers(MatchObserver::matchStarted);</span>
+<span class="fc" id="L765">    }</span>
+
+    /**
+     * Sends a broadcast message in the chat. Notifies all observers of the event.
+     * Called by Player
+     *
+     * @param sender player that sends the message
+     * @param text   content of the message
+     */
+    protected void sendBroadcastText(Player sender, String text) {
+<span class="fc" id="L775">        notifyObservers(observer -&gt; observer.someoneSentBroadcastText(sender, text));</span>
+<span class="fc" id="L776">    }</span>
+
+    /**
+     * Sends a private message to the recipient chat. Notifies all observers of the event.
+     * Called by Player
+     *
+     * @param sender    player that sends the message
+     * @param recipient player that receives the message
+     * @param text      content of the message
+     */
+    protected void sendPrivateText(Player sender, Player recipient, String text) {
+<span class="fc" id="L787">        notifyObservers(observer -&gt; observer.someoneSentPrivateText(sender, recipient, text));</span>
+<span class="fc" id="L788">    }</span>
+
+    /**
+     * Notifies asynchronously all match observers, calling the passed MatchObserverCallable on each of them.
+     * To be more specific: creates a thread for each match observer, each thread is appointed to call the passed callable
+     * on a MatchObserver instance; then runs all of them; finally joins on them (waiting each of them to return and exit).
+     *
+     * @param observerCallable The &quot;method&quot; to be called on each observer of the match
+     */
+    private void notifyObservers(MatchObserverCallable observerCallable) {
+<span class="pc bpc" id="L798" title="1 of 4 branches missed.">        if(observers == null || observers.isEmpty())</span>
+<span class="fc" id="L799">            return;</span>
+
+<span class="fc" id="L801">        ExecutorService executor = Executors.newFixedThreadPool(observers.size());</span>
+
+<span class="fc bfc" id="L803" title="All 2 branches covered.">        for (MatchObserver observer : observers)</span>
+<span class="fc" id="L804">            executor.submit(() -&gt; observerCallable.call(observer));</span>
+
+<span class="fc" id="L806">        executor.shutdown();</span>
+<span class="fc" id="L807">    }</span>
+
+    /**
+     * If the match is rejoinable (not every player is connected)
+     * @return if the match is rejoinable
+     */
+    public synchronized boolean isRejoinable() {
+<span class="pc bpc" id="L814" title="4 of 6 branches missed.">        return players.stream().anyMatch((p) -&gt; !p.isConnected()) &amp;&amp; isStarted();</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

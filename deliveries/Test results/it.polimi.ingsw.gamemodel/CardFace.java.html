@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CardFace.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.gamemodel</a> &gt; <span class="el_source">CardFace.java</span></div><h1>CardFace.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.gamemodel;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.Set;
+import it.polimi.ingsw.exceptions.CardException;
+
+/**
+ * Topological definition of a card's side
+ */
+public class CardFace implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    private Symbol topLeft;
+    private Symbol topRight;
+    private Symbol bottomLeft;
+    private Symbol bottomRight;
+    private Set&lt;Symbol&gt; center;
+
+    
+    /**
+     * Class constructor.
+     * 
+     * @param topLeft Top left corner
+     * @param topRight Top right corner
+     * @param bottomLeft Bottom left corner
+     * @param bottomRight Bottom right corner
+     * @param center Center of the card
+     */
+<span class="fc" id="L31">    public CardFace(Symbol topLeft, Symbol topRight, Symbol bottomLeft, Symbol bottomRight, Set&lt;Symbol&gt; center) {</span>
+<span class="fc" id="L32">        this.topLeft = topLeft;</span>
+<span class="fc" id="L33">        this.topRight = topRight;</span>
+<span class="fc" id="L34">        this.bottomLeft = bottomLeft;</span>
+<span class="fc" id="L35">        this.bottomRight = bottomRight;</span>
+<span class="fc" id="L36">        this.center = center;</span>
+<span class="fc" id="L37">    }</span>
+
+    /**
+     * Used to get the symbol present in one of the four corners of a card
+     *
+     * @param corner which of the four corners we want
+     * @return the symbol the specified corner contains
+     * @throws CardException if the specified corner does not exist
+     */
+    public Symbol getCorner(Corner corner) throws CardException {
+<span class="fc bfc" id="L47" title="All 4 branches covered.">        return switch (corner) {</span>
+<span class="fc" id="L48">            case TOP_LEFT -&gt; this.topLeft;</span>
+<span class="fc" id="L49">            case TOP_RIGHT -&gt; this.topRight;</span>
+<span class="fc" id="L50">            case BOTTOM_LEFT -&gt; this.bottomLeft;</span>
+<span class="fc" id="L51">            case BOTTOM_RIGHT -&gt; this.bottomRight;</span>
+        };
+    }
+
+    /**
+     * Getter for the center of the card
+     *
+     * @return the set containing all symbols the center of the card contains
+     */
+    public Set&lt;Symbol&gt; getCenter() {
+<span class="fc" id="L61">        return center;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

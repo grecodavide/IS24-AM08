@@ -6,19 +6,28 @@ import it.polimi.ingsw.exceptions.WrongStateException;
 import it.polimi.ingsw.exceptions.WrongTurnException;
 import it.polimi.ingsw.utils.Pair;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
  * Represents each in-game user, so acts also as a gateway receiving input by the Controller.
  * It's also responsible for the board's logic, which is a slice of the game logic.
  */
-public class Player {
+public class Player implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     private final String username;
     private final Match match;
     private int points;
     private final Board board;
     private Color pawnColor;
     private Objective secretObjective;
+    /**
+     * If the player is connected
+     */
+    private boolean connected;
 
     /**
      * Initializes the main player's attributes.
@@ -30,6 +39,7 @@ public class Player {
         this.username = username;
         this.match = match;
 
+        this.connected = true;
         //Initialize values
         board = new Board();
         points = 0;
@@ -38,7 +48,7 @@ public class Player {
     /**
      * Initializes the current instance from a copy reference
      *
-     * @param player
+     * @param player The player to make a copy of
      */
     public Player(Player player) {
         this.username = player.username;
@@ -69,6 +79,10 @@ public class Player {
      * @param coords x and y position in which the card is played (where 0, 0 is the initial card)
      * @param card   the card to be placed
      * @param side   whether the card should be placed on the front or on the back
+     * @throws WrongChoiceException If the chosen card cannot be player (placement not allowed, or not enough resources,
+     *                              or card not in the player's hand)
+     * @throws WrongStateException  If a card cannot be played in this match state
+     * @throws WrongTurnException   If it's the turn of this player.
      */
     public void playCard(Pair<Integer, Integer> coords, PlayableCard card, Side side) throws WrongTurnException, WrongStateException, WrongChoiceException {
         synchronized (match) {
@@ -135,6 +149,7 @@ public class Player {
      * @throws WrongTurnException   if called by the player when it's not its turn
      * @throws WrongChoiceException if called on a drawing source which is empty (e.g. empty deck)
      * @throws WrongStateException  if called during the wrong match state
+     * @throws HandException if the player already has three cards in their hand
      */
     public void drawCard(DrawSource source) throws HandException, WrongStateException, WrongChoiceException, WrongTurnException {
         synchronized (match) {
@@ -218,7 +233,7 @@ public class Player {
      *
      * @see #chooseSecretObjective(Objective)
      */
-    protected Objective getSecretObjective() {
+    public Objective getSecretObjective() {
         return secretObjective;
     }
 
@@ -236,5 +251,17 @@ public class Player {
      */
     public String getUsername() {
         return username;
+    }
+
+    public boolean isConnected() {
+        synchronized (match) {
+            return connected;
+        }
+    }
+
+    public void setConnected(boolean connected) {
+        synchronized (match) {
+            this.connected = connected;
+        }
     }
 }

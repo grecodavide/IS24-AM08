@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Objective.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">AM08</a> &gt; <a href="index.source.html" class="el_package">it.polimi.ingsw.gamemodel</a> &gt; <span class="el_source">Objective.java</span></div><h1>Objective.java</h1><pre class="source lang-java linenums">package it.polimi.ingsw.gamemodel;
+
+import java.io.Serial;
+import java.io.Serializable;
+
+/**
+ * Every player has a secret objective, and at the start of the game two objectives common to every
+ * player get randomly chosen. The objective asks for a certain requirement to be satisfied and gives points only when
+ * the game ends, and does not stack on itself (e.g. if an objective requires three feathers and a player has 6, he will receive the points only once)
+ */
+public class Objective implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    private int points;
+    private Requirement req;
+<span class="fc" id="L17">    private static Integer lastID = 0;</span>
+    private Integer id;
+
+    /**
+     * Class constructor. It is composed only of a requirement (using polymorphism) and the points it gives
+     *
+     * @param points the number of points the objective will give (which is always an absolute number, it never depends on any resource)
+     * @param req    the requirement to satisfy in order to receive the points
+     */
+<span class="fc" id="L26">    public Objective(int points, Requirement req) {</span>
+<span class="fc" id="L27">        Objective.lastID++;</span>
+<span class="fc" id="L28">        this.id = Objective.lastID;</span>
+<span class="fc" id="L29">        this.points = points;</span>
+<span class="fc" id="L30">        this.req = req;</span>
+<span class="fc" id="L31">    }</span>
+
+    /**
+     * Getter for the Objective class
+     *
+     * @return the points held by the objective card.
+     */
+    public int getPoints() {
+<span class="fc" id="L39">        return this.points;</span>
+    }
+
+    /**
+     * Getter for the Objective class
+     *
+     * @return the requirement for the objective card to be placed.
+     */
+    public Requirement getReq() {
+<span class="fc" id="L48">        return this.req;</span>
+    }
+
+    /**
+     * @return the id of the objective card
+     */
+    public Integer getID() {
+<span class="fc" id="L55">        return this.id;</span>
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+<span class="fc bfc" id="L60" title="All 2 branches covered.">        if (obj == this)</span>
+<span class="fc" id="L61">            return true;</span>
+<span class="pc bpc" id="L62" title="1 of 2 branches missed.">        if (!(obj instanceof Objective))</span>
+<span class="nc" id="L63">            return false;</span>
+
+<span class="fc" id="L65">        Objective other = (Objective) obj;</span>
+<span class="fc" id="L66">        return other.getID().equals(this.id);</span>
+    }
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

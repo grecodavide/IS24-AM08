@@ -1,7 +1,7 @@
 package it.polimi.ingsw.gamemodel;
 
 /**
- * Used to know which of the two faces of a card we want to use
+ * Represents a card side.
  */
 public enum Side {
     FRONT("front"),
@@ -12,15 +12,21 @@ public enum Side {
     Side(String string) {
         this.string = string;
     }
-
+    
     @Override
     public String toString() {
         return this.string;
     }
 
-    public Side fromString(String cmp) {
+    /**
+     * Return a instance of this enum from its corresponding string representation.
+     *
+     * @param sideString The side represented as a string
+     * @return The side instance
+     */
+    public Side fromString(String sideString) {
         for (Side side : Side.values()) {
-            if (side.toString().equals(cmp)) {
+            if (side.toString().equals(sideString)) {
                 return side;
             }
         }
