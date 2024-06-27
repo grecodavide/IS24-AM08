@@ -777,9 +777,10 @@ public class TuiPrinter {
      * @param ranking The Leaderboard
      * @param username The player's username, used to highlight your rank
      */
-    public void printEndScreen(List<LeaderboardEntry> ranking, String username) {
+    public synchronized void printEndScreen(List<LeaderboardEntry> ranking, String username) {
         int maxWidth = this.getWidth() - 2;
 
+        this.clearTerminal();
         List<String> winning = new ArrayList<String>();
         List<String> losing = new ArrayList<String>();
         for (LeaderboardEntry leaderboardEntry : ranking) {
