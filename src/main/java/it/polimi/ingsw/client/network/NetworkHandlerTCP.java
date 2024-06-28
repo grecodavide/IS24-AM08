@@ -3,6 +3,8 @@ package it.polimi.ingsw.client.network;
 import java.io.IOException;
 import java.net.Socket;
 import java.rmi.RemoteException;
+import java.util.Calendar;
+
 import it.polimi.ingsw.client.frontend.GraphicalView;
 import it.polimi.ingsw.controllers.PlayerControllerTCP;
 import it.polimi.ingsw.gamemodel.DrawSource;
@@ -41,7 +43,6 @@ public class NetworkHandlerTCP extends NetworkHandler {
         this.io = new IOHandler(socket);
         new Thread(new ClientReceiver(this, socket)).start();
         connected = true;
-        super.startConnectionCheck();
     }
 
     /**
@@ -202,6 +203,12 @@ public class NetworkHandlerTCP extends NetworkHandler {
         }
     }
 
+    /**
+     * Confirm that the ping was successful
+     */
+    public void pong() {
+        this.lastPing = Calendar.getInstance().getTime().toInstant();
+    }
 
     /**
      * Utility to send a message to the socket's output stream. If there was an error, it means the

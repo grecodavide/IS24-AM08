@@ -179,7 +179,15 @@ public class ClientListener extends Thread {
      */
     private void executeRequest(String msg) {
         try {
-
+            if (msg.equals("ping")) {
+                this.playerController.ping();
+                try {
+                    io.writeMsg("pong");
+                } catch (IOException e ) {
+                    // Not supposed to be handled
+                }
+                return;
+            }
             ActionMessage message = (ActionMessage) parser.toMessage(msg);
             if (msg != null) {
                 switch (message) {

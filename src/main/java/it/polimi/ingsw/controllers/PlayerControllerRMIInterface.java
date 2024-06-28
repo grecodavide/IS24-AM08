@@ -113,4 +113,12 @@ public interface PlayerControllerRMIInterface extends Remote {
      * @throws RemoteException If the remote object is considered not to be reachable any more and cannot return as usual
      */
     void sendPrivateText(String recipient, String text) throws RemoteException;
+
+    /**
+     * Pings the server in order to perceive if the connection is still alive and working.
+     *
+     * @throws RemoteException If the connection to this class instance is not alive anymore
+     * @return True if the connection is alive, false otherwise
+     */
+    boolean ping() throws RemoteException;
 }

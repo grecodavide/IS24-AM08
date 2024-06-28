@@ -1,20 +1,11 @@
-# Project Creation
-The project was created by running
-```
-mvn archetype:generate \
-  -DgroupId=it.polimi.ingsw \
-  -DartifactId=AM08 \
-  -DarchetypeArtifactId=maven-archetype-quickstart \
-  -DarchetypeVersion=1.4 \
-  -DinteractiveMode=false
-```
+# Progetto di Ingegneria del software, A.C. 2023/2024
+Implementazione del gioco da tavolo `Codex naturalis` della Cranio Creations (C) scritta da:
+- Francesco Caracciolo
+- Antonino Ciancimino
+- Gianluca Di Paola
+- Davide Greco
 
-Flags:
-- `DgroupId`: unique base name of the company who created the project
-- `DartifactId`: unique name of the project
-- `DarchetypeArtifactId`: base struct of project
-
-
-To ensure we all run the same maven version (so that if it compiles on one machine, it'll do so on all the others), we also
-use `mvnw`, maven wrapper. This way, all the commands we have to run (`mvn build`, `mvn package`, `mvn test`...) will instead be run with `mvnw` 
-(`./mvnw build` ... on linux/macOS, `.\mvnw.cmd` on Windows)
+Funzionalità avanzate implementate:
+- Chat testuale
+- Partite multiple
+- Salvataggio periodico dei match e ripristino in caso di crash del server

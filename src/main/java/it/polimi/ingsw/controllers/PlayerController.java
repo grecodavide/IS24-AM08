@@ -9,7 +9,15 @@ import it.polimi.ingsw.gamemodel.MatchObserver;
 import it.polimi.ingsw.gamemodel.Player;
 import it.polimi.ingsw.utils.GuiUtil;
 
+import java.rmi.RemoteException;
+import java.time.Duration;
+import java.time.temporal.Temporal;
+import java.util.Calendar;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Controller for a match player, the only agent needing a view and so a controller in this
@@ -24,6 +32,7 @@ import java.util.Optional;
 public abstract sealed class PlayerController implements MatchObserver permits PlayerControllerRMI, PlayerControllerTCP {
     protected Player player;
     protected final Match match;
+    private Temporal lastPing;
 
     /**
      * Instantiates the internal Player with the given username and sets the internal Match reference to
@@ -36,6 +45,20 @@ public abstract sealed class PlayerController implements MatchObserver permits P
     public PlayerController(String username, Match match) {
         this.player = new Player(username, match);
         this.match = match;
+
+        // Check periodically if the connection with the remote view (NetworkHandler) is still alive
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+
+        Runnable checkConnectivity = () -> {
+            Temporal now = Calendar.getInstance().getTime().toInstant();
+
+            if (lastPing != null && Duration.between(lastPing, now).toMillis() > 10000) {
+                match.removePlayer(player);
+                executor.shutdown();
+            }
+        };
+
+        executor.scheduleAtFixedRate(checkConnectivity, 0, 5, TimeUnit.SECONDS);
     }
 
     /**
@@ -97,4 +120,17 @@ public abstract sealed class PlayerController implements MatchObserver permits P
      * Notifies the view that match has resumed after a server crash.
      */
     public abstract void matchResumed();
+
+    /**
+     * Pings the remote controller in order to perceive if the connection is still alive and working.
+     * Always return true, since the false is implicit when returning a {@link RemoteException}
+     * when the connection is not working anymore.
+     *
+     * @return True if the connection is alive, false otherwise
+     */
+    public boolean ping() {
+        lastPing = Calendar.getInstance().getTime().toInstant();
+
+        return true;
+    }
 }

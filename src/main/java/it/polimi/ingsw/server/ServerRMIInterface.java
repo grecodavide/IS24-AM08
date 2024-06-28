@@ -51,12 +51,4 @@ public interface ServerRMIInterface extends Remote {
      * @throws WrongNameException   If the chosen player username doesn't meet the alphanumerical criteria
      */
     void createMatch(String matchName, int maxPlayers) throws RemoteException, ChosenMatchException, WrongNameException;
-
-    /**
-     * Pings the server in order to perceive if the connection is still alive and working.
-     *
-     * @throws RemoteException If the connection to this class instance is not alive anymore
-     * @return True if the connection is alive, false otherwise
-     */
-    boolean ping() throws RemoteException;
 }

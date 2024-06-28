@@ -8,6 +8,9 @@ import it.polimi.ingsw.utils.AvailableMatch;
 import it.polimi.ingsw.utils.LeaderboardEntry;
 import it.polimi.ingsw.utils.Pair;
 
+import java.time.Duration;
+import java.time.temporal.Temporal;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -25,6 +28,7 @@ public abstract class NetworkHandler implements RemoteViewInterface {
     protected final String ipAddress;
     protected final int port;
     protected boolean connected = false;
+    protected Temporal lastPing;
 
     /**
      * Initialize the instance all its internal attributes.
@@ -50,8 +54,11 @@ public abstract class NetworkHandler implements RemoteViewInterface {
             if (!connected) {
                 // If the connection lost is already acknowledged, shutdown the executor
                 executor.shutdown();
+
             } else {
-                if (!ping()) {
+                Temporal now = Calendar.getInstance().getTime().toInstant();
+                ping();
+                if (Duration.between(lastPing, now).toMillis() > 10000) {
                     // If there is a connection error, notify the client and shutdown the executor
                     disconnect();
                     graphicalView.notifyConnectionLost();
@@ -62,6 +69,7 @@ public abstract class NetworkHandler implements RemoteViewInterface {
 
         // Check every two second for connectivity
         executor.scheduleAtFixedRate(pingServer, 0, 2, TimeUnit.SECONDS);
+        lastPing = Calendar.getInstance().getTime().toInstant();
     }
 
     /**
@@ -330,6 +338,9 @@ public abstract class NetworkHandler implements RemoteViewInterface {
     @Override
     public void someoneJoined(String someoneUsername, List<String> joinedPlayers) {
         graphicalView.someoneJoined(someoneUsername, joinedPlayers);
+        if (someoneUsername.equals(username)) {
+            this.startConnectionCheck();
+        }
     }
 
     /**

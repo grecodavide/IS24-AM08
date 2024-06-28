@@ -145,6 +145,9 @@ public class ClientReceiver implements Runnable {
      */
     private void parseMessage(String message) {
         try {
+            if (message.equals("pong")) {
+                this.networkHandler.pong();
+            }
             ResponseMessage response = (ResponseMessage) io.stringToMsg(message);
             String username = response.getUsername();
             switch (response) {
@@ -268,6 +271,7 @@ public class ClientReceiver implements Runnable {
                     this.parseMessage(finalMessage);
                 }).start();
             } catch (IOException | ClassNotFoundException e) {
+                
             }
         }
     }

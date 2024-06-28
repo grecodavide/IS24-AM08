@@ -5,6 +5,8 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.time.temporal.Temporal;
+import java.util.Calendar;
 import java.util.List;
 import it.polimi.ingsw.client.frontend.GraphicalView;
 import it.polimi.ingsw.controllers.PlayerController;
@@ -38,13 +40,12 @@ public class NetworkHandlerRMI extends NetworkHandler {
      */
     public NetworkHandlerRMI(GraphicalView graphicalView, String ipAddress, int port) throws RemoteException {
         super(graphicalView, ipAddress, port);
-
+        System.getProperties().setProperty("sun.rmi.transport.tcp.responseTimeout", "2000");
         // Try to get a remote Server instance from the network
         Registry registry = LocateRegistry.getRegistry(ipAddress, port);
         try {
             this.server = (ServerRMIInterface) registry.lookup("CodexNaturalisRMIServer");
             connected = true;
-            this.startConnectionCheck();
         } catch (NotBoundException e) {
             // If the registry exists but the lookup string isn't found, exit the application since it's
             // a programmatic error (it regards the code, not the app life cycle)
@@ -229,7 +230,9 @@ public class NetworkHandlerRMI extends NetworkHandler {
     @Override
     public boolean ping() {
         try {
-            return server.ping();
+            controller.ping();
+            super.lastPing = Calendar.getInstance().getTime().toInstant();
+            return true;
         } catch (RemoteException e) {
             return false;
         }

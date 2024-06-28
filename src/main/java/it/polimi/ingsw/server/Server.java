@@ -23,10 +23,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * The server class of this application. It's appointed with managing remote interactions with clients
@@ -135,18 +132,6 @@ public class Server extends UnicastRemoteObject implements ServerRMIInterface {
             newMatch.subscribeObserver(new MatchStatusObserver(matchName, matches));
             matches.put(matchName, newMatch);
         }
-    }
-
-    /**
-     * Pings the server in order to perceive if the connection is still alive and working.
-     * Always return true, since the false is implicit in returning a {@link RemoteException}
-     * when the connection is not working anymore.
-     *
-     * @return True if the connection is alive, false otherwise
-     */
-    @Override
-    public boolean ping() {
-        return true;
     }
 
     /**
