@@ -68,8 +68,8 @@ public abstract class NetworkHandler implements RemoteViewInterface {
         };
 
         // Check every two second for connectivity
-        executor.scheduleAtFixedRate(pingServer, 0, 2, TimeUnit.SECONDS);
         lastPing = Calendar.getInstance().getTime().toInstant();
+        executor.scheduleAtFixedRate(pingServer, 0, 2, TimeUnit.SECONDS);
     }
 
     /**
@@ -159,7 +159,7 @@ public abstract class NetworkHandler implements RemoteViewInterface {
 
     /**
      * Sends a message to all the match players
-     *
+     *if (match.getCurrentPlayer().equals(this))
      * @param text The content of the message
      */
     public abstract void sendBroadcastText(String text);

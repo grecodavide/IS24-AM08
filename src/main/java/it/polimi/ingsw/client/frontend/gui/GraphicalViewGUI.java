@@ -223,7 +223,11 @@ public class GraphicalViewGUI extends GraphicalView {
     @Override
     public void someoneDrewInitialCard(String someoneUsername, InitialCard card) {
         super.someoneDrewInitialCard(someoneUsername, card);
-        Platform.runLater(() -> playerTabControllers.get(someoneUsername).someoneDrewInitialCard(card));
+        Platform.runLater(() -> {
+            if (playerTabControllers != null && playerTabControllers.containsKey(someoneUsername)) {
+                playerTabControllers.get(someoneUsername).someoneDrewInitialCard(card);
+            }
+        });
     }
 
     @Override
